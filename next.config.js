@@ -1,10 +1,12 @@
 module.exports = {
-  async rewrites() {
-    return [
+  cacheHandler: require.resolve('./cache-handler.js'),
+  images: {
+    remotePatterns: [
       {
-        source: '/',
-        destination: '/login', // Ruta real (puede ser diferente)
+        protocol: 'https',
+        hostname: '**',
+        port: '',
       },
-    ];
+    ],
   },
 };

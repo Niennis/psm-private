@@ -2,12 +2,12 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
 
-import Sidebar from '../../components/Sidebar'
+import Sidebar from '@/components/Sidebar'
 import FeatherIcon from "feather-icons-react";
 import {
   blogimg1, blogimg10, blogimg11, blogimg12, blogimg2, blogimg3, blogimg4, blogimg5,
   blogimg6, blogimg7, blogimg8, blogimg9,
-} from '../../components/imagepath'
+} from '@/components/imagepath'
 
 import { fetchBlogs } from '@/services/BlogServices';
 

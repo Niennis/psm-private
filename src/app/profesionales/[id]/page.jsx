@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import Sidebar from '../../../components/Sidebar';
 import { Profileuser, cameraicon, doctor, imagesend, medalicon, medalicon02, medalicon03, menuicon16, profilebg } from '../../../components/imagepath';

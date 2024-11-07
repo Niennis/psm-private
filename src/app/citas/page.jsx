@@ -3,18 +3,18 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link';
 import { Table } from 'antd';
-import Sidebar from '../../components/Sidebar';
-import { onShowSizeChange, itemRender } from '../../components/Pagination'
+import Sidebar from '@/components/Sidebar';
+import { onShowSizeChange, itemRender } from '@/components/Pagination'
 
-import { useAuthorization } from '../../../hooks/useAuthorization';
+import { useAuthorization } from '@/../hooks/useAuthorization';
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 
-import { fetchAppointments, changeStatusAppointment, search } from '../../services/AppointmentsServices'
+import { fetchAppointments, changeStatusAppointment, search } from '@/services/AppointmentsServices'
 
 import {
   imagesend, pdficon, pdficon3, pdficon4, plusicon, refreshicon, searchnormal
-} from '../../components/imagepath';
+} from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import ProtectedPage from '@/components/ProtectedRoutes';

@@ -1,6 +1,4 @@
-import { blogimg10, blogimg12, blogimg2, blogimg4, blogimg6, blogimg8 } from "../../components/imagepath";
-
-
+/* import { blogimg10, blogimg12, blogimg2, blogimg4, blogimg6, blogimg8 } from "../../components/imagepath";
 
 export default {
     Data: [
@@ -118,4 +116,4 @@ export default {
             FIELD9: " "
         }
     ]
-}
+} */

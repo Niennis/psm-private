@@ -6,7 +6,6 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 
 const Error = () => {
-  console.log('TOY O NO TOY');
   return (
     <div className='center'>
       <div className="row justify-content-center " style={{ padding: 0, margin: "250px auto 0"  }}>

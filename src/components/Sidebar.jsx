@@ -17,7 +17,7 @@ const Sidebar = (props) => {
   const router = useRouter();
   const [sidebar, setSidebar] = useState("");
 
-  console.log('STATUS', status)
+  // console.log('STATUS', status)
 
   const handleClick = (e, item, item1, item3) => {
     const div = document.querySelector(`#${item}`);

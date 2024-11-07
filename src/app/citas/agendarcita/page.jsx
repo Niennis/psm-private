@@ -7,14 +7,14 @@ import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller } from 'react-hook-form';
 
-import Sidebar from "../../../components/Sidebar";
+import Sidebar from "@/components/Sidebar";
 
 import { TextField, Alert } from "@mui/material";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 
-import { fetchDoctors } from "../../../services/DoctorsServices";
-import { fetchUsers } from "../../../services/UsersServices";
-import { createAppointment } from "../../../services/AppointmentsServices"
+import { fetchDoctors } from "@/services/DoctorsServices";
+import { fetchUsers } from "@/services/UsersServices";
+import { createAppointment } from "@/services/AppointmentsServices"
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
