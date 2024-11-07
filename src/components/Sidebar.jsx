@@ -296,7 +296,7 @@ const Sidebar = (props) => {
 
             }
             <div className="logout-btn">
-              <Link href="/" onClick={() => signOut({ callbackUrl: 'http://localhost:3000' })}>
+              <Link href="/" onClick={() => signOut({ callbackUrl: 'sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net' })}>
                 <span className="menu-side">
                   <img src={logout.src} alt="" />
                 </span>{" "}

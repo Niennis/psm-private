@@ -127,7 +127,7 @@ const Header = () => {
             variant="h6"
             noWrap
             component="a"
-            href="/"
+            href="sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net"
             sx={{
               mr: 2,
               display: { xs: 'none', lg: 'flex' },
@@ -227,7 +227,7 @@ const Header = () => {
             variant="h5"
             noWrap
             component="a"
-            href="/"
+            href="sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net"
             sx={{
               mr: { xs: 0, lg: 2 },
               display: { xs: 'flex', lg: 'none' },
@@ -315,7 +315,7 @@ const Header = () => {
                 </>
                 : session.user.picture ?
                   <button className="btn">
-                    <Link href="/citas" style={{ textDecoration: 'none' }}>
+                    <Link href="sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net/citas" style={{ textDecoration: 'none' }}>
                       <img
                         className="avatar-img rounded-circle"
                         src={session.user.picture}
@@ -326,7 +326,7 @@ const Header = () => {
                     {/* {session.user.name} */}
                   </button>
                   :
-                  <Link href="/citas">
+                  <Link href="sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net/citas">
                     <FaUserCircle style={{ height: '40px' }} />
                   </Link>
             }
