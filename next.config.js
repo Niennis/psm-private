@@ -3,10 +3,7 @@ module.exports = {
     return [
       {
         source: '/',
-        destination: '/login',
-        options: {
-          redirectStatusCode: 302,
-        },
+        destination: '/login', // Ruta real (puede ser diferente)
       },
     ];
   },
