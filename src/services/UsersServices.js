@@ -43,7 +43,7 @@ export const fetchUserMailAndPass = async (user) => {
     },
     body: JSON.stringify({
       email: user.email,
-      contrasena: user.password
+      contrasena: user.contrasena
     })
   })
   return data.json()

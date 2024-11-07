@@ -36,14 +36,13 @@ const handler = NextAuth({
     Credentials({
       // You can specify which fields should be submitted, by adding keys to the `credentials` object.
       // e.g. domain, username, password, 2FA token, etc.
-      name: 'Credentials',
+      // name: 'Credentials',
       credentials: {
-        email: {label: "email", type: "email", placeholder: 'example@example.com'},
+        email: { label: "email", type: "email", placeholder: 'example@example.com' },
         password: { label: "password", type: "password" }
       },
       authorize: async (credentials) => {
-        console.log('CREDENTIALS', credentials);
-        
+
         let user = null
         // logic to salt and hash password
         // const pwHash = saltAndHashPassword(credentials.password)
@@ -53,20 +52,23 @@ const handler = NextAuth({
           email: credentials.email,
           contrasena: pwHash
         }
-        // logic to verify if user exists
-        // user = await fetchUserMailAndPass(body)
-        user = {
-          email: 'estefania.osses.v@gmail.com'
-        }
-        console.log('USER', user);
-        if (!user) {
-          // No user found, so this is their first attempt to login
-          // meaning this is also the place you could do registration
-          throw new Error("User not found.")
-        }
+        try {
+          user = await fetchUserMailAndPass(body)// user = {
+          //   email: 'estefania.osses.v@gmail.com'
+          // }
+          if (!user) {
+            // No user found, so this is their first attempt to login
+            // meaning this is also the place you could do registration
+            throw new Error("User not found.")
+          }
 
-        // return user object with the their profile data
-        return user
+          // return user object with the their profile data
+          console.log('RETORNAR USER', user);
+          
+          return user
+        } catch (error) {
+          console.log('NO LO ENCONTRó', error)
+        }
       },
     }),
   ],
@@ -75,11 +77,15 @@ const handler = NextAuth({
   },
   callbacks: {
     async signIn({ account, profile, credentials }) {
-      console.log('CREDENTIALS', credentials);
+      console.log('CREDENTIALS', account, profile, credentials);
       try {
-        const user = [{email: 'estefania.osses.v@gmail.com'}]
-        // const user = await searchUser(profile.email)
-        // console.log('USER', user);
+        // const user = [{ email: 'estefania.osses.v@gmail.com' }]
+        // const userApi = await searchUser(profile.email)
+
+        const body = {email: credentials.email, contrasena: credentials.password}
+        console.log('BODY CALLBACK', body)
+        const user = await fetchUserMailAndPass(body)
+        console.log('user callback', user);
         if (user.length === 0) {
           // Si el usuario no tiene un correo electrónico, significa que la autenticación ha fallado.
           throw new Error('No se pudo acceder. Correo no autorizado.');
@@ -97,7 +103,7 @@ const handler = NextAuth({
     },
     async session({ session, user, token }) {
       // const userS = await searchUser(profile.email)
-      // console.log('USER', user);
+      console.log('USER, token', user, token);
       if (token /* && token.user */) {
         session.user = token; // Asegúrate de que `token.user` contenga las propiedades extendidas
         session.user.rol = ROL;

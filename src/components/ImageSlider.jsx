@@ -405,7 +405,6 @@ const ImageSlider = ({ innerRef }) => {
                   alignItems="baseline"
                 >
                   <Link href={`/blog/${idBlog}`}>
-                    {console.log('IDBLOG', idBlog)}
                     <button
                       className="btn submit-form me-2"
                       style={{
@@ -427,9 +426,9 @@ const ImageSlider = ({ innerRef }) => {
                       overflow: 'hidden',
                       margin: 'auto',
                       borderRadius: '8px',
-                      webkitBoxShadow: '12px 12px 0px 0px rgba(166,166,166,1)',
-                      mozBoxShadow: '12px 12px 0px 0px rgba(166,166,166,1)',
-                      boxShadow: '12px 12px 0px 0px rgba(166,166,166,1)',
+                      WebkitBoxShadow: '12px 12px 0px 0px rgba(166,166,166,1)',
+                      MozBoxShadow: '12px 12px 0px 0px rgba(166,166,166,1)',
+                      BoxShadow: '12px 12px 0px 0px rgba(166,166,166,1)',
                     }}
                   />
 

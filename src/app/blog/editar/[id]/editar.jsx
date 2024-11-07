@@ -4,11 +4,11 @@
 import React, { useState } from 'react'
 // import { Link } from "react-router-dom";
 import Link from 'next/link';
-import TextEditor from '../../../../components/TextEditor';
+import TextEditor from '@/components/TextEditor';
 
 
 // import Header from '../../Header';
-import Sidebar from '../../../../components/Sidebar';
+import Sidebar from '@/components/Sidebar';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import Select from "react-select";
 

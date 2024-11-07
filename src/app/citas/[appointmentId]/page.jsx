@@ -3,8 +3,8 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 // import Headerudp from "../Headerudp";
-import Sidebar from "../../../components/Sidebar"
-import { imagesend } from "../../../components/imagepath";
+import Sidebar from "@/components/Sidebar"
+import { imagesend } from "@/components/imagepath";
 import { DatePicker } from "antd";
 import FeatherIcon from "feather-icons-react";
 // import { Link, useParams } from "react-router-dom";
@@ -13,9 +13,9 @@ import dayjs from "dayjs";
 import Select from "react-select";
 import { TextField } from "@mui/material";
 import { useForm, Controller, useController } from 'react-hook-form';
-import { fetchAppointment, updateAppointment } from "../../../services/AppointmentsServices";
-import { fetchDoctors } from "../../../services/DoctorsServices";
-import { fetchUsers } from "../../../services/UsersServices";
+import { fetchAppointment, updateAppointment } from "@/services/AppointmentsServices";
+import { fetchDoctors } from "@/services/DoctorsServices";
+import { fetchUsers } from "@/services/UsersServices";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
