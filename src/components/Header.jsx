@@ -15,28 +15,30 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { FaUserCircle } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa";
 
+const URL = 'https://sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net/'
+
 const pagesWithEvents = [
   // { title: 'INICIO', url: '/#inicio', label: 'inicio' },
-  { title: 'TEST AUTODIAGNÓSTICO?', url: 'https://psm-publico.vercel.app/#test_autodiagnostico', label: 'test_autodiagnostico' },
+  { title: 'TEST AUTODIAGNÓSTICO?', url: URL + '#test_autodiagnostico', label: 'test_autodiagnostico' },
   { title: 'EVENTOS', url: '/#', label: 'eventos' },
-  { title: 'PREGUNTAS FRECUENTES', url: 'https://psm-publico.vercel.app/#preguntas-frecuentes', label: 'preguntas_frecuentes' },
-  { title: 'MATERIAL DESCARGABLE', url: 'https://psm-publico.vercel.app/material-descargable', label: 'material_descargable' },
-  { title: 'QUIÉNES SOMOS', url: 'https://psm-publico.vercel.app/quienes-somos', label: 'quienes_somos' },
+  { title: 'PREGUNTAS FRECUENTES', url: URL + '#preguntas-frecuentes', label: 'preguntas_frecuentes' },
+  { title: 'MATERIAL DESCARGABLE', url: URL + 'material-descargable', label: 'material_descargable' },
+  { title: 'QUIÉNES SOMOS', url: URL + 'quienes-somos', label: 'quienes_somos' },
 ];
 
 const pagesWithoutEvents = [
   // { title: 'INICIO', url: '/#inicio', label: 'inicio' },
-  { title: 'TEST AUTODIAGNÓSTICO', url: 'https://psm-publico.vercel.app/#test_autodiagnostico', label: 'test_autodiagnostico' },
-  { title: 'PREGUNTAS FRECUENTES', url: 'https://psm-publico.vercel.app/#preguntas-frecuentes', label: 'preguntas_frecuentes' },
-  { title: 'MATERIAL DESCARGABLE', url: 'https://psm-publico.vercel.app/material-descargable', label: 'material_descargable' },
-  { title: 'QUIÉNES SOMOS', url: 'https://psm-publico.vercel.app/quienes-somos', label: 'quienes_somos' },
+  { title: 'TEST AUTODIAGNÓSTICO', url: URL + '#test_autodiagnostico', label: 'test_autodiagnostico' },
+  { title: 'PREGUNTAS FRECUENTES', url: URL + '#preguntas-frecuentes', label: 'preguntas_frecuentes' },
+  { title: 'MATERIAL DESCARGABLE', url: URL + 'material-descargable', label: 'material_descargable' },
+  { title: 'QUIÉNES SOMOS', url: URL + 'quienes-somos', label: 'quienes_somos' },
 ];
 
 const settings = [
-  { title: 'Intervenciones', url: 'https://psm-publico.vercel.app/como-trabajamos', label: '/como_trabajamos' },
-  { title: 'Plan de Acción', url: 'https://psm-publico.vercel.app/plan-de-accion-en-salud-mental', label: '/plan-de-accion-en-salud-mental' },
-  { title: 'Prevención', url: 'https://psm-publico.vercel.app/intervencion-en-promocion-y-prevencion', label: '/intervencion-en-promocion-y-prevencion' },
-  { title: 'Convenios y profesionales', url: 'https://psm-publico.vercel.app/como-trabajamos/convenios-y-profesionales', label: '/convenios-y-profesionales' },
+  { title: 'Intervenciones', url: URL + 'como-trabajamos', label: '/como_trabajamos' },
+  { title: 'Plan de Acción', url: URL + 'plan-de-accion-en-salud-mental', label: '/plan-de-accion-en-salud-mental' },
+  { title: 'Prevención', url: URL + 'intervencion-en-promocion-y-prevencion', label: '/intervencion-en-promocion-y-prevencion' },
+  { title: 'Convenios y profesionales', url: URL + 'como-trabajamos/convenios-y-profesionales', label: '/convenios-y-profesionales' },
 ];
 
 const Header = () => {
