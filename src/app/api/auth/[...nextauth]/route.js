@@ -66,7 +66,7 @@ const handler = NextAuth({
     }),
   ],
   pages: {
-    signIn: '/',
+    signIn: 'https://sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net',
   },
   callbacks: {
     async signIn({ account, profile, credentials }) {
@@ -99,7 +99,7 @@ const handler = NextAuth({
     },
     async session({ session, user, token }) {
       // TODO buscar entre todos los usuarios para retornar el rol y agregarlo
-      const userS = await searchUser(profile.email)
+      // const userS = await searchUser(profile.email)
       console.log('TOKEN', session, token)
       if (token /* && token.user */) {
         session.user = token; // Asegúrate de que `token.user` contenga las propiedades extendidas

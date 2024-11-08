@@ -12,7 +12,7 @@ export async function logInAction(token, formData) {
 
   // verificar el token
   const captchaData = await verifyCaptchaToken(token)
-
+  console.log('captchaData', captchaData)
   if (!captchaData) {
     return {
       success: false,
@@ -20,7 +20,7 @@ export async function logInAction(token, formData) {
     }
   }
 
-  if (!captchaData.success || captchaData.score < 0.5){
+  if (!captchaData.success || captchaData.score < 0.5) {
     return {
       success: false,
       message: "Captcha falló",
@@ -28,7 +28,7 @@ export async function logInAction(token, formData) {
     }
   }
 
-    // success response
+  // success response
   return {
     success: true,
     message: "Verificado"

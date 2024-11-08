@@ -45,7 +45,7 @@ const Login = () => {
     setSubmit('')
     const token = await getCaptchaToken()
     const response = await logInAction(token, data)
-
+    console.log('RESPONSE', response)
     if (response.success) {
       try {
         const res = await signIn('credentials', { 
