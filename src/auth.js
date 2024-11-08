@@ -1,4 +1,4 @@
-export const sessionStatus = false;
+// export const sessionStatus = false;
 /*
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
@@ -57,14 +57,14 @@ export const {
   ...authConfig,
 }) */
 
-import NextAuth from "next-auth";
-import authConfig from "@/auth.config";
+// import NextAuth from "next-auth";
+// import authConfig from "@/auth.config";
 
 
-export const {
-  handlers, signIn, signOut, auth }
-  = NextAuth({
-    // adapter: PrismaAdapter(db),
-    // session: { strategy: "jwt" },
-    ...authConfig,
-  })
+// export const {
+//   handlers, signIn, signOut, auth }
+//   = NextAuth({
+//     // adapter: PrismaAdapter(db),
+//     // session: { strategy: "jwt" },
+//     ...authConfig,
+//   })
