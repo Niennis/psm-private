@@ -13594,3 +13594,33 @@ td:has(div.text-end) {
 .grecaptcha-badge:hover {
   width: 256px !important;
 }
+
+
+/* MEDIA QUERY */
+
+.mobile {
+  /* display: block; */
+}
+
+.desktop {
+  /* display: none; */
+}
+
+@media (min-width: 500px) {
+  .mobile {
+    display: none;
+  }
+
+  .desktop {
+    display: block;
+  }
+}
+/* MEDIA QUERY */
+
+
+.underline {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom:gray;
+}

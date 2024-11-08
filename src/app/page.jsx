@@ -20,10 +20,10 @@ const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(true);
   const [isInvalid, setIsInvalid] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const matches = useMediaQuery('(min-width:600px)');
   const [submit, setSubmit] = useState('')
   const [hash, setHash] = useState('');
-
+  const matches = useMediaQuery('(min-width:600px)');
+  const isSmallDevice = useMediaQuery('(max-width: 599px)')
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setHash(window.location.hash.substring(1));
@@ -109,6 +109,8 @@ const Login = () => {
 
             <div className="col-12 col-lg-6 login-wrap-bg" style={{ padding: '15px 20px 15px' }}>
               <div className="login-wrapper">
+              { (matches|| isSmallDevice) && 
+
                 <div className="loginbox"
                   style={{
                     background: 'white !important',
@@ -125,13 +127,13 @@ const Login = () => {
                       <section className="comp-section mt-5" id="comp_tabs">
                         <div className="row">
                           <div className="col-12">
-                            <div className="card" style={{ border: 'none' }}>
+                            <div className="card px-lg-5" style={{ border: 'none' }}>
                               <div className="card-body" style={{ width: !matches && '90vw' }}>
-                                {/* <h4 className="card-title">Login</h4> */}
+                                {/* ENCABEZADO */}
                                 <h3 className="section-title">Login</h3>
 
-                                <ul className="nav nav-tabs">
-                                  <li className="nav-item">
+                                <ul className="nav nav-tabs underline">
+                                  <li className="nav-item ">
                                     <a
                                       className={`sailec-medium nav-link ${hash === 'estudiantes' ? 'active' : hash === '' ? 'active' : ''}`}
                                       onClick={() => handleTabClick('estudiantes')}
@@ -162,6 +164,8 @@ const Login = () => {
                                 </ul>
                                 <div className="tab-content" style={{ height: '250px' }}>
 
+
+                                  {/* LOGIN ESTUDIANTES */}
                                   <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', }}>
                                     <p>Ingresa con tu mail UDP para poder realizar una reserva.</p>
                                     <div>
@@ -188,10 +192,10 @@ const Login = () => {
                                         </div>
                                       </button>
                                     </div>
-
                                   </div>
-                                  <div className={`tab-pane ${hash === 'profesionales' ? 'show active' : ''}`} id="estudiantes">
 
+                                  {/* LOGIN PROFESIONALES */}
+                                  <div className={`tab-pane ${hash === 'profesionales' ? 'show active' : ''}`} id="estudiantes">
                                     <form >
                                       <div className="form-group">
                                         <label>
@@ -276,75 +280,6 @@ const Login = () => {
                           </div>
                         </div>
                       </section>
-
-                      {/* <form >
-                        <div className="form-group">
-                          <label>
-                            Correo electrónico <span className="login-danger">*</span>
-                          </label>
-                          <input
-                            className="form-control"
-                            type="email"
-                            {...register('email', {
-                              required: {
-                                value: true,
-                                message: 'Correo es requerido'
-                              },
-                              pattern: {
-                                value: /^[A-Za-z0-9._%+-]+@gmail\.com$/,
-                                message: 'Correo no es válido'
-                              }
-                            })}
-                          />
-                          {errors.email && <span><small>{errors.email.message}</small></span>}
-
-                        </div>
-                        <div className="form-group">
-                          <label>
-                            Contraseña <span className="login-danger">*</span>
-                          </label>
-                          <input
-                            className="form-control pass-input"
-                            type={passwordVisible ? 'password' : ''}
-                            {...register('password', {
-                              required: {
-                                value: true,
-                                message: 'Contraseña es requerida'
-                              },
-                              minLength: {
-                                value: 6,
-                                message: 'Contraseña incorrecta'
-                              }
-                            })}
-                          />
-                          {
-                            errors.password && <span><small>{errors.password.message}</small></span>
-                          }
-
-                          <span
-                            className="toggle-password"
-                            onClick={togglePasswordVisibility}
-                          >
-                            {passwordVisible ? <EyeOff className="react-feather-custom" /> : <Eye className="react-feather-custom" />}
-                          </span>
-                        </div>
-
-                        <div className="forgotpass">
-                  
-                        </div>
-                        <div>
-                          {isInvalid && <span style={{ color: 'red' }}><small>Usuario no encontrado</small></span>}
-                        </div>
-                        <div className="form-group login-btn">
-                          <button
-                            className="btn btn-primary btn-block"
-                            onClick={handleOnSubmit}
-                          >
-                            Iniciar sesión
-                          </button>
-                        </div>
-                      </form> */}
-                      {/* /Form */}
                       <div className="next-sign">
                         <p className="account-subtitle">
                           {/* ¿No tienes una cuenta? <Link href="/signup">Regístrate</Link> */}
@@ -356,6 +291,7 @@ const Login = () => {
                     </div>
                   </div>
                 </div>
+}
               </div>
             </div>
             {/* /Login Content */}
