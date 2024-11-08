@@ -74,8 +74,8 @@ const handler = NextAuth({
       // TODO validar que solo sean usuarios de la DB
       if (account.provider === "google") {
         if (profile.email_verified && profile.email.endsWith("@gmail.com")) {
-          profile.rol === 'estudiante'
-          return profile
+          profile.rol === 'alumno'
+          return true
         }
       }
 
