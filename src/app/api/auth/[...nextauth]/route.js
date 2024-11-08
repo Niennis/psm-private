@@ -2,7 +2,6 @@ import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google"
 import { fetchUsers } from "@/services/UsersServices";
 import { redirect } from "next/dist/server/api-utils";
-// export { GET, POST } from "@/auth"
 import bcrypt from "bcryptjs"
 import { fetchUserMailAndPass } from "@/services/UsersServices";
 import Credentials from "next-auth/providers/credentials"
@@ -22,13 +21,11 @@ const handler = NextAuth({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       profile(profile) {
-        // console.log('PROFILE', profile);
         return ({
           id: profile.sub,
           name: `${profile.name}`,
           apellido: `${profile.family_name}`,
           email: profile.email,
-          // role: profile.role || 'user',
           image: profile.picture
         })
       }
@@ -54,56 +51,56 @@ const handler = NextAuth({
         }
         try {
           user = await fetchUserMailAndPass(body)// user = {
-          //   email: 'estefania.osses.v@gmail.com'
           // }
           if (!user) {
             // No user found, so this is their first attempt to login
             // meaning this is also the place you could do registration
-            throw new Error("User not found.")
+            throw new Error("Usuario no encontrado.")
           }
 
-          // return user object with the their profile data
-          console.log('RETORNAR USER', user);
-          
-          return user
+          return true
         } catch (error) {
-          console.log('NO LO ENCONTRó', error)
+          console.log('Ocurrió un problema: ', error)
         }
       },
     }),
   ],
   pages: {
-    signIn: '/login',
+    signIn: '/',
   },
   callbacks: {
     async signIn({ account, profile, credentials }) {
-      console.log('CREDENTIALS', account, profile, credentials);
-      try {
-        // const user = [{ email: 'estefania.osses.v@gmail.com' }]
-        // const userApi = await searchUser(profile.email)
-
-        const body = {email: credentials.email, contrasena: credentials.password}
-        console.log('BODY CALLBACK', body)
-        const user = await fetchUserMailAndPass(body)
-        console.log('user callback', user);
-        if (user.length === 0) {
-          // Si el usuario no tiene un correo electrónico, significa que la autenticación ha fallado.
-          throw new Error('No se pudo acceder. Correo no autorizado.');
+      // Si el proveedor es google, validar que sea correo udp.
+      // TODO validar que solo sean usuarios de la DB
+      if (account.provider === "google") {
+        if (profile.email_verified && profile.email.endsWith("@gmail.com")) {
+          profile.rol === 'estudiante'
+          return profile
         }
-
-        if (account.provider === "google") {
-          return profile.email_verified && profile.email.endsWith("@gmail.com")
-        }
-
-        return true // Do different verification for other providers that don't have `email_verified`
-      } catch (error) {
-        console.log('ERRRRRRRRR', error);
       }
-      return true
+
+      // Si el proveedor es credentials, validar que exista en la DB
+      if (account.provider === "credentials") {
+        try {
+          const body = { email: credentials.email, contrasena: credentials.password }
+          const user = await fetchUserMailAndPass(body)
+          console.log('USER', user);
+
+          if (user.length === 0) {
+            // Si length === 0 , no encontró al usuario, no puede acceder
+            throw new Error('No se pudo acceder. Correo no autorizado.');
+          }
+          // Si lo anterior no ocurre, encontró el mail
+          return true
+        } catch (error) {
+          console.log('ERRRRRRRRR', error);
+        }
+      }
     },
     async session({ session, user, token }) {
-      // const userS = await searchUser(profile.email)
-      console.log('USER, token', user, token);
+      // TODO buscar entre todos los usuarios para retornar el rol y agregarlo
+      const userS = await searchUser(profile.email)
+      console.log('TOKEN', session, token)
       if (token /* && token.user */) {
         session.user = token; // Asegúrate de que `token.user` contenga las propiedades extendidas
         session.user.rol = ROL;

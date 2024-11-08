@@ -50,11 +50,9 @@ const Login = () => {
       try {
         const res = await signIn('credentials', { 
           callbackUrl: '/citas',
-          // redirect: false,
           email: data.email,
           password: data.password
         })
-        console.log('SIGNIN', res);
         if (res.validacion === false) {
           setIsInvalid(true)
         } else {
@@ -62,7 +60,7 @@ const Login = () => {
           setIsLoggedIn(true)
         }
       } catch (err) {
-        console.log('en login', err)
+        console.log('Hubo un error:', err)
       }
     } else {
       console.log('NO PUDO LOGEAR')
@@ -90,7 +88,7 @@ const Login = () => {
         // Muestra un mensaje de error genérico al usuario
         alert('Ha ocurrido un error durante la autenticación. Por favor, inténtalo de nuevo.');
       }
-      redirect('/login')
+      redirect('/')
     }
   }
 
