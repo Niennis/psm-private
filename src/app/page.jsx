@@ -42,6 +42,7 @@ const Login = () => {
   };
 
   const handleOnSubmit = handleSubmit(async (data) => {
+    console.log('DATA', data)
     setSubmit('')
     const token = await getCaptchaToken()
     const response = await logInAction(token, data)
