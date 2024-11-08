@@ -46,11 +46,11 @@ const Login = () => {
     setSubmit('')
     const token = await getCaptchaToken()
     const response = await logInAction(token, data)
-    console.log('RESPONSE', response)
 
     if (response && response.success) {
+      console.log('RESPONSE captcha', response)
       try {
-        const res = await signIn('credentials', { 
+        const res = await signIn('credentials', {
           callbackUrl: '/citas',
           email: data.email,
           password: data.password

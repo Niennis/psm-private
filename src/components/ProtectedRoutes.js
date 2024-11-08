@@ -26,7 +26,7 @@ const protectedToRoutes = [
 const ProtectedPage = ({ children, level }) => {
   // const { user } = useUser();
   const { data: session } = useSession()
-  // console.log('PROTECTED', session)
+  console.log('PROTECTED', session, level)
   const router = useRouter();
   const pathname = usePathname();
 

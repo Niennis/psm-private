@@ -105,6 +105,8 @@ const handler = NextAuth({
         session.user = token; // Asegúrate de que `token.user` contenga las propiedades extendidas
         session.user.rol = ROL;
         console.log('SESSION', session);
+        return session;
+
       }
       return session;
     },
