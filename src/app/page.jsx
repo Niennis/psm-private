@@ -76,7 +76,7 @@ const Login = () => {
   const handleSignIn = async () => {
     try {
       // Realiza la autenticación
-      await signIn('google', { callbackUrl: 'https://sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net/citas' }) // Se puede pasar el nombre del proveedor que se esté utilizando
+      await signIn('google', { callbackUrl: '/citas' }) // Se puede pasar el nombre del proveedor que se esté utilizando
       // Si la autenticación es exitosa, se redirigirá automáticamente a la página de destino configurada en NextAuth
     } catch (error) {
       // Maneja el error de autenticación
@@ -90,7 +90,7 @@ const Login = () => {
         // Muestra un mensaje de error genérico al usuario
         alert('Ha ocurrido un error durante la autenticación. Por favor, inténtalo de nuevo.');
       }
-      redirect('https://sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net')
+      redirect('/')
     }
   }
 

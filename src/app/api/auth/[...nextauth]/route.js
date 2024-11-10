@@ -39,8 +39,7 @@ const handler = NextAuth({
         password: { label: "password", type: "password" }
       },
       authorize: async (credentials) => {
-
-        let user = null
+        let user = undefined;
         // logic to salt and hash password
         // const pwHash = saltAndHashPassword(credentials.password)
         const pwHash = credentials.password
@@ -49,16 +48,22 @@ const handler = NextAuth({
           email: credentials.email,
           contrasena: pwHash
         }
+
         try {
-          user = await fetchUserMailAndPass(body)// user = {
+          // user = await fetchUserMailAndPass(body)// user = {
           // }
+          user = {
+            email: 'juanperez@gmail.com',
+            contrasena: '12345678'
+          }
           if (!user) {
             // No user found, so this is their first attempt to login
             // meaning this is also the place you could do registration
             throw new Error("Usuario no encontrado.")
+          } 
+          if( user.email === body.email && user.contrasena === body.contrasena){
+            return true
           }
-
-          return true
         } catch (error) {
           console.log('Ocurrió un problema: ', error)
         }
@@ -73,14 +78,17 @@ const handler = NextAuth({
       // Si el proveedor es google, validar que sea correo udp.
       // TODO validar que solo sean usuarios de la DB
       if (account.provider === "google") {
+        console.log('ENTRÓ A GOOGLE')
         if (profile.email_verified && profile.email.endsWith("@gmail.com")) {
           profile.rol === 'alumno'
-          return true
+          // return true
         }
+        // return true
       }
 
       // Si el proveedor es credentials, validar que exista en la DB
       if (account.provider === "credentials") {
+        console.log('ENTRÓ A CREDENTIALS')
         try {
           const body = { email: credentials.email, contrasena: credentials.password }
           const user = await fetchUserMailAndPass(body)
@@ -92,9 +100,11 @@ const handler = NextAuth({
           }
           // Si lo anterior no ocurre, encontró el mail
           return true
+
         } catch (error) {
           console.log('ERRRRRRRRR', error);
         }
+        // return
       }
     },
     async session({ session, user, token }) {
