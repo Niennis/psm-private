@@ -1,5 +1,5 @@
 import { fetchUser } from './UsersServices'
-import { fetchDoctor } from './DoctorsServices';
+import { fetchProfessionalById } from './DoctorsServices';
 import { fetchSpeciality } from './DoctorsServices';
 
 import dayjs from 'dayjs';
@@ -174,7 +174,7 @@ export const fetchAppointments = async (callback) => {
 
     const obj = response['citas'].map(async date => {
       // console.log('DATE', date);
-      const doctor = await fetchDoctor(date.id_profesional)
+      const doctor = await fetchProfessionalById(date.id_profesional)
       const fetchPatient = await fetchUser(date.id_paciente)
       const result = await fetchSpeciality(date.id_profesional)
       // const fetch

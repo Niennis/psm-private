@@ -10,7 +10,7 @@ import { useForm, Controller } from 'react-hook-form'
 
 import Select from "react-select";
 
-import { fetchSpeciality } from '@/services/DoctorsServices';
+import { fetchSpeciality, fetchProfessionalById } from '@/services/DoctorsServices';
 import { createSchedule, getDates, fetchScheduleByDate, validateDates } from '@/services/SchedulesServices';
 import Calender from '../../../calender/page';
 
@@ -23,14 +23,14 @@ const AddSchedule = ({ params }) => {
   const { data: session } = useSession()
   const router = useRouter();
   // useAuthorization(['alumno'])
-  console.log(session)
+  // console.log(session)
 
   const [startTime, setStartTime] = useState();
   const [endTime, setEndTime] = useState();
   const [profesional, setProfesional] = useState({})
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('initial')
-  const [startDate, setStartDate] = useState();
+  const [startDate, setStartDate] = useState('');
   const [startDay, setStartDay] = useState('');
 
   const [prueba, setPrueba] = useState(new Date)
@@ -47,14 +47,13 @@ const AddSchedule = ({ params }) => {
   // const label = { inputProps: { 'aria-label': 'Switch demo' } };
   useEffect(() => {
     const fetchProfesional = async () => {
-      // const { especialidad: user } = await fetchSpeciality(params.id)
-      // console.log('especialidad', user[0])
-      // setProfesional(user[0])
-      setProfesional({
-        nombre: `Miguel González`,
-        especialidad: 'Psicología',
-      })
-      
+      const { especialidad: user } = await fetchSpeciality(params.id)
+      const { users } = await fetchProfessionalById(params.id)
+      const obj = {
+        ...users[0],
+        especialidad: user.especialidad
+      }
+      setProfesional(obj)      
     }
     fetchProfesional()
   }, [])
@@ -64,23 +63,19 @@ const AddSchedule = ({ params }) => {
   } = useForm({
     defaultValues: async () => {
       // console.log('Params en add schedule', params.id);
-      // const { especialidad: user } = await fetchSpeciality(params.id)
-      // console.log('user', user);
-      // const obj = {
-      //   nombre: `${user[0].nombre} ${user[0].apellido}`,
-      //   especialidad: user[0].especialidad,
-      //   id: user[0].usuario_id,
-      //   horaIni: '00:00:00',
-      //   semanal: { dia: [] }
-      // }
+      const { especialidad: user } = await fetchSpeciality(params.id)
+      // console.log('useForm user', user);
+
+      const { users } = await fetchProfessionalById(params.id)
+
+
       const obj = {
-        nombre: `Miguel González`,
-        especialidad: 'Psicología',
-        id: 1,
+        nombre: `${users[0].nombre} ${users[0].apellido}`,
+        especialidad: user[0].especialidad,
+        id: user[0].usuario_id,
         horaIni: '00:00:00',
         semanal: { dia: [] }
       }
-      setProfesional(obj)
       return obj
     }
   })
@@ -115,29 +110,30 @@ const AddSchedule = ({ params }) => {
       return
     }
 
-    // const promesas = []
-    // dates.forEach(date => promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id)))
+    const promesas = []
+    dates.forEach(date => promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id)))
 
-    // Promise.all(promesas)
-    //   .then(async (values) => {
-    //     // console.log('VALUES', values);
-    //     if (values.includes(true)) {
-    //       // console.log('GGGGGGGGGGG')
-    //     } else {
-          // console.log('AT LAST!!!!')
+    Promise.all(promesas)
+      .then(async (values) => {
+        // console.log('VALUES', values);
+        if (values.includes(true)) {
+          // console.log('GGGGGGGGGGG')
+        } else {
+          console.log('AT LAST!!!!')
           try {
-            // const req = await createSchedule(newData)
-            // if (req.detalle === 'fail!!!') setSuccess('fail')
+            const req = await createSchedule(newData)
+            console.log('REQ', req)
+            if (req.detalle === 'fail!!!') setSuccess('fail')
             setSuccess('success')
           } catch (error) {
             setSuccess('fail')
             console.log('ERRRR', err.message)
           }
-      //   }
-      // })
-      // .catch((reason) => {
-      //   console.log('reason', reason);
-      // });
+        }
+      })
+      .catch((reason) => {
+        console.log('reason', reason);
+      });
   })
 
   const duracion = [

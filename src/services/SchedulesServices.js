@@ -49,7 +49,8 @@ export const fetchScheduleByAvailability = async (id) => {
     },
     body: JSON.stringify(body)
   })
-  return data.json()
+  const response = await data.json()
+  return response
 }
 
 const recurrencia = (obj) => {
@@ -234,7 +235,6 @@ export const getDates = (body) => {
       obtenerFechasMensuales(body, fechas)
     }
   }
-  console.log('FECHAS', fechas)
   return fechas;
 }
 
@@ -316,6 +316,7 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
 
 // Retorna true si hay choque de horario
 const hayChoqueHorario = (inicioMayor, finMayor, bloquesMenores) => {
+  console.log(inicioMayor, finMayor, bloquesMenores)
   for (const bloqueMenor of bloquesMenores) {
     const { hora_inicio, hora_fin } = bloqueMenor;
 

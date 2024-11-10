@@ -25,7 +25,7 @@ const Calender = ({ id }) => {
   const onChange = (date, dateString) => {
     // console.log(date, dateString);
   };
-  console.log('ID in calender', id);
+  // console.log('ID in calender', id);
   const toggleMobileMenu = () => {
     setMenu(!menu);
   };
@@ -76,8 +76,8 @@ const Calender = ({ id }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // console.log('id', id);
-      // const { users: response } = await fetchScheduleByAvailability(id)
+      const { users: response } = await fetchScheduleByAvailability(id)
+      console.log('calendaio', response)
       /*  const processed = response.map(item => {
          // detalleServicio y duracionServicio
          return (

@@ -6,17 +6,19 @@ const formatDate = (date) => {
   return `${year}-${month}-${day}`
 }
 
-export const fetchDoctors = async () => {
+export const fetchProfessionals = async () => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PROFESSIONALS
   try {
     const data = await fetch(USERS_API, {
+      method: 'POST',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
-        'ngrok-skip-browser-warning': 'any'
       }
     })
-    return data.json()
+    const { users: response } = await data.json()
+
+    return response
   } catch (err) {
     console.log(err)
   }
@@ -35,13 +37,35 @@ export const fetchSpeciality = async (usuario_id) => {
         usuario_id
       })
     })
-    return data.json()
+
+    const response = await data.json()
+    return response;
   } catch (err) {
     console.log(err)
   }
 }
 
-export const fetchDoctor = async (id) => {
+
+export const professionalsWithSpeciality = async (usuarios) => {
+  // Crear un array de promesas para cada usuario
+  const usuariosCompletos = await Promise.all(
+    usuarios.map(async (usuario) => {
+      // Obtener la especialidad del usuario llamando a la función con su id
+      const {especialidad : data} = await fetchSpeciality(usuario.id);
+      // Retornar el usuario con la especialidad añadida
+      return {
+        ...usuario,
+        especialidad: data[0]?.especialidad ? data[0]?.especialidad : 'no especificado'
+      };
+    })
+  );
+
+  // console.log('usuariosCompletos', usuariosCompletos)
+  return usuariosCompletos;
+}
+
+
+export const fetchProfessionalById = async (id) => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PROFESSIONALS_BY_ID
   try {
     const data = await fetch(USERS_API, {
@@ -55,7 +79,8 @@ export const fetchDoctor = async (id) => {
         id
       })
     })
-    return data.json()
+    const response = data.json()
+    return response
   } catch (err) {
     console.log(err)
   }

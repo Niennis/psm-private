@@ -14,7 +14,7 @@ import {
 } from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 
-import { fetchDoctors, fetchDoctor, addDoctor, updateDoctor, fetchSpeciality } from '@/services/DoctorsServices';
+import { fetchProfessionals, fetchDoctor, addDoctor, updateDoctor, fetchSpeciality, professionalsWithSpeciality } from '@/services/DoctorsServices';
 import { search } from '@/services/AppointmentsServices'
 import ProtectedPage from '@/components/ProtectedRoutes';
 
@@ -25,54 +25,24 @@ const DoctorList = () => {
   // useAuthorization(['alumno'])
 
   const [doctors, setDoctors] = useState([])
-  const [results, setResults] = useState([])
+  // const [results, setResults] = useState([])
   const [show, setShow] = useState({ state: false, id: '' })
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
-      // const { users } = await fetchDoctors()
-
-      // const usersAndSPeciality = users.map(async user => {
-      //   const result = await fetchSpeciality(user.id)
-      //   const newUser = {
-      //     ...user,
-      //     especialidad: result.especialidad.length === 0 ? 'Psicologia' : result.especialidad[0].especialidad
-      //   }
-      //   return newUser
-      // })
-      // const newUsers = await Promise.all(usersAndSPeciality)
-
-      const newUsers = [
-        {
-          id: 10,
-          nombre: 'Miguel',
-          apellido: 'González',
-          especialidad: 'Psicología',
-          telefono: '912345678',
-          email: 'miguelgonzalez@udp.cl',
-          status: 'Activo'
-        },
-        {
-          id: 11,
-          nombre: 'María',
-          apellido: 'Flores',
-          especialidad: 'Psicología',
-          telefono: '912345678',
-          email: 'mariaflores@udp.cl',
-          status: 'Activo'
-        },
-        {
-          id: 12,
-          nombre: 'Felipe',
-          apellido: 'Perez',
-          especialidad: 'Psicología',
-          telefono: '912345678',
-          email: 'felipeperez@udp.cl',
-          status: 'Activo'
-        },
-      ]
-      setDoctors(newUsers)
-      setResults(newUsers)
+      try {
+        const users = await fetchProfessionals();
+        const professionals = await professionalsWithSpeciality(users);
+        setDoctors(professionals)
+        setIsLoading(false);
+      } catch (error) {
+        console.log('Error: ', error)
+        setIsLoading(false);
+      } finally {
+        // Cambia isLoading a false cuando termina la carga
+        setIsLoading(false);
+      }
     }
     fetchData()
   }, [])
@@ -101,40 +71,10 @@ const DoctorList = () => {
     setResults(doctors)
   }
 
-  const psicologos = [
-    {
-      id: 10,
-      nombre: 'Miguel',
-      apellido: 'González',
-      especialidad: 'Psicología',
-      telefono: '912345678',
-      email: 'miguelgonzalez@udp.cl',
-      status: 'Activo'
-    },
-    {
-      id: 11,
-      nombre: 'María',
-      apellido: 'Flores',
-      especialidad: 'Psicología',
-      telefono: '912345678',
-      email: 'mariaflores@udp.cl',
-      status: 'Activo'
-    },
-    {
-      id: 12,
-      nombre: 'Felipe',
-      apellido: 'Perez',
-      especialidad: 'Psicología',
-      telefono: '912345678',
-      email: 'felipeperez@udp.cl',
-      status: 'Activo'
-    },
-  ]
-
   const columns = [
     {
       title: "Nombre",
-      dataIndex: "nameDoctor",
+      dataIndex: "nombre",
       fixed: 'left',
       render: (text, record) => (
         <>
@@ -151,12 +91,12 @@ const DoctorList = () => {
 
         </>
       ),
-      sorter: (a, b) => a.nombre.length - b.nombre.length
+      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
     },
     {
       title: "Especialidad",
       dataIndex: "especialidad",
-      sorter: (a, b) => a.especialidad.length - b.especialidad.length
+      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
     },
     // {
     //   title: "Specialization",
@@ -180,20 +120,20 @@ const DoctorList = () => {
     }, {
       title: "Email",
       dataIndex: "email",
-      sorter: (a, b) => a.email.length - b.email.length
+      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
     },
     {
       title: "Estado",
       dataIndex: "status",
-      sorter: (a, b) => a.status.length - b.status.length,
+      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
       render: (text, record) => (
         <div>
-          {record.status === "Activo" && (
+          {record.status === "activo" && (
             <span className="custom-badge status-green">
               {record.status}
             </span>
           )}
-          {record.status === "Inactivo" && (
+          {record.status === "inactivo" && (
             <span className="custom-badge status-pink">
               {record.status}
             </span>
@@ -219,7 +159,7 @@ const DoctorList = () => {
                 <i className="fas fa-ellipsis-v" />
               </Link>
               <div
-                style={{ right: '35px', top: 0}}
+                style={{ right: '35px', top: 0 }}
                 className=
                 {show.state === true && show.id === record.id
                   ? "dropdown-menu dropdown-menu-end dropdown-extra show"
@@ -339,24 +279,28 @@ const DoctorList = () => {
                     </div>
                     {/* /Table Header */}
                     <div className="table-responsive doctor-list">
-                      <Table
-                        pagination={{
-                          total: results.length,
-                          showTotal: (total, range) =>
-                            `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
-                          // showSizeChanger: true,
-                          onShowSizeChange: onShowSizeChange,
-                          itemRender: itemRender,
-                        }}
-                        columns={columns}
-                        dataSource={psicologos}
+                      {isLoading ? (
+                        <p>Cargando...</p> // Puedes poner un indicador de carga aquí
+                      ) : (
+                        <Table
+                          pagination={{
+                            total: doctors.length,
+                            showTotal: (total, range) =>
+                              `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
+                            // showSizeChanger: true,
+                            onShowSizeChange: onShowSizeChange,
+                            itemRender: itemRender,
+                          }}
+                          columns={columns}
+                          dataSource={doctors}
 
-                        rowSelection={rowSelection}
-                        rowKey={(record) => record.id}
-                        style={{
-                          backgroundColor: '#f2f2f2', // Replace with your desired background color for the table
-                        }}
-                      />
+                          rowSelection={rowSelection}
+                          rowKey={(record) => record.id}
+                          style={{
+                            backgroundColor: '#f2f2f2', // Replace with your desired background color for the table
+                          }}
+                        />)
+                      }
                     </div>
                   </div>
                 </div>
