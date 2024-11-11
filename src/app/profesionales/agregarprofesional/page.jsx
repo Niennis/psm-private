@@ -15,17 +15,18 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 
 import ChildModal from "@/components/ChildModal";
-import { addDoctor } from "../../../services/DoctorsServices";
+import { addProfessional } from "../../../services/DoctorsServices";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from "@/components/ProtectedRoutes";
 
-const AddDoctor = () => {
+const AddProfessional = () => {
   const ELEGIR_STATUS = false;
-  const ROL = ["profesional"]
+  const ROL = "profesional"
   const { data: session } = useSession()
   const router = useRouter();
+  const [menuPortalTarget, setMenuPortalTarget] = useState(null);
 
   const { register, handleSubmit, watch, control, reset, setValue, getValues,
     formState: { errors, isSubmitSuccessful }
@@ -67,14 +68,15 @@ const AddDoctor = () => {
     { value: "Psicopedagogia", label: "Psicopedagogía", name: "speciality" },
     { value: "Psicologia", label: "Psicología", name: "speciality" },
     { value: "Psiquiatria", label: "Psiquiatría", name: "speciality" },
+    { value: "Trabajador social", label: "Trabajador social", name: "speciality" },
   ]);
 
   useEffect(() => {
+    setMenuPortalTarget(document.body);
+
     if (isSubmitSuccessful) {
       reset()
-      // setValue('genero.value', 0)
-      // console.log('HOLO', setValue('genero', {value: 0, label: " "}))
-
+      setValue('genero.value', 0)
     }
   }, [isSubmitSuccessful, reset])
 
@@ -91,12 +93,12 @@ const AddDoctor = () => {
     const dataWithHashPass = { ...data, password: hashedPassword }
     console.log('data', dataWithHashPass)
 
-    /*  if (data) {
+     if (data) {
        try {
-         const response = await addDoctor(dataWithHashPass)
-         console.log(response)
-         // if(response.err) setStatusPetition(prevState => ({...prevState, warning: true}))
-         // else setStatusPetition(prevState => ({...prevState, success: true}))
+         const response = await addProfessional(dataWithHashPass)
+         console.log('page 100', response)
+        //  if(response.err) setStatusPetition(prevState => ({...prevState, warning: true}))
+        //  else setStatusPetition(prevState => ({...prevState, success: true}))
          setSuccess('success')
        } catch (err) {
          console.log('ERR', err)
@@ -105,11 +107,11 @@ const AddDoctor = () => {
  
      } else {
        console.log('FAIL')
-     } */
+     }
   })
 
   const onConfirm = async () => {
-    const response = await addDoctor(dataDoctor)
+    const response = await addProfessional(dataDoctor)
     console.log(response)
   }
 
@@ -239,7 +241,7 @@ const AddDoctor = () => {
                                   defaultValue={selectedOption}
                                   onChange={onChange}
                                   options={gender}
-                                  menuPortalTarget={document.body}
+                                  menuPortalTarget={menuPortalTarget}
                                   styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                   id="genero"
                                   components={{
@@ -594,7 +596,7 @@ const AddDoctor = () => {
                     }}
                     spacing={2}
                   >
-                    Ha ocurrido un problema. {error}
+                    Ha ocurrido un problema.{/*  {error} */}
                   </Alert>
                   : ''
               }
@@ -606,4 +608,4 @@ const AddDoctor = () => {
   );
 };
 
-export default AddDoctor;
+export default AddProfessional;
