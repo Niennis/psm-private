@@ -210,7 +210,7 @@ const Login = () => {
                                               message: 'Correo es requerido'
                                             },
                                             pattern: {
-                                              value: /^[A-Za-z0-9._%+-]+@gmail\.com$/,
+                                              value: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/,
                                               message: 'Correo no es válido'
                                             }
                                           })}
