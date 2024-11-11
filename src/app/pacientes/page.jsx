@@ -7,9 +7,7 @@ import Sidebar from '../../components/Sidebar';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
 import { fetchUsers } from '../../services/UsersServices'
 import { search } from '../../services/AppointmentsServices'
-import {
-  blogimg10, imagesend, pdficon, pdficon3, pdficon4, plusicon, refreshicon, searchnormal, blogimg12,
-  blogimg2, blogimg4, blogimg6, blogimg8
+import { imagesend,  plusicon, refreshicon, searchnormal, 
 } from '../../components/imagepath';
 import Link from "next/link";
 
@@ -151,7 +149,7 @@ const PatientsList = () => {
     <ProtectedPage level={ROL}>
       {/* <Headerudp /> */}
       <Sidebar id='menu-item2' id1='menu-items2' activeClassName='patient-list' />
-      <div className="page-wrapper">
+      <div className="page-wrapper mt-5 pt-5">
         <div className="content">
           {/* Page Header */}
           <div className="page-header">
