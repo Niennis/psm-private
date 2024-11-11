@@ -4,19 +4,16 @@ import { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
 import { Table } from "antd";
+
 import { onShowSizeChange, itemRender } from '@/components/Pagination'
-import Sidebar from '@/components/Sidebar';
-
-import {
-  imagesend, pdficon, pdficon3, pdficon4, plusicon, refreshicon, searchnormal
-} from '@/components/imagepath';
-import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
-
-import { fetchProfessionals, fetchDoctor, addDoctor, updateDoctor, fetchSpeciality, professionalsWithSpeciality } from '@/services/DoctorsServices';
-import { search } from '@/services/AppointmentsServices'
 import ProtectedPage from '@/components/ProtectedRoutes';
+import Sidebar from '@/components/Sidebar';
+import { fetchProfessionals, professionalsWithSpeciality, fetchSpecialities } from '@/services/DoctorsServices';
+import { search } from '@/services/AppointmentsServices'
+
+import { imagesend, plusicon, refreshicon, searchnormal } from '@/components/imagepath';
+import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 
 const DoctorList = () => {
   const ROL = ["admin", "profesional"]
@@ -25,7 +22,7 @@ const DoctorList = () => {
   // useAuthorization(['alumno'])
 
   const [doctors, setDoctors] = useState([])
-  // const [results, setResults] = useState([])
+  const [results, setResults] = useState([])
   const [show, setShow] = useState({ state: false, id: '' })
   const [isLoading, setIsLoading] = useState(true)
 
@@ -33,7 +30,8 @@ const DoctorList = () => {
     const fetchData = async () => {
       try {
         const users = await fetchProfessionals();
-        const professionals = await professionalsWithSpeciality(users);
+        const specialities = await fetchSpecialities()
+        const professionals = await professionalsWithSpeciality(specialities, users);
         setDoctors(professionals)
         setIsLoading(false);
       } catch (error) {
@@ -71,6 +69,7 @@ const DoctorList = () => {
     setResults(doctors)
   }
 
+  /* Encabezados de la tabla */
   const columns = [
     {
       title: "Nombre",
@@ -88,7 +87,6 @@ const DoctorList = () => {
             </Link>}
             <Link href={`/profesionales/${record.id}`}>{record.nombre + ' ' + record.apellido}</Link>
           </h2>
-
         </>
       ),
       sorter: (a, b) => a.nombre.localeCompare(b.nombre),
@@ -98,16 +96,6 @@ const DoctorList = () => {
       dataIndex: "especialidad",
       sorter: (a, b) => a.nombre.localeCompare(b.nombre),
     },
-    // {
-    //   title: "Specialization",
-    //   dataIndex: "Specialization",
-    //   sorter: (a, b) => a.Specialization.length - b.Specialization.length
-    // },
-    // {
-    //   title: "Degree",
-    //   dataIndex: "Degree",
-    //   sorter: (a, b) => a.Degree.length - b.Degree.length
-    // },
     {
       title: "Teléfono",
       dataIndex: "telefono",
@@ -190,10 +178,8 @@ const DoctorList = () => {
     },
   ]
 
-
   return (
     <ProtectedPage level={'profesional'}>
-      {/* <Headerudp /> */}
       <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' />
       <>
         <div className="page-wrapper mt-5 pt-5">
@@ -262,29 +248,16 @@ const DoctorList = () => {
                             </div>
                           </div>
                         </div>
-                        {/* <div className="col-auto text-end float-end ms-auto download-grp">
-                          <Link href="#" className=" me-2">
-                            <img src={pdficon.src} alt="#" />
-                          </Link>
-                          <Link href="#" className=" me-2">
-                          </Link>
-                          <Link href="#" className=" me-2">
-                            <img src={pdficon3.src} alt="#" />
-                          </Link>
-                          <Link href="#">
-                            <img src={pdficon4.src} alt="#" />
-                          </Link>
-                        </div> */}
                       </div>
                     </div>
                     {/* /Table Header */}
                     <div className="table-responsive doctor-list">
                       {isLoading ? (
-                        <p>Cargando...</p> // Puedes poner un indicador de carga aquí
+                        <p>Cargando...</p>
                       ) : (
                         <Table
                           pagination={{
-                            total: doctors.length,
+                            total: results.length,
                             showTotal: (total, range) =>
                               `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
                             // showSizeChanger: true,
@@ -292,12 +265,12 @@ const DoctorList = () => {
                             itemRender: itemRender,
                           }}
                           columns={columns}
-                          dataSource={doctors}
+                          dataSource={results}
 
                           rowSelection={rowSelection}
                           rowKey={(record) => record.id}
                           style={{
-                            backgroundColor: '#f2f2f2', // Replace with your desired background color for the table
+                            backgroundColor: '#f2f2f2',
                           }}
                         />)
                       }
@@ -317,10 +290,10 @@ const DoctorList = () => {
                 <div className="m-t-20">
                   {" "}
                   <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-                    Close
+                    Cerrar
                   </Link>
                   <button type="submit" className="btn btn-danger">
-                    Delete
+                    Cancelar
                   </button>
                 </div>
               </div>
@@ -346,11 +319,6 @@ const DoctorList = () => {
             </div>
           </div>
         </div>
-      </>
-
-
-      <>
-
       </>
 
     </ProtectedPage>
