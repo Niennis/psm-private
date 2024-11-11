@@ -317,7 +317,7 @@ const Header = () => {
                 </>
                 : session.user.picture ?
                   <button className="btn">
-                    <Link href="sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net/citas" style={{ textDecoration: 'none' }}>
+                    <Link href="/citas" style={{ textDecoration: 'none' }}>
                       <img
                         className="avatar-img rounded-circle"
                         src={session.user.picture}
@@ -328,7 +328,7 @@ const Header = () => {
                     {/* {session.user.name} */}
                   </button>
                   :
-                  <Link href="sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net/citas">
+                  <Link href="/citas" style={{fontSize: '40px', padding: 0, margin: 0}}>
                     <FaUserCircle style={{ height: '40px' }} />
                   </Link>
             }
