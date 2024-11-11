@@ -82,7 +82,7 @@ const handler = NextAuth({
         console.log('ENTRÓ A GOOGLE')
         if (profile.email_verified && profile.email.endsWith("@gmail.com")) {
           profile.rol === 'alumno'
-          // return true
+          return true
         }
         // return true
       }
