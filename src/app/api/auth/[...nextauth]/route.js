@@ -5,11 +5,16 @@ import { redirect } from "next/dist/server/api-utils";
 import bcrypt from "bcryptjs"
 import { fetchUserMailAndPass } from "@/services/UsersServices";
 import Credentials from "next-auth/providers/credentials"
+import { fetchProfessionals } from "@/services/DoctorsServices";
 
 const searchUser = async email => {
   const response = await fetchUsers()
   const user = response.users.filter(user => user.email === email)
-  return user
+
+  const professionals = await fetchProfessionals()
+  const prof = professionals.filter(user => user.email === email)
+  if (prof.length === 1) return prof
+  if (user.length === 1) return user
 }
 // admin, alumno, profesional
 const ROL = 'admin'
@@ -50,19 +55,15 @@ const handler = NextAuth({
         }
 
         try {
-          // user = await fetchUserMailAndPass(body)// user = {
-          // }
-          user = {
-            email: 'juanperez@gmail.com',
-            contrasena: '12345678'
-          }
+          user = await fetchUserMailAndPass(body)// user = {
+
           if (!user) {
             // No user found, so this is their first attempt to login
             // meaning this is also the place you could do registration
             throw new Error("Usuario no encontrado.")
-          } 
-          if( user.email === body.email && user.contrasena === body.contrasena){
-            return true
+          }
+          if (user.email === body.email && user.contrasena === body.contrasena) {
+            return user
           }
         } catch (error) {
           console.log('Ocurrió un problema: ', error)
@@ -71,7 +72,7 @@ const handler = NextAuth({
     }),
   ],
   pages: {
-    signIn: 'https://sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net',
+    signIn: '/',
   },
   callbacks: {
     async signIn({ account, profile, credentials }) {
@@ -92,8 +93,6 @@ const handler = NextAuth({
         try {
           const body = { email: credentials.email, contrasena: credentials.password }
           const user = await fetchUserMailAndPass(body)
-          console.log('USER', user);
-
           if (user.length === 0) {
             // Si length === 0 , no encontró al usuario, no puede acceder
             throw new Error('No se pudo acceder. Correo no autorizado.');
@@ -109,16 +108,21 @@ const handler = NextAuth({
     },
     async session({ session, user, token }) {
       // TODO buscar entre todos los usuarios para retornar el rol y agregarlo
-      // const userS = await searchUser(profile.email)
-      console.log('TOKEN', session, token)
-      if (token /* && token.user */) {
-        session.user = token; // Asegúrate de que `token.user` contenga las propiedades extendidas
-        session.user.rol = ROL;
-        console.log('SESSION', session);
+      try {
+        const users = await searchUser(session.user.email)
+        if (token /* && token.user */) {
+          if (session.user.email === users[0].email) {
+            session.user = token
+            session.user.name = !session.user.name && users[0].nombre + ' ' + users[0].apellido
+            session.user.rol = users[0].tipo_usuario
+          }
+          console.log(session)
+          return session;
+        }
         return session;
-
+      } catch (error) {
+        console.log('Hubo un error: ', error)
       }
-      return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
