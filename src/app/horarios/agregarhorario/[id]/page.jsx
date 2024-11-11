@@ -10,7 +10,7 @@ import { useForm, Controller } from 'react-hook-form'
 
 import Select from "react-select";
 
-import { fetchSpeciality, fetchProfessionalById } from '@/services/DoctorsServices';
+import { fetchSpecialityById, fetchProfessionalById } from '@/services/DoctorsServices';
 import { createSchedule, getDates, fetchScheduleByDate, validateDates } from '@/services/SchedulesServices';
 import Calender from '../../../calender/page';
 
@@ -47,7 +47,7 @@ const AddSchedule = ({ params }) => {
   // const label = { inputProps: { 'aria-label': 'Switch demo' } };
   useEffect(() => {
     const fetchProfesional = async () => {
-      const { especialidad: user } = await fetchSpeciality(params.id)
+      const { especialidad: user } = await fetchSpecialityById(params.id)
       const { users } = await fetchProfessionalById(params.id)
       const obj = {
         ...users[0],
@@ -62,12 +62,9 @@ const AddSchedule = ({ params }) => {
     formState: { errors }
   } = useForm({
     defaultValues: async () => {
-      // console.log('Params en add schedule', params.id);
-      const { especialidad: user } = await fetchSpeciality(params.id)
-      // console.log('useForm user', user);
+      const { especialidad: user } = await fetchSpecialityById(params.id)
 
       const { users } = await fetchProfessionalById(params.id)
-
 
       const obj = {
         nombre: `${users[0].nombre} ${users[0].apellido}`,
@@ -100,29 +97,26 @@ const AddSchedule = ({ params }) => {
       dias: data.frecuencia === "semanal" ? data.semanal.dia : semana
     }
 
-    // console.log('newData', newData);
-    const dates = getDates(newData, fechas)
+    const dates = getDates(newData)
     let esValido = []
 
-    if (dates.length === 0) {
-      // console.log('CHAO NO SE PUEDE')
+    if (dates?.length === 0) {
       esValido.push(false)
       return
     }
 
     const promesas = []
-    dates.forEach(date => promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id)))
+    dates.forEach(date => {
+      return promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id))
+  })
 
     Promise.all(promesas)
       .then(async (values) => {
-        // console.log('VALUES', values);
         if (values.includes(true)) {
-          // console.log('GGGGGGGGGGG')
+          console.log('GGGGGGGGGGG')
         } else {
-          console.log('AT LAST!!!!')
           try {
             const req = await createSchedule(newData)
-            console.log('REQ', req)
             if (req.detalle === 'fail!!!') setSuccess('fail')
             setSuccess('success')
           } catch (error) {
