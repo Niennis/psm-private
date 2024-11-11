@@ -2,26 +2,29 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
-import Sidebar from "../../../../components/Sidebar";
+import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
-import { favicon, imagesend } from "../../../../components/imagepath";
+import { favicon, imagesend } from "@/components/imagepath";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { DatePicker } from "antd";
 import Select from "react-select";
 import { useForm, Controller } from 'react-hook-form'
-import { fetchDoctor } from "../../../../services/DoctorsServices";
+import { fetchProfessionalById, fetchSpecialityById } from "@/services/DoctorsServices";
+import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from "@/components/ProtectedRoutes";
 
-const EditDoctor = ({params}) => {
+const EditDoctor = ({ params }) => {
   const ROL = ["profesional"]
   const { data: session } = useSession()
   const router = useRouter();
   // useAuthorization(['alumno'])
 
   const [initial, setInitial] = useState({})
+  const [passwordVisible, setPasswordVisible] = useState(true);
+
   const [selectedOption, setSelectedOption] = useState(null);
   const [options, setOptions] = useState([
     { value: 1, label: "Select City" },
@@ -39,10 +42,11 @@ const EditDoctor = ({params}) => {
     { value: 2, label: "Alaska" },
     { value: 3, label: "California" },
   ]);
-  const [department, setDepartment] = useState([
-    { value: "Psicopedagogia", label: "Psicopedagogia", name: "speciality" },
-    { value: "Psicologia", label: "Psicologia", name: "speciality" },
-    { value: "Psiquiatria", label: "Psiquiatria", name: "speciality" },
+  const [speciality, setSpeciality] = useState([
+    { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality" },
+    { value: "Psicología", label: "Psicología", name: "speciality" },
+    { value: "Psiquiatría", label: "Psiquiatría", name: "speciality" },
+    { value: "Trabajador social", label: "Trabajador social", name: "speciality" },
   ]);
 
   const [show, setShow] = useState(false);
@@ -53,21 +57,14 @@ const EditDoctor = ({params}) => {
     // Handle file loading logic here
   };
 
-  useEffect(() => {
-    console.log(params.id)
-    const fetchDataDoctor = async() => {
-      const data = await fetchDoctor(params.id)
-      setInitial(data)
-    }
-    fetchDataDoctor()
-  }, [])
+  const fetchInitialData = async () => {
+    try {
+      const usersData = await fetchProfessionalById(params.id);
+      // const speciality = await fetchSpecialityById(params.id); 
+      const speciality = 'Trabajador social';
 
-
-  const { register, handleSubmit, watch, control,
-    formState: { errors }
-  } = useForm({
-    defaultValues: async () => fetchDoctor(params.id).then(user => {
-      const obj = {
+      const user = usersData.users[0];
+      return {
         name: user.nombre,
         lastName: user.apellido,
         mobile: user.telefono,
@@ -76,13 +73,25 @@ const EditDoctor = ({params}) => {
         confirmPassword: user.contrasena,
         dateOfBirth: user.fecha_nacimiento,
         gender: user.genero,
-        speciality: user.especialidad,
-        status: user.status
-      }
-      setInitial(obj)
-      return obj
-    })
-  })
+        speciality: speciality,
+        status: user.status,
+      };
+    } catch (error) {
+      console.error("Error fetching initial data:", error);
+      return {};
+    }
+  };
+
+
+  const { register, handleSubmit, watch, control,
+    formState: { errors }, reset
+  } = useForm({
+    defaultValues: async () => await fetchInitialData()
+  });
+
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
 
   const onSubmit = handleSubmit(data => {
     console.log('DATA', data)
@@ -264,125 +273,30 @@ const EditDoctor = ({params}) => {
 
                           </div>
                         </div> */}
+
+                        {/* SELECT ESPECIALIDAD */}
                         <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms cal-icon">
-                            <label>
-                              Fecha de nacimiento h{" "}
-                              <span className="login-danger">*</span>
-                            </label>
-                            <Controller
-                              control={control}
-                              name="dateOfBirth"
-                              {...register('dateOfBirth', {
-                                required: {
-                                  value: true,
-                                  message: 'Fecha es requerido',
-                                }
-                              })}
-                              ref={null}
-                              render={({ field: { onChange, onBlur, value } }) => (
-
-                                <DatePicker
-                                  className="form-control datetimepicker"
-                                  onChange={onChange}
-                                  suffixIcon={null}
-                                // placeholder='24/11/2022'
-                                />
-                              )}
-                            />
-
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group select-gender">
-                            <label className="gen-label">
-                              Género<span className="login-danger">*</span>
-                            </label>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  type="radio"
-                                  name="gender"
-                                  value="masculino"
-                                  className="form-check-input"
-                                  defaultChecked={initial.gender === 'masculino'}
-                                />
-                                Masculino
-                              </label>
-                            </div>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  type="radio"
-                                  name="gender"
-                                  value="femenino"
-                                  className="form-check-input"
-                                  defaultChecked={initial.gender === 'femenino'}
-                                />
-                                Femenino
-                              </label>
-                            </div>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  type="radio"
-                                  name="gender"
-                                  value="otro"
-                                  className="form-check-input"
-                                  defaultChecked={initial.gender === 'otro'}
-
-                                />
-                                Otro
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Educación <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                            // defaultValue="M.B.B.S, M.S."
-                            />
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Designación{" "}
-                              <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                            // defaultValue="Physician"
-                            />
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-4">
                           <div className="form-group local-forms">
                             <label>
                               Especialidad <span className="login-danger">*</span>
-                            </label><Controller
+                            </label>
+                            <Controller
                               control={control}
                               name="speciality"
-                              {...register('speciality', {
+                              rules={{
                                 required: {
                                   value: true,
                                   message: 'Especialidad es requerida',
                                 }
-                              })}
+                              }}
                               ref={null}
                               render={({ field: { onChange, onBlur, value } }) => {
                                 return (
                                   <Select
-                                    defaultValue={selectedOption}
-                                    onChange={onChange}
-                                    options={department}
-                                    id="search-commodity"
+                                    value={speciality.find(option => option.value === value) || null}
+                                    onChange={(option) => onChange(option.value)}
+                                    options={speciality}
+                                    id="speciality"
                                     components={{
                                       IndicatorSeparator: () => null
                                     }}
@@ -410,16 +324,139 @@ const EditDoctor = ({params}) => {
                                 )
                               }}
                             />
-
-                            {/* <select className="form-control select">
-                              <option>Select Department</option>
-                              <option>Orthopedics</option>
-                              <option>Radiology</option>
-                              <option>Dentist</option>
-                            </select> */}
                           </div>
                         </div>
-                        <div className="col-12 col-sm-12">
+
+                        {/* FECHA NACIMIENTO */}
+                        {/*  <div className="col-12 col-md-6 col-xl-6">
+                          <div className="form-group local-forms cal-icon">
+                            <label>
+                              Fecha de nacimiento h{" "}
+                              <span className="login-danger">*</span>
+                            </label>
+                            <Controller
+                              control={control}
+                              name="dateOfBirth"
+                              {...register('dateOfBirth', {
+                                required: {
+                                  value: true,
+                                  message: 'Fecha es requerido',
+                                }
+                              })}
+                              ref={null}
+                              render={({ field: { onChange, onBlur, value } }) => (
+
+                                <DatePicker
+                                  className="form-control datetimepicker"
+                                  onChange={onChange}
+                                  suffixIcon={null}
+                                />
+                              )}
+                            />
+
+                          </div>
+                        </div> */}
+
+                        {/* GENERO */}
+                        <div className="col-12 col-md-6 col-xl-6">
+                          <div className="form-group select-gender">
+                            <label className="gen-label">
+                              Género<span className="login-danger">*</span>
+                            </label>
+                            <div className="form-check-inline">
+                              <label className="form-check-label">
+                                <input
+                                  type="radio"
+                                  name="gender"
+                                  value="hombre"
+                                  className="form-check-input"
+                                  defaultChecked={initial.genero === 'hombre'}
+                                />
+                                Hombre
+                              </label>
+                            </div>
+                            <div className="form-check-inline">
+                              <label className="form-check-label">
+                                <input
+                                  type="radio"
+                                  name="gender"
+                                  value="mujer"
+                                  className="form-check-input"
+                                  defaultChecked={initial.genero === 'mujer'}
+                                />
+                                Mujer
+                              </label>
+                            </div>
+                            <div className="form-check-inline">
+                              <label className="form-check-label">
+                                <input
+                                  type="radio"
+                                  name="gender"
+                                  value="hombre trans"
+                                  className="form-check-input"
+                                  defaultChecked={initial.genero === 'hombre trans'}
+                                />
+                                Femenino
+                              </label>
+                            </div>
+                            <div className="form-check-inline">
+                              <label className="form-check-label">
+                                <input
+                                  type="radio"
+                                  name="gender"
+                                  value="mujer trans"
+                                  className="form-check-input"
+                                  defaultChecked={initial.genero === 'mujer trans'}
+                                />
+                                Mujer trans
+                              </label>
+                            </div>
+                            <div className="form-check-inline">
+                              <label className="form-check-label">
+                                <input
+                                  type="radio"
+                                  name="gender"
+                                  value="otro"
+                                  className="form-check-input"
+                                  defaultChecked={initial.genero === 'no binarie' || 'personalizado'}
+                                />
+                                No binarie
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* EDUCACION */}
+                        {/*  <div className="col-12 col-md-6 col-xl-4">
+                          <div className="form-group local-forms">
+                            <label>
+                              Educación <span className="login-danger">*</span>
+                            </label>
+                            <input
+                              className="form-control"
+                              type="text"
+                            // defaultValue="M.B.B.S, M.S."
+                            />
+                          </div>
+                        </div> */}
+
+                        {/* DESIGNACION */}
+                        {/*  <div className="col-12 col-md-6 col-xl-4">
+                          <div className="form-group local-forms">
+                            <label>
+                              Designación{" "}
+                              <span className="login-danger">*</span>
+                            </label>
+                            <input
+                              className="form-control"
+                              type="text"
+                            // defaultValue="Physician"
+                            />
+                          </div>
+                        </div> */}
+
+                        {/* DIRECCION */}
+                        {/*  <div className="col-12 col-sm-12">
                           <div className="form-group local-forms">
                             <label>
                               Dirección <span className="login-danger">*</span>
@@ -428,13 +465,12 @@ const EditDoctor = ({params}) => {
                               className="form-control"
                               rows={3}
                               cols={30}
-                            // defaultValue={
-                            //   "101, Elanxa Apartments, 340 N Madison Avenue"
-                            // }
                             />
                           </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-3">
+                        </div> */}
+
+                        {/* CIUDAD */}
+                        {/* <div className="col-12 col-md-6 col-xl-3">
                           <div className="form-group local-forms">
                             <label>
                               Ciudad <span className="login-danger">*</span>
@@ -476,8 +512,9 @@ const EditDoctor = ({params}) => {
                               }}
                             />
                           </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-3">
+                        </div> */}
+                        {/* PAIS */}
+                        {/* <div className="col-12 col-md-6 col-xl-3">
                           <div className="form-group local-forms">
                             <label>
                               País <span className="login-danger">*</span>
@@ -519,8 +556,9 @@ const EditDoctor = ({params}) => {
                               }}
                             />
                           </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-3">
+                        </div> */}
+                        {/* REGION */}
+                        {/* <div className="col-12 col-md-6 col-xl-3">
                           <div className="form-group local-forms">
                             <label>
                               Región{" "}
@@ -564,8 +602,9 @@ const EditDoctor = ({params}) => {
                               }}
                             />
                           </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-3">
+                        </div> */}
+                        {/* CODIGO POSTAL */}
+                        {/* <div className="col-12 col-md-6 col-xl-3">
                           <div className="form-group local-forms">
                             <label>
                               Código Postal{" "}
@@ -577,8 +616,10 @@ const EditDoctor = ({params}) => {
                             // defaultValue={91403}
                             />
                           </div>
-                        </div>
-                        <div className="col-12 col-sm-12">
+                        </div> */}
+
+                        {/* BIOGRAFIA */}
+                        {/* <div className="col-12 col-sm-12">
                           <div className="form-group local-forms">
                             <label>
                               Biografía {" "}
@@ -588,13 +629,82 @@ const EditDoctor = ({params}) => {
                               className="form-control"
                               rows={3}
                               cols={30}
-                            // defaultValue={
-                            //   "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliquat enim ad minim veniam, quriesstrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-                            // }
                             />
                           </div>
+                        </div> */}
+
+
+                        {/* Contraseña */}
+                        <div className="col-12 col-md-6 col-xl-6">
+                          <div className="form-group local-forms">
+                            <label>
+                              Contraseña <span className="login-danger">*</span>
+                            </label>
+                            <input
+                              className="form-control"
+                              type={passwordVisible ? 'password' : ''}
+                              placeholder=""
+                              name="password"
+                              {...register('password', {
+                                required: {
+                                  value: true,
+                                  message: 'Contraseña es requerida'
+                                },
+                                minLength: {
+                                  value: 8,
+                                  message: 'Contraseña debe tener al menos 8 caracteres'
+                                },
+                                validate:
+                                  value => {
+                                    const regex = /^(?=.*\d)(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).*$/;
+                                    return regex.test(value) || 'La contraseña debe contener al menos un caracter especial, un número y una mayúscula';
+                                  }
+                              })}
+                            />
+
+                            <span
+                              className="toggle-password"
+                              onClick={togglePasswordVisibility}
+                            >
+                              {passwordVisible ? <EyeOff className="react-feather-custom" /> : <Eye className="react-feather-custom" />}
+                            </span>
+                            {errors.password && <span className="login-danger">
+                              <small>{errors.password.message}</small>
+                            </span>}
+                          </div>
                         </div>
-                      
+
+                        {/* Confirmar contraseña */}
+                        <div className="col-12 col-md-6 col-xl-6">
+                          <div className="form-group local-forms">
+                            <label>
+                              Confirmar contraseña{" "}
+                              <span className="login-danger">*</span>
+                            </label>
+                            <input
+                              className="form-control"
+                              type={passwordVisible ? 'password' : ''}
+                              placeholder=""
+                              {...register('confirmPassword', {
+                                required: {
+                                  value: true,
+                                  message: 'Confirmación requerida'
+                                },
+                                validate: value => value === watch('password') || 'Las contraseñas no coinciden'
+                              })}
+                            />
+                            <span
+                              className="toggle-password"
+                              onClick={togglePasswordVisibility}
+                            >
+                              {passwordVisible ? <EyeOff className="react-feather-custom" /> : <Eye className="react-feather-custom" />}
+                            </span>
+                            {errors.confirmPassword && <span className="login-danger">
+                              <small>{errors.confirmPassword.message}</small>
+                            </span>}
+                          </div>
+                        </div>
+
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group select-gender">
                             <label className="gen-label">
