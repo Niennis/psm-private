@@ -94,11 +94,23 @@ const AppoinmentList = () => {
   const [show, setShow] = useState({ state: false, id: '' })
   const matches = useMediaQuery('(min-width:600px)');
 
+  /* useEffect(() => {
+    fetchAppointments(setAppointments)
+    fetchAppointments(setResults)
+    // setResults()
+  }, []) */
+
   useEffect(() => {
-    // fetchAppointments(setAppointments)
-    // fetchAppointments(setResults)
-    setResults()
-  }, [])
+    const loadAppointments = async () => {
+      const data = await fetchAppointments();
+      // console.log('DATA', data);
+      
+      setAppointments(data);
+      setResults(data);
+    };
+  
+    loadAppointments();
+  }, []);
 
   const onSelectChange = (newSelectedRowKeys) => {
     console.log("selectedRowKeys changed: ", selectedRowKeys);
@@ -128,7 +140,7 @@ const AppoinmentList = () => {
     {
       title: "Estudiante",
       dataIndex: "nombre_alumno",
-      sorter: (a, b) => a['nombre_alumno'].length - b['nombre_alumno'].length,
+      sorter: (a, b) => a['nombre_alumno'].localeCompare(b['nombre_alumno']),
       fixed: 'left',
       render: (text, record) => (
         <>
@@ -149,58 +161,58 @@ const AppoinmentList = () => {
     {
       title: "Profesional",
       dataIndex: "nombre_profesional",
-      sorter: (a, b) => a['nombre_profesional'].length - b['nombre_profesional'].length,
+      sorter: (a, b) => a['nombre_profesional'].localeCompare(b['nombre_profesional']),
       key: 'nombre_profesional',
       responsive: ['md'],
     },
     {
       title: "Especialidad",
       dataIndex: "especialidad",
-      sorter: (a, b) => a.especialidad.length - b.especialidad.length,
+      sorter: (a, b) => a.especialidad.localeCompare(b.especialidad),
       key: 'especialidad',
       responsive: ['md'],
     },
     {
       title: "Teléfono",
-      dataIndex: "telefono_alumno",
-      sorter: (a, b) => a['telefono_alumno'].length - b['telefono_alumno'].length,
-      key: 'telefono_alumno',
+      dataIndex: "telefono_estudiante",
+      sorter: (a, b) => a['telefono_estudiante'].localeCompare(b['telefono_estudiante']),
+      key: 'telefono_estudiante',
       responsive: ['md'],
     },
     {
       title: "Correo electrónico",
-      dataIndex: "mail_alumno",
-      sorter: (a, b) => a['mail_alumno'].length - b['mail_alumno'].length,
+      dataIndex: "email_estudiante",
+      sorter: (a, b) => a['email_estudiante'].localeCompare(b['email_estudiante']),
       render: (text, record) => (
         <>
-          <Link href="#">{record.mail_alumno}</Link>
+          <Link href="#">{record.email_estudiante}</Link>
         </>
       ),
-      key: 'mail_alumno',
+      key: 'email_estudiante',
       responsive: ['md'],
     }, {
       title: "Día",
       dataIndex: "fecha",
-      sorter: (a, b) => a['fecha'].length - b['fecha'].length,
+      sorter: (a, b) => a['fecha'].localeCompare(b['fecha']),
       key: 'fecha',
       responsive: ['md'],
     }, {
       title: "Hora",
       dataIndex: "hora",
-      sorter: (a, b) => a['hora'].length - b['hora'].length,
+      sorter: (a, b) => a['hora'].localeCompare(b['hora']),
       key: 'hora',
       responsive: ['md'],
     }, {
       title: "Estado",
       dataIndex: "estado",
-      sorter: (a, b) => a.estado.length - b.estado.length,
+      sorter: (a, b) => a.estado.localeCompare(b.estado),
       key: 'estado',
       responsive: ['lg'],
     }, {
       title: "",
       dataIndex: "field",
       fixed: 'right',
-      responsive: ['xs'],
+      // responsive: ['xs'],
       render: (text, record) => (
         <>
           <div className="text-end">
@@ -214,7 +226,6 @@ const AppoinmentList = () => {
               >
                 <i className="fas fa-ellipsis-v" />
               </Link>
-              {console.log('SHOW', show.id, record.id_cita)}
               <div
                 style={{ right: '35px', top: 0 }}
                 className=
@@ -338,7 +349,7 @@ const AppoinmentList = () => {
                     <div className="table-responsive patient-list">
                       <Table
                         pagination={{
-                          total: citas.length,
+                          total: results.length,
                           showTotal: (total, range) =>
                             `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
                           //showSizeChanger: true,
@@ -346,10 +357,10 @@ const AppoinmentList = () => {
                           itemRender: itemRender,
                         }}
                         columns={columns}
-                        dataSource={citas}
+                        dataSource={results}
 
                         rowSelection={rowSelection}
-                        rowKey={(record) => record.id_cita}
+                        rowKey={(record) => `${record.id_cita}`}
                       />
                     </div>
                   </div>
