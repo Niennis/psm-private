@@ -67,144 +67,45 @@ const Calender = ({ id }) => {
     ];
 
   const datesToTimestamp = (fecha, hora) => {
-    let fecha_obj = new Date(fecha);
-
-    let [horas, minutos, segundos] = hora.split(":").map(Number);
-    fecha_obj.setHours(fecha_obj.getHours() + horas, fecha_obj.getMinutes() + minutos, fecha_obj.getSeconds() + segundos);
-    return fecha_obj.getTime()
-  }
+    // Combinar fecha y hora en un formato ISO 8601 compatible con `Date`
+    const fechaHora = `${fecha} ${hora}`;
+    const timestamp = Date.parse(fechaHora); // Obtiene el tiempo en milisegundos
+    return timestamp;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       const { users: response } = await fetchScheduleByAvailability(id)
-      console.log('calendaio', response)
-      /*  const processed = response.map(item => {
-         // detalleServicio y duracionServicio
-         return (
-           {
-             ...item,
-             start: new Date(`${item.fechaInicio}T${item.horaIni}`).getTime(),
-             end: new Date(`${item.fechaFin}T${item.horaFin}`).getTime(),
-             className: "bg-purple",
-             title: item.detalleServicio || 'Disponible',
-           }
-         )
-       }) */
-      // console.log('RESPONSE', response);
-      // const {bloques : servicio2Response} = await fetchScheduleByUser(id)
+      const processed = response.map(item => {
+        // detalleServicio y duracionServicio
+        return (
+          {
+            ...item,
+            start: datesToTimestamp(item.fechaInicio, item.horaIni),
+            end: datesToTimestamp(item.fechaFin, item.horaFin),
+            className: "bg-purple",
+            title: item.detalleServicio || 'Disponible',
+          }
+        )
+      })
+      console.log('CALENDARIO', response);
 
-      // // Función para calcular los intervalos de tiempo
-      // function calcularIntervalos(horaInicio, horaFin, duracionServicio, item) {
-      //   const intervalos = [];
-      //   let horaActual = horaInicio;
+      const ordered = processed.sort((a, b) => a.start - b.start);
+      // console.log('ORDERED', ordered)
+      const bloquesCombinados = ordered.reduce((resultado, bloque) => {
+        // console.log('BLOQUE', bloque);
+        const ultimoBloque = resultado[resultado.length - 1];
+        if (ultimoBloque && ultimoBloque.end >= bloque.start) {
+          ultimoBloque.end = Math.max(ultimoBloque.end, bloque.end);
+        } else {
+          resultado.push(bloque);
+        }
+        // console.log('RESULTADO', resultado);
 
-      //   while (horaActual <= horaFin) {
-      //     const horaFinIntervalo = sumarMinutos(horaActual, duracionServicio);
-      //     if (horaFinIntervalo <= horaFin) {
-      //       intervalos.push({ ...item, horaInicioServicio: horaActual, horaFinServicio: horaFinIntervalo });
-      //       horaActual = horaFinIntervalo;
-      //     } else {
-      //       break; // Termina el bucle si el intervalo supera la hora de finalización
-      //     }
-      //   }
-      //   return intervalos;
-      // }
+        return resultado;
+      }, [])
 
-      // function sumarMinutos(hora, minutos) {
-      //   const [horas, minutosInicio] = hora.split(":").map(Number);
-      //   const totalMinutos = horas * 60 + minutosInicio + minutos;
-      //   const horasResultado = Math.floor(totalMinutos / 60);
-      //   const minutosResultado = totalMinutos % 60;
-      //   return `${String(horasResultado).padStart(2, '0')}:${String(minutosResultado).padStart(2, '0')}`;
-      // }
-
-      // // Función para combinar los resultados
-      // function combinarResultados(resultados) {
-      //   return resultados.reduce((acumulador, resultado) => {
-      //     return acumulador.concat(resultado);
-      //   }, []);
-      // }
-
-      // // Calculando los intervalos de tiempo para cada usuario
-      // const resultadosIndividuales = response.map(usuario => {
-      //   return calcularIntervalos(usuario.horaIni, usuario.horaFin, usuario.duracionServicio, usuario);
-      // });
-      // // console.log('resultadosIndividuales', resultadosIndividuales.flat());
-      // // Combinando los resultados individuales en un solo array
-      // const intervalosDeTiempo = combinarResultados(resultadosIndividuales.flat());
-      // console.log('intervalosDeTiempo', intervalosDeTiempo);
-      // // // Filtrando los bloques del segundo servicio que coincidan con los intervalos calculados
-      // const bloquesFiltrados = servicio2Response.filter(bloque => {
-      //   return intervalosDeTiempo.some(intervalo => {
-      //     const [bloqueHoraInicio, bloqueMinutosInicio] = bloque.hora_inicio.split(":").map(Number);
-      //     const [bloqueHoraFin, bloqueMinutosFin] = bloque.hora_fin.split(":").map(Number);
-      //     const [intervaloHora, intervaloMinutos] = intervalo['horaInicioServicio'].split(":").map(Number);
-      //     return (
-      //       bloqueHoraInicio === intervaloHora &&
-      //       bloqueMinutosInicio === intervaloMinutos &&
-      //       bloqueHoraFin <= intervaloHora &&
-      //       bloqueMinutosFin <= intervaloMinutos
-      //     );
-      //   });
-      // });
-      // console.log('bloquesFiltrados', bloquesFiltrados);
-
-
-
-      // const algo = servicio2Response.map(bloque => {
-      //   return intervalosDeTiempo.some(intervalo => {
-      //     const [bloqueHoraInicio, bloqueMinutosInicio] = bloque.hora_inicio.split(":").map(Number);
-      //     const [bloqueHoraFin, bloqueMinutosFin] = bloque.hora_fin.split(":").map(Number);
-      //     const [intervaloHora, intervaloMinutos] = intervalo['horaInicioServicio'].split(":").map(Number);
-      //     return (
-      //       bloqueHoraInicio === intervaloHora &&
-      //       bloqueMinutosInicio === intervaloMinutos &&
-      //       bloqueHoraFin >= intervaloHora &&
-      //       bloqueMinutosFin >= intervaloMinutos
-      //     );
-      //   });
-      // });
-
-
-
-
-
-      // // Formateando los datos resultantes
-      // const resultadoFinal = bloquesFiltrados.map(bloque => ({
-      //   horaInicio: bloque.hora_inicio
-      // }));
-
-      // console.log('RESULTADO FINAL', resultadoFinal);
-
-      // // const ordered = processed.sort((a, b) => a.start - b.start);
-      // // // console.log('ORDERED', ordered)
-      // // const bloquesCombinados = ordered.reduce((resultado, bloque) => {
-      // //   console.log('BLOQUE', bloque);
-      // //   const ultimoBloque = resultado[resultado.length - 1];
-      // //   if (ultimoBloque && ultimoBloque.end >= bloque.start) {
-      // //     ultimoBloque.end = Math.max(ultimoBloque.end, bloque.end);
-      // //   } else {
-      // //     resultado.push(bloque);
-      // //   }
-      // //   return resultado;
-      // // }, [])
-
-
-      // const processed = resultadosIndividuales.map(item => {
-      //   // detalleServicio y duracionServicio
-      //   return (
-      //     {
-      //       ...item,
-      //       start: new Date(`${item.fechaInicio}T${item.horaIni}`).getTime(),
-      //       end: new Date(`${item.fechaFin}T${item.horaFin}`).getTime(),
-      //       className: "bg-purple",
-      //       title: item.detalleServicio || 'Disponible',
-      //     }
-      //   )
-      // })
-
-      // console.log('bloquesCombinados', bloquesCombinados);
-      setCalendario(defaultEvents)
+      setCalendario(bloquesCombinados)
       // setCalendario(resultadoFinal)
     }
     fetchData()
