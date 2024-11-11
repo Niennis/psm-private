@@ -1,6 +1,6 @@
 import { fetchUser } from './UsersServices'
 import { fetchProfessionalById } from './DoctorsServices';
-import { fetchSpeciality } from './DoctorsServices';
+import { fetchSpecialityById } from './DoctorsServices';
 
 import dayjs from 'dayjs';
 import axios from 'axios';
@@ -161,10 +161,16 @@ export const changeStatusAppointment = async (id, status) => {
     console.log(err)
   }
 }
-
+/* 
 export const fetchAppointments = async (callback) => {
   try {
-    const data = await fetch(process.env.NEXT_PUBLIC_SHOW_APPOINTMENTS)
+    const data = await fetch(process.env.NEXT_PUBLIC_SHOW_APPOINTMENTS, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+    })
     // const data = await fetch(process.env.VITE_SHOW_APPOINTMENTS)
     const response = await data.json()
 
@@ -173,10 +179,9 @@ export const fetchAppointments = async (callback) => {
     // });
 
     const obj = response['citas'].map(async date => {
-      // console.log('DATE', date);
       const doctor = await fetchProfessionalById(date.id_profesional)
       const fetchPatient = await fetchUser(date.id_paciente)
-      const result = await fetchSpeciality(date.id_profesional)
+      const result = await fetchSpecialityById(date.id_profesional)
       // const fetch
       return {
         ...date,
@@ -194,6 +199,44 @@ export const fetchAppointments = async (callback) => {
     console.log(err)
   }
 }
+ */
+
+export const fetchAppointments = async () => {
+  try {
+    const data = await fetch(process.env.NEXT_PUBLIC_SHOW_APPOINTMENTS, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+    });
+
+    const {citas} = await data.json();
+
+    // const appointments = await Promise.allSettled(
+    //   citas.map(async (date) => {
+    //     // const doctor = await fetchProfessionalById(date.id_profesional);
+    //     // const {users: fetchPatient} = await fetchUser(date.id_paciente);
+    //     const result = await fetchSpecialityById(date.id_profesional);
+
+    //     return {
+    //       ...date,
+    //       // nombre_alumno: `${fetchPatient.users[0].nombre} ${fetchPatient.users[0].apellido}`,
+    //       // nombre_profesional: `${doctor.users[0].nombre} ${doctor.users[0].apellido}`,
+    //       // telefono_alumno: fetchPatient.users[0].telefono,
+    //       // mail_alumno: fetchPatient.users[0].email,
+    //       especialidad: result.especialidad.length === 0 ? 'Psicologia' : result.especialidad[0].especialidad,
+    //       key: date.id
+    //     };
+    //   })
+    // );
+
+    return citas;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
 
 export const fetchAppointment = async (id) => {
   try {
@@ -214,4 +257,10 @@ export const fetchAppointment = async (id) => {
   }
 }
 
-export const search = (data, query) => data.filter(obj => JSON.stringify(obj).toLowerCase().includes(query.toLowerCase()))
+export const search = (data, query) => {
+
+  const bleh = data.filter(obj =>
+    JSON.stringify(obj).toLowerCase().includes(query.toLowerCase()))
+
+  return bleh
+}

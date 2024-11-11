@@ -3,6 +3,7 @@ export const fetchUsers = async () => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PATIENTS
 
   const data = await fetch(USERS_API, {
+    method: 'POST',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -10,8 +11,8 @@ export const fetchUsers = async () => {
     }
   })
 
-  console.log('SHOW_PATIENTS', data)
-  return data.json()
+  const response = await data.json()
+  return response
 }
 
 export const fetchUser = async (id) => {
@@ -27,8 +28,6 @@ export const fetchUser = async (id) => {
       id
     })
   })
-
-  console.log('SHOW_PATIENT_BY_ID', data)
 
   return data.json()
 }
@@ -48,7 +47,6 @@ export const fetchUserMailAndPass = async (user) => {
       contrasena: user.contrasena
     })
   })
-  console.log('USERS_VALIDATE_USER', data);
   
   return data.json()
 }

@@ -22,6 +22,7 @@ export const fetchScheduleByDate = async (id, date) => {
     usuario_id: id,
     fecha: date
   }
+  
   const data = await fetch(SHOW_BLOQUES, {
     method: "POST",
     headers: {
@@ -31,6 +32,8 @@ export const fetchScheduleByDate = async (id, date) => {
     body: JSON.stringify(body)
   })
   const response = await data.json()
+  console.log('fetchScheduleByDate', response);
+  
   return response;
 }
 
@@ -40,7 +43,7 @@ export const fetchScheduleByAvailability = async (id) => {
   const body = {
     id_user: id
   }
-  console.log('body', body);
+  
   const data = await fetch(SCHEDULES_URL, {
     method: "POST",
     headers: {
@@ -91,16 +94,15 @@ const obtenerFechasSemana = (objeto, fechas) => {
     // console.log('bleh', fecha.getDay(), semana.indexOf(dia), dia);
     return fecha.getDay() === semana.indexOf(dia);
   }
-  // Convertir fecha de inicio a objeto Date
-  // Mientras la fecha actual sea menor o igual a la fecha de fin
+
   dias.forEach(dia => {
     let fechaActual = new Date(fechaInicio + 'T00:00:00');
     while (fechaActual <= new Date(fechaFin + 'T00:00:00')) {
-      // Verificar si la fecha actual es un día de la semana válido y no es sábado ni domingo
+
       const esDiaValido = esDiaDeLaSemana(fechaActual, dia) &&
         fechaActual.getDay() !== 0 && fechaActual.getDay() !== 6;
-      // Si es un día válido, agregarlo a la lista de fechas
-      if (esDiaValido) {
+
+        if (esDiaValido) {
         fechas.push(fechaActual.toISOString().split('T')[0]);
       }
       fechaActual = new Date(fechaActual.setDate(fechaActual.getDate() + 1))
@@ -311,7 +313,6 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
   } catch (error) {
     console.log('Error', error)
   }
-
 }
 
 // Retorna true si hay choque de horario
@@ -341,15 +342,15 @@ const hayChoqueHorario = (inicioMayor, finMayor, bloquesMenores) => {
 }
 
 export const validateDates = async (fecha, horaInicio, horaFin, id) => {
-  // console.log('VALIDA', fecha, horaInicio, horaFin, id)
+  console.log('VALIDA', fecha, horaInicio, horaFin, id)
   const { bloques: bloquesMenores } = await fetchScheduleByDate(id, fecha)
-  // console.log('BLOQUESMENORES', bloquesMenores)
+  console.log('BLOQUESMENORES', bloquesMenores)
 
   if (bloquesMenores.length === 0) {
-    // console.log('TAMBIÉN ENTRA AQUÍ');
+    console.log('TAMBIÉN ENTRA AQUÍ');
     return false
   } else {
-    // console.log('HAY CHOQUE', hayChoqueHorario(horaInicio, horaFin, bloquesMenores))
+    console.log('HAY CHOQUE', hayChoqueHorario(horaInicio, horaFin, bloquesMenores))
     return hayChoqueHorario(horaInicio, horaFin, bloquesMenores)
   }
 

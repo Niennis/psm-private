@@ -24,8 +24,8 @@ export const fetchProfessionals = async () => {
   }
 }
 
-export const fetchSpeciality = async (usuario_id) => {
-  const SPECIALITY_URL = process.env.NEXT_PUBLIC_SHOW_ESPECIALIDADES
+export const fetchSpecialityById = async (usuario_id) => {
+  const SPECIALITY_URL = process.env.NEXT_PUBLIC_SHOW_ESPECIALIDAD_BY_ID
   try {
     const data = await fetch(SPECIALITY_URL, {
       method: 'POST',
@@ -45,25 +45,33 @@ export const fetchSpeciality = async (usuario_id) => {
   }
 }
 
-
-export const professionalsWithSpeciality = async (usuarios) => {
-  // Crear un array de promesas para cada usuario
-  const usuariosCompletos = await Promise.all(
-    usuarios.map(async (usuario) => {
-      // Obtener la especialidad del usuario llamando a la función con su id
-      const {especialidad : data} = await fetchSpeciality(usuario.id);
-      // Retornar el usuario con la especialidad añadida
-      return {
-        ...usuario,
-        especialidad: data[0]?.especialidad ? data[0]?.especialidad : 'no especificado'
-      };
+export const fetchSpecialities = async () => {
+  const SPECIALITY_URL = process.env.NEXT_PUBLIC_SHOW_ESPECIALIDADES
+  try {
+    const data = await fetch(SPECIALITY_URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
     })
-  );
-
-  // console.log('usuariosCompletos', usuariosCompletos)
-  return usuariosCompletos;
+    const { especialidad } = await data.json()
+    return especialidad;
+  } catch (err) {
+    console.log(err)
+  }
 }
 
+export const professionalsWithSpeciality = async (specialities, users) => {
+  const especialidadMap = new Map(
+    specialities.map((user) => [user.usuario_id, user.especialidad])
+  );
+
+  return users.map((user) => ({
+    ...user,
+    especialidad: especialidadMap.get(user.id) || null, 
+  }));
+}
 
 export const fetchProfessionalById = async (id) => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PROFESSIONALS_BY_ID
@@ -79,21 +87,21 @@ export const fetchProfessionalById = async (id) => {
         id
       })
     })
-    const response = data.json()
+    const response = await data.json()
     return response
   } catch (err) {
     console.log(err)
   }
 }
 
-export const addDoctor = async (user) => {
+export const addProfessional = async (user) => {
   // const USERS_API = process.env.VITE_USERS_API + `/api/professionals`
   const USERS_API = process.env.NEXT_PUBLIC_CREATE_PROFESSIONAL
   const body = {
     "nombre": user.name,
     "apellido": user.lastName,
     "rut": "16332702-3",
-    "fechaNacimiento": "14-02-1990",
+    "fechaNacimiento": "1990-03-03",
     "genero": user.genero.label,
     "email": user.email,
     "telefono": 987654321,
@@ -101,18 +109,16 @@ export const addDoctor = async (user) => {
     "especialidad": user.speciality.value,
     "tipo_usuario": 'profesional',
     "status": 'activo',
-    "campus": 'Sede Centro',
+    "campus": user.campus,
     "carrera": user.speciality.label,
-    "anoIngresoCarrera": "14-02-2024",
+    "anoIngresoCarrera": "2020-03-03",
     "jornada": "laboral",
     "direccion": "random",
     "region": "santiago",
     "comuna": "santiago",
-    "status": user.status,
-    "especialidad": user.speciality.label,
   }
-
   console.log('body', body);
+
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -120,17 +126,16 @@ export const addDoctor = async (user) => {
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
-        'ngrok-skip-browser-warning': 'any'
       },
       body: JSON.stringify(body)
     })
 
-    console.log('STATUS', data.status, data.ok, data)
-    const response = await data.json()
-    console.log('response', response)
-    if (!data.ok && response.message.includes('Duplicate entry')) return { err: 'Usuario duplicado' }
+    // console.log('data', data)
+    // const response = await data.json()
+    // console.log('RESPONSE', response)
+    // if (!data.ok && response?.message.includes('Duplicate entry')) return { err: 'Usuario duplicado' }
 
-    return response
+    return data
   } catch (err) {
     console.log('ERROR', err)
   }
