@@ -16,8 +16,6 @@ const searchUser = async email => {
   if (prof.length === 1) return prof
   if (user.length === 1) return user
 }
-// admin, alumno, profesional
-const ROL = 'admin'
 
 const handler = NextAuth({
   session: { strategy: "jwt" },
@@ -56,46 +54,65 @@ const handler = NextAuth({
 
         try {
           user = await fetchUserMailAndPass(body)// user = {
-
           if (!user) {
             // No user found, so this is their first attempt to login
             // meaning this is also the place you could do registration
-            throw new Error("Usuario no encontrado.")
+            throw new Error({message: "usuario no encontrado."})
           }
           if (user.email === body.email && user.contrasena === body.contrasena) {
             return user
           }
         } catch (error) {
           console.log('Ocurrió un problema: ', error)
+          throw new Error({message: `ocurrió un problema: ${error}`})
         }
       },
     }),
   ],
   pages: {
     signIn: '/',
+    error: '/error/page'
   },
   callbacks: {
     async signIn({ account, profile, credentials }) {
       // Si el proveedor es google, validar que sea correo udp.
-      // TODO validar que solo sean usuarios de la DB
       if (account.provider === "google") {
         console.log('ENTRÓ A GOOGLE')
-        if (profile.email_verified && profile.email.endsWith("@gmail.com")) {
+        if (profile.email_verified && profile.email.endsWith("@gmail.com" || "@mail.udp.cl")) {
           profile.rol === 'alumno'
           return true
+        } else {
+          throw new Error({ message: 'dominio incorrecto' })
         }
-        // return true
+      }
+
+      if (account.provider === "google") {
+        console.log('ENTRÓ A GOOGLE')
+        const response = await fetchUsers()
+        const userDB = response.users.filter(user => user[0].email === email)
+
+        if (userDB.length >= 1) {
+          profile.rol === 'alumno'
+          return true
+        } else {
+          throw new Error({ message: 'no se encontró al usuario' })
+        }
       }
 
       // Si el proveedor es credentials, validar que exista en la DB
       if (account.provider === "credentials") {
         console.log('ENTRÓ A CREDENTIALS')
         try {
-          const body = { email: credentials.email, contrasena: credentials.password }
+          const body = {
+            email: credentials.email,
+            contrasena: credentials.password
+          }
           const user = await fetchUserMailAndPass(body)
+
           if (user.length === 0) {
             // Si length === 0 , no encontró al usuario, no puede acceder
-            throw new Error('No se pudo acceder. Correo no autorizado.');
+            // redirect(`/api/auth/error?error=noseencontroalusuario`)
+            throw new Error({ message: 'no se encontró al usuario' });
           }
           // Si lo anterior no ocurre, encontró el mail
           return true
@@ -116,7 +133,6 @@ const handler = NextAuth({
             session.user.name = !session.user.name && users[0].nombre + ' ' + users[0].apellido
             session.user.rol = users[0].tipo_usuario
           }
-          console.log(session)
           return session;
         }
         return session;
