@@ -13,7 +13,7 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 
-import { fetchDoctors, fetchDoctor } from "@/services/DoctorsServices";
+import { fetchProfessionals, fetchProfessionalById } from "@/services/DoctorsServices";
 import { fetchUsers } from "@/services/UsersServices";
 import { createAppointment } from "@/services/AppointmentsServices"
 import { createInterviewRecord } from "@/services/RecordServices";
@@ -93,7 +93,7 @@ const AddInterviewRecord = ({ params }) => {
   })
 
   const fetchData = async () => {
-    const { users } = await fetchDoctor('6')
+    const { users } = await fetchProfessionalById('6')
     console.log('users', users);
     const docs = users.map((doc, i) => {
       return {
