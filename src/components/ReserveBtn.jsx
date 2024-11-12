@@ -16,7 +16,7 @@ const ReserveBtn = ({ text, bgColor, color }) => {
 
   return (
     <>
-      <Link href="/login#estudiantes" className="sailec-medium" >
+      <Link href="/#estudiantes" className="sailec-medium" >
       <button
         className='btn btn-rounded btn-reservar'
         style={{
