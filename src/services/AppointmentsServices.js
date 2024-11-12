@@ -5,8 +5,8 @@ import { fetchSpecialityById } from './DoctorsServices';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
-export const sendEmail = async () => {
-  // console.log('el body', body);
+export const sendEmail = async (email, typeUser) => {
+  console.log('el body', email, typeUser);
   const SEND_EMAIL = process.env.NEXT_PUBLIC_SEND_EMAIL;
   const lebody = {
     "tarjet": "estefania.osses.v@gmail.com",
@@ -242,13 +242,13 @@ export const fetchAppointment = async (id) => {
   try {
     const data = await fetch(process.env.NEXT_PUBLIC_APPOINTMENTS_API + `/api/appintsimple/${id}`)
     const response = await data.json()
-    const fetchDoctor = await fetchUser(response.id_professional)
+    const fetchProfessional = await fetchUser(response.id_professional)
     const fetchPatient = await fetchUser(response.id_patient)
     return {
       ...response,
       nombre_alumno: fetchPatient.nombre,
       apellido_alumno: fetchPatient.apellido,
-      nombre_profesional: fetchDoctor.nombre + ' ' + fetchDoctor.apellido,
+      nombre_profesional: fetchProfessional.nombre + ' ' + fetchProfessional.apellido,
       telefono_alumno: fetchPatient.telefono,
       mail_alumno: fetchPatient.email,
     }
