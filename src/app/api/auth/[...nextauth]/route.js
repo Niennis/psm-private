@@ -130,6 +130,7 @@ const handler = NextAuth({
         if (token /* && token.user */) {
           if (session.user.email === users[0].email) {
             session.user = token
+            session.user.id = users[0].id
             session.user.name = !session.user.name && users[0].nombre + ' ' + users[0].apellido
             session.user.rol = users[0].tipo_usuario
           }
