@@ -11,7 +11,7 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { fetchScheduleByUser, getSpecialities } from "@/services/SchedulesServices";
-import { fetchDoctors, fetchDoctor, addDoctor, updateDoctor } from '../../services/DoctorsServices';
+import { fetchProfessionals, fetchProfessionalById, addDoctor, updateDoctor } from '../../services/DoctorsServices';
 import { useForm } from 'react-hook-form';
 
 import { useSession } from "next-auth/react";
@@ -42,7 +42,7 @@ const ScheduleList = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { users } = await fetchDoctors()
+      const { users } = await fetchProfessionals()
       const { response } = await getSpecialities()
 
       const usersAndSPeciality = users.map(user => {

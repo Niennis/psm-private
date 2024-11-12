@@ -61,8 +61,8 @@ const DoctorList = () => {
   };
 
   const handleSearch = (e) => {
-    const bleh = search(doctors, e)
-    setResults(bleh)
+    const result = search(doctors, e)
+    setResults(result)
   }
 
   const handleRefresh = () => {
