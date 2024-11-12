@@ -14,7 +14,7 @@ import Select from "react-select";
 import { TextField } from "@mui/material";
 import { useForm, Controller, useController } from 'react-hook-form';
 import { fetchAppointment, updateAppointment } from "@/services/AppointmentsServices";
-import { fetchDoctors } from "@/services/DoctorsServices";
+import { fetchProfessionals } from "@/services/DoctorsServices";
 import { fetchUsers } from "@/services/UsersServices";
 
 import { useSession } from "next-auth/react";
@@ -34,7 +34,7 @@ const EditAppoinments = ({ params }) => {
   // const [doctor, setDoctor] = useState([]);
 
   // const fetchDataDoctors = async () => {
-  //   const response = await fetchDoctors()
+  //   const response = await fetchProfessionals()
   //   const docs = response.map((doc, i) => {
   //     return {
   //       value: i + 2,

@@ -12,7 +12,7 @@ import Sidebar from "@/components/Sidebar";
 import { TextField, Alert } from "@mui/material";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 
-import { fetchDoctors } from "@/services/DoctorsServices";
+import { fetchProfessionals } from "@/services/DoctorsServices";
 import { fetchUsers } from "@/services/UsersServices";
 import { createAppointment } from "@/services/AppointmentsServices"
 
@@ -58,7 +58,7 @@ const AddAppoinments = () => {
   const handleClose = () => setOpen(false);
 
   const fetchData = async () => {
-    // const { users } = await fetchDoctors()
+    // const { users } = await fetchProfessionals()
     // console.log(users);
     const users = [
       {
