@@ -306,12 +306,12 @@ const Header = () => {
             </Box>
           </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
+          <Box sx={{ flexGrow: 0, maxWidth: '200px', wrap: 'balance', textAlign: 'right'}}>
             {
               !session
                 ? <>
                   <ReserveBtn text={'Reservar'} bgColor={'#FABB00'} color={'#000'} />
-                  <Link href="/login#profesionales" style={{ textDecoration: 'none' }}>
+                  <Link href="/#profesionales" style={{ textDecoration: 'none' }}>
                     <FaUserCircle style={{ fontSize: matches ? '50px' : '38px', color: '#000', border: '1px solid #ff5253', borderRadius: '50px', padding: '5px', marginLeft: '5px', background: '#b82925', color: '#fff', fontFamily: 'sailec' }} />
                   </Link>
                 </>
@@ -328,8 +328,9 @@ const Header = () => {
                     {/* {session.user.name} */}
                   </button>
                   :
-                  <Link href="/citas" style={{fontSize: '40px', padding: 0, margin: 0}}>
-                    <FaUserCircle style={{ height: '40px' }} />
+                  <Link href="/citas" style={{padding: 0, margin: 0, textAlign: 'right'}}>
+                    <FaUserCircle style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end'}} />
+                    Bienvenido, {session.user.name}
                   </Link>
             }
           </Box>
