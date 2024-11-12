@@ -22,7 +22,7 @@ import ProtectedPage from '@/components/ProtectedRoutes';
 const citas = [
   {
     id: 1,
-    id_cita: 1, 
+    id_cita: 1,
     nombre_alumno: 'Juan Perez',
     nombre_profesional: 'Miguel González',
     especialidad: 'Psicología',
@@ -31,10 +31,10 @@ const citas = [
     fecha: '12/07/2024',
     hora: '09:30',
     estado: 'Confirmada'
-  }, 
+  },
   {
     id: 2,
-    id_cita: 2, 
+    id_cita: 2,
     nombre_alumno: 'Juan Perez',
     nombre_profesional: 'Miguel González',
     especialidad: 'Psicología',
@@ -46,7 +46,7 @@ const citas = [
   },
   {
     id: 3,
-    id_cita: 3, 
+    id_cita: 3,
     nombre_alumno: 'Juan Perez',
     nombre_profesional: 'Miguel González',
     especialidad: 'Psicología',
@@ -58,7 +58,7 @@ const citas = [
   },
   {
     id: 4,
-    id_cita: 4, 
+    id_cita: 4,
     nombre_alumno: 'Juan Perez',
     nombre_profesional: 'Miguel González',
     especialidad: 'Psicología',
@@ -70,7 +70,7 @@ const citas = [
   },
   {
     id: 5,
-    id_cita: 5, 
+    id_cita: 5,
     nombre_alumno: 'Juan Perez',
     nombre_profesional: 'Miguel González',
     especialidad: 'Psicología',
@@ -84,7 +84,7 @@ const citas = [
 
 const AppoinmentList = () => {
   const ROL = ["alumno"]
-  const { data: session } = useSession()
+  const { data: session, status } = useSession();
   const router = useRouter();
   // useAuthorization(['alumno'])
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -94,24 +94,31 @@ const AppoinmentList = () => {
   const [show, setShow] = useState({ state: false, id: '' })
   const matches = useMediaQuery('(min-width:600px)');
 
-  /* useEffect(() => {
-    fetchAppointments(setAppointments)
-    fetchAppointments(setResults)
-    // setResults()
-  }, []) */
-
   useEffect(() => {
-    const loadAppointments = async () => {
-      const data = await fetchAppointments();
-      // console.log('DATA', data);
-      
-      setAppointments(data);
-      setResults(data);
-    };
-  
-    loadAppointments();
-  }, []);
+    if (status === 'authenticated') {
+      const loadAppointments = async () => {
+        const data = await fetchAppointments();
+        console.log('session', session);
+        if (session.user.rol === 'profesional') {
+          const dataFiltered = data.filter(item => item.id_profesional == session.user.sub);
+          setAppointments(dataFiltered);
+          setResults(dataFiltered);
+        } else if (session.user.rol === 'alumno') {
+          const dataFiltered = data.filter(item => item.id_paciente == session.user.id);
+          setAppointments(dataFiltered);
+          setResults(dataFiltered);
+        } else if (session.user.rol === 'admin') {
+          setAppointments(data);
+          setResults(data);
+        }
+      };
+      loadAppointments();
+    }
+  }, [session, status]);
 
+  if (status === 'loading') {
+    return <p>Loading...</p>; // Muestra un estado de carga mientras se obtienen los datos de la sesión 
+  }
   const onSelectChange = (newSelectedRowKeys) => {
     console.log("selectedRowKeys changed: ", selectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
@@ -128,8 +135,8 @@ const AppoinmentList = () => {
   }
 
   const handleSearch = (e) => {
-    const bleh = search(appointments, e)
-    setResults(bleh)
+    const result = search(appointments, e)
+    setResults(result)
   }
 
   const handleRefresh = () => {
@@ -234,23 +241,39 @@ const AppoinmentList = () => {
                   : "dropdown-menu dropdown-menu-end dropdown-extra"
                 }
               >
-                <Link className="dropdown-item" href={`/fichas/${record.id_cita}`}>
-                  <i className="far fa-edit me-2" />
-                  Registrar atención
-                </Link>
-                <Link className="dropdown-item" href={`/citas/${record.id_cita}`}>
-                  <i className="far fa-edit me-2" />
-                  Editar
-                </Link>
-                <Link
-                  href="#"
-                  className="dropdown-item"
-                  data-bs-toggle="modal"
-                  data-bs-target="#delete_appointment"
-                  onClick={() => setIdAppointment(record.id_cita)}>
-                  <i className="fa fa-trash-alt m-r-5"></i>
-                  Cancelar cita
-                </Link>
+                {session.user.role === ('profesional' || 'admin') ?
+                  (<>
+                    <Link className="dropdown-item" href={`/fichas/${record.id_cita}`}>
+                      <i className="far fa-edit me-2" />
+                      Registrar atención
+                    </Link>
+                    {/* <Link className="dropdown-item" href={`/citas/${record.id_cita}`}>
+                   <i className="far fa-edit me-2" />
+                   Editar
+                 </Link> */}
+                    <Link
+                      href="#"
+                      className="dropdown-item"
+                      data-bs-toggle="modal"
+                      data-bs-target="#delete_appointment"
+                      onClick={() => setIdAppointment(record.id_cita)}>
+                      <i className="fa fa-trash-alt m-r-5"></i>
+                      Cancelar cita
+                    </Link>
+                  </>
+                  ) :
+                  (
+                    <Link
+                      href="#"
+                      className="dropdown-item"
+                      data-bs-toggle="modal"
+                      data-bs-target="#delete_appointment"
+                      onClick={() => setIdAppointment(record.id_cita)}>
+                      <i className="fa fa-trash-alt m-r-5"></i>
+                      Cancelar cita
+                    </Link>
+                  )
+                }
               </div>
             </div>
           </div>
@@ -298,7 +321,7 @@ const AppoinmentList = () => {
                             {matches && <h3>Lista de citas </h3>}
                             <div className="doctor-search-blk">
                               <div className="top-nav-search table-search-blk col-6">
-                                <form style={{width: `${matches ? '270px' : '150px' } ` }}>
+                                <form style={{ width: `${matches ? '270px' : '150px'} ` }}>
                                   <input
                                     type="text"
                                     className="form-control"
@@ -314,20 +337,20 @@ const AppoinmentList = () => {
                                 </form>
                               </div>
                             </div>
-                              <div className="add-group">
-                                <Link href="/citas/agendarcita"
-                                  className="btn btn-primary add-pluss ms-2"
-                                >
-                                  <img src={plusicon.src} alt="#" />
-                                </Link>
-                                <Link
-                                  href="#"
-                                  onClick={handleRefresh}
-                                  className="btn btn-primary doctor-refresh ms-2"
-                                >
-                                  <img src={refreshicon.src} alt="#" />
-                                </Link>
-                              </div>
+                            <div className="add-group">
+                              <Link href="/citas/agendarcita"
+                                className="btn btn-primary add-pluss ms-2"
+                              >
+                                <img src={plusicon.src} alt="#" />
+                              </Link>
+                              <Link
+                                href="#"
+                                onClick={handleRefresh}
+                                className="btn btn-primary doctor-refresh ms-2"
+                              >
+                                <img src={refreshicon.src} alt="#" />
+                              </Link>
+                            </div>
                           </div>
                         </div>
                         {/* <div className="col-auto text-end float-end ms-auto download-grp">
