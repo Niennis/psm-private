@@ -13511,6 +13511,14 @@ td:has(div.text-end) {
   background: var(--main-light-grey);
 }
 
+.font-blue {
+  color: var(--main-bg-blue)
+}
+
+.font-red {
+  color: var(--main-light-red)
+}
+
 .blog-title {
   font-family: sailecbold;
   font-weight: 700;
