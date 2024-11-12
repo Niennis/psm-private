@@ -18,6 +18,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from '@/components/ProtectedRoutes';
 
+import Tooltip from '@mui/material/Tooltip';
+import { FaInfoCircle } from "react-icons/fa";
+
 const AddSchedule = ({ params }) => {
   const ROL = ["profesional"]
   const { data: session } = useSession()
@@ -53,7 +56,7 @@ const AddSchedule = ({ params }) => {
         ...users[0],
         especialidad: user.especialidad
       }
-      setProfesional(obj)      
+      setProfesional(obj)
     }
     fetchProfesional()
   }, [])
@@ -108,7 +111,7 @@ const AddSchedule = ({ params }) => {
     const promesas = []
     dates.forEach(date => {
       return promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id))
-  })
+    })
 
     Promise.all(promesas)
       .then(async (values) => {
@@ -243,20 +246,24 @@ const AddSchedule = ({ params }) => {
                         </div>
                         <div className="col-12 col-md-12 col-xl-12">
                           <div className="form-group local-forms">
+
+                            {/* <Tooltip title="Delete" placement="top-start"> */}
                             <label>
-                              Nombre servicio o evento <span className="login-danger">*</span>
+                              Nombre servicio o evento <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="El nombre del servicio es un nombre de fantasía para identificar las horas disponibles en los reportes. Este nombre permite agrupar diferentes tipos de disponibilidad en un mismo grupo. " />
+                              <span className="login-danger">*</span>
                             </label>
                             <input
                               className="form-control"
                               type="text"
                               {...register('title')}
                             />
+                            {/* </Tooltip> */}
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group local-forms">
                             <label>
-                              Duración servicio <span className="login-danger">*</span>
+                              Duración servicio <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="La duración del servicio indica cuánto tiempo se dedicará a la atención profesional indicada" /><span className="login-danger">*</span>
                             </label>
                             <Controller
                               control={control}
@@ -310,7 +317,7 @@ const AddSchedule = ({ params }) => {
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group local-forms">
                             <label>
-                              Tiempo post servicio
+                              Tiempo post servicio <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="El tiempo post servicio se refiere al tiempo que el profesional puede dedicar a transcribir las anotaciones de la sesión o a descansar entre una sesión y otra " />
                             </label>
                             <Controller
                               control={control}
@@ -368,7 +375,7 @@ const AddSchedule = ({ params }) => {
                         <div className="col-12 col-lg-12" >
                           <div className="col-12">
                             <div className="form-heading">
-                              <h4>Tipo de disponibilidad</h4>
+                              <h4>Tipo de disponibilidad <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="El tiempo post servicio se refiere al tiempo que el profesional puede dedicar a transcribir las anotaciones de la sesión o a descansar entre una sesión y otra " /></h4>
                             </div>
                           </div>
                           {/* <div className="form-group select-gender">
@@ -496,7 +503,7 @@ const AddSchedule = ({ params }) => {
                         <div className="col-12 col-lg-12" >
                           <div className="col-12">
                             <div className="form-heading">
-                              <h4>Modalidad</h4>
+                              <h4>Modalidad <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="Al seleccionar un tipo de modalidad u otra, se ofrecerá como opción al momento de agendar una cita. Si estarás disponible para todos los tipos de modalidad, selecciona Ambas." /></h4>
                             </div>
                           </div>
                           <div className="form-group select-gender">
@@ -545,7 +552,7 @@ const AddSchedule = ({ params }) => {
                           < div className="col-12 col-lg-12" >
                             <div className="col-12">
                               <div className="form-heading">
-                                <h4>Campus</h4>
+                                <h4>Campus <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="Al seleccionar un campus, se podrán asignar horas de atención para dicho lugar. Si estarás disponible para ambas sedes, selecciona Ambas." /></h4>
                               </div>
                             </div>
                             <div className="form-group select-gender">
@@ -593,7 +600,9 @@ const AddSchedule = ({ params }) => {
                         {/* HORARIOS */}
                         <div className="col-12">
                           <div className="form-heading">
-                            <h4>Disponibilidad</h4>
+                            <h4>Disponibilidad <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title={`Al seleccionar un rango de disponibilidad, el tiempo de cada sesión será dividido en N bloques según la duración del servicio.
+                              
+Por ejemplo, si seleccionaste una duración de 1 hora y 0 de post servicio, y un rango de disponibilidad entre 9:00 y 12:00, entonces en ese rango caben 3 sesiones de 1 hora.`}  /></h4>
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-4">
@@ -648,7 +657,9 @@ const AddSchedule = ({ params }) => {
                         <div className="col-12 col-lg-12" >
                           <div className="col-12">
                             <div className="form-heading">
-                              <h4>Frecuencia</h4>
+                              <h4>Frecuencia <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title={`Al seleccionar una frecuencia, los intervalos seleccionados previamente se repetirán automáticamente para esa selección.
+
+Por ejemplo, si se selecciona diariamente, entonces todos los días, a la misma hora, estará disponible el mismo servicio o grupo de servicios.` }/></h4>
                             </div>
                           </div>
                           <div className="row">
@@ -887,7 +898,9 @@ const AddSchedule = ({ params }) => {
                         <div className="col-12 col-md-6 col-xl-12">
                           <div className="col-12">
                             <div className="form-heading">
-                              <h4>Rango de repetición</h4>
+                              <h4>Rango de repetición <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title={`El rango de repetición permite identificar un período global en que la agenda tenga horas disponibles, por ejemplo, se puede establecer la fecha de inicio y fin de un año académico completo o de un semestre.
+                              
+La disponibilidad de horas, será hasta la fecha de finalización.`}  /></h4>
                             </div>
                           </div>
                           <div className="row">
@@ -1003,48 +1016,19 @@ const AddSchedule = ({ params }) => {
                 : ''
             } */}
 
-{success === 'success'
-          ?
-          <div  style={{
-            height: '100%',
-            position: 'fixed',
-            top: '0',
-            width: '100%',
-            zIndex: 99999,
-            background: '#00000080'
-          }}>
-            {/* <div className="col-sm-12 col-lg-6"> */}
-            <Alert
-              severity="success"
-              onClose={() => { setSuccess('initial') }}
-              sx={{
-                zIndex: 'tooltip',
-                position: 'absolute',
-                left: '30%',
-                width: '50%',
-                padding: '50px',
-                bottom: '50vh'
-              }}
-              spacing={2}
-            >
-              Se ha agregado la disponibilidad horario con éxito.
-            </Alert>
-            {/* </div> */}
-          </div>
-
-          : success === 'fail'
-            ?
-            <div className="row" style={{
-              height: '100%',
-              position: 'fixed',
-              top: '0',
-              width: '100%',
-              zIndex: 99999,
-              background: '#00000080'
-            }}>
-              <div className="col-sm-12 col-lg-6">
+            {success === 'success'
+              ?
+              <div style={{
+                height: '100%',
+                position: 'fixed',
+                top: '0',
+                width: '100%',
+                zIndex: 99999,
+                background: '#00000080'
+              }}>
+                {/* <div className="col-sm-12 col-lg-6"> */}
                 <Alert
-                  severity="error"
+                  severity="success"
                   onClose={() => { setSuccess('initial') }}
                   sx={{
                     zIndex: 'tooltip',
@@ -1056,12 +1040,41 @@ const AddSchedule = ({ params }) => {
                   }}
                   spacing={2}
                 >
-                  Ha ocurrido un problema. {error}
+                  Se ha agregado la disponibilidad horario con éxito.
                 </Alert>
+                {/* </div> */}
               </div>
-            </div>
-            : ''
-        }
+
+              : success === 'fail'
+                ?
+                <div className="row" style={{
+                  height: '100%',
+                  position: 'fixed',
+                  top: '0',
+                  width: '100%',
+                  zIndex: 99999,
+                  background: '#00000080'
+                }}>
+                  <div className="col-sm-12 col-lg-6">
+                    <Alert
+                      severity="error"
+                      onClose={() => { setSuccess('initial') }}
+                      sx={{
+                        zIndex: 'tooltip',
+                        position: 'absolute',
+                        left: '30%',
+                        width: '50%',
+                        padding: '50px',
+                        bottom: '50vh'
+                      }}
+                      spacing={2}
+                    >
+                      Ha ocurrido un problema. {error}
+                    </Alert>
+                  </div>
+                </div>
+                : ''
+            }
           </div>
         </div>
       </>
