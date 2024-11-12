@@ -11,6 +11,8 @@ import Sidebar from "@/components/Sidebar";
 
 import { TextField, Alert } from "@mui/material";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { fetchProfessionals } from "@/services/DoctorsServices";
 import { fetchUsers } from "@/services/UsersServices";
@@ -21,6 +23,7 @@ import { useRouter } from 'next/navigation';
 import ProtectedPage from "@/components/ProtectedRoutes";
 import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import * as dayjs from 'dayjs'
+import { motivo_consulta } from "@/utils/selects";
 
 const AddAppoinments = () => {
   const VIDEOLLAMADA = false;
@@ -56,7 +59,9 @@ const AddAppoinments = () => {
     setOpen(true)
   };
   const handleClose = () => setOpen(false);
+  const modalidad = watch('modalidad')
 
+  const motivo_consulta_seleccionado = watch('motivo_consulta')
   const fetchData = async () => {
     // const { users } = await fetchProfessionals()
     // console.log(users);
@@ -319,7 +324,7 @@ const AddAppoinments = () => {
                       <div className="row" style={{ border: '1px solid lightgrey', borderRadius: '8px', padding: '10px', margin: '10px' }}>
                         <div className="col-12">
                           <div className="form-heading">
-                            <h4>Detalles de la Cita</h4>
+                            <h4>Detalles del Profesional</h4>
                           </div>
                         </div>
                         {VIDEOLLAMADA && <div className="row">
@@ -377,7 +382,7 @@ const AddAppoinments = () => {
                                   defaultValue={{
                                     id: 0,
                                     value: 2,
-                                    label: 'Miguel González',
+                                    label: '',
                                   }}
                                   onChange={(e) => {
                                     onChange(e);
@@ -429,7 +434,7 @@ const AddAppoinments = () => {
                         </div>
 
                         {/* lUGAR DE ATENCIÓN */}
-                     {/*    <div className="row">
+                        {/*    <div className="row">
                           <div className="col-12 col-md-12 col-xl-12">
                             <div className="form-group select-gender">
                               <label className="gen-label">
@@ -712,8 +717,299 @@ const AddAppoinments = () => {
                             }
                           </div>
                         </div>
+                        <Accordion
+                            defaultExpanded={true}>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header"
+                          >
+                            <div className="col-12 pb-0 mb-0">
+                              <div className="form-heading pb-0 mb-0">
+                                <h4>Detalles de la Cita</h4>
+                              </div>
+                            </div>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+                              <div className="col-12 col-md-6 col-xl-4">
+                                <div className="form-group select-gender">
+                                  <label className="gen-label">
+                                    Indique modalidad de la atención <span className="login-danger">*</span>
+                                  </label>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="modalidad"
+                                        value="videollamada"
+                                        className="form-check-input"
+                                        {...register('modalidad')}
+                                      />
+                                      Videollamada
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="modalidad"
+                                        value="presencial"
+                                        className="form-check-input"
+                                        {...register('modalidad')}
+                                      />
+                                      Presencial
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            {modalidad === 'presencial' &&
+                              <div className="row">
+                                <div className="col-12 col-md-12 col-xl-12">
+                                  <div className="form-group select-gender">
+                                    <label className="gen-label">
+                                      Indique lugar de preferencia <span className="login-danger">*</span>
+                                    </label>
+                                    <div className="form-check-inline">
+                                      <label className="form-check-label">
+                                        <input
+                                          type="radio"
+                                          name="campus"
+                                          value="centro"
+                                          className="form-check-input"
+                                          {...register('campus')}
+                                        />
+                                        Sede Centro - Manuel Rodríguez 343 sur, 2° piso
+                                      </label>
+                                    </div>
+                                    <div className="form-check-inline">
+                                      <label className="form-check-label">
+                                        <input
+                                          type="radio"
+                                          name="campus"
+                                          value="huechuraba"
+                                          className="form-check-input"
+                                          {...register('campus')}
+                                        />
+                                        Sede Huechuraba - Av. Sta. Clara 797, Huechuraba
+                                      </label>
+                                    </div>
+
+                                  </div>
+                                </div>
+                              </div>
+
+                            }
+
+                            <div className="col-12 col-md-12 col-xl-12">
+                              <div className="form-group local-forms">
+                                <label>Motivo de la consulta</label>
+                                <Controller
+                                  control={control}
+                                  name="motivo"
+                                  {...register('motivo', {
+                                    required: {
+                                      value: true,
+                                      message: 'Motivo es requerido',
+                                    }
+                                  })}
+                                  ref={null}
+                                  render={({ field: { onChange, onBlur, value } }) => (
+                                    <Select
+                                      instanceId="motivo"
+                                      defaultValue={selectedOption}
+                                      onChange={onChange}
+                                      options={motivo_consulta}
+                                      menuPortalTarget={menuPortalTarget}
+                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                      id="motivo"
+                                      components={{
+                                        IndicatorSeparator: () => null
+                                      }}
+
+                                      styles={{
+                                        control: (baseStyles, state) => ({
+                                          ...baseStyles,
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                          '&:hover': {
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                          },
+                                          borderRadius: '10px',
+                                          fontSize: "14px",
+                                          minHeight: "45px",
+                                        }),
+                                        dropdownIndicator: (base, state) => ({
+                                          ...base,
+                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                          transition: '250ms',
+                                          width: '35px',
+                                          height: '35px',
+                                          zIndex: '90000000'
+                                        }),
+                                      }}
+                                    />
+                                  )}
+                                />
+                                {errors.motivo && <span><small>{errors.motivo.message}</small></span>}
+                              </div>
+                            </div>
+
+                            {
+                              motivo_consulta_seleccionado === 'Otro' &&
+                              <div className="col-12 col-sm-6">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Escribe el motivo <span className="login-danger">*</span>
+                                  </label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('relationship_contact')} />
+                                </div>
+                              </div>
+                            }
+                            <div className="col-12 col-md-6 col-xl-6">
+                              <div className="form-group local-forms">
+                                <label>Profesional</label>
+                                <Controller
+                                  control={control}
+                                  name="professional"
+                                  {...register('professional')}
+                                  ref={null}
+                                  render={({ field: { onChange, onBlur, value, name, ref } }) => {
+                                    return (<Select
+                                      instanceId="professional"
+                                      defaultValue={selectedOption}
+                                      onChange={(e) => {
+                                        onChange(e);
+                                        handleSelectedProfessional(e);
+                                      }}
+                                      getOptionLabel={e => e.label}
+                                      options={doctor}
+                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                      id="professional"
+                                      components={{
+                                        IndicatorSeparator: () => null
+                                      }}
+
+                                      styles={{
+                                        control: (baseStyles, state) => ({
+                                          ...baseStyles,
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                          '&:hover': {
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                          },
+                                          borderRadius: '10px',
+                                          fontSize: "14px",
+                                          minHeight: "45px",
+                                        }),
+                                        dropdownIndicator: (base, state) => ({
+                                          ...base,
+                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                          transition: '250ms',
+                                          width: '35px',
+                                          height: '35px',
+                                        }),
+                                      }}
+                                    />)
+                                  }}
+                                />
+                                {errors.professional && <span><small>{errors.professional.message}</small></span>}
+
+                              </div>
+                            </div>
+                            {profesional &&
+
+                              <div className="row">
+                                <div className="col-12 col-md-12 col-xl-12">
+                                  <label>
+                                    Día de la Cita{" "}
+                                    <span className="login-danger">*</span>
+                                  </label>
+                                  <div className="form-group local-forms">
+                                    {days.length > 0 && (
+                                      <>
+                                        <button
+                                          className="btn btn-primary"
+                                          onClick={e => { mostrarAnterioresDias(e) }}
+                                          disabled={indiceDias === 0}>
+                                          <ChevronLeft />
+                                        </button>
+
+                                        {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
+                                          // console.log('day en el map', date,'holo', day.fechaInicio)
+                                          return (
+                                            <button
+                                              className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
+                                              key={`${day.id}${i}days`}
+                                              onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
+                                              {dayjs(day.fechaInicio).format('ddd DD MMM')}
+                                            </button>
+                                          )
+                                        }
+                                        )}
+                                        <button
+                                          className="btn btn-primary"
+                                          onClick={e => { mostrarSiguientesDias(e) }}
+                                          disabled={indiceDias + 5 >= days.length}>
+                                          <ChevronRight />
+                                        </button>
+                                      </>)
+                                    }
+                                  </div>
+                                </div>
+                                {/* <DatePick /> */}
+                                {date !== '' &&
+                                  <div className="col-12 col-md-12 col-xl-12">
+                                    <label>
+                                      Hora <span className="login-danger">*</span>
+                                    </label>
+                                    <div className="form-group local-forms">
+                                      {hours.length > 0 && (
+                                        <>
+                                          <button
+                                            className="btn btn-primary"
+                                            onClick={e => { mostrarAnterioresHoras(e) }}
+                                            disabled={indiceHoras === 0}>
+                                            <ChevronLeft />
+                                          </button>
+                                          {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
+                                            console.log('hour', hour.horaInicioBloque, time)
+                                            return (
+                                              <button
+                                                type="button"
+                                                className={`btn me-2 ${time === hour.horaInicioBloque ? "btn-primary" : "btn-cancel"}`}
+                                                key={`${hour.id}${i}hours`}
+                                                onClick={() => { setTime(hour.horaInicioBloque) }}>
+                                                {hour.horaInicioBloque}
+                                              </button>
+                                            )
+                                          }
+                                          )}
+                                          <button
+                                            className="btn btn-primary"
+                                            onClick={e => { mostrarSiguientesHoras(e) }}
+                                            disabled={indiceHoras + 5 >= hours.length}>
+                                            <ChevronRight />
+                                          </button>
+                                        </>)
+                                      }
+                                    </div>
+                                  </div>
+                                }
+                              </div>
+                            }
+                           
+                          </AccordionDetails>
+                        </Accordion>
 
                       </div>
+
+
+
                       <div className="col-12">
                         <div className="doctor-submit text-end">
                           <button
