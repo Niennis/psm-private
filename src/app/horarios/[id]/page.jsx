@@ -10,7 +10,7 @@ import { useForm, Controller } from 'react-hook-form'
 
 import Select from "react-select";
 
-import { fetchSpeciality } from '@/services/DoctorsServices';
+import { fetchSpecialityById } from '@/services/DoctorsServices';
 import { createSchedule, getDates, fetchScheduleByDate, validateDates } from '@/services/SchedulesServices';
 import Calender from '../../calender/page';
 
@@ -43,7 +43,7 @@ const ScheduleByProfessional = ({ params }) => {
   // const label = { inputProps: { 'aria-label': 'Switch demo' } };
   useEffect(() => {
     const fetchProfesional = async () => {
-      const { especialidad: user } = await fetchSpeciality(params.id)
+      const { especialidad: user } = await fetchSpecialityById(params.id)
       // console.log('especialidad', user[0])
       setProfesional(user[0])
     }
@@ -55,7 +55,7 @@ const ScheduleByProfessional = ({ params }) => {
   } = useForm({
     defaultValues: async () => {
       console.log('Params en add schedule', params.id);
-      const { especialidad: user } = await fetchSpeciality(params.id)
+      const { especialidad: user } = await fetchSpecialityById(params.id)
       console.log('user', user);
       const obj = {
         nombre: `${user[0].nombre} ${user[0].apellido}`,
