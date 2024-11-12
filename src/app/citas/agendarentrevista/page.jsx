@@ -23,8 +23,8 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import { fetchDoctors } from "@/services/DoctorsServices";
-import { fetchUsers } from "@/services/UsersServices";
+import { fetchProfessionals } from "@/services/DoctorsServices";
+import { fetchUser, fetchUsers } from "@/services/UsersServices";
 import { createAppointment, sendEmail } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta } from "@/utils/selects";
 // import { formatRut } from "@/utils/managedata";
@@ -88,47 +88,32 @@ const AddFirstAppoinments = () => {
     setChecked((prev) => !prev);
   };
 
-  const { register, handleSubmit, watch, control,
-    formState: { errors }
-  } = useForm({
-    defaultValues: {
-      name: 'Juan',
-      lastName: 'Perez',
-      email: 'juanperez@udp.cl',
-      birthday: '12/12/2002',
-      genero: 'hombre',
-      mobile: '987654321'
+  const fetchInitialData = async () => {
+    try {
+      const { users: patient } = await fetchUser(session.user.id);
 
+      return {
+        name: patient[0].nombre,
+        lastName: patient[0].apellido,
+        email: session.user.email,
+        birthday: dayjs(patient[0].fecha_nacimiento).format('YYYY-MM-DD'),
+        genero: patient[0].genero === 'personalizado' ? 'No binarie' : patient[0].genero,
+        mobile: patient[0].telefono
+      };
+    } catch (error) {
+      console.error("Error fetching initial data:", error);
+      return {};
     }
-    /*  async () => fetchUsers().then(response => {
-       // console.log('response', response);
-       if (session?.user) {
-         // console.log('session?.user', session?.user)
-         const patient = response.users.filter(user => user.email === session?.user.email)
-         // console.log('SESSION async', session);
-         const obj = {
-           name: patient[0].nombre,
-           lastName: patient[0].apellido,
-           email: session.user.email,
-           birthday: dayjs(patient[0].fecha_nacimiento).format('YYYY-MM-DD'),
-           genero: patient[0].genero,
-           mobile: patient[0].telefono
- 
-         }
-         console.log('obj', patient);
-         return obj
-       } else {
-         console.log('No encuentra al usuario')
-       }
-     })
-       .catch(error =>
-         console.log('err', error)
-       ) */
-  })
+  };
+
+  const { register, handleSubmit, watch, control,
+    formState: { errors }, reset
+  } = useForm({
+    defaultValues: async () => await fetchInitialData()
+  });
 
   useEffect(() => {
     fetchData()
-    // fetchDoctors()
     setMenuPortalTarget(document.body);
   }, [])
 
@@ -167,46 +152,46 @@ const AddFirstAppoinments = () => {
     setDate('')
     setTime('')
     try {
-      // const { users: byProf } = await fetchScheduleByAvailability(e.id)
-      // const { bloques } = await fetchScheduleByUser(e.id)
+      const { users: byProf } = await fetchScheduleByAvailability(e.id)
+      const { bloques } = await fetchScheduleByUser(e.id)
 
-      // const bloque = obtenerDias(byProf)
-      // setAllDays(byProf)
-      // setDays(bloque)
-      setDays([
-        {
-          fechaInicio: '2024-06-20',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-21',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-24',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-25',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-26',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-27',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-28',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-07-01',
-          id_user: 2
-        },
-      ])
+      const bloque = obtenerDias(byProf)
+      setAllDays(byProf)
+      setDays(bloque)
+      // setDays([
+      //   {
+      //     fechaInicio: '2024-06-20',
+      //     id_user: 2
+      //   },
+      //   {
+      //     fechaInicio: '2024-06-21',
+      //     id_user: 2
+      //   },
+      //   {
+      //     fechaInicio: '2024-06-24',
+      //     id_user: 2
+      //   },
+      //   {
+      //     fechaInicio: '2024-06-25',
+      //     id_user: 2
+      //   },
+      //   {
+      //     fechaInicio: '2024-06-26',
+      //     id_user: 2
+      //   },
+      //   {
+      //     fechaInicio: '2024-06-27',
+      //     id_user: 2
+      //   },
+      //   {
+      //     fechaInicio: '2024-06-28',
+      //     id_user: 2
+      //   },
+      //   {
+      //     fechaInicio: '2024-07-01',
+      //     id_user: 2
+      //   },
+      // ])
     } catch (error) {
       console.log('Error: ', error)
     }
@@ -248,13 +233,15 @@ const AddFirstAppoinments = () => {
   }
 
   const handleDays = async (e, fecha, id) => {
+    setHours('')
     e.preventDefault()
+
     // console.log('handle.days', fecha, id)
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
     // console.log('fechamod', fecha);
     try {
-      // const { bloques } = await fetchScheduleByDate(parseInt(id), fechaMod)
-      // console.log('BLOQUES', bloques)
+      const { bloques } = await fetchScheduleByDate(parseInt(id), fechaMod)
+      console.log('BLOQUES', bloques)
       // console.log('allDays', allDays)
       setDate(fechaMod)
       // const newBloques = agruparBloquesPorHora(bloques)
@@ -266,51 +253,53 @@ const AddFirstAppoinments = () => {
       })
 
       const flatted = newBloques.flat()
-      // console.log('flatted', flatted);
+      console.log('flatted', flatted);
 
       // const horasDisponibles = flatted.filter(hora => {
       //   // Busca la disponibilidad correspondiente en el segundo array
       //   console.log(('HORA', hora));
       //   const disponibilidadHora = bloques.find(item => {
+      //     console.log('ITEM', item);
+
       //     return ((item.hora_inicio).length === 7 ? `0${item.hora_inicio}` : item.hora_inicio) === hora.horaInicioBloque
       //   });
       //   // Si la disponibilidadHora existe y está disponible, devuelve true (se incluirá en el resultado)
       //   return disponibilidadHora && disponibilidadHora.disponible === 1;
       // });
-      const horasDisponibles = [
-        {
-          id: 1,
-          horaInicioBloque: '10:30'
-        },
-        {
-          id: 2,
-          horaInicioBloque: '11:30'
-        },
-        {
-          id: 3,
-          horaInicioBloque: '12:30'
-        },
-        {
-          id: 4,
-          horaInicioBloque: '14:30'
-        },
-        {
-          id: 5,
-          horaInicioBloque: '15:30'
-        },
-        {
-          id: 6,
-          horaInicioBloque: '16:30'
-        },
-        {
-          id: 7,
-          horaInicioBloque: '17:30'
-        },
-      ]
+      // const horasDisponibles = [
+      //   {
+      //     id: 1,
+      //     horaInicioBloque: '10:30'
+      //   },
+      //   {
+      //     id: 2,
+      //     horaInicioBloque: '11:30'
+      //   },
+      //   {
+      //     id: 3,
+      //     horaInicioBloque: '12:30'
+      //   },
+      //   {
+      //     id: 4,
+      //     horaInicioBloque: '14:30'
+      //   },
+      //   {
+      //     id: 5,
+      //     horaInicioBloque: '15:30'
+      //   },
+      //   {
+      //     id: 6,
+      //     horaInicioBloque: '16:30'
+      //   },
+      //   {
+      //     id: 7,
+      //     horaInicioBloque: '17:30'
+      //   },
+      // ]
 
       // console.log('horasDisponibles', horasDisponibles);
 
-      setHours(horasDisponibles)
+      setHours(flatted)
     } catch (error) {
       console.log(error)
     }
@@ -329,21 +318,8 @@ const AddFirstAppoinments = () => {
   const handleClose = () => setOpen(false);
 
   const fetchData = async () => {
-    // const { users } = await fetchDoctors()
-    const users = [
-      {
-        id: 0,
-        nombre: 'Miguel',
-        apellido: 'González',
-        email: 'miguelgonzález@udp.cl'
-      },
-      {
-        id: 1,
-        nombre: 'Ximena',
-        apellido: 'Alarcón',
-        email: 'ximenaalarcon@udp.cl'
-      }
-    ]
+    const users = await fetchProfessionals()
+
     const docs = users.map((doc, i) => {
       return {
         value: i + 2,
@@ -367,48 +343,49 @@ const AddFirstAppoinments = () => {
   };
 
   const onSubmit = handleSubmit(async data => {
-    // console.log('data', data);
+    console.log('data', data);
     setSuccess('initial')
     const patientName = watch("name")
     const patientLastname = watch("lastName")
-    // const patients = await fetchUsers()
+    const patients = await fetchUsers()
 
     console.log('session.user.email', session.user.email);
-    // const patient = patients.users.filter(user =>
-    //   user.email === session.user.email
-    // )
-    // const body = {
-    //   ...data,
-    //   "patient_id": patient[0].id,
-    //   "fecha": date,
-    //   "hora": time
-    // }
+    const patient = patients.users.filter(user =>
+      user.email === session.user.email
+    )
+    const body = {
+      ...data,
+      "patient_id": patient[0].id,
+      "fecha": date,
+      "hora": time
+    }
 
     try {
-      // const appointment = await createAppointment(body)
-      // if (appointment.detalle === 'fail!!!') setSuccess('fail')
+      const appointment = await createAppointment(body)
+      if (appointment.detalle === 'fail!!!') setSuccess('fail')
       setSuccess('success')
       setOpenBackdrop(true)
+      await sendEmail()
+
     } catch (err) {
       setSuccess('fail')
-      // console.log('ERRRR', err.message)
-      // if (err.message === "Cannot read properties of undefined (reading 'id')") {
-      //   setError(`No se encontró al paciente`);
-      // }
+      console.log('ERRRR', err.message)
+      if (err.message === "Cannot read properties of undefined (reading 'id')") {
+        setError(`No se encontró al paciente`);
+      }
     } finally {
       setOpen(false)
     }
   })
 
   const motivo_consulta_seleccionado = watch('motivo_consulta')
-  // console.log('motivo_consulta_seleccionado')
 
   const gender = [
-    { value: 1, label: "Hombre" },
-    { value: 2, label: "Mujer" },
-    { value: 3, label: "Hombre trans" },
-    { value: 4, label: "Mujer trans" },
-    { value: 5, label: "No binarie" }
+    { value: "Hombre", label: "Hombre" },
+    { value: "Mujer", label: "Mujer" },
+    { value: "Hombre trans", label: "Hombre trans" },
+    { value: "Mujer trans", label: "Mujer trans" },
+    { value: "No binarie", label: "No binarie" }
   ]
 
   const career = [
@@ -499,6 +476,7 @@ const AddFirstAppoinments = () => {
                         <div className="col-12">
                           <div className="form-heading">
                             <h4 >Agendar Entrevista</h4>
+                            <small className="font-red">* Completa toda la información del formulario para agendar una primera entrevista inicial.</small>
                           </div>
                         </div>
                       </div>
@@ -520,7 +498,7 @@ const AddFirstAppoinments = () => {
                           <div className="row">
                             <div className="col-12">
                               <div className="form-heading">
-                                <h5 style={{ fontSize: '12px', margin: '5px 0 25px' }}>Los campos son editables, pero solo afectarán la información en este portal, no para SAP</h5>
+                                <h5 style={{ fontSize: '12px', margin: '5px 0 25px' }}>Los campos son editables, pero solo afectarán la información en este portal, no en otros sistemas internos de la universidad</h5>
                               </div>
                             </div>
                             <div className="col-12 col-md-6 col-xl-6">
@@ -653,42 +631,43 @@ const AddFirstAppoinments = () => {
                                     }
                                   })}
                                   ref={null}
-                                  render={({ field: { onChange, onBlur, value } }) => (
-                                    <Select
-                                      instanceId="genero"
-                                      defaultValue={selectedOption}
-                                      onChange={onChange}
-                                      options={gender}
-                                      menuPortalTarget={menuPortalTarget}
-                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                      id="genero"
-                                      components={{
-                                        IndicatorSeparator: () => null
-                                      }}
+                                  render={({ field: { onChange, onBlur, value } }) => {
+                                    return (
+                                      <Select
+                                        // instanceId="genero"
+                                        value={gender.find(option => option.value === value) || null}
+                                        onChange={(option) => onChange(option.value)}
+                                        options={gender}
+                                        menuPortalTarget={menuPortalTarget}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="genero"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
 
-                                      styles={{
-                                        control: (baseStyles, state) => ({
-                                          ...baseStyles,
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                          '&:hover': {
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                          },
-                                          borderRadius: '10px',
-                                          fontSize: "14px",
-                                          minHeight: "45px",
-                                        }),
-                                        dropdownIndicator: (base, state) => ({
-                                          ...base,
-                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                          transition: '250ms',
-                                          width: '35px',
-                                          height: '35px',
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
 
-                                        }),
-                                      }}
-                                    />
-                                  )}
+                                          }),
+                                        }}
+                                      />)
+                                  }}
                                 />
                               </div>
                             </div>
@@ -978,7 +957,7 @@ const AddFirstAppoinments = () => {
                               </div>
                             </div>
                             <div className="col-12 col-md-12 col-xl-12">
-                              <h5>Agregar contacto <PlusCircle onClick={() => { handleAddContact() }} /></h5>
+                              <h5 className="font-blue">Agregar contacto <PlusCircle onClick={() => { handleAddContact() }} /></h5>
                               {contacts.map((item) => item)}
                             </div>
                           </div>
@@ -1245,7 +1224,7 @@ const AddFirstAppoinments = () => {
                                           <ChevronLeft />
                                         </button>
                                         {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
-                                          // console.log('hour', hour.horaInicioBloque , time)
+                                          console.log('hour', hour.horaInicioBloque, time)
                                           return (
                                             <button
                                               type="button"
@@ -1260,7 +1239,7 @@ const AddFirstAppoinments = () => {
                                         <button
                                           className="btn btn-primary"
                                           onClick={e => { mostrarSiguientesHoras(e) }}
-                                          disabled={indiceHoras + 5 >= days.length}>
+                                          disabled={indiceHoras + 5 >= hours.length}>
                                           <ChevronRight />
                                         </button>
                                       </>)
