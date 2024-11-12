@@ -797,9 +797,11 @@ const AddFirstAppoinments = () => {
                                   render={({ field: { onChange, onBlur, value } }) => (
                                     <Select
                                       instanceId="select-region"
-                                      defaultValue={selectedOption}
+                                      defaultValue={{ value: 13, label: "Región Metropolitana", name: "metropolitana" }}
+                                      isDisabled={true}
                                       onChange={onChange}
                                       options={regiones}
+                                      // isDisabled={true}
                                       menuPortalTarget={menuPortalTarget}
                                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                       id="select-region"
