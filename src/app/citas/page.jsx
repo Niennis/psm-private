@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 import { fetchAppointments, changeStatusAppointment, search } from '@/services/AppointmentsServices'
 
 import {
-  imagesend, pdficon, pdficon3, pdficon4, plusicon, refreshicon, searchnormal
+  imagesend, plusicon, refreshicon, searchnormal
 } from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -117,7 +117,7 @@ const AppoinmentList = () => {
   }, [session, status]);
 
   if (status === 'loading') {
-    return <p>Loading...</p>; // Muestra un estado de carga mientras se obtienen los datos de la sesión 
+    return <p>Cargando...</p>; 
   }
   const onSelectChange = (newSelectedRowKeys) => {
     console.log("selectedRowKeys changed: ", selectedRowKeys);
@@ -174,9 +174,9 @@ const AppoinmentList = () => {
     },
     {
       title: "Especialidad",
-      dataIndex: "especialidad",
-      sorter: (a, b) => a.especialidad.localeCompare(b.especialidad),
-      key: 'especialidad',
+      dataIndex: "especialidad_profesional",
+      sorter: (a, b) => a.especialidad_profesional.localeCompare(b.especialidad_profesional),
+      key: 'especialidad_profesional',
       responsive: ['md'],
     },
     {
@@ -241,7 +241,7 @@ const AppoinmentList = () => {
                   : "dropdown-menu dropdown-menu-end dropdown-extra"
                 }
               >
-                {session.user.role === ('profesional' || 'admin') ?
+                {session.user.rol === ('profesional' || 'admin') ?
                   (<>
                     <Link className="dropdown-item" href={`/fichas/${record.id_cita}`}>
                       <i className="far fa-edit me-2" />
