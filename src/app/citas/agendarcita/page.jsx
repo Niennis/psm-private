@@ -373,7 +373,7 @@ const AddAppoinments = () => {
                               {...register('doctor', {
                                 required: {
                                   value: true,
-                                  message: 'Especialista es requerido',
+                                  message: 'Profesional es requerido',
                                 }
                               })}
                               ref={null}
