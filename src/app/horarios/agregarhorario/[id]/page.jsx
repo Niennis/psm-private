@@ -207,6 +207,7 @@ const AddSchedule = ({ params }) => {
                             <input
                               className="form-control"
                               type="text"
+                              disabled
                               {...register('nombre', {
                                 required: {
                                   value: true,
@@ -227,6 +228,7 @@ const AddSchedule = ({ params }) => {
                               Especialidad <span className="login-danger">*</span>
                             </label>
                             <input
+                              disabled
                               className="form-control"
                               type="text"
                               {...register('especialidad', {
