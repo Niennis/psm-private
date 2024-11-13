@@ -59,8 +59,6 @@ const pruebaSendMail = (mail) => {
 }
 
 
-
-
 export const createAppointment = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_APPOINTMENT
 
@@ -116,8 +114,8 @@ export const createAppointment = async (appointment) => {
   }
 }
 
-export const updateAppointment = async (appointment, id) => {
-  const APPOINTMENT_API = process.env.NEXT_PUBLIC_APPOINTMENTS_API
+export const updateAppointment = async (appointment) => {
+  const APPOINTMENT_API = process.env.NEXT_PUBLIC_EDIT_CITA
   console.log(appointment.appointment_date);
   const body = {
     "profesional_id": appointment.selected_doctor.id,
@@ -125,15 +123,14 @@ export const updateAppointment = async (appointment, id) => {
     "fecha": dayjs(appointment.appointment_date.$d).format('YYYY-MM-DD'),
     "hora": appointment.start_time,
     "hora_fin": appointment.end_time.concat(':00'),
-    "estado": "pendiente"
+    "estado": appointment.status
   }
   try {
-    const data = await fetch(APPOINTMENT_API + `/api/appointments/${id}`, {
-      method: "PUT",
+    const data = await fetch(APPOINTMENT_API , {
+      method: "POST",
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
-        'ngrok-skip-browser-warning': 'any'
       },
       body: JSON.stringify(body)
     })
@@ -147,7 +144,7 @@ export const changeStatusAppointment = async (id, status) => {
   const APPOINMENT_API = process.env.NEXT_PUBLIC_APPOINTMENTS_API
   try {
     await fetch(APPOINMENT_API + `/api/appointments/${id}`, {
-      method: 'PATCH',
+      method: 'POST',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -240,7 +237,7 @@ export const fetchAppointments = async () => {
 
 export const fetchAppointment = async (id) => {
   try {
-    const data = await fetch(process.env.NEXT_PUBLIC_APPOINTMENTS_API + `/api/appintsimple/${id}`)
+    const data = await fetch(process.env.NEXT_PUBLIC_APPOINTMENTS_API )
     const response = await data.json()
     const fetchProfessional = await fetchUser(response.id_professional)
     const fetchPatient = await fetchUser(response.id_patient)
