@@ -15,7 +15,7 @@ import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 
 import { fetchProfessionals, fetchProfessionalById } from "@/services/DoctorsServices";
 import { fetchUsers } from "@/services/UsersServices";
-import { createAppointment } from "@/services/AppointmentsServices"
+import { createAppointment, changeStatusAppointment, fetchAppointment } from "@/services/AppointmentsServices"
 import { createInterviewRecord } from "@/services/RecordServices";
 import Contact from "@/components/Contact"
 import dayjs from "dayjs";
@@ -46,13 +46,20 @@ const AddInterviewRecord = ({ params }) => {
   // const [allRegions, setAllRegions] = useState(regiones)
   // const [selectedCities, setSelectedCities] = useState([])
   // const [rut, setRut] = useState('')
+  // const [appointment, setAppointment]
 
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetchData()
     getPatients()
+    // getAppointment()
   }, [])
+
+  // const getAppointment = async() => {
+  //   const response = await fetchAppointment(params.id)
+  //   console.log('getAppointment', response)
+  // }
 
   const calcularEdad = (fechaNacimiento) => {
     var hoy = new Date();
@@ -221,13 +228,16 @@ const AddInterviewRecord = ({ params }) => {
 
   const handleInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
-    console.log('HOOOLAAAA', data)
+    console.log('DATA', data)
     try {
       const resp = await createInterviewRecord({ ...data, id_profesional: 9, id_alumno: parseInt(params.id) })
       console.log('resp', resp)
+      const changeStatus = await changeStatusAppointment(params.id, 'realizada')
 
     } catch (error) {
       console.log('Error: ', error);
+    } finally {
+
     }
   })
 
