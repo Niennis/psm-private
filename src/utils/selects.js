@@ -1,22 +1,25 @@
 export const regiones = [
-  { value: 1, label: "Antofagasta", name: "antofagasta" },
-  { value: 2, label: "Arica y Parinacota", name: "arica_y_parinacota" },
-  { value: 3, label: "Atacama", name: "atacama" },
-  { value: 4, label: "Aysén del Gral. C. Ibáñez del Campo", name: "aysen" },
-  { value: 5, label: "Biobío", name: "biobio" },
-  { value: 6, label: "Coquimbo", name: "coquimbo" },
-  { value: 7, label: "Lib. Gral. Bernardo O'Higgins", name: "ohiggins" },
-  { value: 8, label: "Los Lagos", name: "los_lagos" },
-  { value: 9, label: "Los Ríos", name: "los_rios" },
-  { value: 10, label: "Magallanes y Antártica Chilena", name: "magallanes" },
-  { value: 11, label: "Maule", name: "maule" },
-  { value: 12, label: "Ñuble", name: "nuble" },
   { value: 13, label: "Región Metropolitana", name: "metropolitana" },
-  { value: 14, label: "Región de la Araucanía", name: "araucania" },
-  { value: 15, label: "Tarapacá", name: "tarapaca" },
-  { value: 16, label: "Valparaíso", name: "valparaiso" }
-
 ]
+
+// export const regiones = [
+//   { value: 1, label: "Antofagasta", name: "antofagasta" },
+//   { value: 2, label: "Arica y Parinacota", name: "arica_y_parinacota" },
+//   { value: 3, label: "Atacama", name: "atacama" },
+//   { value: 4, label: "Aysén del Gral. C. Ibáñez del Campo", name: "aysen" },
+//   { value: 5, label: "Biobío", name: "biobio" },
+//   { value: 6, label: "Coquimbo", name: "coquimbo" },
+//   { value: 7, label: "Lib. Gral. Bernardo O'Higgins", name: "ohiggins" },
+//   { value: 8, label: "Los Lagos", name: "los_lagos" },
+//   { value: 9, label: "Los Ríos", name: "los_rios" },
+//   { value: 10, label: "Magallanes y Antártica Chilena", name: "magallanes" },
+//   { value: 11, label: "Maule", name: "maule" },
+//   { value: 12, label: "Ñuble", name: "nuble" },
+//   { value: 13, label: "Región Metropolitana", name: "metropolitana" },
+//   { value: 14, label: "Región de la Araucanía", name: "araucania" },
+//   { value: 15, label: "Tarapacá", name: "tarapaca" },
+//   { value: 16, label: "Valparaíso", name: "valparaiso" }
+// ]
 
 export const comunas = {
   antofagasta: [
