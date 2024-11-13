@@ -117,7 +117,7 @@ const AppoinmentList = () => {
   }, [session, status]);
 
   if (status === 'loading') {
-    return <p>Cargando...</p>; 
+    return <p>Cargando...</p>;
   }
   const onSelectChange = (newSelectedRowKeys) => {
     console.log("selectedRowKeys changed: ", selectedRowKeys);
@@ -252,7 +252,7 @@ const AppoinmentList = () => {
                    Editar
                  </Link> */}
                     <Link
-                      href="#"
+                      href={`/citas/${record.id_cita}`}
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
@@ -264,7 +264,7 @@ const AppoinmentList = () => {
                   ) :
                   (
                     <Link
-                      href="#"
+                      href={`/citas/${record.id_cita}`}
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
