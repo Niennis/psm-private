@@ -117,7 +117,7 @@ const AddFirstAppoinments = () => {
     setMenuPortalTarget(document.body);
   }, [])
 
-  const selectedRegion = watch('region')
+  const selectedRegion = { value: 13, label: "Región Metropolitana", name: "metropolitana" }
   const profesional = watch('professional')
   const modalidad = watch('modalidad')
 
