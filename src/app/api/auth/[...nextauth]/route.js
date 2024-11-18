@@ -61,16 +61,15 @@ const authOptions = {
         }
         try {
           const user = await fetchUserMailAndPass(body)
-
           if (!user) {
             throw new Error("usuario no encontrado.")
           }
 
           // if (user) {
           //   await cacheHandler.set(cacheKey, user, { tags: ['user'] });
-          //   return user;
+          return user;
           // }
-          throw new Error("Usuario no encontrado.");
+          // throw new Error("Usuario no encontrado.");
 
           // if (user.email === body.email && user.contrasena === body.contrasena) {
           //   return user
@@ -90,7 +89,7 @@ const authOptions = {
   callbacks: {
     async signIn({ account, profile, credentials }) {
       // Si el proveedor es google, validar que sea correo udp.
-     
+
       if (account.provider === "google") {
         if (profile.email_verified && profile.email.endsWith("@gmail.com" || "@mail.udp.cl")) {
           profile.rol === 'alumno'
