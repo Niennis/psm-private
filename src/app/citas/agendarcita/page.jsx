@@ -135,7 +135,6 @@ const AddAppoinments = () => {
 
   const modalidad = watch('modalidad')
   const motivo_consulta_seleccionado = watch('motivo')
-  console.log(motivo_consulta_seleccionado, modalidad)
   useEffect(() => {
     setMenuPortalTarget(document.body);
     getProfessionals()
@@ -178,7 +177,7 @@ const AddAppoinments = () => {
         fecha: formatDateToService(date),
       })
       console.log('appointment', appointment)
-      if (appointment.detalle === 'fail!!') {
+      if (appointment["detalle"].includes('fail!!')) {
         setSuccess('fail')
       } else {
         setSuccess('success')

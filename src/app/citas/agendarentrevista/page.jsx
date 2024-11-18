@@ -94,7 +94,7 @@ const AddFirstAppoinments = () => {
   const fetchInitialData = async () => {
     try {
       const { users: patient } = await fetchUser(session.user.id);
-      console.log('patient', patient)
+      // console.log('patient', patient)
       return {
         name: patient[0].nombre,
         lastName: patient[0].apellido,
@@ -201,7 +201,6 @@ const AddFirstAppoinments = () => {
     return `${String(horas).padStart(2, "0")}:${String(minutosRestantes).padStart(2, "0")}:00`;
   }
 
-
   const handleDays = async (e, fecha, id) => {
     setHours('')
     e.preventDefault()
@@ -223,51 +222,6 @@ const AddFirstAppoinments = () => {
       })
 
       const flatted = newBloques.flat()
-      console.log('flatted', flatted);
-
-      // const horasDisponibles = flatted.filter(hora => {
-      //   // Busca la disponibilidad correspondiente en el segundo array
-      //   console.log(('HORA', hora));
-      //   const disponibilidadHora = bloques.find(item => {
-      //     console.log('ITEM', item);
-
-      //     return ((item.hora_inicio).length === 7 ? `0${item.hora_inicio}` : item.hora_inicio) === hora.horaInicioBloque
-      //   });
-      //   // Si la disponibilidadHora existe y está disponible, devuelve true (se incluirá en el resultado)
-      //   return disponibilidadHora && disponibilidadHora.disponible === 1;
-      // });
-      // const horasDisponibles = [
-      //   {
-      //     id: 1,
-      //     horaInicioBloque: '10:30'
-      //   },
-      //   {
-      //     id: 2,
-      //     horaInicioBloque: '11:30'
-      //   },
-      //   {
-      //     id: 3,
-      //     horaInicioBloque: '12:30'
-      //   },
-      //   {
-      //     id: 4,
-      //     horaInicioBloque: '14:30'
-      //   },
-      //   {
-      //     id: 5,
-      //     horaInicioBloque: '15:30'
-      //   },
-      //   {
-      //     id: 6,
-      //     horaInicioBloque: '16:30'
-      //   },
-      //   {
-      //     id: 7,
-      //     horaInicioBloque: '17:30'
-      //   },
-      // ]
-
-      // console.log('horasDisponibles', horasDisponibles);
 
       setHours(flatted)
     } catch (error) {
@@ -312,7 +266,29 @@ const AddFirstAppoinments = () => {
     // Handle file loading logic here
   };
 
-  const onSubmit = handleSubmit(async data => {
+
+  const motivo_consulta_seleccionado = watch('motivo_consulta')
+
+  const gender = [
+    { value: "Hombre", label: "Hombre" },
+    { value: "Mujer", label: "Mujer" },
+    { value: "Hombre trans", label: "Hombre trans" },
+    { value: "Mujer trans", label: "Mujer trans" },
+    { value: "No binarie", label: "No binarie" }
+  ]
+
+  const career = [
+    { value: 2, label: "Antropologia" },
+    { value: 3, label: "Arquitectura" },
+    { value: 4, label: "Contador" },
+    { value: 5, label: "Derecho" },
+    { value: 6, label: "Ingenieria" },
+  ];
+
+
+  const handleFirstInterview = handleSubmit(async (data, e) => {
+    e.preventDefault()
+    console.log('errors', errors)
     console.log('data', data);
     setSuccess('initial')
     const patientName = watch("name")
@@ -332,10 +308,13 @@ const AddFirstAppoinments = () => {
 
     try {
       const appointment = await createAppointment(body)
-      if (appointment.detalle === 'fail!!!') setSuccess('fail')
-      setSuccess('success')
+      if (appointment.detalle === 'fail!!!') {
+        setSuccess('fail')
+      } else {
+        setSuccess('success')
+      }
       setOpenBackdrop(true)
-      await sendEmail()
+      // await sendEmail()
 
     } catch (err) {
       setSuccess('fail')
@@ -347,24 +326,6 @@ const AddFirstAppoinments = () => {
       setOpen(false)
     }
   })
-
-  const motivo_consulta_seleccionado = watch('motivo_consulta')
-
-  const gender = [
-    { value: "Hombre", label: "Hombre" },
-    { value: "Mujer", label: "Mujer" },
-    { value: "Hombre trans", label: "Hombre trans" },
-    { value: "Mujer trans", label: "Mujer trans" },
-    { value: "No binarie", label: "No binarie" }
-  ]
-
-  const career = [
-    { value: 2, label: "Antropologia" },
-    { value: 3, label: "Arquitectura" },
-    { value: 4, label: "Contador" },
-    { value: 5, label: "Derecho" },
-    { value: 6, label: "Ingenieria" },
-  ];
 
   const handleAddContact = () => {
     const newContact = [
@@ -757,12 +718,7 @@ const AddFirstAppoinments = () => {
                                 <Controller
                                   control={control}
                                   name="region"
-                                  {...register('region', {
-                                    required: {
-                                      value: true,
-                                      message: 'Región es requerida',
-                                    }
-                                  })}
+                                  {...register('region')}
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value } }) => (
                                     <Select
@@ -771,6 +727,7 @@ const AddFirstAppoinments = () => {
                                       isDisabled={true}
                                       onChange={onChange}
                                       options={regiones}
+                                      value={value}
                                       // isDisabled={true}
                                       menuPortalTarget={menuPortalTarget}
                                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -1196,7 +1153,7 @@ const AddFirstAppoinments = () => {
                                           <ChevronLeft />
                                         </button>
                                         {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
-                                          console.log('hour', hour.horaInicioBloque, time)
+                                          // console.log('hour', hour.horaInicioBloque, time)
                                           return (
                                             <button
                                               type="button"
@@ -1224,9 +1181,9 @@ const AddFirstAppoinments = () => {
                           <div className="col-12">
                             <div className="doctor-submit text-end mt-3">
                               <button
-                                type="button"
+                                // type="button"
                                 className="btn btn-primary submit-form me-2"
-                                onClick={handleOpen}
+                                onClick={handleFirstInterview}
                               >
                                 Enviar
                               </button>
@@ -1248,7 +1205,7 @@ const AddFirstAppoinments = () => {
               </div>
             </div>
           </div>
-          <Modal open={open} handleClose={handleClose} onClick={onSubmit} errors={errors} />
+          <Modal open={open} handleClose={handleClose} onClick={handleFirstInterview} errors={errors} />
         </div>
 
         {/*  <SimpleBackdrop
