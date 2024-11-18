@@ -16,7 +16,10 @@ import Calender from '../../calender/page';
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from '@/components/ProtectedRoutes';
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const ScheduleByProfessional = ({ params }) => {
   const ROL = ["profesional"]
@@ -123,7 +126,7 @@ const ScheduleByProfessional = ({ params }) => {
 
 
   return (
-    <ProtectedPage level={ROL}>
+    < >
       <Sidebar id='menu-item5' id1='menu-items5' activeClassName='professional-shedule' />
       <>
         <div className="page-wrapper">
@@ -206,8 +209,9 @@ const ScheduleByProfessional = ({ params }) => {
           </div>
         </div >
       </>
-    </ProtectedPage>
+    </>
   )
 }
 
-export default ScheduleByProfessional;
+// export default ScheduleByProfessional;
+export default withAuth(ScheduleByProfessional, ['admin', 'profesional']);

@@ -16,7 +16,10 @@ import Calender from '../../../calender/page';
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from '@/components/ProtectedRoutes';
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 import Tooltip from '@mui/material/Tooltip';
 import { FaInfoCircle } from "react-icons/fa";
@@ -112,6 +115,7 @@ const AddSchedule = ({ params }) => {
     dates.forEach(date => {
       return promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id))
     })
+console.log('DATES', dates)
 
     Promise.all(promesas)
       .then(async (values) => {
@@ -162,7 +166,7 @@ const AddSchedule = ({ params }) => {
   }
 
   return (
-    <ProtectedPage level={ROL}>
+    < >
       <Sidebar id='menu-item5' id1='menu-items5' activeClassName='add-shedule' />
       <>
         <div className="page-wrapper mt-5 pt-5">
@@ -1082,8 +1086,10 @@ La disponibilidad de horas, será hasta la fecha de finalización.`}  /></h4>
       </>
 
 
-    </ProtectedPage>
+    </>
   )
 }
 
-export default AddSchedule;
+// export default AddSchedule;
+export default withAuth(AddSchedule, ['admin', 'profesional']);
+

@@ -16,7 +16,10 @@ import { useForm } from 'react-hook-form';
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from "@/components/ProtectedRoutes";
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const ScheduleList = () => {
   const ROL = ["profesional"]
@@ -336,7 +339,7 @@ const ScheduleList = () => {
 
 
   return (
-    <ProtectedPage level={ROL}>
+    < >
       <>
         {/* <Headerudp /> */}
         <Sidebar id='menu-item5' id1='menu-items5' activeClassName='shedule-list' />
@@ -484,8 +487,10 @@ const ScheduleList = () => {
           </div>
         </div>
       </>
-    </ProtectedPage>
+    </>
   );
 };
 
-export default ScheduleList;
+// export default ScheduleList;
+export default withAuth(ScheduleList, ['admin']);
+
