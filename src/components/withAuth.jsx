@@ -14,7 +14,7 @@ const withAuth = (WrappedComponent, allowedRoles) => {
       if (status === 'loading') return; // Espera a que la sesión esté cargada
 
       if (session && session.user?.rol) {
-        console.log('Client - session:', session);
+        // console.log('Client - session:', session);
 
         // Si la sesión y el rol están presentes, verifica el rol del usuario
         if (allowedRoles.includes(session.user?.rol)) {
