@@ -13,14 +13,14 @@ const withAuth = (WrappedComponent, allowedRoles) => {
     useEffect(() => {
       if (status === 'loading') return; // Espera a que la sesión esté cargada
 
-      if (session && session.user.rol) {
+      if (session && session.user?.rol) {
         console.log('Client - session:', session);
 
         // Si la sesión y el rol están presentes, verifica el rol del usuario
-        if (allowedRoles.includes(session.user.rol)) {
+        if (allowedRoles.includes(session.user?.rol)) {
           setIsReady(true);
         } else {
-          console.log('Rol no permitido:', session.user.rol);
+          console.log('Rol no permitido:', session.user?.rol);
           router.push('/');
         }
       } else if (!session) {

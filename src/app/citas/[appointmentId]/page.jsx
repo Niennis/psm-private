@@ -66,7 +66,7 @@ const EditAppoinments = ({ params }) => {
   const getAppointments = async () => {
     try {
       const response = await fetchAppointments()
-      const filteredResponse = response.filter(item => (item.id_cita == params.appointmentId) /* && (item.id_profesional == session.user.id) */)
+      const filteredResponse = response.filter(item => (item.id_cita == params.appointmentId) /* && (item.id_profesional == session.user?.id) */)
 
       const obj = {
         speciality: filteredResponse[0].especialidad_profesional,
@@ -149,7 +149,7 @@ const EditAppoinments = ({ params }) => {
       data.validacion = patientByEmail.validacion
       data.alumndo_id = patientByEmail.id
       
-      const status = session.user.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional'
+      const status = session.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional'
       if( data.status === "status" ){
         const response = await changeStatusAppointment(data.id, status)
         console.log('response', response)

@@ -53,18 +53,18 @@ const AppoinmentList = () => {
 
         const data = await fetchAppointments();
         
-        if (session.user.rol === 'profesional') {
-          const dataFiltered = data.filter(item => item.id_profesional == session.user.sub);
+        if (session.user?.rol === 'profesional') {
+          const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
 
           setAppointments(dataFiltered);
           setResults(dataFiltered);
           // setIsValidated(false)
-        } else if (session.user.rol === 'alumno') {
-          const dataFiltered = data.filter(item => item.id_paciente == session.user.id);
+        } else if (session.user?.rol === 'alumno') {
+          const dataFiltered = data.filter(item => item.id_paciente == session.user?.id);
 
           setAppointments(dataFiltered);
           setResults(dataFiltered);
-        } else if (session.user.rol === 'admin') {
+        } else if (session.user?.rol === 'admin') {
           setAppointments(data);
           setResults(data);
 
@@ -202,7 +202,7 @@ const AppoinmentList = () => {
                   : "dropdown-menu dropdown-menu-end dropdown-extra"
                 }
               >
-                {session.user.rol === ('profesional' || 'admin') ?
+                {session.user?.rol === ('profesional' || 'admin') ?
                   (<>
                     <Link className="dropdown-item" href={`/fichas/${record.id_cita}`}>
                       <i className="far fa-edit me-2" />
@@ -245,8 +245,8 @@ const AppoinmentList = () => {
   ]
 
   const columns = allColumns.filter((col) => {
-    if (session.user.rol === "profesional" && col.key !== "nombre_profesional") return true; 
-    if (session.user.rol === "alumno" && col.key !== "nombre_alumno") return true; 
+    if (session.user?.rol === "profesional" && col.key !== "nombre_profesional") return true; 
+    if (session.user?.rol === "alumno" && col.key !== "nombre_alumno") return true; 
     return false;
   });
 
@@ -391,7 +391,7 @@ const AppoinmentList = () => {
                 <h3>Antes de continuar, cambia tu contraseña</h3>
                 <div className="m-t-20">
                   {" "}
-                  <Link href={`/profesionales/${session.user.id}`} className="btn btn-white me-2" data-bs-dismiss="modal">
+                  <Link href={`/profesionales/${session.user?.id}`} className="btn btn-white me-2" data-bs-dismiss="modal">
                     Ir a editar contraseña
                   </Link>
                 </div>

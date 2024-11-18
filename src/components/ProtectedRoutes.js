@@ -34,14 +34,14 @@ const ProtectedPage = ({ children, level }) => {
     switch (level) {
       case level.includes('admin'):
         console.log('ENTRÓ COMO ADMIN')
-        if ((!session && protectedToRoutes.includes(pathname)) || session.user.rol !== "admin") {
+        if ((!session && protectedToRoutes.includes(pathname)) || session.user?.rol !== "admin") {
           router.push('/');
         }
         break;
       case level.includes('profesional'):
         console.log('ENTRÓ COMO PROFESIONAL')
         if ((!session && protectedToRoutes.includes(pathname))
-          || (session.user.rol !== "admin" && session.user.rol !== "profesional")) {
+          || (session.user?.rol !== "admin" && session.user?.rol !== "profesional")) {
           router.push('/');
         }
         break;

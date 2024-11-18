@@ -315,17 +315,17 @@ const Header = () => {
                     <FaUserCircle style={{ fontSize: matches ? '50px' : '38px', color: '#000', border: '1px solid #ff5253', borderRadius: '50px', padding: '5px', marginLeft: '5px', background: '#b82925', color: '#fff', fontFamily: 'sailec' }} />
                   </Link>
                 </>
-                : session.user.picture ?
+                : session.user?.picture ?
                   <button className="btn">
                     <Link href="/citas" style={{ textDecoration: 'none' }}>
                       <img
                         className="avatar-img rounded-circle"
-                        src={session.user.picture}
+                        src={session.user?.picture}
                         alt="avatar"
                         height={40}
                       />
                     </Link>
-                    {/* {session.user.name} */}
+                    {session.user?.name}
                   </button>
                   :
                   <Link href="/citas" style={{padding: 0, margin: 0, textAlign: 'right'}}>

@@ -386,7 +386,7 @@ const AddAppoinments = () => {
                               <input
                                 className="form-control"
                                 type="text"
-                                value={session.user.name}
+                                value={session.user?.name}
                                 {...register('lastName')}
                               />
                               {errors.professional && <span><small>{errors.professional.message}</small></span>}

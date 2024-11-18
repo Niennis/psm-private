@@ -69,7 +69,7 @@ const Sidebar = (props) => {
                 }
 
                 {
-                  session.user.rol && session.user.rol === "alumno" &&
+                  session.user?.rol && session.user?.rol === "alumno" &&
                   <>
                     {/* <li className="submenu"> */}
                     {/* <Link href="#" id="menu-item4" onClick={(e) => handleClick(e, "menu-item4", "menu-items4")}>
@@ -98,7 +98,7 @@ const Sidebar = (props) => {
 
 
                 {
-                  session.user.rol && session.user.rol === "profesional" &&
+                  session.user?.rol && session.user?.rol === "profesional" &&
                   <>
                     <li className="submenu">
                       <Link href="#" id="menu-item2" onClick={(e) => handleClick(e, "menu-item2", "menu-items2")}>
@@ -156,7 +156,7 @@ const Sidebar = (props) => {
                     <Link className={props?.activeClassName === 'shedule-list' ? 'active' : ''} href="/horarios">Lista de Horarios</Link>
                   </li> */}
                       {/* <li> */}
-                        <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario/${session.user.sub}`} >
+                        <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario/${session.user?.sub}`} >
                           <span className="menu-side">
                             <img src={doctorschedule.src} alt="" />
                           </span>{" "}
@@ -172,7 +172,7 @@ const Sidebar = (props) => {
                 }
 
                 {
-                  session.user.rol && session.user.rol === "admin" &&
+                  session.user?.rol && session.user?.rol === "admin" &&
                   <>
                     <li className="submenu">
                       <Link href="#" id="menu-item1" onClick={(e) => {

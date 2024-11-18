@@ -93,12 +93,12 @@ const AddFirstAppoinments = () => {
 
   const fetchInitialData = async () => {
     try {
-      const { users: patient } = await fetchUser(session.user.id);
+      const { users: patient } = await fetchUser(session.user?.id);
       // console.log('patient', patient)
       return {
         name: patient[0].nombre,
         lastName: patient[0].apellido,
-        email: session.user.email,
+        email: session.user?.email,
         birthday: dayjs(patient[0].fecha_nacimiento).format('YYYY-MM-DD'),
         genero: patient[0].genero === 'personalizado' ? 'No binarie' : patient[0].genero,
         mobile: patient[0].telefono
@@ -295,9 +295,9 @@ const AddFirstAppoinments = () => {
     const patientLastname = watch("lastName")
     const patients = await fetchUsers()
 
-    console.log('session.user.email', session.user.email);
+    console.log('session.user.email', session.user?.email);
     const patient = patients.users.filter(user =>
-      user.email === session.user.email
+      user.email === session.user?.email
     )
     const body = {
       ...data,
