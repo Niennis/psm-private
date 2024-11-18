@@ -5,6 +5,11 @@ import { fetchSpecialityById } from './DoctorsServices';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
+const formatDate = (dateString) => {
+  const [year, month, day] = dateString.split("-");
+  return `${year}-${day}-${month}`;
+};
+
 export const sendEmail = async (email, typeUser) => {
   console.log('el body', email, typeUser);
   const SEND_EMAIL = process.env.NEXT_PUBLIC_SEND_EMAIL;
@@ -60,13 +65,13 @@ const pruebaSendMail = (mail) => {
 }
 
 
-export const createAppointment = async (appointment) => {
-  const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_APPOINTMENT
-
+export const createInterview = async (appointment) => {
+  const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_INTERVIEW
+console.log('appointment', appointment)
   const body = {
     profesional_id: appointment.professional.id,
     alumno_id: appointment.patient_id,
-    fecha_inicio: appointment.fecha,
+    fechaInicio: formatDate(appointment.fecha),
     hora: appointment.hora,
     estado: "pendiente",
     modalidad: appointment.modalidad || 'modalidad',
@@ -77,9 +82,8 @@ export const createAppointment = async (appointment) => {
     derivado_desde: 'derivado',
     tratamiento: 'tratamientos',
     diagnostico_previo: 'diagnosticos',
-    primera_cita: 1
+    primera_cita: 1,
   }
-
   console.log('BODY', body);
 
   try {
@@ -106,6 +110,54 @@ export const createAppointment = async (appointment) => {
     console.log(err)
   }
 }
+
+
+export const createAppointment = async (appointment) => {
+  const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_APPOINTMENT
+console.log('appointment', appointment)
+  const body = {
+    profesional_id: appointment.professional.id,
+    alumno_id: appointment.patient_id,
+    fechaInicio: appointment.fecha,
+    hora: appointment.hora,
+    estado: "pendiente",
+    modalidad: appointment.modalidad || 'modalidad',
+    campus: appointment.campus || 'no aplica',
+    notas: 'notas',
+    motivo: appointment.motivo.label || 'motivo',
+    como: 'como se entero',
+    derivado_desde: 'derivado',
+    tratamiento: 'tratamientos',
+    diagnostico_previo: 'diagnosticos',
+    primera_cita: 0,
+  }
+  console.log('BODY', body);
+
+  try {
+    const data = await fetch(APPOINTMENT_API, {
+      method: "POST",
+      cache: 'no-store',
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*'
+      },
+      body: JSON.stringify(body)
+    })
+    const response = await data.json()
+    console.log('response', response.detalle);
+
+    // ENVÍO DE MAIL
+    // if (response.detalle === 'success!!') {
+      // pruebaSendMail('estefania.osses.v@gmail.com')
+      // await sendEmail(bodyEmailProfessional)
+    // }
+
+    return response
+  } catch (err) {
+    console.log(err)
+  }
+}
+
 
 export const updateAppointment = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_EDIT_CITA
