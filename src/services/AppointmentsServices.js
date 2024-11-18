@@ -64,31 +64,23 @@ export const createAppointment = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_APPOINTMENT
 
   const body = {
-    profesional_id: (appointment.professional.id).toString(),
-    alumno_id: (appointment.patient_id).toString(),
-    fecha: appointment.fecha,
+    profesional_id: appointment.professional.id,
+    alumno_id: appointment.patient_id,
+    fecha_inicio: appointment.fecha,
     hora: appointment.hora,
     estado: "pendiente",
     modalidad: appointment.modalidad || 'modalidad',
-    campus: appointment.campus || 'campus',
+    campus: appointment.campus || 'no aplica',
     notas: 'notas',
     motivo: appointment.motivo.label || 'motivo',
     como: 'como se entero',
     derivado_desde: 'derivado',
     tratamiento: 'tratamientos',
     diagnostico_previo: 'diagnosticos',
+    primera_cita: 1
   }
 
   console.log('BODY', body);
-  // const bodyEmailPatient = {
-  //   "tarjet": appointment.email,
-  //   "paciente": true
-  // }
-
-  // const bodyEmailProfessional = {
-  //   "tarjet": appointment.doctor.email,
-  //   "paciente": false
-  // }
 
   try {
     const data = await fetch(APPOINTMENT_API, {
@@ -104,10 +96,10 @@ export const createAppointment = async (appointment) => {
     console.log('response', response.detalle);
 
     // ENVÍO DE MAIL
-    if (response.detalle === 'success!!') {
-      pruebaSendMail('estefania.osses.v@gmail.com')
+    // if (response.detalle === 'success!!') {
+      // pruebaSendMail('estefania.osses.v@gmail.com')
       // await sendEmail(bodyEmailProfessional)
-    }
+    // }
 
     return response
   } catch (err) {

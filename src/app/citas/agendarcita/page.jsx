@@ -15,40 +15,66 @@ import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { fetchProfessionals } from "@/services/DoctorsServices";
-import { fetchUsers } from "@/services/UsersServices";
+import { fetchUsers, fetchUser, fetchPatientsDespejeFalse } from "@/services/UsersServices";
 import { createAppointment } from "@/services/AppointmentsServices"
+import { fetchScheduleByAvailability, fetchScheduleByUser, fetchScheduleByDate } from "@/services/SchedulesServices";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from "@/components/ProtectedRoutes";
 import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import * as dayjs from 'dayjs'
+import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
+import 'dayjs/locale/es-mx'
 import { motivo_consulta } from "@/utils/selects";
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
+
+// Función para obtener fechas únicas
+const obtenerFechasUnicas = array => {
+  let fechasUnicas = [];
+  let arrayDeComprobacion = []
+
+  array.forEach(objeto => {
+    let { fechaInicio, id_user } = objeto;
+    if (!arrayDeComprobacion.includes(fechaInicio)) {
+      fechasUnicas.push({ fechaInicio, id_user });
+      arrayDeComprobacion.push(fechaInicio)
+    }
+  });
+  return fechasUnicas;
+}
+
+const formatDate = (dateString) => {
+  const [year, part1, part2] = dateString.split("-");
+  return parseInt(part1) > 12 ? `${year}-${part2}-${part1}` : dateString;
+};
+
+const formatDateToService = (dateString) => {
+  const [year, month, day] = dateString.split("-");
+  return `${year}-${day}-${month}`
+};
 
 const AddAppoinments = () => {
   const VIDEOLLAMADA = false;
-  const ROL = ["profesional", "admin"]
-  // useAuthorization(['alumno'])
-
-  const { register, handleSubmit, watch, control,
-    formState: { errors }
-  } = useForm(
-    {
-      defaultValues: { speciality: 'Psicología' }
-    }
-  )
+  const { data: session, status } = useSession()
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
-
   const [isClicked, setIsClicked] = useState(false);
   const [startTime, setStartTime] = useState();
   const [selectedOption, setSelectedOption] = useState(null);
   const [doctor, setDoctor] = useState([]);
+  const [patients, setPatients] = useState(null);
   const [days, setDays] = useState([]);
+  const [allDays, setAllDays] = useState([])
   const [hours, setHours] = useState([])
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [indiceDias, setIndiceDias] = useState(0);
   const [indiceHoras, setIndiceHoras] = useState(0);
+  const [selectedPatient, setSelectedPatient] = useState('')
+  dayjs.extend(isLeapYear) // use plugin
+  dayjs.locale('es-mx') // use locale
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
@@ -59,48 +85,63 @@ const AddAppoinments = () => {
     setOpen(true)
   };
   const handleClose = () => setOpen(false);
-  const modalidad = watch('modalidad')
 
-  const motivo_consulta_seleccionado = watch('motivo_consulta')
-  const fetchData = async () => {
-    // const { users } = await fetchProfessionals()
-    // console.log(users);
-    const users = [
-      {
-        id: 0,
-        nombre: 'Miguel',
-        apellido: 'González',
-        email: 'miguelgonzález@udp.cl'
-      },
-      {
-        id: 1,
-        nombre: 'Ximena',
-        apellido: 'Alarcón',
-        email: 'ximenaalarcon@udp.cl'
-      }
-    ]
-    // const { docs } = users.map((doc, i) => {
+
+  const { register, handleSubmit, watch, control,
+    formState: { errors }, reset
+  } = useForm({
+    defaultValues: async () => await getPatients()
+  });
+  const intervencion = [
+    { value: 2, label: "Acompañamiento psicológico" },
+    { value: 3, label: "Psicoterapia breve" },
+    { value: 4, label: "Psicopedagógica individual" },
+  ]
+  /* FETCH PACIENTES CON DESPEJE */
+  const getPatients = async () => {
+    try {
+      const { users: alumnosFiltered } = await fetchPatientsDespejeFalse()
+      const alumnosProcessed = alumnosFiltered.map((alumno, i) => {
+        return {
+          value: i + 2,
+          label: alumno.email,
+          name: alumno.nombre,
+          lastName: alumno.apellido,
+          id: alumno.id
+        }
+      })
+      setPatients(alumnosProcessed)
+    } catch (error) {
+      console.error("Error fetching initial data:", error);
+      return {};
+    }
+  };
+
+  /* FETCH PROFESIONALES */
+  const getProfessionals = async () => {
+    const users = await fetchProfessionals()
+
     const docs = users.map((doc, i) => {
       return {
         value: i + 2,
         label: doc.nombre + ' ' + doc.apellido,
-        id: doc.id
+        id: doc.id,
+        email: doc.email,
+        name: doc.nombre
       }
     })
-    console.log('DOCS', docs);
     setDoctor(docs)
-
   }
 
+  const modalidad = watch('modalidad')
+  const motivo_consulta_seleccionado = watch('motivo')
+  console.log(motivo_consulta_seleccionado, modalidad)
   useEffect(() => {
     setMenuPortalTarget(document.body);
-    setSelectedOption({
-      id: 0,
-      value: 2,
-      label: 'Miguel González',
-    })
-    fetchData()
+    getProfessionals()
+    getPatients()
   }, [])
+
 
   const onChange = (date, dateString) => {
     console.log(date, dateString);
@@ -110,22 +151,38 @@ const AddAppoinments = () => {
     // Handle file loading logic here
   };
 
+  const obtenerDias = (objetos) => {
+    let fechaActual = new Date();
+
+    const filterWeekDays = objetos.filter(item => {
+      if (fechaActual.toISOString().split('T')[0] < item.fechaInicio) {
+        if (new Date(item.fechaInicio).getDay() !== 5
+          && new Date(item.fechaInicio).getDay() !== 6) {
+          return true;
+        }
+      }
+      return false
+    })
+    const soloDias = obtenerFechasUnicas(filterWeekDays)
+    return soloDias;
+  }
+
   const onSubmit = handleSubmit(async data => {
     setSuccess('initial')
-    const patientName = watch("name")
-    const patientLastname = watch("lastName")
-    // const patients = await fetchUsers()
 
-    // const patient = patients.filter(user =>
-    //   user.nombre === patientName
-    //   & user.apellido === patientLastname
-    //   & user.tipo_usuario === 'alumno'
-    // )
     try {
-      // const appointment = await createAppointment({ ...data, "patient_id": patient[0].id })
-      // console.log('appointment', appointment)
-      // return bleh
-      setSuccess('success')
+      const appointment = await createAppointment({
+        ...data,
+        "patient_id": selectedPatient.id,
+        hora: time,
+        fecha: formatDateToService(date),
+      })
+      console.log('appointment', appointment)
+      if (appointment.detalle === 'fail!!') {
+        setSuccess('fail')
+      } else {
+        setSuccess('success')
+      }
 
     } catch (err) {
       setSuccess('fail')
@@ -155,103 +212,88 @@ const AddAppoinments = () => {
 
 
   // // // // // // // // // // // // // // // // // // // 
-  const profesional = watch('doctor')
+  const profesional = watch('professional')
+
+  const orderByDate = (arr) => {
+    return arr.sort((a, b) => dayjs(a.fechaInicio).isAfter(dayjs(b.fechaInicio)) ? 1 : -1);
+  }
 
   const handleSelectedProfessional = async (e) => {
-    // e.preventDefault()
     setDays([])
     setHours([])
     setDate('')
     setTime('')
-
     try {
-      setDays([
-        {
-          fechaInicio: '2024-06-20',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-21',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-24',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-25',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-26',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-27',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-06-28',
-          id_user: 2
-        },
-        {
-          fechaInicio: '2024-07-01',
-          id_user: 2
-        },
-      ])
+      const { users: byProf } = await fetchScheduleByAvailability(e.id)
+      // const { bloques } = await fetchScheduleByUser(e.id)
 
+      const response = byProf.map(item => ({
+        ...item,
+        fechaFin: formatDate(item.fechaFin),
+        fechaInicio: formatDate(item.fechaInicio)
+      }))
+      const orderedData = orderByDate(response)
+      const bloque = obtenerDias(orderedData)
+
+      setAllDays(orderedData)
+      setDays(bloque)
     } catch (error) {
       console.log('Error: ', error)
-
     }
   }
+
+  const horaAMinutos = (hora) => {
+    const partesHora = hora.split(":");
+    return parseInt(partesHora[0]) * 60 + parseInt(partesHora[1]);
+  }
+
+  const calcularHoraInicioDeBloques = (cita) => {
+    const horaIniMinutos = horaAMinutos(cita.horaIni);
+    const duracionBloque = cita.duracionServicio;
+
+    // Array para almacenar las horas de inicio de cada bloque
+    const horasInicioBloques = [];
+
+    // Calcular la hora de inicio para cada bloque
+    for (let i = 0; i < Math.floor((horaAMinutos(cita.horaFin) - horaIniMinutos) / duracionBloque); i++) {
+      // Convertir minutos a formato HH:MM
+      const horaInicioBloque = minutosAHora(horaIniMinutos + i * duracionBloque);
+      horasInicioBloques.push({ ...cita, horaInicioBloque });
+    }
+
+    return horasInicioBloques;
+  }
+
+  // Función para convertir minutos a formato HH:MM
+  const minutosAHora = (minutos) => {
+    const horas = Math.floor(minutos / 60);
+    const minutosRestantes = minutos % 60;
+    return `${String(horas).padStart(2, "0")}:${String(minutosRestantes).padStart(2, "0")}:00`;
+  }
+
   const handleDays = async (e, fecha, id) => {
+    setHours('')
     e.preventDefault()
-    console.log('DAYS', days);
-    const horasDisponibles = [
-      {
-        id: 1,
-        horaInicioBloque: '10:30'
-      },
-      {
-        id: 2,
-        horaInicioBloque: '11:30'
-      },
-      {
-        id: 3,
-        horaInicioBloque: '12:30'
-      },
-      {
-        id: 4,
-        horaInicioBloque: '14:30'
-      },
-      {
-        id: 5,
-        horaInicioBloque: '15:30'
-      },
-      {
-        id: 6,
-        horaInicioBloque: '16:30'
-      },
-      {
-        id: 7,
-        horaInicioBloque: '17:30'
-      },
-    ]
+
+    // console.log('handle.days', fecha, id)
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
-
+    // console.log('fechamod', fecha);
     try {
+      const { bloques } = await fetchScheduleByDate(parseInt(id), fechaMod)
       setDate(fechaMod)
+      const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod)
 
-      setHours(horasDisponibles)
+      let newBloques = []
+      selectedDays.forEach(item => {
+        newBloques.push(calcularHoraInicioDeBloques(item))
+      })
 
-
+      const flatted = newBloques.flat()
+      setHours(flatted)
     } catch (error) {
       console.log(error)
     }
-
   }
-
 
   const mostrarSiguientesDias = (e) => {
     e.preventDefault()
@@ -273,12 +315,13 @@ const AddAppoinments = () => {
     setIndiceHoras(prevIndice => Math.max(0, prevIndice - 5));
   };
 
-  // // // // // // // // // // // // // // // // // // // // // // 
+  const handleSelectedalumno = async (e) => {
+    console.log(e)
+    setSelectedPatient(e)
+  }
 
   return (
-    <ProtectedPage level={ROL}>
-      {/* <Header /> */}
-      {/* <Headerudp /> */}
+    < >
       <Sidebar
         id="menu-item4"
         id1="menu-items4"
@@ -321,486 +364,219 @@ const AddAppoinments = () => {
                       </div>
 
                       {/* Detalles de la cita */}
-                      <div className="row" style={{ border: '1px solid lightgrey', borderRadius: '8px', padding: '10px', margin: '10px' }}>
-                        <div className="col-12">
-                          <div className="form-heading">
-                            <h4>Detalles del Profesional</h4>
-                          </div>
-                        </div>
-                        {VIDEOLLAMADA && <div className="row">
-                          <div className="col-12 col-md-6 col-xl-4">
-                            <div className="form-group select-gender">
-                              <label className="gen-label">
-                                Indique modalidad de la atención <span className="login-danger">*</span>
-                              </label>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="radio"
-                                    name="gender"
-                                    value="male"
-                                    className="form-check-input"
-                                    {...register('gender')}
-                                  />
-                                  Videollamada
-                                </label>
-                              </div>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="radio"
-                                    name="gender"
-                                    value="female"
-                                    className="form-check-input"
-                                    {...register('gender')}
-                                  />
-                                  Presencial
-                                </label>
-                              </div>
+                      <Accordion>
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls="panel1-content"
+                          id="panel1-header"
+                        >
+                          <div className="col-12">
+                            <div className="form-heading">
+                              <h4>Detalles del Profesional que agenda</h4>
                             </div>
                           </div>
-                        </div>
-                        }
+                        </AccordionSummary>
+                        <AccordionDetails>
 
-                        {/* PROFESIONAL */}
 
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>Profesional</label>
-                            <Controller
-                              control={control}
-                              name="doctor"
-                              {...register('doctor', {
-                                required: {
-                                  value: true,
-                                  message: 'Profesional es requerido',
-                                }
-                              })}
-                              ref={null}
-                              render={({ field: { onChange, onBlur, value } }) => (
-                                <Select
-                                  defaultValue={{
-                                    id: 0,
-                                    value: 2,
-                                    label: '',
-                                  }}
-                                  onChange={(e) => {
-                                    onChange(e);
-                                    handleSelectedProfessional(e);
-                                  }}
-                                  options={doctor}
-                                  instanceId="profesional"
-                                  menuPortalTarget={menuPortalTarget}
-                                  styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                  id="search-commodity"
-                                  components={{
-                                    IndicatorSeparator: () => null
-                                  }}
+                          {/* PROFESIONAL */}
 
-                                  styles={{
-                                    control: (baseStyles, state) => ({
-                                      ...baseStyles,
-                                      borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                      boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                      '&:hover': {
-                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                      },
-                                      borderRadius: '10px',
-                                      fontSize: "14px",
-                                      minHeight: "45px",
-                                    }),
-                                    dropdownIndicator: (base, state) => ({
-                                      ...base,
-                                      transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                      transition: '250ms',
-                                      width: '35px',
-                                      height: '35px',
-                                    }),
-                                  }}
-                                />
-                              )}
-                            />
-                            {errors.doctor && <span><small>{errors.doctor.message}</small></span>}
-                          </div>
-                        </div>
-
-                        {/* ESPECIALIDAD */}
-
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>Especialidad </label>
-                            <input className="form-control" type="text" {...register('speciality')} />
-                          </div>
-                        </div>
-
-                        {/* lUGAR DE ATENCIÓN */}
-                        {/*    <div className="row">
-                          <div className="col-12 col-md-12 col-xl-12">
-                            <div className="form-group select-gender">
-                              <label className="gen-label">
-                                Indique lugar de preferencia <span className="login-danger">*</span>
-                              </label>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="radio"
-                                    name="gender"
-                                    value="male"
-                                    className="form-check-input"
-                                    {...register('gender')}
-                                  />
-                                  Sede Centro - Manuel Rodríguez 343 sur, 2° piso
-                                </label>
-                              </div>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="radio"
-                                    name="gender"
-                                    value="female"
-                                    className="form-check-input"
-                                    {...register('gender')}
-                                  />
-                                  Sede Huechuraba - Av. Sta. Clara 797, Huechuraba
-                                </label>
-                              </div>
-
-                            </div>
-                          </div>
-                        </div>
- */}
-                        {/* 
-                        <div className="col-12 col-md-6 col-xl-4">
-                          <div className="form-group local-forms cal-icon">
-                            <label>
-                              Día de la Cita{" "}
-                              <span className="login-danger">*</span>
-                            </label>
-                            <Controller
-                              control={control}
-                              name="appointment_date"
-                              {...register('appointment_date', {
-                                required: {
-                                  value: true,
-                                  message: 'Días es requerido',
-                                }
-                              })}
-                              ref={null}
-                              render={({ field: { onChange, onBlur, value } }) => (
-                                <DatePicker
-                                  className="form-control datetimepicker"
-                                  onChange={onChange}
-                                  suffixIcon={null}
-                                  format={'YYYY-MM-DD'}
-                                  style={{
-                                    control: (baseStyles, state) => ({
-                                      ...baseStyles,
-                                      borderColor: isClicked ? '#2E37A4' : '2px solid rgba(46, 55, 164, 0.1)',
-                                      '&:hover': {
-                                        borderColor: state.isFocused ? 'none' : 'none',
-                                      },
-                                    })
-                                  }}
-                                />
-                              )}
-                            />
-                            {errors.appointment_date && <span><small>{errors.appointment_date.message}</small></span>}
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Hora <span className="login-danger">*</span>
-                            </label>
-                            <div className="">
-                              <TextField
+                          <div className="col-12 col-md-6 col-xl-6">
+                            <div className="form-group local-forms">
+                              <label>Profesional</label>
+                              <input
                                 className="form-control"
-                                id="outlined-controlled"
-                                type="time"
-                                value={startTime}
-                                onChange={(event) => {
-                                  setStartTime(event.target.value);
-                                }}
-                                {...register('start_time', {
-                                  required: {
-                                    value: true,
-                                    message: 'Hora es requerida',
-                                  }
-                                })}
+                                type="text"
+                                value={session.user.name}
+                                {...register('lastName')}
                               />
-                              {errors.start_time && <span><small>{errors.start_time.message}</small></span>}
-
+                              {errors.professional && <span><small>{errors.professional.message}</small></span>}
                             </div>
                           </div>
-                        </div> */}
 
-                        <div className="col-12 col-sm-12">
-                          <div className="form-group local-forms">
-                            <label>
-                              Observaciones <span className="login-danger">*</span>
-                            </label>
-                            <textarea
-                              className="form-control"
-                              rows={3}
-                              cols={30}
-                              defaultValue={""}
-                              {...register('notes')}
-                              style={{ resize: 'none' }}
-                            />
+                          {/* ESPECIALIDAD */}
+
+                          <div className="col-12 col-md-6 col-xl-6">
+                            <div className="form-group local-forms">
+                              <label>Especialidad </label>
+                              <input className="form-control" type="text" {...register('speciality')} />
+                            </div>
                           </div>
-                        </div>
-
-
-                        {profesional &&
-
+                        </AccordionDetails>
+                      </Accordion>
+                      <Accordion>
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls="panel1-content"
+                          id="panel1-header"
+                        >
+                          <div className="col-12">
+                            <div className="form-heading">
+                              <h4 style={{ margin: 0 }}>Detalles del Paciente</h4>
+                              <h5 style={{ fontSize: '12px', margin: '5px 0 25px' }}>Los campos son editables, pero solo afectarán la información en este portal, no en otros sistemas internos de la universidad</h5>
+                            </div>
+                          </div>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          {/* DATOS ESTUDIANTE */}
                           <div className="row">
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>
-                                Día de la Cita{" "}
-                                <span className="login-danger">*</span>
-                              </label>
+                            <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group local-forms">
-                                {days.length > 0 && (
-                                  <>
-                                    <button
-                                      className="btn btn-primary"
-                                      onClick={e => { mostrarAnterioresDias(e) }}
-                                      disabled={indiceDias === 0}>
-                                      <ChevronLeft />
-                                    </button>
+                                <label>
+                                  Correo electrónico de alumno {/* <span className="login-danger">*</span> */}
+                                </label>
+                                <Controller
+                                  control={control}
+                                  name="alumno"
+                                  {...register('alumno')}
+                                  ref={null}
+                                  render={({ field: { onChange, onBlur, value, name, ref } }) => {
+                                    return (<Select
+                                      instanceId="alumno"
+                                      defaultValue={selectedOption}
+                                      onChange={(e) => {
+                                        onChange(e);
+                                        handleSelectedalumno(e);
+                                      }}
+                                      getOptionLabel={e => e.label}
+                                      options={patients}
+                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                      id="alumno"
+                                      components={{
+                                        IndicatorSeparator: () => null
+                                      }}
 
-                                    {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
-                                      // console.log('day en el map', date,'holo', day.fechaInicio)
-                                      return (
-                                        <button
-                                          className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
-                                          key={`${day.id}${i}days`}
-                                          onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
-                                          {dayjs(day.fechaInicio).format('ddd DD MMM')}
-                                        </button>
-                                      )
-                                    }
-                                    )}
-                                    <button
-                                      className="btn btn-primary"
-                                      onClick={e => { mostrarSiguientesDias(e) }}
-                                      disabled={indiceDias + 5 >= days.length}>
-                                      <ChevronRight />
-                                    </button>
-                                  </>)
-                                }
+                                      styles={{
+                                        control: (baseStyles, state) => ({
+                                          ...baseStyles,
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                          '&:hover': {
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                          },
+                                          borderRadius: '10px',
+                                          fontSize: "14px",
+                                          minHeight: "45px",
+                                        }),
+                                        dropdownIndicator: (base, state) => ({
+                                          ...base,
+                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                          transition: '250ms',
+                                          width: '35px',
+                                          height: '35px',
+                                        }),
+                                      }}
+                                    />)
+                                  }}
+                                />
+                                {errors.alumno && <span><small>{errors.alumno.message}</small></span>}
+
                               </div>
                             </div>
-                            {/* <DatePick /> */}
-                            {date !== '' &&
-                              <div className="col-12 col-md-12 col-xl-12">
-                                <label>
-                                  Hora <span className="login-danger">*</span>
-                                </label>
-                                <div className="form-group local-forms">
-                                  {hours.length > 0 && (
-                                    <>
-                                      <button
-                                        className="btn btn-primary"
-                                        onClick={e => { mostrarAnterioresHoras(e) }}
-                                        disabled={indiceHoras === 0}>
-                                        <ChevronLeft />
-                                      </button>
-                                      {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
-                                        // console.log('hour', hour.horaInicioBloque , time)
-                                        return (
-                                          <button
-                                            type="button"
-                                            className={`btn me-2 ${time === hour.horaInicioBloque ? "btn-primary" : "btn-cancel"}`}
-                                            key={`${hour.id}${i}hours`}
-                                            onClick={() => { setTime(hour.horaInicioBloque) }}>
-                                            {hour.horaInicioBloque}
-                                          </button>
-                                        )
-                                      }
-                                      )}
-                                      <button
-                                        className="btn btn-primary"
-                                        onClick={e => { mostrarSiguientesHoras(e) }}
-                                        disabled={indiceHoras + 5 >= days.length}>
-                                        <ChevronRight />
-                                      </button>
-                                    </>)
-                                  }
-                                </div>
-                              </div>
-                            }
                           </div>
-                        }
-
-
-
-                      </div>
-
-                      <div className="row" style={{ border: '1px solid lightgrey', borderRadius: '8px', padding: '10px', margin: '10px' }}>
-                        <div className="col-12">
-                          <div className="form-heading">
-                            <h4 style={{ margin: 0 }}>Detalles del Paciente</h4>
-                            <h5 style={{ fontSize: '12px', margin: '5px 0 25px' }}>Los campos son editables, pero solo afectarán la información en este portal, no para SAP</h5>
-                          </div>
-                        </div>
-                        <div className="row">
                           <div className="col-12 col-md-6 col-xl-6">
                             <div className="form-group local-forms">
                               <label>
-                                Correo electrónico {/* <span className="login-danger">*</span> */}
+                                Nombres {/* <span className="login-danger">*</span> */}
                               </label>
                               <input
                                 className="form-control"
-                                type="email"
-                                {...register('email', {
-                                  required: {
-                                    value: true,
-                                    message: 'Correo es requerido'
-                                  },
-                                  pattern: {
-                                    value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
-                                    message: 'Correo no es válido'
-                                  }
-                                })}
+                                type="text"
+                                value={selectedPatient?.name}
+                                {...register('name')}
                               />
-                              {errors.email && <span><small>{errors.email.message}</small></span>}
-
+                              {
+                                errors.name && <span><small>{errors.name.message}</small></span>
+                              }
                             </div>
                           </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>
-                              Nombres {/* <span className="login-danger">*</span> */}
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              {...register('name', {
-                                required: {
-                                  value: true,
-                                  message: 'Nombre es requerido'
-                                },
-                                minLength: {
-                                  value: 2,
-                                  message: 'Nombre debe tener al menos 2 caracteres'
-                                }
-                              })}
-                            />
-                            {
-                              errors.name && <span><small>{errors.name.message}</small></span>
-                            }
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>
-                              Apellidos {/* <span className="login-danger">*</span> */}
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              {...register('lastName', {
-                                required: {
-                                  value: true,
-                                  message: 'Nombre es requerido'
-                                },
-                                minLength: {
-                                  value: 2,
-                                  message: 'Nombre debe tener al menos 2 caracteres'
-                                }
-                              })}
-                            />
-                            {
-                              errors.lastName && <span><small>{errors.lastName.message}</small></span>
-                            }
-                          </div>
-                        </div>
-                        <Accordion
-                            defaultExpanded={true}>
-                          <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls="panel1-content"
-                            id="panel1-header"
-                          >
-                            <div className="col-12 pb-0 mb-0">
-                              <div className="form-heading pb-0 mb-0">
-                                <h4>Detalles de la Cita</h4>
-                              </div>
+                          <div className="col-12 col-md-6 col-xl-6">
+                            <div className="form-group local-forms">
+                              <label>
+                                Apellidos {/* <span className="login-danger">*</span> */}
+                              </label>
+                              <input
+                                className="form-control"
+                                type="text"
+                                value={selectedPatient?.lastName}
+                                {...register('patientlastName')}
+                              />
+                              {
+                                errors.lastName && <span><small>{errors.lastName.message}</small></span>
+                              }
                             </div>
-                          </AccordionSummary>
-                          <AccordionDetails>
-                            <div className="row">
-                              <div className="col-12 col-md-6 col-xl-4">
-                                <div className="form-group select-gender">
-                                  <label className="gen-label">
-                                    Indique modalidad de la atención <span className="login-danger">*</span>
-                                  </label>
-                                  <div className="form-check-inline">
-                                    <label className="form-check-label">
-                                      <input
-                                        type="radio"
-                                        name="modalidad"
-                                        value="videollamada"
-                                        className="form-check-input"
-                                        {...register('modalidad')}
-                                      />
-                                      Videollamada
-                                    </label>
-                                  </div>
-                                  <div className="form-check-inline">
-                                    <label className="form-check-label">
-                                      <input
-                                        type="radio"
-                                        name="modalidad"
-                                        value="presencial"
-                                        className="form-check-input"
-                                        {...register('modalidad')}
-                                      />
-                                      Presencial
-                                    </label>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            {modalidad === 'presencial' &&
-                              <div className="row">
-                                <div className="col-12 col-md-12 col-xl-12">
-                                  <div className="form-group select-gender">
-                                    <label className="gen-label">
-                                      Indique lugar de preferencia <span className="login-danger">*</span>
-                                    </label>
-                                    <div className="form-check-inline">
-                                      <label className="form-check-label">
-                                        <input
-                                          type="radio"
-                                          name="campus"
-                                          value="centro"
-                                          className="form-check-input"
-                                          {...register('campus')}
-                                        />
-                                        Sede Centro - Manuel Rodríguez 343 sur, 2° piso
-                                      </label>
-                                    </div>
-                                    <div className="form-check-inline">
-                                      <label className="form-check-label">
-                                        <input
-                                          type="radio"
-                                          name="campus"
-                                          value="huechuraba"
-                                          className="form-check-input"
-                                          {...register('campus')}
-                                        />
-                                        Sede Huechuraba - Av. Sta. Clara 797, Huechuraba
-                                      </label>
-                                    </div>
+                          </div>
+                        </AccordionDetails>
+                      </Accordion>
+                      {/* DATOS ESTUDIANTE */}
 
-                                  </div>
-                                </div>
+                      <Accordion
+                        defaultExpanded={true}>
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls="panel1-content"
+                          id="panel1-header"
+                        >
+                          <div className="col-12 pb-0 mb-0">
+                            <div className="form-heading pb-0 mb-0">
+                              <h4>Detalles de la Cita</h4>
+                            </div>
+                          </div>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <div className="row">
+                            <div className="col-12 ">
+                              <div className="form-group local-forms col-md-6 col-xl-6">
+                                <label>Profesional</label>
+                                <Controller
+                                  control={control}
+                                  name="professional"
+                                  {...register('professional')}
+                                  ref={null}
+                                  render={({ field: { onChange, onBlur, value, name, ref } }) => {
+                                    return (<Select
+                                      instanceId="professional"
+                                      defaultValue={selectedOption}
+                                      onChange={(e) => {
+                                        onChange(e);
+                                        handleSelectedProfessional(e);
+                                      }}
+                                      getOptionLabel={e => e.label}
+                                      options={doctor}
+                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                      id="professional"
+                                      components={{
+                                        IndicatorSeparator: () => null
+                                      }}
+
+                                      styles={{
+                                        control: (baseStyles, state) => ({
+                                          ...baseStyles,
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                          '&:hover': {
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                          },
+                                          borderRadius: '10px',
+                                          fontSize: "14px",
+                                          minHeight: "45px",
+                                        }),
+                                        dropdownIndicator: (base, state) => ({
+                                          ...base,
+                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                          transition: '250ms',
+                                          width: '35px',
+                                          height: '35px',
+                                        }),
+                                      }}
+                                    />)
+                                  }}
+                                />
+                                {errors.professional && <span><small>{errors.professional.message}</small></span>}
                               </div>
 
-                            }
+                            </div>
+
 
                             <div className="col-12 col-md-12 col-xl-12">
                               <div className="form-group local-forms">
@@ -857,161 +633,233 @@ const AddAppoinments = () => {
                             </div>
 
                             {
-                              motivo_consulta_seleccionado === 'Otro' &&
-                              <div className="col-12 col-sm-6">
+                              motivo_consulta_seleccionado?.label === 'Otro' ?
+                                <div className="col-12 col-sm-6">
+                                  <div className="form-group local-forms">
+                                    <label>
+                                      Escribe el motivo <span className="login-danger">*</span>
+                                    </label>
+                                    <input
+                                      className="form-control" type="text"
+                                      defaultValue={""}
+                                      {...register('relationship_contact')} />
+                                  </div>
+                                </div>
+                                : <></>
+                            }
+
+
+                            <div className="col-12 col-md-12 col-xl-12">
+                              <div className="form-group local-forms">
+                                <label>Modalidad de atención a la cual accede según evaluación</label>
                                 <div className="form-group local-forms">
-                                  <label>
-                                    Escribe el motivo <span className="login-danger">*</span>
-                                  </label>
-                                  <input
-                                    className="form-control" type="text"
-                                    defaultValue={""}
-                                    {...register('relationship_contact')} />
+                                  <Controller
+                                    control={control}
+                                    name="intervencion"
+                                    {...register('intervencion')}
+                                    ref={null}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                      <Select
+                                        isMulti
+                                        instanceId="intervencion"
+                                        defaultValue={selectedOption}
+                                        onChange={onChange}
+                                        options={intervencion}
+                                        // menuPortalTarget={document.body}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="intervencion"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
+
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+
+                                          }),
+                                        }}
+                                      />
+                                    )}
+                                  />
                                 </div>
                               </div>
-                            }
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>Profesional</label>
-                                <Controller
-                                  control={control}
-                                  name="professional"
-                                  {...register('professional')}
-                                  ref={null}
-                                  render={({ field: { onChange, onBlur, value, name, ref } }) => {
-                                    return (<Select
-                                      instanceId="professional"
-                                      defaultValue={selectedOption}
-                                      onChange={(e) => {
-                                        onChange(e);
-                                        handleSelectedProfessional(e);
-                                      }}
-                                      getOptionLabel={e => e.label}
-                                      options={doctor}
-                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                      id="professional"
-                                      components={{
-                                        IndicatorSeparator: () => null
-                                      }}
+                            </div>
 
-                                      styles={{
-                                        control: (baseStyles, state) => ({
-                                          ...baseStyles,
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                          '&:hover': {
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                          },
-                                          borderRadius: '10px',
-                                          fontSize: "14px",
-                                          minHeight: "45px",
-                                        }),
-                                        dropdownIndicator: (base, state) => ({
-                                          ...base,
-                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                          transition: '250ms',
-                                          width: '35px',
-                                          height: '35px',
-                                        }),
-                                      }}
-                                    />)
-                                  }}
-                                />
-                                {errors.professional && <span><small>{errors.professional.message}</small></span>}
-
+                            <div className="col-12 col-md-6 col-xl-4">
+                              <div className="form-group select-gender">
+                                <label className="gen-label">
+                                  Indique modalidad de la atención <span className="login-danger">*</span>
+                                </label>
+                                <div className="form-check-inline">
+                                  <label className="form-check-label">
+                                    <input
+                                      type="radio"
+                                      name="modalidad"
+                                      value="videollamada"
+                                      className="form-check-input"
+                                      {...register('modalidad')}
+                                    />
+                                    Videollamada
+                                  </label>
+                                </div>
+                                <div className="form-check-inline">
+                                  <label className="form-check-label">
+                                    <input
+                                      type="radio"
+                                      name="modalidad"
+                                      value="presencial"
+                                      className="form-check-input"
+                                      {...register('modalidad')}
+                                    />
+                                    Presencial
+                                  </label>
+                                </div>
                               </div>
                             </div>
-                            {profesional &&
+                          </div>
+                          {modalidad === 'presencial' &&
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group select-gender">
+                                  <label className="gen-label">
+                                    Indique lugar de preferencia <span className="login-danger">*</span>
+                                  </label>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="campus"
+                                        value="centro"
+                                        className="form-check-input"
+                                        {...register('campus')}
+                                      />
+                                      Sede Centro - Manuel Rodríguez 343 sur, 2° piso
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="campus"
+                                        value="huechuraba"
+                                        className="form-check-input"
+                                        {...register('campus')}
+                                      />
+                                      Sede Huechuraba - Av. Sta. Clara 797, Huechuraba
+                                    </label>
+                                  </div>
 
-                              <div className="row">
+                                </div>
+                              </div>
+                            </div>
+
+                          }
+
+
+
+                          {profesional &&
+
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>
+                                  Día de la Cita{" "}
+                                  <span className="login-danger">*</span>
+                                </label>
+
+                                <div className="form-group local-forms">
+                                  {days.length > 0 && (
+                                    <>
+                                      <button
+                                        className="btn btn-primary"
+                                        onClick={e => { mostrarAnterioresDias(e) }}
+                                        disabled={indiceDias === 0}>
+                                        <ChevronLeft />
+                                      </button>
+
+                                      {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
+                                        // console.log('day en el map', date,'holo', day.fechaInicio)
+                                        return (
+                                          <button
+                                            className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
+                                            key={`${day.id}${i}days`}
+                                            onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
+                                            {dayjs(day.fechaInicio).format('ddd DD MMM')}
+                                          </button>
+                                        )
+                                      }
+                                      )}
+                                      <button
+                                        className="btn btn-primary"
+                                        onClick={e => { mostrarSiguientesDias(e) }}
+                                        disabled={indiceDias + 5 >= days.length}>
+                                        <ChevronRight />
+                                      </button>
+                                    </>)
+                                  }
+                                </div>
+                              </div>
+                              {/* <DatePick /> */}
+                              {date !== '' &&
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <label>
-                                    Día de la Cita{" "}
-                                    <span className="login-danger">*</span>
+                                    Hora <span className="login-danger">*</span>
                                   </label>
                                   <div className="form-group local-forms">
-                                    {days.length > 0 && (
+                                    {hours.length > 0 && (
                                       <>
                                         <button
                                           className="btn btn-primary"
-                                          onClick={e => { mostrarAnterioresDias(e) }}
-                                          disabled={indiceDias === 0}>
+                                          onClick={e => { mostrarAnterioresHoras(e) }}
+                                          disabled={indiceHoras === 0}>
                                           <ChevronLeft />
                                         </button>
+                                        {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
 
-                                        {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
-                                          // console.log('day en el map', date,'holo', day.fechaInicio)
                                           return (
                                             <button
-                                              className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
-                                              key={`${day.id}${i}days`}
-                                              onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
-                                              {dayjs(day.fechaInicio).format('ddd DD MMM')}
+                                              type="button"
+                                              className={`btn me-2 ${time === hour.horaInicioBloque ? "btn-primary" : "btn-cancel"}`}
+                                              key={`${hour.id}${i}hours`}
+                                              onClick={() => { setTime(hour.horaInicioBloque) }}>
+                                              {hour.horaInicioBloque}
                                             </button>
                                           )
                                         }
                                         )}
                                         <button
                                           className="btn btn-primary"
-                                          onClick={e => { mostrarSiguientesDias(e) }}
-                                          disabled={indiceDias + 5 >= days.length}>
+                                          onClick={e => { mostrarSiguientesHoras(e) }}
+                                          disabled={indiceHoras + 5 >= hours.length}>
                                           <ChevronRight />
                                         </button>
                                       </>)
                                     }
                                   </div>
                                 </div>
-                                {/* <DatePick /> */}
-                                {date !== '' &&
-                                  <div className="col-12 col-md-12 col-xl-12">
-                                    <label>
-                                      Hora <span className="login-danger">*</span>
-                                    </label>
-                                    <div className="form-group local-forms">
-                                      {hours.length > 0 && (
-                                        <>
-                                          <button
-                                            className="btn btn-primary"
-                                            onClick={e => { mostrarAnterioresHoras(e) }}
-                                            disabled={indiceHoras === 0}>
-                                            <ChevronLeft />
-                                          </button>
-                                          {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
-                                            console.log('hour', hour.horaInicioBloque, time)
-                                            return (
-                                              <button
-                                                type="button"
-                                                className={`btn me-2 ${time === hour.horaInicioBloque ? "btn-primary" : "btn-cancel"}`}
-                                                key={`${hour.id}${i}hours`}
-                                                onClick={() => { setTime(hour.horaInicioBloque) }}>
-                                                {hour.horaInicioBloque}
-                                              </button>
-                                            )
-                                          }
-                                          )}
-                                          <button
-                                            className="btn btn-primary"
-                                            onClick={e => { mostrarSiguientesHoras(e) }}
-                                            disabled={indiceHoras + 5 >= hours.length}>
-                                            <ChevronRight />
-                                          </button>
-                                        </>)
-                                      }
-                                    </div>
-                                  </div>
-                                }
-                              </div>
-                            }
-                           
-                          </AccordionDetails>
-                        </Accordion>
-
-                      </div>
-
+                              }
+                            </div>
+                          }
+                        </AccordionDetails>
+                      </Accordion>
 
 
                       <div className="col-12">
-                        <div className="doctor-submit text-end">
+                        <div className="doctor-submit text-end mt-3">
                           <button
                             // type="submit"
                             className="btn btn-primary submit-form me-2"
@@ -1096,8 +944,8 @@ const AddAppoinments = () => {
             : ''
         }
       </>
-    </ProtectedPage>
+    </>
   );
 };
 
-export default AddAppoinments;
+export default withAuth(AddAppoinments, ['profesional']);

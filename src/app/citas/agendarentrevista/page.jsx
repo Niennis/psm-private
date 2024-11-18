@@ -29,7 +29,10 @@ import { createAppointment, sendEmail } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta } from "@/utils/selects";
 // import { formatRut } from "@/utils/managedata";
 import { fetchScheduleByDate, fetchScheduleByUser, fetchScheduleByAvailability } from "@/services/SchedulesServices";
-import ProtectedPage from "@/components/ProtectedRoutes";
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const formatRut = (value) => {
   const cleanedValue = value.replace(/[^\dkK]/g, '');
@@ -91,7 +94,7 @@ const AddFirstAppoinments = () => {
   const fetchInitialData = async () => {
     try {
       const { users: patient } = await fetchUser(session.user.id);
-
+      console.log('patient', patient)
       return {
         name: patient[0].nombre,
         lastName: patient[0].apellido,
@@ -163,46 +166,18 @@ const AddFirstAppoinments = () => {
       //     fechaInicio: '2024-06-20',
       //     id_user: 2
       //   },
-      //   {
-      //     fechaInicio: '2024-06-21',
-      //     id_user: 2
-      //   },
-      //   {
-      //     fechaInicio: '2024-06-24',
-      //     id_user: 2
-      //   },
-      //   {
-      //     fechaInicio: '2024-06-25',
-      //     id_user: 2
-      //   },
-      //   {
-      //     fechaInicio: '2024-06-26',
-      //     id_user: 2
-      //   },
-      //   {
-      //     fechaInicio: '2024-06-27',
-      //     id_user: 2
-      //   },
-      //   {
-      //     fechaInicio: '2024-06-28',
-      //     id_user: 2
-      //   },
-      //   {
-      //     fechaInicio: '2024-07-01',
-      //     id_user: 2
-      //   },
       // ])
     } catch (error) {
       console.log('Error: ', error)
     }
   }
 
-  function horaAMinutos(hora) {
+  const horaAMinutos = (hora) => {
     const partesHora = hora.split(":");
     return parseInt(partesHora[0]) * 60 + parseInt(partesHora[1]);
   }
 
-  function calcularHoraInicioDeBloques(cita) {
+  const calcularHoraInicioDeBloques = (cita) => {
     const horaIniMinutos = horaAMinutos(cita.horaIni);
     const duracionBloque = cita.duracionServicio;
 
@@ -220,17 +195,12 @@ const AddFirstAppoinments = () => {
   }
 
   // Función para convertir minutos a formato HH:MM
-  function minutosAHora(minutos) {
+  const minutosAHora = (minutos) => {
     const horas = Math.floor(minutos / 60);
     const minutosRestantes = minutos % 60;
     return `${String(horas).padStart(2, "0")}:${String(minutosRestantes).padStart(2, "0")}:00`;
   }
 
-  // Función para convertir una hora en formato HH:MM:SS a minutos
-  function horaAMinutos(hora) {
-    const partesHora = hora.split(":");
-    return parseInt(partesHora[0]) * 60 + parseInt(partesHora[1]);
-  }
 
   const handleDays = async (e, fecha, id) => {
     setHours('')
@@ -438,7 +408,7 @@ const AddFirstAppoinments = () => {
   const handleCloseBackdrop = () => setOpenBackdrop(false);
 
   return (
-    <ProtectedPage level={ROL}>
+    < >
       {/* <Header /> */}
       <Sidebar
         id="menu-item4"
@@ -1252,7 +1222,7 @@ const AddFirstAppoinments = () => {
                             </div>
                           }
                           <div className="col-12">
-                            <div className="doctor-submit text-end">
+                            <div className="doctor-submit text-end mt-3">
                               <button
                                 type="button"
                                 className="btn btn-primary submit-form me-2"
@@ -1346,8 +1316,10 @@ const AddFirstAppoinments = () => {
         }
       </>
 
-    </ProtectedPage>
+    </>
   );
 };
 
-export default AddFirstAppoinments;
+// export default AddFirstAppoinments;
+export default withAuth(AddFirstAppoinments, ['alumno', 'profesional']);
+
