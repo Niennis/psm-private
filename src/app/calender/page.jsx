@@ -3,20 +3,25 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 
-import Link from "next/link";
-// import { useParams } from "react-router-dom";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 
-import Sidebar from "../../components/Sidebar";
-import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { DatePicker } from "antd";
 import esLocale from '@fullcalendar/core/locales/es'
 // import { fetchSchedules } from "../../utils/fetchSchedules";
 import { fetchSchedules, fetchScheduleByDate, fetchScheduleByAvailability, fetchScheduleByUser } from "@/services/SchedulesServices";
 import Carrousel from "@/components/skeletons/Carrousel";
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
+
+const formatDate = (dateString) => {
+  const [year, part1, part2] = dateString.split("-");
+  return parseInt(part1) > 12 ? `${year}-${part2}-${part1}` : dateString;
+};
 
 const Calender = ({ id }) => {
   const [menu, setMenu] = useState(false);
@@ -81,8 +86,8 @@ const Calender = ({ id }) => {
         return (
           {
             ...item,
-            start: datesToTimestamp(item.fechaInicio, item.horaIni),
-            end: datesToTimestamp(item.fechaFin, item.horaFin),
+            start: datesToTimestamp(formatDate(item.fechaInicio), item.horaIni),
+            end: datesToTimestamp(formatDate(item.fechaFin), item.horaFin),
             className: "bg-purple",
             title: item.detalleServicio || 'Disponible',
           }
@@ -345,4 +350,5 @@ const Calender = ({ id }) => {
   )
 };
 
-export default Calender;
+// export default Calender;
+export default withAuth(Calender, ['alumno', 'profesional']);
