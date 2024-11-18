@@ -82,7 +82,8 @@ const AddInterviewRecord = ({ params }) => {
         edad: calcularEdad(responsePatient.fecha_nacimiento),
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
-        telefono: date[0].telefono_estudiante
+        telefono: date[0].telefono_estudiante,
+        validacion: date[0].validacion
       }
       setPatient(responsePatient)
       return obj
@@ -225,7 +226,7 @@ const AddInterviewRecord = ({ params }) => {
     setContacts(newContact);
   }
 
-  
+
   const handleDeleteContact = (key) => {
     const newArray = contacts.filter((_, i) => i !== key);
     setContacts(newArray)
@@ -296,85 +297,413 @@ const AddInterviewRecord = ({ params }) => {
             <div className="row">
               <div className="col-sm-12">
                 <div className="card">
-                  <div className="card-body">
-                    <h4>Entrevista de evaluación</h4>
-                    <form>
-                      {/* Detalles de la cita */}
+                  {patient?.validacion ?
 
-                      <div className="row" style={{ border: '1px solid lightgrey', borderRadius: '8px', padding: '20px 0 0 0', margin: '10px' }}>
-                        <div className="col-12 col-md-4 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Profesional que realiza evaluación
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              {...register('profesional_evaluador')}
-                            />
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-4 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Fecha
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              {...register('fecha', {
-                                required: {
-                                  value: true,
-                                  message: 'Fecha es requerida'
-                                }
-                              })}
-                            />
-                            {errors.fecha && <span className="login-danger">
-                              <small>{errors.fecha.message}</small>
-                            </span>}
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-4 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Número de ficha
-                            </label>
-                            <input
-                              className="form-control"
-                              // value={rut}
-                              type="text"
-                              {...register('numero_ficha', {
-                                required: {
-                                  value: true,
-                                  message: 'Número de ficha es requerido'
-                                }
-                              })}
-                            />
-                            {errors.numero_ficha && <span className="login-danger">
-                              <small>{errors.numero_ficha.message}</small>
-                            </span>}
-                          </div>
-                        </div>
-                      </div>
+                    <div className="card-body">
+                      <h4>Registrar atención</h4>
+                      <form>
+                        {/* Detalles de la cita */}
 
-                      {/* 1. Datos de identificación */}
-                      <Accordion>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls="panel1-content"
-                          id="panel1-header">
-                          <div className="col-12">
-                            <div className="form-heading">
-                              <h4>1. Datos de identificación</h4>
+                        <div className="row" style={{ border: '1px solid lightgrey', borderRadius: '8px', padding: '20px 0 0 0', margin: '10px' }}>
+                          <div className="col-12 col-md-4 col-xl-4">
+                            <div className="form-group local-forms">
+                              <label>
+                                Profesional que realiza evaluación
+                              </label>
+                              <input
+                                className="form-control"
+                                type="text"
+                                {...register('profesional_evaluador')}
+                              />
                             </div>
                           </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <div className="row" >
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>Nombre completo</label>
-                                {/* <select className="select form-control" name="cars" id="cars">
+                          <div className="col-12 col-md-4 col-xl-4">
+                            <div className="form-group local-forms">
+                              <label>
+                                Fecha
+                              </label>
+                              <input
+                                className="form-control"
+                                type="text"
+                                {...register('fecha', {
+                                  required: {
+                                    value: true,
+                                    message: 'Fecha es requerida'
+                                  }
+                                })}
+                              />
+                              {errors.fecha && <span className="login-danger">
+                                <small>{errors.fecha.message}</small>
+                              </span>}
+                            </div>
+                          </div>
+                          <div className="col-12 col-md-4 col-xl-4">
+                            <div className="form-group local-forms">
+                              <label>
+                                Número de ficha
+                              </label>
+                              <input
+                                className="form-control"
+                                // value={rut}
+                                type="text"
+                                {...register('numero_ficha', {
+                                  required: {
+                                    value: true,
+                                    message: 'Número de ficha es requerido'
+                                  }
+                                })}
+                              />
+                              {errors.numero_ficha && <span className="login-danger">
+                                <small>{errors.numero_ficha.message}</small>
+                              </span>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 1. Datos de identificación */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>1. Datos de identificación</h4>
+                              </div>
+                            </div>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row" >
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>Nombre completo</label>
+                                  {/* <select className="select form-control" name="cars" id="cars">
+                          {
+                            patients.map(patient => (
+                              <option
+                                value={`${patient.nombre} ${patient.apellido}`}
+                                key={patient.id}>{patient.nombre} {patient.apellido}
+                              </option>
+                            ))
+                          }
+                        </select> */}
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('nombre_completo')} />
+                                  {errors.nombre_completo && <span className="login-danger">
+                                    <small>{errors.nombre_completo.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>Rut</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('rut')} />
+                                  {errors.rut && <span className="login-danger">
+                                    <small>{errors.rut.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Carrera</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('carrera')} />
+                                  {errors.carrera && <span className="login-danger">
+                                    <small>{errors.carrera.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Año de ingreso</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('ano_ingreso')} />
+                                  {errors.ano_ingreso && <span className="login-danger">
+                                    <small>{errors.ano_ingreso.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Fecha de nacimiento</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('fecha_nacimiento')} />
+                                  {errors.fecha_nacimiento && <span className="login-danger">
+                                    <small>{errors.fecha_nacimiento.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Edad</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('edad')} />
+                                  {errors.edad && <span className="login-danger">
+                                    <small>{errors.edad.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>Comuna</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('comuna')} />
+                                  {errors.comuna && <span className="login-danger">
+                                    <small>{errors.comuna.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Correo electrónico</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('correo')} />
+                                  {errors.correo && <span className="login-danger">
+                                    <small>{errors.correo.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Teléfono</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('telefono')} />
+                                  {errors.telefono && <span className="login-danger">
+                                    <small>{errors.telefono.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
+
+                            </div>
+                          </AccordionDetails>
+                        </Accordion>
+
+
+
+                        {/* 2. Motivo de consulta */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>2. Motivo de consulta</h4>
+                              </div>
+                            </div>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                          <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('motivo_consulta')}
+                                  />
+                                </div>
+                              </div>
+
+                            </div>
+                          </AccordionDetails>
+                        </Accordion>
+                        {/* 3. Antecedentes generales */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>3. Antecedentes Generales</h4>
+                              </div>
+                            </div>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('desafio_enfrentado_universidad')}
+                                  />
+                                </div>
+                              </div>
+
+                            </div>
+                          </AccordionDetails>
+                        </Accordion>
+                       
+                       
+                        {/* 4. Acuerdos */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>4. Acuerdos</h4>
+                              </div>
+                            </div>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <textarea
+                                    className="form-control"
+                                    rows={4}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('observaciones')}
+                                  />
+                                </div>
+                              </div>
+
+                            </div>
+                          </AccordionDetails>
+                        </Accordion>
+                        <div className="col-12">
+                          <div className="doctor-submit text-end mt-3">
+                            <button
+                              // type="submit"
+                              className="btn btn-primary submit-form me-2"
+                              onClick={(e) => { handleInterview(e) }}
+                            >
+                              Enviar
+                            </button>
+                            <button
+                              // type="submit"
+                              className="btn btn-primary cancel-form"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+
+                      </form>
+                    </div>
+                    :
+
+                    <div className="card-body">
+                      <h4>Entrevista de evaluación</h4>
+                      <form>
+                        {/* Detalles de la cita */}
+
+                        <div className="row" style={{ border: '1px solid lightgrey', borderRadius: '8px', padding: '20px 0 0 0', margin: '10px' }}>
+                          <div className="col-12 col-md-4 col-xl-4">
+                            <div className="form-group local-forms">
+                              <label>
+                                Profesional que realiza evaluación
+                              </label>
+                              <input
+                                className="form-control"
+                                type="text"
+                                {...register('profesional_evaluador')}
+                              />
+                            </div>
+                          </div>
+                          <div className="col-12 col-md-4 col-xl-4">
+                            <div className="form-group local-forms">
+                              <label>
+                                Fecha
+                              </label>
+                              <input
+                                className="form-control"
+                                type="text"
+                                {...register('fecha', {
+                                  required: {
+                                    value: true,
+                                    message: 'Fecha es requerida'
+                                  }
+                                })}
+                              />
+                              {errors.fecha && <span className="login-danger">
+                                <small>{errors.fecha.message}</small>
+                              </span>}
+                            </div>
+                          </div>
+                          <div className="col-12 col-md-4 col-xl-4">
+                            <div className="form-group local-forms">
+                              <label>
+                                Número de ficha
+                              </label>
+                              <input
+                                className="form-control"
+                                // value={rut}
+                                type="text"
+                                {...register('numero_ficha', {
+                                  required: {
+                                    value: true,
+                                    message: 'Número de ficha es requerido'
+                                  }
+                                })}
+                              />
+                              {errors.numero_ficha && <span className="login-danger">
+                                <small>{errors.numero_ficha.message}</small>
+                              </span>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 1. Datos de identificación */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>1. Datos de identificación</h4>
+                              </div>
+                            </div>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row" >
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>Nombre completo</label>
+                                  {/* <select className="select form-control" name="cars" id="cars">
                               {
                                 patients.map(patient => (
                                   <option
@@ -384,240 +713,240 @@ const AddInterviewRecord = ({ params }) => {
                                 ))
                               }
                             </select> */}
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('nombre_completo')} />
-                                {errors.nombre_completo && <span className="login-danger">
-                                  <small>{errors.nombre_completo.message}</small>
-                                </span>}
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('nombre_completo')} />
+                                  {errors.nombre_completo && <span className="login-danger">
+                                    <small>{errors.nombre_completo.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>Rut</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('rut')} />
-                                {errors.rut && <span className="login-danger">
-                                  <small>{errors.rut.message}</small>
-                                </span>}
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>Rut</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('rut')} />
+                                  {errors.rut && <span className="login-danger">
+                                    <small>{errors.rut.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>Carrera</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('carrera')} />
-                                {errors.carrera && <span className="login-danger">
-                                  <small>{errors.carrera.message}</small>
-                                </span>}
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Carrera</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('carrera')} />
+                                  {errors.carrera && <span className="login-danger">
+                                    <small>{errors.carrera.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>Año de ingreso</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('ano_ingreso')} />
-                                {errors.ano_ingreso && <span className="login-danger">
-                                  <small>{errors.ano_ingreso.message}</small>
-                                </span>}
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Año de ingreso</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('ano_ingreso')} />
+                                  {errors.ano_ingreso && <span className="login-danger">
+                                    <small>{errors.ano_ingreso.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>Fecha de nacimiento</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('fecha_nacimiento')} />
-                                {errors.fecha_nacimiento && <span className="login-danger">
-                                  <small>{errors.fecha_nacimiento.message}</small>
-                                </span>}
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Fecha de nacimiento</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('fecha_nacimiento')} />
+                                  {errors.fecha_nacimiento && <span className="login-danger">
+                                    <small>{errors.fecha_nacimiento.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>Edad</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('edad')} />
-                                {errors.edad && <span className="login-danger">
-                                  <small>{errors.edad.message}</small>
-                                </span>}
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Edad</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('edad')} />
+                                  {errors.edad && <span className="login-danger">
+                                    <small>{errors.edad.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>Dirección</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('direccion')} />
-                                {errors.direccion && <span className="login-danger">
-                                  <small>{errors.direccion.message}</small>
-                                </span>}
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>Dirección</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('direccion')} />
+                                  {errors.direccion && <span className="login-danger">
+                                    <small>{errors.direccion.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>Correo electrónico</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('correo')} />
-                                {errors.correo && <span className="login-danger">
-                                  <small>{errors.correo.message}</small>
-                                </span>}
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Correo electrónico</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('correo')} />
+                                  {errors.correo && <span className="login-danger">
+                                    <small>{errors.correo.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>Teléfono</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('telefono')} />
-                                {errors.telefono && <span className="login-danger">
-                                  <small>{errors.telefono.message}</small>
-                                </span>}
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Teléfono</label>
+                                  <input
+                                    className="form-control" type="text"
+                                    defaultValue={""}
+                                    {...register('telefono')} />
+                                  {errors.telefono && <span className="login-danger">
+                                    <small>{errors.telefono.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
 
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
+                            </div>
+                          </AccordionDetails>
+                        </Accordion>
 
-                      {/* 2. Datos de contactos de urgencia */}
-                      <Accordion>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls="panel1-content"
-                          id="panel1-header">
-                          <div className="col-12">
-                            <div className="form-heading">
-                              <h4>2. Datos de contactos de urgencia</h4>
-                            </div>
-                          </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <div className="row">
-                            <div className="col-12 col-md-4 col-xl-4">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Nombre y apellido
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('nombre_contacto_emergencia1')}
-                                />
-                                {errors.nombre_contacto_emergencia1 && <span className="login-danger">
-                                  <small>{errors.nombre_contacto_emergencia1.message}</small>
-                                </span>}
+                        {/* 2. Datos de contactos de urgencia */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>2. Datos de contactos de urgencia</h4>
                               </div>
                             </div>
-                            <div className="col-12 col-md-4 col-xl-4">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Parentesco o relación
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('parentesco_contacto_emergencia1')}
-                                />
-                                {errors.parentesco_contacto_emergencia1 && <span className="login-danger">
-                                  <small>{errors.parentesco_contacto_emergencia1.message}</small>
-                                </span>}
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+                              <div className="col-12 col-md-4 col-xl-4">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Nombre y apellido
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('nombre_contacto_emergencia1')}
+                                  />
+                                  {errors.nombre_contacto_emergencia1 && <span className="login-danger">
+                                    <small>{errors.nombre_contacto_emergencia1.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
-                            <div className="col-12 col-md-4 col-xl-4">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Teléfono
-                                </label>
-                                <input
-                                  className="form-control"
-                                  // value={rut}
-                                  type="text"
-                                  {...register('celular_contacto_emergencia1')}
-                                />
-                                {errors.celular_contacto_emergencia1 && <span className="login-danger">
-                                  <small>{errors.celular_contacto_emergencia1.message}</small>
-                                </span>}
+                              <div className="col-12 col-md-4 col-xl-4">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Parentesco o relación
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('parentesco_contacto_emergencia1')}
+                                  />
+                                  {errors.parentesco_contacto_emergencia1 && <span className="login-danger">
+                                    <small>{errors.parentesco_contacto_emergencia1.message}</small>
+                                  </span>}
+                                </div>
                               </div>
-                            </div>
+                              <div className="col-12 col-md-4 col-xl-4">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Teléfono
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    // value={rut}
+                                    type="text"
+                                    {...register('celular_contacto_emergencia1')}
+                                  />
+                                  {errors.celular_contacto_emergencia1 && <span className="login-danger">
+                                    <small>{errors.celular_contacto_emergencia1.message}</small>
+                                  </span>}
+                                </div>
+                              </div>
 
 
-                            <div className="col-12 col-md-4 col-xl-4">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Nombre y apellido
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('nombre_contacto_emergencia2')}
-                                />
+                              <div className="col-12 col-md-4 col-xl-4">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Nombre y apellido
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('nombre_contacto_emergencia2')}
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-12 col-md-4 col-xl-4">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Parentesco o relación
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('parentesco_contacto_emergencia2')}
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-12 col-md-4 col-xl-4">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Teléfono
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('celular_contacto_emergencia2')}
+                                  />
+                                </div>
                               </div>
                             </div>
-                            <div className="col-12 col-md-4 col-xl-4">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Parentesco o relación
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('parentesco_contacto_emergencia2')}
-                                />
-                              </div>
-                            </div>
-                            <div className="col-12 col-md-4 col-xl-4">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Teléfono
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('celular_contacto_emergencia2')}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
+                          </AccordionDetails>
+                        </Accordion>
 
-                      {/* 3. Antecedentes sociales y familiares */}
-                      <Accordion>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls="panel1-content"
-                          id="panel1-header">
-                          <div className="col-12">
-                            <div className="form-heading">
-                              <h4>3. Antecedentes sociales y familiares</h4>
+                        {/* 3. Antecedentes sociales y familiares */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>3. Antecedentes sociales y familiares</h4>
+                              </div>
                             </div>
-                          </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          {/* <div className="col-12 col-md-12 col-xl-12">
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            {/* <div className="col-12 col-md-12 col-xl-12">
                           <div className="form-group select-gender">
                             <label>Previsión de salud </label>
                             <div className="form-check-inline">
@@ -658,628 +987,628 @@ const AddInterviewRecord = ({ params }) => {
                             </div>
                           </div>
                         </div> */}
-                          <div className="row">
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group select-gender">
-                                <label>Financiamiento carrera </label>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="financiamiento_carrera"
-                                      value="gratuidad"
-                                      className="form-check-input"
-                                      {...register('financiamiento_carrera')}
-                                    />
-                                    Gratuidad
-                                  </label>
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group select-gender">
+                                  <label>Financiamiento carrera </label>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="financiamiento_carrera"
+                                        value="gratuidad"
+                                        className="form-check-input"
+                                        {...register('financiamiento_carrera')}
+                                      />
+                                      Gratuidad
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="financiamiento_carrera"
+                                        value="beca"
+                                        className="form-check-input"
+                                        {...register('financiamiento_carrera')}
+                                      />
+                                      Beca
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="financiamiento_carrera"
+                                        value="credito"
+                                        className="form-check-input"
+                                        {...register('financiamiento_carrera')}
+                                      />
+                                      Crédito
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="financiamiento_carrera"
+                                        value="sin beneficio"
+                                        className="form-check-input"
+                                        {...register('financiamiento_carrera')}
+                                      />
+                                      Sin beneficio
+                                    </label>
+                                  </div>
+                                  {
+                                    errors.financiamiento_carrera && <span className="login-danger">
+                                      <small>{errors.financiamiento_carrera.message}</small>
+                                    </span>
+                                  }
                                 </div>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="financiamiento_carrera"
-                                      value="beca"
-                                      className="form-check-input"
-                                      {...register('financiamiento_carrera')}
-                                    />
-                                    Beca
-                                  </label>
-                                </div>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="financiamiento_carrera"
-                                      value="credito"
-                                      className="form-check-input"
-                                      {...register('financiamiento_carrera')}
-                                    />
-                                    Crédito
-                                  </label>
-                                </div>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="financiamiento_carrera"
-                                      value="sin beneficio"
-                                      className="form-check-input"
-                                      {...register('financiamiento_carrera')}
-                                    />
-                                    Sin beneficio
-                                  </label>
-                                </div>
-                                {
-                                  errors.financiamiento_carrera && <span className="login-danger">
-                                    <small>{errors.financiamiento_carrera.message}</small>
-                                  </span>
-                                }
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>¿Dónde y con quién vives? Relación que tienes con ellos. ¿cómo te llevas con ellos?</label>
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>¿Dónde y con quién vives? Relación que tienes con ellos. ¿cómo te llevas con ellos?</label>
 
-                                <textarea
-                                  className="form-control"
-                                  rows={3}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('vivienda_situacion_actual')}
-                                />
-                                {
-                                  errors.vivienda_situacion_actual && <span className="login-danger">
-                                    <small>{errors.vivienda_situacion_actual.message}</small>
-                                  </span>
-                                }
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>¿Tienes labores de cuidador? ¿A quién cuidas?</label>
-
-                                <textarea
-                                  className="form-control"
-                                  rows={3}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('labores_cuidador')}
-                                />
-                                {
-                                  errors.labores_cuidador && <span className="login-danger">
-                                    <small>{errors.labores_cuidador.message}</small>
-                                  </span>
-                                }
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>¿De qué manera financias tus gastos personales?</label>
-                                <textarea
-                                  className="form-control"
-                                  rows={3}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('financiamiento_gastos_personales')}
-                                />
-                                {
-                                  errors.financiamiento_gastos_personales && <span className="login-danger">
-                                    <small>{errors.financiamiento_gastos_personales.message}</small>
-                                  </span>
-                                }
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>En caso de que tuvieses que costear tratamiento externo, quién/es podrían apoyarte económicamente?</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('apoyo_economico_tratamiento')} />
-                                {
-                                  errors.apoyo_economico_tratamiento && <span className="login-danger">
-                                    <small>{errors.apoyo_economico_tratamiento.message}</small>
-                                  </span>
-                                }
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>¿Cuánto crees que podrías pagar para acceder a tratamiento semanalmente?</label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('pago_tratamiento_semanal')} />
-                                {
-                                  errors.pago_tratamiento_semanal && <span className="login-danger">
-                                    <small>{errors.pago_tratamiento_semanal.message}</small>
-                                  </span>
-                                }
-                              </div>
-                            </div>
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
-
-                      {/* 4. Antecedentes de salud */}
-                      <Accordion>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls="panel1-content"
-                          id="panel1-header">
-                          <div className="col-12">
-                            <div className="form-heading">
-                              <h4>4. Antecedentes de salud</h4>
-                            </div>
-                          </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <div className="row">
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Te has realizado chequeos de salud durante el último año?  </label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      value="si"
-                                      name="chequeos_salud_ultimo_ano"
-                                      className="form-check-input"
-                                      {...register('chequeos_salud_ultimo_ano')}
-                                    />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      value="no"
-                                      name="chequeos_salud_ultimo_ano"
-                                      className="form-check-input"
-                                      {...register('chequeos_salud_ultimo_ano')}
-                                    />
-                                    No / No recuerdo
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
-                                  <label className="form-check-label">
-                                    Motivo
-                                  </label>
                                   <textarea
                                     className="form-control"
-                                    rows={1}
+                                    rows={3}
                                     cols={30}
                                     defaultValue={""}
                                     style={{ resize: 'none' }}
-                                    {...register('motivo_chequeos_salud')}
+                                    {...register('vivienda_situacion_actual')}
                                   />
+                                  {
+                                    errors.vivienda_situacion_actual && <span className="login-danger">
+                                      <small>{errors.vivienda_situacion_actual.message}</small>
+                                    </span>
+                                  }
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Tienes alguna enfermedad de salud física?</label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      value="si"
-                                      name="enfermedad_salud_fisica"
-                                      className="form-check-input"
-                                      {...register('enfermedad_salud_fisica')}
-                                    />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      value="no"
-                                      name="enfermedad_salud_fisica"
-                                      className="form-check-input"
-                                      {...register('enfermedad_salud_fisica')}
-                                    />
-                                    No / No sé
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
-                                  <label className="form-check-label">
-                                    ¿Cuál?
-                                  </label>
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>¿Tienes labores de cuidador? ¿A quién cuidas?</label>
+
                                   <textarea
                                     className="form-control"
-                                    rows={1}
+                                    rows={3}
                                     cols={30}
                                     defaultValue={""}
                                     style={{ resize: 'none' }}
-                                    {...register('diagnostico_salud_fisica')}
+                                    {...register('labores_cuidador')}
                                   />
+                                  {
+                                    errors.labores_cuidador && <span className="login-danger">
+                                      <small>{errors.labores_cuidador.message}</small>
+                                    </span>
+                                  }
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Tienes algún diagnóstico de salud mental?</label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      value="si"
-                                      name="enfermedad_salud_mental"
-                                      className="form-check-input"
-                                      {...register('enfermedad_salud_mental')}
-                                    />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      value="no"
-                                      name="enfermedad_salud_mental"
-                                      className="form-check-input"
-                                      {...register('enfermedad_salud_mental')}
-                                    />
-                                    No
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
-                                  <label className="form-check-label">
-                                    ¿Cuál?
-                                  </label>
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>¿De qué manera financias tus gastos personales?</label>
                                   <textarea
                                     className="form-control"
-                                    rows={1}
+                                    rows={3}
                                     cols={30}
                                     defaultValue={""}
                                     style={{ resize: 'none' }}
-                                    {...register('diagnostico_salud_mental')}
+                                    {...register('financiamiento_gastos_personales')}
                                   />
+                                  {
+                                    errors.financiamiento_gastos_personales && <span className="login-danger">
+                                      <small>{errors.financiamiento_gastos_personales.message}</small>
+                                    </span>
+                                  }
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Tomas alguna medicación de manera permanente? (salud física y/o salud mental)</label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      value="si"
-                                      name="medicacion_permanente"
-                                      className="form-check-input"
-                                      {...register('medicacion_permanente')}
-                                    />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      value="no"
-                                      name="medicacion_permanente"
-                                      className="form-check-input"
-                                      {...register('medicacion_permanente')}
-                                    />
-                                    No
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
-                                  <label className="form-check-label">
-                                    ¿Cuál/es?
-                                  </label>
-                                  <textarea
-                                    className="form-control"
-                                    rows={1}
-                                    cols={30}
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>En caso de que tuvieses que costear tratamiento externo, quién/es podrían apoyarte económicamente?</label>
+                                  <input
+                                    className="form-control" type="text"
                                     defaultValue={""}
-                                    style={{ resize: 'none' }}
-                                    {...register('medicacion_permanente_nombres')}
-                                  />
+                                    {...register('apoyo_economico_tratamiento')} />
+                                  {
+                                    errors.apoyo_economico_tratamiento && <span className="login-danger">
+                                      <small>{errors.apoyo_economico_tratamiento.message}</small>
+                                    </span>
+                                  }
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Tienes atenciones previas en el departamento de salud mental?</label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="atenciones_previas_salud_mental"
-                                      className="form-check-input"
-                                      {...register('atenciones_previas_salud_mental')}
-                                    />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="atenciones_previas_salud_mental"
-                                      className="form-check-input"
-                                      {...register('atenciones_previas_salud_mental')}
-                                    />
-                                    No
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
-                                  <label className="form-check-label">
-                                    Describe
-                                  </label>
-                                  <textarea
-                                    className="form-control"
-                                    rows={1}
-                                    cols={30}
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>¿Cuánto crees que podrías pagar para acceder a tratamiento semanalmente?</label>
+                                  <input
+                                    className="form-control" type="text"
                                     defaultValue={""}
-                                    style={{ resize: 'none' }}
-                                    {...register('atenciones_previas_salud_mental')}
-                                  />
+                                    {...register('pago_tratamiento_semanal')} />
+                                  {
+                                    errors.pago_tratamiento_semanal && <span className="login-danger">
+                                      <small>{errors.pago_tratamiento_semanal.message}</small>
+                                    </span>
+                                  }
                                 </div>
                               </div>
                             </div>
+                          </AccordionDetails>
+                        </Accordion>
 
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Has estado en tratamientos previos en salud mental? ¿Cuánto tiempo y de qué tipo?</label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="tratamientos_previos_salud_mental"
-                                      className="form-check-input"
-                                      {...register('tratamientos_previos_salud_mental')}
-                                    />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="tratamientos_previos_salud_mental"
-                                      className="form-check-input"
-                                      {...register('tratamientos_previos_salud_mental')}
-                                    />
-                                    No
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
-                                  <label className="form-check-label">
-                                    Describe
-                                  </label>
-                                  <textarea
-                                    className="form-control"
-                                    rows={1}
-                                    cols={30}
-                                    defaultValue={""}
-                                    style={{ resize: 'none' }}
-                                    {...register('tratamientos_previos_salud_mental')}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Actualmente estás con algún tratamiento en salud mental?</label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="tratamiento_actual_salud_mental"
-                                      className="form-check-input"
-                                      {...register('tratamiento_actual_salud_mental')}
-                                    />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="tratamiento_actual_salud_mental"
-                                      className="form-check-input"
-                                      {...register('tratamiento_actual_salud_mental')}
-                                    />
-                                    No
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
-                                  <label className="form-check-label">
-                                    ¿De qué tipo?
-                                  </label>
-                                  <textarea
-                                    className="form-control"
-                                    rows={1}
-                                    cols={30}
-                                    defaultValue={""}
-                                    style={{ resize: 'none' }}
-                                    {...register('tratamiento_actual_salud_mental')}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-
-                            {/* Consumo de alcohol y/o drogas */}
+                        {/* 4. Antecedentes de salud */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
                             <div className="col-12">
                               <div className="form-heading">
-                                <h4>a) Consumo de alcohol y/o drogas</h4>
+                                <h4>4. Antecedentes de salud</h4>
                               </div>
                             </div>
-
-                            {/* Consumo de alcohol */}
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group select-gender">
-                                <label>¿Consumes alcohol?</label>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="consume_alcohol"
-                                      value="si"
-                                      className="form-check-input"
-                                      {...register('consume_alcohol')}
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Te has realizado chequeos de salud durante el último año?  </label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        value="si"
+                                        name="chequeos_salud_ultimo_ano"
+                                        className="form-check-input"
+                                        {...register('chequeos_salud_ultimo_ano')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        value="no"
+                                        name="chequeos_salud_ultimo_ano"
+                                        className="form-check-input"
+                                        {...register('chequeos_salud_ultimo_ano')}
+                                      />
+                                      No / No recuerdo
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
+                                    <label className="form-check-label">
+                                      Motivo
+                                    </label>
+                                    <textarea
+                                      className="form-control"
+                                      rows={1}
+                                      cols={30}
+                                      defaultValue={""}
+                                      style={{ resize: 'none' }}
+                                      {...register('motivo_chequeos_salud')}
                                     />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="consume_alcohol"
-                                      value="no"
-                                      className="form-check-input"
-                                      {...register('consume_alcohol')}
-                                    />
-                                    No
-                                  </label>
-                                </div>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="alcohol"
-                                      value="ocasional"
-                                      className="form-check-input"
-                                      {...register('alcohol_ocasional')}
-                                    />
-                                    Ocasional
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>
-                                  ¿Qué tipo?
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('tipo_alcohol_consumido')}
-                                />
-                              </div>
-                            </div>
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Frecuencia en que consumes
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('frecuencia_consumo_alcohol')}
-                                />
-                              </div>
-                            </div>
-
-                            {/* Consumo de drogas */}
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group select-gender">
-                                <label>¿Consumes drogas? </label>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="consume_drogas"
-                                      className="form-check-input"
-                                      {...register('consume_drogas')}
-                                    />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="consume_drogas"
-                                      className="form-check-input"
-                                      {...register('consume_drogas')}
-                                    />
-                                    No
-                                  </label>
-                                </div>
-                                <div className="form-check-inline">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="consume_drogas"
-                                      className="form-check-input"
-                                      {...register('consume_drogas')}
-                                    />
-                                    Ocasional
-                                  </label>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>
-                                  ¿Qué tipo?
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('tipo_drogas_consumidas')}
-                                />
-                              </div>
-                            </div>
-                            <div className="col-12 col-md-6 col-xl-6">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Frecuencia en que consumes
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('frecuencia_consumo_drogas')}
-                                />
-                              </div>
-                            </div>
 
-                            {/* Riesgo suicida */}
-                            <div className="col-12">
-                              <div className="form-heading">
-                                <h4>b) Riesgo suicida</h4>
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Tienes alguna enfermedad de salud física?</label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        value="si"
+                                        name="enfermedad_salud_fisica"
+                                        className="form-check-input"
+                                        {...register('enfermedad_salud_fisica')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        value="no"
+                                        name="enfermedad_salud_fisica"
+                                        className="form-check-input"
+                                        {...register('enfermedad_salud_fisica')}
+                                      />
+                                      No / No sé
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
+                                    <label className="form-check-label">
+                                      ¿Cuál?
+                                    </label>
+                                    <textarea
+                                      className="form-control"
+                                      rows={1}
+                                      cols={30}
+                                      defaultValue={""}
+                                      style={{ resize: 'none' }}
+                                      {...register('diagnostico_salud_fisica')}
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Aplicar escala riesgo suicida
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('riesgo_suicida_escala')}
-                                />
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Tienes algún diagnóstico de salud mental?</label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        value="si"
+                                        name="enfermedad_salud_mental"
+                                        className="form-check-input"
+                                        {...register('enfermedad_salud_mental')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        value="no"
+                                        name="enfermedad_salud_mental"
+                                        className="form-check-input"
+                                        {...register('enfermedad_salud_mental')}
+                                      />
+                                      No
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
+                                    <label className="form-check-label">
+                                      ¿Cuál?
+                                    </label>
+                                    <textarea
+                                      className="form-control"
+                                      rows={1}
+                                      cols={30}
+                                      defaultValue={""}
+                                      style={{ resize: 'none' }}
+                                      {...register('diagnostico_salud_mental')}
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Tomas alguna medicación de manera permanente? (salud física y/o salud mental)</label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        value="si"
+                                        name="medicacion_permanente"
+                                        className="form-check-input"
+                                        {...register('medicacion_permanente')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        value="no"
+                                        name="medicacion_permanente"
+                                        className="form-check-input"
+                                        {...register('medicacion_permanente')}
+                                      />
+                                      No
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
+                                    <label className="form-check-label">
+                                      ¿Cuál/es?
+                                    </label>
+                                    <textarea
+                                      className="form-control"
+                                      rows={1}
+                                      cols={30}
+                                      defaultValue={""}
+                                      style={{ resize: 'none' }}
+                                      {...register('medicacion_permanente_nombres')}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Tienes atenciones previas en el departamento de salud mental?</label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="atenciones_previas_salud_mental"
+                                        className="form-check-input"
+                                        {...register('atenciones_previas_salud_mental')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="atenciones_previas_salud_mental"
+                                        className="form-check-input"
+                                        {...register('atenciones_previas_salud_mental')}
+                                      />
+                                      No
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
+                                    <label className="form-check-label">
+                                      Describe
+                                    </label>
+                                    <textarea
+                                      className="form-control"
+                                      rows={1}
+                                      cols={30}
+                                      defaultValue={""}
+                                      style={{ resize: 'none' }}
+                                      {...register('atenciones_previas_salud_mental')}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Has estado en tratamientos previos en salud mental? ¿Cuánto tiempo y de qué tipo?</label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="tratamientos_previos_salud_mental"
+                                        className="form-check-input"
+                                        {...register('tratamientos_previos_salud_mental')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="tratamientos_previos_salud_mental"
+                                        className="form-check-input"
+                                        {...register('tratamientos_previos_salud_mental')}
+                                      />
+                                      No
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
+                                    <label className="form-check-label">
+                                      Describe
+                                    </label>
+                                    <textarea
+                                      className="form-control"
+                                      rows={1}
+                                      cols={30}
+                                      defaultValue={""}
+                                      style={{ resize: 'none' }}
+                                      {...register('tratamientos_previos_salud_mental')}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Actualmente estás con algún tratamiento en salud mental?</label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="tratamiento_actual_salud_mental"
+                                        className="form-check-input"
+                                        {...register('tratamiento_actual_salud_mental')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="tratamiento_actual_salud_mental"
+                                        className="form-check-input"
+                                        {...register('tratamiento_actual_salud_mental')}
+                                      />
+                                      No
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
+                                    <label className="form-check-label">
+                                      ¿De qué tipo?
+                                    </label>
+                                    <textarea
+                                      className="form-control"
+                                      rows={1}
+                                      cols={30}
+                                      defaultValue={""}
+                                      style={{ resize: 'none' }}
+                                      {...register('tratamiento_actual_salud_mental')}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
 
 
-                            {/*  <div className="col-12 col-md-4 col-xl-4">
+                              {/* Consumo de alcohol y/o drogas */}
+                              <div className="col-12">
+                                <div className="form-heading">
+                                  <h4>a) Consumo de alcohol y/o drogas</h4>
+                                </div>
+                              </div>
+
+                              {/* Consumo de alcohol */}
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group select-gender">
+                                  <label>¿Consumes alcohol?</label>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="consume_alcohol"
+                                        value="si"
+                                        className="form-check-input"
+                                        {...register('consume_alcohol')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="consume_alcohol"
+                                        value="no"
+                                        className="form-check-input"
+                                        {...register('consume_alcohol')}
+                                      />
+                                      No
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="alcohol"
+                                        value="ocasional"
+                                        className="form-check-input"
+                                        {...register('alcohol_ocasional')}
+                                      />
+                                      Ocasional
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    ¿Qué tipo?
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('tipo_alcohol_consumido')}
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Frecuencia en que consumes
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('frecuencia_consumo_alcohol')}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Consumo de drogas */}
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group select-gender">
+                                  <label>¿Consumes drogas? </label>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="consume_drogas"
+                                        className="form-check-input"
+                                        {...register('consume_drogas')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="consume_drogas"
+                                        className="form-check-input"
+                                        {...register('consume_drogas')}
+                                      />
+                                      No
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="consume_drogas"
+                                        className="form-check-input"
+                                        {...register('consume_drogas')}
+                                      />
+                                      Ocasional
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    ¿Qué tipo?
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('tipo_drogas_consumidas')}
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Frecuencia en que consumes
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('frecuencia_consumo_drogas')}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Riesgo suicida */}
+                              <div className="col-12">
+                                <div className="form-heading">
+                                  <h4>b) Riesgo suicida</h4>
+                                </div>
+                              </div>
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Aplicar escala riesgo suicida
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('riesgo_suicida_escala')}
+                                  />
+                                </div>
+                              </div>
+
+
+                              {/*  <div className="col-12 col-md-4 col-xl-4">
                           <div className="form-group local-forms">
                             <label>
                               Nombre y apellido
@@ -1355,77 +1684,316 @@ const AddInterviewRecord = ({ params }) => {
                             />
                           </div>
                         </div> */}
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
-                      {/* 5. Motivo de consulta */}
-                      <Accordion>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls="panel1-content"
-                          id="panel1-header">
-                          <div className="col-12">
-                            <div className="form-heading">
-                              <h4>5. Motivo de consulta</h4>
                             </div>
-                          </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <div className="row">
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Descripción motivo de consulta
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('motivo_consulta')}
-                                />
+                          </AccordionDetails>
+                        </Accordion>
+                        {/* 5. Motivo de consulta */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>5. Motivo de consulta</h4>
                               </div>
                             </div>
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Sintomatología asociada al motivo de consulta
-                                </label>
-                                <input
-                                  className="form-control"
-                                  type="text"
-                                  {...register('sintomatologia_motivo_consulta')}
-                                />
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Descripción motivo de consulta
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('motivo_consulta')}
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Sintomatología asociada al motivo de consulta
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    {...register('sintomatologia_motivo_consulta')}
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    ¿Cuál es tu expectativa con respecto a la atención en nuestro departamento?
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    // value={rut}
+                                    type="text"
+                                    {...register('expectativas_departamento')}
+                                  />
+                                </div>
+                                <div className="col-12 col-md-12 col-xl-12">
+                                  <div className="form-group local-forms">
+                                    <label>Área de atención de preferencia del/la estudiante<span className="login-danger">*</span>
+                                    </label>
+                                    <Controller
+                                      control={control}
+                                      name="area_atencion_preferencia"
+                                      {...register('area_atencion_preferencia')}
+                                      ref={null}
+                                      render={({ field: { onChange, onBlur, value } }) => (
+                                        <Select
+                                          instanceId="area_atencion_preferencia"
+                                          defaultValue={selectedOption}
+                                          onChange={onChange}
+                                          options={area_atencion}
+                                          // menuPortalTarget={document.body}
+                                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                          id="area_atencion_preferencia"
+                                          components={{
+                                            IndicatorSeparator: () => null
+                                          }}
+
+                                          styles={{
+                                            control: (baseStyles, state) => ({
+                                              ...baseStyles,
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                              boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                              '&:hover': {
+                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                              },
+                                              borderRadius: '10px',
+                                              fontSize: "14px",
+                                              minHeight: "45px",
+                                            }),
+                                            dropdownIndicator: (base, state) => ({
+                                              ...base,
+                                              transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                              transition: '250ms',
+                                              width: '35px',
+                                              height: '35px',
+
+                                            }),
+                                          }}
+                                        />
+                                      )}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+                          </AccordionDetails>
+                        </Accordion>
+                        {/* 6. Antecedentes académicos */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>6. Antecedentes académicos</h4>
                               </div>
                             </div>
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  ¿Cuál es tu expectativa con respecto a la atención en nuestro departamento?
-                                </label>
-                                <input
-                                  className="form-control"
-                                  // value={rut}
-                                  type="text"
-                                  {...register('expectativas_departamento')}
-                                />
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Es tu primera carrera?</label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="primera_carrera"
+                                        className="form-check-input"
+                                        {...register('primera_carrera')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="primera_carrera"
+                                        className="form-check-input"
+                                        {...register('primera_carrera')}
+                                      />
+                                      No
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
+                                    <label className="form-check-label">
+                                      Si es no, ¿qué estudiaste antes?
+                                    </label>
+                                    <textarea
+                                      className="form-control"
+                                      rows={1}
+                                      cols={30}
+                                      defaultValue={""}
+                                      style={{ resize: 'none' }}
+                                      {...register('primera_carrera')}
+                                    />
+                                  </div>
+                                </div>
                               </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Te sientes satisfecho/a con tu decisión de carrera actual?</label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="satisfecho_decision_carrera"
+                                        className="form-check-input"
+                                        {...register('satisfecho_decision_carrera')}
+                                      />
+                                      Si
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="satisfecho_decision_carrera"
+                                        className="form-check-input"
+                                        {...register('satisfecho_decision_carrera')}
+                                      />
+                                      No
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="satisfecho_decision_carrera"
+                                        className="form-check-input"
+                                        {...register('satisfecho_decision_carrera')}
+                                      />
+                                      Aún no lo sé
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>¿Cómo consideras que ha sido tu desempeño hasta ahora?</label>
+                                <div className="form-group select-gender">
+                                  <div className="form-check-inline col-2 col-md-1 col-xl-1">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="desempeno_academico"
+                                        className="form-check-input"
+                                        {...register('desempeno_academico')}
+                                      />
+                                      Bueno
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="desempeno_academico"
+                                        className="form-check-input"
+                                        {...register('desempeno_academico')}
+                                      />
+                                      Malo
+                                    </label>
+                                  </div>
+                                  <div className="form-check-inline col-6 col-md-2 col-xl-2">
+                                    <label className="form-check-label">
+                                      <input
+                                        type="radio"
+                                        name="desempeno_academico"
+                                        className="form-check-input"
+                                        {...register('desempeno_academico')}
+                                      />
+                                      Regular
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>
+                                  ¿Cuál ha sido el principal desafío al que te has enfrentado en la universidad?
+                                </label>
+                                <div className="form-group local-forms">
+
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('desafio_enfrentado_universidad')}
+                                  />
+                                </div>
+                              </div>
+
+                            </div>
+                          </AccordionDetails>
+                        </Accordion>
+                        {/* 7. Redes de apoyo disponibles */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>7. Redes de apoyo disponibles</h4>
+                              </div>
+                            </div>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    ¿Cuentas con personas significativas que te apoyen hoy en día? ¿Quiénes son?
+                                  </label>
+
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('redes_apoyo_personas_significativas')}
+                                  />
+                                </div>
+                              </div>
+
                               <div className="col-12 col-md-12 col-xl-12">
                                 <div className="form-group local-forms">
                                   <label>Área de atención de preferencia del/la estudiante<span className="login-danger">*</span>
                                   </label>
                                   <Controller
                                     control={control}
-                                    name="area_atencion_preferencia"
-                                    {...register('area_atencion_preferencia')}
+                                    name="tipos_apoyo_actual"
+                                    {...register('tipos_apoyo_actual')}
                                     ref={null}
                                     render={({ field: { onChange, onBlur, value } }) => (
                                       <Select
-                                        instanceId="area_atencion_preferencia"
+                                        isMulti
+                                        instanceId="tipos_apoyo_actual"
                                         defaultValue={selectedOption}
                                         onChange={onChange}
-                                        options={area_atencion}
+                                        options={tipo_apoyo}
                                         // menuPortalTarget={document.body}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                        id="area_atencion_preferencia"
+                                        id="tipos_apoyo_actual"
                                         components={{
                                           IndicatorSeparator: () => null
                                         }}
@@ -1456,549 +2024,311 @@ const AddInterviewRecord = ({ params }) => {
                                   />
                                 </div>
                               </div>
-                            </div>
 
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
-                      {/* 6. Antecedentes académicos */}
-                      <Accordion>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls="panel1-content"
-                          id="panel1-header">
-                          <div className="col-12">
-                            <div className="form-heading">
-                              <h4>6. Antecedentes académicos</h4>
                             </div>
-                          </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <div className="row">
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Es tu primera carrera?</label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="primera_carrera"
-                                      className="form-check-input"
-                                      {...register('primera_carrera')}
-                                    />
-                                    Si
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="primera_carrera"
-                                      className="form-check-input"
-                                      {...register('primera_carrera')}
-                                    />
-                                    No
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-8" style={{ display: 'inline-flex' }} >
-                                  <label className="form-check-label">
-                                    Si es no, ¿qué estudiaste antes?
+                          </AccordionDetails>
+                        </Accordion>
+                        {/* 8. Intereses y autocuidado */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>8. Intereses y autocuidado </h4>
+                              </div>
+                            </div>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    ¿Qué tipo de actividades te gusta realizar? ¿Les dedicas tiempo?
                                   </label>
                                   <textarea
                                     className="form-control"
-                                    rows={1}
+                                    rows={2}
                                     cols={30}
                                     defaultValue={""}
                                     style={{ resize: 'none' }}
-                                    {...register('primera_carrera')}
+                                    {...register('actividades_gustan_realizar')}
                                   />
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Te sientes satisfecho/a con tu decisión de carrera actual?</label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="satisfecho_decision_carrera"
-                                      className="form-check-input"
-                                      {...register('satisfecho_decision_carrera')}
-                                    />
-                                    Si
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    ¿Tienes espacios de autocuidado? ¿Cómo cuáles?
                                   </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="satisfecho_decision_carrera"
-                                      className="form-check-input"
-                                      {...register('satisfecho_decision_carrera')}
-                                    />
-                                    No
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="satisfecho_decision_carrera"
-                                      className="form-check-input"
-                                      {...register('satisfecho_decision_carrera')}
-                                    />
-                                    Aún no lo sé
-                                  </label>
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('espacios_autocuidado')}
+                                  />
                                 </div>
                               </div>
-                            </div>
 
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>¿Cómo consideras que ha sido tu desempeño hasta ahora?</label>
-                              <div className="form-group select-gender">
-                                <div className="form-check-inline col-2 col-md-1 col-xl-1">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="desempeno_academico"
-                                      className="form-check-input"
-                                      {...register('desempeno_academico')}
-                                    />
-                                    Bueno
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    ¿Dedicas tiempo para descansar? Promedio de horas dedicadas a dormir
                                   </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="desempeno_academico"
-                                      className="form-check-input"
-                                      {...register('desempeno_academico')}
-                                    />
-                                    Malo
-                                  </label>
-                                </div>
-                                <div className="form-check-inline col-6 col-md-2 col-xl-2">
-                                  <label className="form-check-label">
-                                    <input
-                                      type="radio"
-                                      name="desempeno_academico"
-                                      className="form-check-input"
-                                      {...register('desempeno_academico')}
-                                    />
-                                    Regular
-                                  </label>
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('tiempo_descanso_horas_sueno')}
+                                  />
                                 </div>
                               </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    ¿Cómo te alimentas? Describe un día de alimentación habitual
+                                  </label>
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('alimentacion_diaria_habitual')}
+                                  />
+                                </div>
+                              </div>
+
                             </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>
-                                ¿Cuál ha sido el principal desafío al que te has enfrentado en la universidad?
-                              </label>
-                              <div className="form-group local-forms">
-
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('desafio_enfrentado_universidad')}
-                                />
+                          </AccordionDetails>
+                        </Accordion>
+                        {/* Evaluación profesional */}
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1-content"
+                            id="panel1-header">
+                            <div className="col-12">
+                              <div className="form-heading">
+                                <h4>9. Evaluación profesional <small>(se completa luego de la entrevista)</small></h4>
                               </div>
                             </div>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <div className="row">
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>Modalidad de atención a la cual accede según evaluación</label>
+                                <div className="form-group local-forms">
+                                  <Controller
+                                    control={control}
+                                    name="modalidad_atencion_evaluacion"
+                                    {...register('modalidad_atencion_evaluacion')}
+                                    ref={null}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                      <Select
+                                        isMulti
+                                        instanceId="modalidad_atencion_evaluacion"
+                                        defaultValue={selectedOption}
+                                        onChange={onChange}
+                                        options={modalidad}
+                                        // menuPortalTarget={document.body}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="modalidad_atencion_evaluacion"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
 
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+
+                                          }),
+                                        }}
+                                      />
+                                    )}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>
+                                  Estado de ánimo/ Afectividad (presencia o no de sintomatología asociada a ansiedad/ depresión/ manía, entre otras)
+                                </label>
+                                <div className="form-group local-forms">
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('estado_animo_afectividad')}
+                                  />
+                                </div>
+                              </div>
+
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <label>
+                                  Tipo de pensamiento observado (organizado, desorganizado, obsesivo, entre otros)
+                                </label>
+                                <div className="form-group local-forms">
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('tipo_pensamiento_observado')}
+                                  />
+                                </div>
+                              </div>
+
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Detección de posibles condiciones asociadas a déficit cognitivo (TEA, TDHA)
+                                  </label>
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('deteccion_condiciones_deficit_cognitivo')}
+                                  />
+                                </div>
+                              </div>
+
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Consciencia de realidad (presencia de delirios, percepción alterada)
+                                  </label>
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('consciencia_realidad')}
+                                  />
+                                </div>
+                              </div>
+
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Autoconcepto y autoestima
+                                  </label>
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('autoconcepto_autoestima')}
+                                  />
+                                </div>
+                              </div>
+
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Situaciones de riesgo a nivel relacional
+                                  </label>
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('situaciones_riesgo_relacional')}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Situaciones de riesgo a nivel personal
+                                  </label>
+                                  <textarea
+                                    className="form-control"
+                                    rows={2}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('situaciones_riesgo_personal')}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-12 col-xl-12">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Observaciones
+                                  </label>
+                                  <textarea
+                                    className="form-control"
+                                    rows={4}
+                                    cols={30}
+                                    defaultValue={""}
+                                    style={{ resize: 'none' }}
+                                    {...register('observaciones')}
+                                  />
+                                </div>
+                              </div>
+
+                            </div>
+                          </AccordionDetails>
+                        </Accordion>
+                        <div className="col-12">
+                          <div className="doctor-submit text-end mt-3">
+                            <button
+                              // type="submit"
+                              className="btn btn-primary submit-form me-2"
+                              onClick={(e) => { handleInterview(e) }}
+                            >
+                              Enviar
+                            </button>
+                            <button
+                              // type="submit"
+                              className="btn btn-primary cancel-form"
+                            >
+                              Cancelar
+                            </button>
                           </div>
-                        </AccordionDetails>
-                      </Accordion>
-                      {/* 7. Redes de apoyo disponibles */}
-                      <Accordion>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls="panel1-content"
-                          id="panel1-header">
-                          <div className="col-12">
-                            <div className="form-heading">
-                              <h4>7. Redes de apoyo disponibles</h4>
-                            </div>
-                          </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <div className="row">
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  ¿Cuentas con personas significativas que te apoyen hoy en día? ¿Quiénes son?
-                                </label>
-
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('redes_apoyo_personas_significativas')}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>Área de atención de preferencia del/la estudiante<span className="login-danger">*</span>
-                                </label>
-                                <Controller
-                                  control={control}
-                                  name="tipos_apoyo_actual"
-                                  {...register('tipos_apoyo_actual')}
-                                  ref={null}
-                                  render={({ field: { onChange, onBlur, value } }) => (
-                                    <Select
-                                      isMulti
-                                      instanceId="tipos_apoyo_actual"
-                                      defaultValue={selectedOption}
-                                      onChange={onChange}
-                                      options={tipo_apoyo}
-                                      // menuPortalTarget={document.body}
-                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                      id="tipos_apoyo_actual"
-                                      components={{
-                                        IndicatorSeparator: () => null
-                                      }}
-
-                                      styles={{
-                                        control: (baseStyles, state) => ({
-                                          ...baseStyles,
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                          '&:hover': {
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                          },
-                                          borderRadius: '10px',
-                                          fontSize: "14px",
-                                          minHeight: "45px",
-                                        }),
-                                        dropdownIndicator: (base, state) => ({
-                                          ...base,
-                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                          transition: '250ms',
-                                          width: '35px',
-                                          height: '35px',
-
-                                        }),
-                                      }}
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
-                      {/* 8. Intereses y autocuidado */}
-                      <Accordion>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls="panel1-content"
-                          id="panel1-header">
-                          <div className="col-12">
-                            <div className="form-heading">
-                              <h4>8. Intereses y autocuidado </h4>
-                            </div>
-                          </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <div className="row">
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  ¿Qué tipo de actividades te gusta realizar? ¿Les dedicas tiempo?
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('actividades_gustan_realizar')}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  ¿Tienes espacios de autocuidado? ¿Cómo cuáles?
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('espacios_autocuidado')}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  ¿Dedicas tiempo para descansar? Promedio de horas dedicadas a dormir
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('tiempo_descanso_horas_sueno')}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  ¿Cómo te alimentas? Describe un día de alimentación habitual
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('alimentacion_diaria_habitual')}
-                                />
-                              </div>
-                            </div>
-
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
-                      {/* Evaluación profesional */}
-                      <Accordion>
-                        <AccordionSummary
-                          expandIcon={<ExpandMoreIcon />}
-                          aria-controls="panel1-content"
-                          id="panel1-header">
-                          <div className="col-12">
-                            <div className="form-heading">
-                              <h4>9. Evaluación profesional <small>(se completa luego de la entrevista)</small></h4>
-                            </div>
-                          </div>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <div className="row">
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>Modalidad de atención a la cual accede según evaluación</label>
-                              <div className="form-group local-forms">
-                                <Controller
-                                  control={control}
-                                  name="modalidad_atencion_evaluacion"
-                                  {...register('modalidad_atencion_evaluacion')}
-                                  ref={null}
-                                  render={({ field: { onChange, onBlur, value } }) => (
-                                    <Select
-                                      isMulti
-                                      instanceId="modalidad_atencion_evaluacion"
-                                      defaultValue={selectedOption}
-                                      onChange={onChange}
-                                      options={modalidad}
-                                      // menuPortalTarget={document.body}
-                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                      id="modalidad_atencion_evaluacion"
-                                      components={{
-                                        IndicatorSeparator: () => null
-                                      }}
-
-                                      styles={{
-                                        control: (baseStyles, state) => ({
-                                          ...baseStyles,
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                          '&:hover': {
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                          },
-                                          borderRadius: '10px',
-                                          fontSize: "14px",
-                                          minHeight: "45px",
-                                        }),
-                                        dropdownIndicator: (base, state) => ({
-                                          ...base,
-                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                          transition: '250ms',
-                                          width: '35px',
-                                          height: '35px',
-
-                                        }),
-                                      }}
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>
-                                Estado de ánimo/ Afectividad (presencia o no de sintomatología asociada a ansiedad/ depresión/ manía, entre otras)
-                              </label>
-                              <div className="form-group local-forms">
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('estado_animo_afectividad')}
-                                />
-                              </div>
-                            </div>
-
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <label>
-                                Tipo de pensamiento observado (organizado, desorganizado, obsesivo, entre otros)
-                              </label>
-                              <div className="form-group local-forms">
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('tipo_pensamiento_observado')}
-                                />
-                              </div>
-                            </div>
-
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Detección de posibles condiciones asociadas a déficit cognitivo (TEA, TDHA)
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('deteccion_condiciones_deficit_cognitivo')}
-                                />
-                              </div>
-                            </div>
-
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Consciencia de realidad (presencia de delirios, percepción alterada)
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('consciencia_realidad')}
-                                />
-                              </div>
-                            </div>
-
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Autoconcepto y autoestima
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('autoconcepto_autoestima')}
-                                />
-                              </div>
-                            </div>
-
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Situaciones de riesgo a nivel relacional
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('situaciones_riesgo_relacional')}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Situaciones de riesgo a nivel personal
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={2}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('situaciones_riesgo_personal')}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Observaciones
-                                </label>
-                                <textarea
-                                  className="form-control"
-                                  rows={4}
-                                  cols={30}
-                                  defaultValue={""}
-                                  style={{ resize: 'none' }}
-                                  {...register('observaciones')}
-                                />
-                              </div>
-                            </div>
-
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
-                      <div className="col-12">
-                        <div className="doctor-submit text-end">
-                          <button
-                            // type="submit"
-                            className="btn btn-primary submit-form me-2"
-                            onClick={(e) => { handleInterview(e) }}
-                          >
-                            Enviar
-                          </button>
-                          <button
-                            // type="submit"
-                            className="btn btn-primary cancel-form"
-                          >
-                            Cancelar
-                          </button>
                         </div>
-                      </div>
 
-                    </form>
-                  </div>
+                      </form>
+                    </div>
+                  }
                 </div>
               </div>
             </div>
