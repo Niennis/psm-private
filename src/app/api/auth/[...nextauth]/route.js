@@ -48,9 +48,9 @@ const authOptions = {
       },
       /* AUTHORIZE */
       authorize: async (credentials) => {
-        const cacheKey = `user-${credentials.email}`;
-        const cachedUser = await cacheHandler.get(cacheKey);
-        if (cachedUser) return cachedUser;
+        // const cacheKey = `user-${credentials.email}`;
+        // const cachedUser = await cacheHandler.get(cacheKey);
+        // if (cachedUser) return cachedUser;
 
         // let user = undefined;
         const pwHash = credentials.password
@@ -66,10 +66,10 @@ const authOptions = {
             throw new Error("usuario no encontrado.")
           }
 
-          if (user) {
-            await cacheHandler.set(cacheKey, user, { tags: ['user'] });
-            return user;
-          }
+          // if (user) {
+          //   await cacheHandler.set(cacheKey, user, { tags: ['user'] });
+          //   return user;
+          // }
           throw new Error("Usuario no encontrado.");
 
           // if (user.email === body.email && user.contrasena === body.contrasena) {
@@ -90,10 +90,7 @@ const authOptions = {
   callbacks: {
     async signIn({ account, profile, credentials }) {
       // Si el proveedor es google, validar que sea correo udp.
-      console.log('CALLBACK SIGNIN')
-      console.log('account', account)
-      console.log('profile', profile)
-      console.log('credentials', credentials)
+     
       if (account.provider === "google") {
         if (profile.email_verified && profile.email.endsWith("@gmail.com" || "@mail.udp.cl")) {
           profile.rol === 'alumno'
@@ -153,17 +150,16 @@ const authOptions = {
       }
     },
     async session({ session, user, token }) {
-      const cacheKey = `session-${session.user.email}`;
-      const cachedSession = await cacheHandler.get(cacheKey);
+      // const cacheKey = `session-${session.user.email}`;
+      // const cachedSession = await cacheHandler.get(cacheKey);
 
-      if (cachedSession) {
-        return cachedSession;
-      }
+      // if (cachedSession) {
+      //   return cachedSession;
+      // }
 
       // TODO buscar entre todos los usuarios para retornar el rol y agregarlo
       try {
         const users = await searchUser(session.user.email)
-        console.log('USERS', users)
         if (token /* && token.user */) {
           if (session.user.email === users[0].email) {
             session.user = token;
@@ -172,7 +168,6 @@ const authOptions = {
             session.user.rol = token.rol;
             return session;
           }
-          console.log('SESSION', session)
           return session;
         }
         return session;
