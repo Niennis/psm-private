@@ -2,14 +2,16 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react'
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSession } from "next-auth/react";
 import { Table } from 'antd';
+
 import Sidebar from '@/components/Sidebar';
+import SimpleBackdrop from '@/components/Backdrop';
 import { onShowSizeChange, itemRender } from '@/components/Pagination'
 
-import { useAuthorization } from '@/../hooks/useAuthorization';
-import { useSession } from "next-auth/react";
-import { useRouter } from 'next/navigation';
-
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
 import { fetchAppointments, changeStatusAppointment, search } from '@/services/AppointmentsServices'
 
 import {
@@ -17,110 +19,70 @@ import {
 } from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import ProtectedPage from '@/components/ProtectedRoutes';
 
-const citas = [
-  {
-    id: 1,
-    id_cita: 1,
-    nombre_alumno: 'Juan Perez',
-    nombre_profesional: 'Miguel González',
-    especialidad: 'Psicología',
-    telefono_alumno: '987654321',
-    mail_alumno: 'miguelgonzalez@udp.cl',
-    fecha: '12/07/2024',
-    hora: '09:30',
-    estado: 'Confirmada'
-  },
-  {
-    id: 2,
-    id_cita: 2,
-    nombre_alumno: 'Juan Perez',
-    nombre_profesional: 'Miguel González',
-    especialidad: 'Psicología',
-    telefono_alumno: '987654321',
-    mail_alumno: 'miguelgonzalez@udp.cl',
-    fecha: '19/07/2024',
-    hora: '09:30',
-    estado: 'Pendiente'
-  },
-  {
-    id: 3,
-    id_cita: 3,
-    nombre_alumno: 'Juan Perez',
-    nombre_profesional: 'Miguel González',
-    especialidad: 'Psicología',
-    telefono_alumno: '987654321',
-    mail_alumno: 'miguelgonzalez@udp.cl',
-    fecha: '26/07/2024',
-    hora: '09:30',
-    estado: 'Pendiente'
-  },
-  {
-    id: 4,
-    id_cita: 4,
-    nombre_alumno: 'Juan Perez',
-    nombre_profesional: 'Miguel González',
-    especialidad: 'Psicología',
-    telefono_alumno: '987654321',
-    mail_alumno: 'miguelgonzalez@udp.cl',
-    fecha: '02/08/2024',
-    hora: '09:30',
-    estado: 'Pendiente'
-  },
-  {
-    id: 5,
-    id_cita: 5,
-    nombre_alumno: 'Juan Perez',
-    nombre_profesional: 'Miguel González',
-    especialidad: 'Psicología',
-    telefono_alumno: '987654321',
-    mail_alumno: 'miguelgonzalez@udp.cl',
-    fecha: '09/07/2024',
-    hora: '09:30',
-    estado: 'Pendiente'
-  }
-]
+const cacheHandler = new CacheHandler();
 
 const AppoinmentList = () => {
-  const ROL = ["alumno"]
   const { data: session, status } = useSession();
   const router = useRouter();
-  // useAuthorization(['alumno'])
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [appointments, setAppointments] = useState([])
   const [results, setResults] = useState([])
   const [idAppointment, setIdAppointment] = useState('')
   const [show, setShow] = useState({ state: false, id: '' })
   const matches = useMediaQuery('(min-width:600px)');
+  const [isValidated, setIsValidated] = useState(true)
+  const [loading, setLoading] = useState(true)
+
+  const cacheKey = "external-api-data";
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      const loadAppointments = async () => {
+
+    const loadAppointments = async () => {
+      setLoading(true);
+
+      try {
+        let cachedData = await cacheHandler.get(cacheKey);
+
+        if (cachedData) {
+          setAppointments(cachedData)
+          setResults(cachedData);
+          setLoading(false);
+          return;
+        }
+
         const data = await fetchAppointments();
-        console.log('session', session);
+        
         if (session.user.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user.sub);
+
           setAppointments(dataFiltered);
           setResults(dataFiltered);
+          // setIsValidated(false)
         } else if (session.user.rol === 'alumno') {
           const dataFiltered = data.filter(item => item.id_paciente == session.user.id);
+
           setAppointments(dataFiltered);
           setResults(dataFiltered);
         } else if (session.user.rol === 'admin') {
           setAppointments(data);
           setResults(data);
+
         }
-      };
-      loadAppointments();
-    }
+      } catch (error) {
+        setError('')
+      } finally {
+        setLoading(false)
+      }
+    };
+    loadAppointments();
+    // }
   }, [session, status]);
 
   if (status === 'loading') {
-    return <p>Cargando...</p>;
+    return <SimpleBackdrop/>;
   }
   const onSelectChange = (newSelectedRowKeys) => {
-    console.log("selectedRowKeys changed: ", selectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
@@ -130,7 +92,6 @@ const AppoinmentList = () => {
   };
 
   const handleCancel = () => {
-    console.log('ID', id, idAppointment)
     changeStatusAppointment(id, 'cancelada')
   }
 
@@ -143,7 +104,7 @@ const AppoinmentList = () => {
     setResults(appointments)
   }
 
-  const columns = [
+  const allColumns = [
     {
       title: "Estudiante",
       dataIndex: "nombre_alumno",
@@ -179,13 +140,13 @@ const AppoinmentList = () => {
       key: 'especialidad_profesional',
       responsive: ['md'],
     },
-    {
-      title: "Teléfono",
-      dataIndex: "telefono_estudiante",
-      sorter: (a, b) => a['telefono_estudiante'].localeCompare(b['telefono_estudiante']),
-      key: 'telefono_estudiante',
-      responsive: ['md'],
-    },
+    // {
+    //   title: "Teléfono",
+    //   dataIndex: "telefono_estudiante",
+    //   sorter: (a, b) => a['telefono_estudiante'].localeCompare(b['telefono_estudiante']),
+    //   key: 'telefono_estudiante',
+    //   responsive: ['md'],
+    // },
     {
       title: "Correo electrónico",
       dataIndex: "email_estudiante",
@@ -283,9 +244,14 @@ const AppoinmentList = () => {
     },
   ]
 
+  const columns = allColumns.filter((col) => {
+    if (session.user.rol === "profesional" && col.key !== "nombre_profesional") return true; 
+    if (session.user.rol === "alumno" && col.key !== "nombre_alumno") return true; 
+    return false;
+  });
+
   return (
-    <ProtectedPage level={ROL}>
-      {/* <Headerudp /> */}
+    <div>
       <Sidebar id='menu-item4' id1='menu-items4' activeClassName='appoinment-list' />
       <>
         <div className="page-wrapper mt-5 pt-5">
@@ -369,6 +335,7 @@ const AppoinmentList = () => {
                       </div>
                     </div>
                     {/* /Table Header */}
+
                     <div className="table-responsive patient-list">
                       <Table
                         pagination={{
@@ -401,7 +368,7 @@ const AppoinmentList = () => {
                 <h3>¿Está seguro que desea cancelar la cita?</h3>
                 <div className="m-t-20">
                   {" "}
-                  <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
+                  <Link href="#" className="btn btn-white me-2" /* data-bs-dismiss="modal" */>
                     Cerrar
                   </Link>
                   <button
@@ -415,32 +382,30 @@ const AppoinmentList = () => {
               </div>
             </div>
           </div>
-          {/* <div id="delete_patient" className="modal fade delete-modal" role="dialog">
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-body text-center">
-                  <img src={imagesend} alt="#" width={50} height={46} />
-                  <h3>Are you sure want to delete this ?</h3>
-                  <div className="m-t-20">
-                    {" "}
-                    <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-                      Close
-                    </Link>
-                    <button type="submit" className="btn btn-danger">
-                      Delete
-                    </button>
-                  </div>
+        </div>
+        {isValidated ? <div id="delete_patient" className="modal fade delete-modal" role="dialog">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-body text-center">
+                <img src={imagesend} alt="#" width={50} height={46} />
+                <h3>Antes de continuar, cambia tu contraseña</h3>
+                <div className="m-t-20">
+                  {" "}
+                  <Link href={`/profesionales/${session.user.id}`} className="btn btn-white me-2" data-bs-dismiss="modal">
+                    Ir a editar contraseña
+                  </Link>
                 </div>
               </div>
             </div>
-          </div> */}
-        </div>
+          </div>
+        </div> : ''}
       </>
       <>
       </>
-    </ProtectedPage>
+    </div>
   )
 }
 
-export default AppoinmentList;
+// export default AppoinmentList;
+export default withAuth(AppoinmentList, ['alumno', 'profesional']);
 

@@ -15,24 +15,28 @@ import { TextField } from "@mui/material";
 import { useForm, Controller, useController } from 'react-hook-form';
 import { fetchAppointment, changeStatusAppointment, fetchAppointments } from "@/services/AppointmentsServices";
 import { fetchProfessionals } from "@/services/DoctorsServices";
-import { fetchUsers } from "@/services/UsersServices";
+import { fetchUsers, fetchUserByEmail } from "@/services/UsersServices";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from "@/components/ProtectedRoutes";
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const EditAppoinments = ({ params }) => {
-  const ROL = ["profesional"]
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const userRole = session?.user?.rol
   const router = useRouter();
-  // useAuthorization(['alumno'])
+  const [loading, setLoading] = useState(true);
 
   const [startTime, setStartTime] = useState();
   const [endTime, setEndTime] = useState();
   const [show, setShow] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [appointment, setAppointment] = useState('');
+  const [dataPatient, setDatapatient] = useState('')
 
   const [speciality, setSpeciality] = useState([
     { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality" },
@@ -41,7 +45,7 @@ const EditAppoinments = ({ params }) => {
     { value: "Trabajador social", label: "Trabajador social", name: "speciality" },
   ]);
 
-  const handleClose = () => setShow(false); 
+  const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const [profesional, setProfesional] = useState([]);
 
@@ -62,12 +66,13 @@ const EditAppoinments = ({ params }) => {
   const getAppointments = async () => {
     try {
       const response = await fetchAppointments()
-      const filteredResponse = response.filter(item => item.id_cita == params.appointmentId)
+      const filteredResponse = response.filter(item => (item.id_cita == params.appointmentId) && (item.id_profesional == session.user.id))
+
       const obj = {
         speciality: filteredResponse[0].especialidad_profesional,
         appointment_date: dayjs(filteredResponse[0]['fecha']).format('YYYY-MM-DD'),
         start_time: filteredResponse[0]['hora'],
-        // end_time: filteredResponse[0]['hora_fin'],
+        // end_time: horaFin,
         id: filteredResponse[0].id_cita,
         email: filteredResponse[0].email_estudiante,
         name: filteredResponse[0]['nombre_alumno'].split(' ')[0],
@@ -78,7 +83,11 @@ const EditAppoinments = ({ params }) => {
         other: filteredResponse[0].genero === 'otro' ? 'on' : null,
         mobile: filteredResponse[0].telefono_estudiante
       }
-      return obj;
+      if (filteredResponse.length === 0) {
+      } else {
+        setDatapatient(obj)
+        return obj;
+      }
     } catch (error) {
       console.log(error)
     }
@@ -89,11 +98,40 @@ const EditAppoinments = ({ params }) => {
     // getAppointments()
   }, [])
 
-  const { register, handleSubmit, watch, control,
-    formState: { errors }
+  // const { register, handleSubmit, watch, control,
+  //   formState: { errors }
+  // } = useForm({
+  //   defaultValues: async () => await getAppointments()
+  // })
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    watch,
   } = useForm({
-    defaultValues: async () => await getAppointments()
-  })
+    defaultValues: async () => {
+      if (status === "loading") {
+        return {}; // Retorna un objeto vacío mientras se carga la sesión
+      }
+      if (!session) {
+        router.push("/"); // Redirige si no hay sesión
+        return {}; // Detiene la ejecución
+      }
+
+      setLoading(true); // Indica que la carga está en progreso
+      try {
+        const data = await getAppointments();
+        return data
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        return { data: [] };
+      } finally {
+        setLoading(false); // Finaliza la carga
+      }
+    },
+  });
 
   // const { field } = useController({ name: 'especialidad', control })
 
@@ -106,20 +144,18 @@ const EditAppoinments = ({ params }) => {
 
   const onSubmit = handleSubmit(async data => {
     console.log('data', data)
-    // e.preventDefault()
+    console.log('data cita', dataPatient)
     try {
-      const patientName = watch("name")
-      const patientLastname = watch("lastName")
-      const patients = await fetchUsers()
+      const patientByEmail = await fetchUserByEmail(data.email)
 
-      console.log('data', data)
-      console.log(': patient[0].id', patient[0].id)
-
-      const patient = patients.filter(user =>
-        user.nombre === patientName
-        & user.apellido === patientLastname
-        & user.tipo_usuario === 'alumno'
-      )
+      console.log('patientByEmail', patientByEmail)
+      data.validacion = patientByEmail.validacion
+      data.alumndo_id = patientByEmail.id
+      
+      const status = session.user.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional'
+      if( data.status === true ){
+        await changeStatusAppointment(data.id, status)
+      }
     } catch (error) {
       console.log(error)
     }
@@ -128,7 +164,7 @@ const EditAppoinments = ({ params }) => {
   })
 
   return (
-    <ProtectedPage level={ROL}>
+    <div>
       {/* <Headerudp /> */}
       <Sidebar
         id="menu-item4"
@@ -314,7 +350,7 @@ const EditAppoinments = ({ params }) => {
                                 className="form-control"
                                 id="outlined-controlled"
                                 type="time"
-                                value={startTime}
+                                // value={startTime}
                                 name='start_time'
                                 onChange={(event) => {
                                   setStartTime(event.target.value);
@@ -360,7 +396,7 @@ const EditAppoinments = ({ params }) => {
                               render={({ field: { onChange, onBlur, value } }) => {
                                 return (
                                   <Select
-                                    isDisabled={userRole === 'profesional' ? false : true} 
+                                    isDisabled={userRole === 'profesional' ? false : true}
                                     value={profesional.find(option => option.name === value) || value}
                                     onChange={(option) => onChange(option.value)}
                                     instanceId={'select_doctor'}
@@ -451,7 +487,7 @@ const EditAppoinments = ({ params }) => {
 
                           </div>
                         </div>
-                    {/*     <div className="col-12 col-sm-12">
+                        {/*     <div className="col-12 col-sm-12">
                           <div className="form-group local-forms">
                             <label>
                               Notas <span className="login-danger">*</span>
@@ -483,7 +519,7 @@ const EditAppoinments = ({ params }) => {
 
                         <div className="col-12" >
                           <div className="doctor-submit text-end">
-                            <button 
+                            <button
                               type="button"
                               className="btn btn-primary submit-form me-2"
                               onClick={onSubmit}
@@ -533,8 +569,9 @@ const EditAppoinments = ({ params }) => {
           </div>
         </div>
       </>
-    </ProtectedPage>
+    </div>
   );
 };
 
-export default EditAppoinments;
+// export default EditAppoinments;
+export default withAuth(EditAppoinments, ['alumno', 'profesional']);
