@@ -22,6 +22,10 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { FaArrowLeft } from "react-icons/fa";
 import { FaDownload } from 'react-icons/fa';
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const card = (item) => (
   <Fragment>
@@ -217,4 +221,6 @@ const Blogdetails = ({ params }) => {
   )
 }
 
-export default Blogdetails
+// export default Blogdetails;
+export default withAuth(Blogdetails, ['admin']);
+

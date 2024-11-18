@@ -15,6 +15,10 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from '@/components/ProtectedRoutes';
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const DynamicSidebar = dynamic(() => import('../../../components/Sidebar'), {
   loading: () => <p>Loading...</p>,
@@ -56,7 +60,7 @@ const Addblog = () => {
   })
 
   return (
-    <ProtectedPage level={ROL}>
+    <div>
       <div className="main-wrapper">
         <DynamicSidebar id='menu-item11' id1='menu-items11' activeClassName='add-blog' />
         {/* page-wrapper-start  */}
@@ -488,11 +492,12 @@ const Addblog = () => {
         {/* page-wrapper-end */}
       </div>
       <div className="sidebar-overlay" data-reff="" />
-    </ProtectedPage>
+    </div>
   )
 }
 
-export default Addblog
+// export default Addblog
+export default withAuth(Addblog, ['admin']);
 /* 
   < div >
   <>

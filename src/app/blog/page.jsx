@@ -13,7 +13,10 @@ import { fetchBlogs } from '@/services/BlogServices';
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from '@/components/ProtectedRoutes';
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const truncarPalabras = (texto, num) => {
   const aux = texto.split(' ');
@@ -46,7 +49,7 @@ const BlogView = () => {
   }, [])
 
   return (
-    <ProtectedPage level={ROL}>
+    <div>
       <div className="main-wrapper">
         {/* Header */}
         {/* <Header /> */}
@@ -785,8 +788,9 @@ const BlogView = () => {
         </div>
       </div>
       {/* /Main Wrapper */}
-    </ProtectedPage>
+    </div>
   )
 }
 
-export default BlogView;
+// export default BlogView;
+export default withAuth(BlogView, ['admin']);

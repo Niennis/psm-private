@@ -17,6 +17,10 @@ import useMediaQuery from '@mui/mater ial/useMediaQuery';
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from '@/components/ProtectedRoutes';
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const Editblog = () => {
   const ROL = ["admin"]
@@ -43,7 +47,7 @@ const Editblog = () => {
   ]);
 
   return (
-    <ProtectedPage level={ROL}>
+    <div>
 
       <div className="main-wrapper">
         {/* <Header /> */}
@@ -313,9 +317,10 @@ const Editblog = () => {
 
       </div>
       <div className="sidebar-overlay" data-reff="" />
-    </ProtectedPage>
+    </div>
 
   )
 }
 
-export default Editblog
+// export default Editblog
+export default withAuth(Editblog, ['admin']);
