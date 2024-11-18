@@ -10,12 +10,11 @@ import { useForm, Controller } from 'react-hook-form';
 import Sidebar from "@/components/Sidebar";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
-
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 
 import { fetchProfessionals, fetchProfessionalById } from "@/services/DoctorsServices";
-import { fetchUsers } from "@/services/UsersServices";
-import { createAppointment, changeStatusAppointment, fetchAppointment } from "@/services/AppointmentsServices"
+import { fetchUserByEmail, fetchUsers } from "@/services/UsersServices";
+import { createAppointment, changeStatusAppointment, fetchAppointment, fetchAppointments } from "@/services/AppointmentsServices"
 import { createInterviewRecord } from "@/services/RecordServices";
 import Contact from "@/components/Contact"
 import dayjs from "dayjs";
@@ -26,10 +25,12 @@ import { regiones, comunas, motivo_consulta, existencia_servicio, quien_derivo, 
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from "@/components/ProtectedRoutes";
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const AddInterviewRecord = ({ params }) => {
-  const ROL = ["profesional"]
   const { data: session } = useSession()
   const router = useRouter();
   // useAuthorization(['alumno'])
@@ -38,7 +39,7 @@ const AddInterviewRecord = ({ params }) => {
   const [startTime, setStartTime] = useState();
   const [selectedOption, setSelectedOption] = useState(null);
   const [doctor, setDoctor] = useState([]);
-  const [patients, setPatients] = useState([])
+  const [patient, setPatient] = useState([])
   const [contacts, setContacts] = useState([])
 
   const [success, setSuccess] = useState('initial')
@@ -50,73 +51,78 @@ const AddInterviewRecord = ({ params }) => {
 
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    fetchData()
-    getPatients()
-    // getAppointment()
-  }, [])
-
-  // const getAppointment = async() => {
-  //   const response = await fetchAppointment(params.id)
-  //   console.log('getAppointment', response)
-  // }
+  // useEffect(() => {
+  //   fetchData()
+  //   getPatients()
+  //   // getAppointment()
+  // }, [])
 
   const calcularEdad = (fechaNacimiento) => {
-    var hoy = new Date();
-    var cumpleanos = new Date(fechaNacimiento);
-    var edad = hoy.getFullYear() - cumpleanos.getFullYear();
-    var mes = hoy.getMonth() - cumpleanos.getMonth();
-
-    if (mes < 0 || (mes === 0 && hoy.getDate() < cumpleanos.getDate())) {
+    const hoy = new Date();
+    const cumpleanos = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+    const mes = hoy.getMonth() - cumpleanos.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate())) {
       edad--;
     }
-    console.log('EDAD', edad);
     return edad;
+  }
+
+  const getData = async () => {
+    try {
+      const responseAppointment = await fetchAppointments()
+      const date = responseAppointment.filter(item => item.id_cita == params.id)
+      const responsePatient = await fetchUserByEmail(date[0].email_estudiante)
+      console.log(responsePatient)
+      const obj = {
+        profesional_evaluador: date[0].nombre_profesional,
+        nombre_completo: date[0].nombre_alumno,
+        correo: date[0].email_estudiante,
+        fecha_nacimiento: dayjs(responsePatient.fecha_nacimiento).format('DD-MM-YYYY'),
+        edad: calcularEdad(responsePatient.fecha_nacimiento),
+        fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
+        genero: responsePatient.genero,
+        telefono: date[0].telefono_estudiante
+      }
+      setPatient(responsePatient)
+      return obj
+    } catch (error) {
+      console.log('error', error)
+    }
   }
 
   const { register, handleSubmit, watch, control,
     formState: { errors }
   } = useForm({
-    defaultValues: async () => fetchUsers().then(response => {
-      console.log('response', response.users)
-      const patient = response.users.filter(user => user.id == params.id)
-      console.log('patient', patient)
-      const obj = {
-        profesional_evaluador: session.user.name,
-        nombre_completo: `${patient[0].nombre} ${patient[0].apellido}`,
-        lastName: patient[0].apellido,
-        correo: patient[0].email,
-        fecha_nacimiento: dayjs(patient[0].fecha_nacimiento).format('DD-MM-YYYY'),
-        edad: calcularEdad(dayjs(patient[0].fecha_nacimiento).format('DD-MM-YYYY')),
-        genero: patient[0].genero,
-        telefono: patient[0].telefono
+    defaultValues: async () => {
+      try {
+        const data = await getData();
+        return data
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        return { data: [] };
       }
-      console.log('obj', patient);
-      return obj
-    })
-      .catch(error =>
-        console.log('err', error)
-      )
+    }
   })
 
-  const fetchData = async () => {
-    const { users } = await fetchProfessionalById('6')
-    console.log('users', users);
-    const docs = users.map((doc, i) => {
-      return {
-        value: i + 2,
-        label: doc.nombre + ' ' + doc.apellido,
-        id: doc.id
-      }
-    })
-    setDoctor(docs)
-  }
+  // const fetchData = async () => {
+  //   const { users } = await fetchProfessionalById('6')
+  //   console.log('users', users);
+  //   const docs = users.map((doc, i) => {
+  //     return {
+  //       value: i + 2,
+  //       label: doc.nombre + ' ' + doc.apellido,
+  //       id: doc.id
+  //     }
+  //   })
+  //   setDoctor(docs)
+  // }
 
-  const getPatients = async () => {
-    const { users } = await fetchUsers()
-    const patients = users.filter(patient => patient.tipo_usuario === 'alumno')
-    setPatients(patients)
-  }
+  // const getPatients = async () => {
+  //   const { users } = await fetchUsers()
+  //   const patients = users.filter(patient => patient.tipo_usuario === 'alumno')
+  //   setPatients(patients)
+  // }
 
   const handleOpen = (e) => {
     e.preventDefault()
@@ -144,7 +150,7 @@ const AddInterviewRecord = ({ params }) => {
       & user.tipo_usuario === 'alumno'
     )
     try {
-      const appointment = await createAppointment({ ...data, "patient_id": patient[0].id })
+      const appointment = await createInterviewRecord({ ...data, "patient_id": patient[0].id })
       console.log('appointment', appointment)
       // return bleh
       setSuccess('success')
@@ -219,6 +225,7 @@ const AddInterviewRecord = ({ params }) => {
     setContacts(newContact);
   }
 
+  
   const handleDeleteContact = (key) => {
     const newArray = contacts.filter((_, i) => i !== key);
     setContacts(newArray)
@@ -226,13 +233,29 @@ const AddInterviewRecord = ({ params }) => {
 
   const handleFormat = rut => rut.replace(/[^\dkK]/g, '').replace(/^(\d{1,2})(\d{3})(\d{3})([0-9kK]{1})$/, '$1.$2.$3-$4')
 
+  const formatDate = (dateString) => {
+    const [day, month, year] = dateString.split("-");
+    return `${year}-${day}-${month}`;
+  };
+
   const handleInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
-    console.log('DATA', data)
+    console.log('DATA', data.fecha, data.fecha_nacimiento)
+    const body = {
+      ...data,
+      id_profesional: 9,
+      id_alumno: patient.id,
+      fecha: formatDate(data.fecha),
+      fecha_nacimiento: formatDate(data.fecha_nacimiento),
+    }
+    console.log('BODY', body)
     try {
-      const resp = await createInterviewRecord({ ...data, id_profesional: 9, id_alumno: parseInt(params.id) })
-      console.log('resp', resp)
-      const changeStatus = await changeStatusAppointment(params.id, 'realizada')
+      const [resp, changeStatus] = await Promise.all([
+        createInterviewRecord(body),
+        changeStatusAppointment(params.id, 'realizada')
+      ]);
+      console.log('resp', resp);
+      console.log('changeStatus', changeStatus);
 
     } catch (error) {
       console.log('Error: ', error);
@@ -242,7 +265,7 @@ const AddInterviewRecord = ({ params }) => {
   })
 
   return (
-    <ProtectedPage level={ROL}>
+    < >
       <Sidebar
         id="menu-item4"
         id1="menu-items4"
@@ -1983,8 +2006,9 @@ const AddInterviewRecord = ({ params }) => {
 
         </div>
       </>
-    </ProtectedPage>
+    </>
   );
 };
 
-export default AddInterviewRecord;
+// export default AddInterviewRecord;
+export default withAuth(AddInterviewRecord, ['admin', 'profesional']);
