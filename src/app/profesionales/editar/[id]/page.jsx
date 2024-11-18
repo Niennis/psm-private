@@ -14,7 +14,10 @@ import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from "@/components/ProtectedRoutes";
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const EditDoctor = ({ params }) => {
   const ROL = ["profesional"]
@@ -82,7 +85,6 @@ const EditDoctor = ({ params }) => {
     }
   };
 
-
   const { register, handleSubmit, watch, control,
     formState: { errors }, reset
   } = useForm({
@@ -98,9 +100,8 @@ const EditDoctor = ({ params }) => {
     // return updateDoctor(data, id)
   })
 
-
   return (
-    <ProtectedPage level={ROL}>
+    < >
       {/* <Headerudp /> */}
       <Sidebar
         id="menu-item1"
@@ -1054,8 +1055,9 @@ const EditDoctor = ({ params }) => {
           </div>
         </div>
       </>
-    </ProtectedPage>
+    </>
   );
 };
 
-export default EditDoctor;
+// export default EditDoctor;
+export default withAuth(EditDoctor, ['admin', 'profesional']);

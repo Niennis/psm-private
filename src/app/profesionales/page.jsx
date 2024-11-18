@@ -14,6 +14,10 @@ import { search } from '@/services/AppointmentsServices'
 
 import { imagesend, plusicon, refreshicon, searchnormal } from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const DoctorList = () => {
   const ROL = ["admin", "profesional"]
@@ -179,7 +183,7 @@ const DoctorList = () => {
   ]
 
   return (
-    <ProtectedPage level={'profesional'}>
+    < >
       <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' />
       <>
         <div className="page-wrapper mt-5 pt-5">
@@ -321,9 +325,10 @@ const DoctorList = () => {
         </div>
       </>
 
-    </ProtectedPage>
+    </>
 
   )
 }
 
-export default DoctorList;
+// export default DoctorList;
+export default withAuth(DoctorList, ['admin', 'profesional']);

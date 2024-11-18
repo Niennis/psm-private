@@ -13,7 +13,10 @@ import Link from "next/link";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from '@/components/ProtectedRoutes';
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const PatientsList = () => {
   const ROL = ["profesional"]
@@ -146,7 +149,7 @@ const PatientsList = () => {
   ]
 
   return (
-    <ProtectedPage level={ROL}>
+    < >
       {/* <Headerudp /> */}
       <Sidebar id='menu-item2' id1='menu-items2' activeClassName='patient-list' />
       <div className="page-wrapper mt-5 pt-5">
@@ -273,9 +276,11 @@ const PatientsList = () => {
           </div>
         </div>
       </div>
-    </ProtectedPage>
+    </>
 
   )
 }
 
-export default PatientsList;
+// export default PatientsList;
+export default withAuth(PatientsList, ['admin', 'profesional']);
+

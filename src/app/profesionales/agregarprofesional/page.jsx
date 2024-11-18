@@ -19,7 +19,10 @@ import { addProfessional } from "../../../services/DoctorsServices";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from "@/components/ProtectedRoutes";
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const AddProfessional = () => {
   const ELEGIR_STATUS = false;
@@ -124,7 +127,7 @@ const AddProfessional = () => {
   }
 
   return (
-    <ProtectedPage level={ROL}>
+    < >
       {/* <Headerudp /> */}
       <Sidebar id="menu-item1" id1="menu-items1" activeClassName="add-doctor" />
       <>
@@ -604,8 +607,10 @@ const AddProfessional = () => {
           </div>
         </div>
       </>
-    </ProtectedPage>
+    </>
   );
 };
 
-export default AddProfessional;
+// export default AddProfessional;
+export default withAuth(AddProfessional, ['admin']);
+

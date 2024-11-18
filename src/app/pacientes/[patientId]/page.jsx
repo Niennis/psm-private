@@ -13,7 +13,10 @@ import { Skeleton } from "@mui/material";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from "@/components/ProtectedRoutes";
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const EditPatients = ({ params }) => {
   const ROL = ["profesional"]
@@ -89,7 +92,7 @@ const EditPatients = ({ params }) => {
   })
 
   return (
-    <ProtectedPage level={ROL}>
+    < >
       {/* <Headerudp /> */}
       <Sidebar
         id="menu-item2"
@@ -940,8 +943,10 @@ const EditPatients = ({ params }) => {
         <div className="sidebar-overlay" data-reff="" />
         {/* Datepicker Core JS */}
       </>
-    </ProtectedPage>
+    </>
   );
 };
 
-export default EditPatients;
+// export default EditPatients;
+export default withAuth(EditPatients, ['admin', 'profesional']);
+

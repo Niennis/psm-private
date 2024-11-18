@@ -8,7 +8,10 @@ import Link from 'next/link';
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import ProtectedPage from '@/components/ProtectedRoutes';
+import withAuth from '@/components/withAuth';
+import CacheHandler from "@/utils/cache-handler";
+
+const cacheHandler = new CacheHandler();
 
 const DoctorProfile = () => {
   const ROL = ["profesional"]
@@ -17,7 +20,7 @@ const DoctorProfile = () => {
   // useAuthorization(['alumno'])
 
   return (
-    <ProtectedPage level={ROL}>
+    < >
       <>
         <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-profile' />
         <div className="page-wrapper">
@@ -708,8 +711,10 @@ const DoctorProfile = () => {
 
 
 
-    </ProtectedPage>
+    </>
   )
 }
 
-export default DoctorProfile;
+// export default DoctorProfile;
+export default withAuth(DoctorProfile, ['admin', 'profesional']);
+
