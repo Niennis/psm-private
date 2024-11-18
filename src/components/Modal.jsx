@@ -99,7 +99,7 @@ const ModalConsent = ({ open, handleClose, onClick, errors }) => {
           {/* <Link to='/form'> */}
           <div className="row">
             <div className="col-12 text-end">
-              {Object.keys(errors).length !== 0 && <p className=''>Faltan campos por completar</p>}
+              {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
               <Button
                 onClick={handleClose}
                 className='btn btn-secondary m-2'>

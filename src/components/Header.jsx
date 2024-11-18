@@ -52,7 +52,7 @@ const Header = () => {
   const pages = EVENTS !== 0 ? pagesWithEvents : pagesWithoutEvents
   const matches = useMediaQuery('(min-width:600px)');
   const [style, setStyle] = useState({ width: 'min-content' });
-
+  // const name = session?.user?.name;
   const isSmallDevice = useMediaQuery(
     "only screen and (max-width : 640px)"
   );
@@ -330,7 +330,7 @@ const Header = () => {
                   :
                   <Link href="/citas" style={{padding: 0, margin: 0, textAlign: 'right'}}>
                     <FaUserCircle style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end'}} />
-                    Bienvenido, {session.user.name}
+                    Bienvenido, {session.user?.name}
                   </Link>
             }
           </Box>
