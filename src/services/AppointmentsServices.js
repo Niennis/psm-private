@@ -16,7 +16,7 @@ export const sendEmail = async (email, typeUser) => {
   try {
     const data = await fetch(SEND_EMAIL, {
       method: "POST",
-      // cors: "no-cors",
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
@@ -40,6 +40,7 @@ const pruebaSendMail = (mail) => {
 
   let config = {
     method: 'post',
+    cache: 'no-store',
     maxBodyLength: Infinity,
     url: 'https://us-central1-mkt-003001-00813.cloudfunctions.net/ZRZ-SendMail',
     headers: {
@@ -92,7 +93,7 @@ export const createAppointment = async (appointment) => {
   try {
     const data = await fetch(APPOINTMENT_API, {
       method: "POST",
-      cors: "no-cors",
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*'
@@ -128,6 +129,7 @@ export const updateAppointment = async (appointment) => {
   try {
     const data = await fetch(APPOINTMENT_API , {
       method: "POST",
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -141,18 +143,25 @@ export const updateAppointment = async (appointment) => {
 }
 
 export const changeStatusAppointment = async (id, status) => {
-  const APPOINMENT_API = process.env.NEXT_PUBLIC_APPOINTMENTS_API
+  const APPOINMENT_API = process.env.NEXT_PUBLIC_CHANGE_STATUS
+
+  const body = {
+    "id": id,
+    "estado" : status,
+  }
+
+  console.log('body change status', body)
   try {
-    await fetch(APPOINMENT_API + `/api/appointments/${id}`, {
+    return await fetch(APPOINMENT_API, {
       method: 'POST',
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
-        'ngrok-skip-browser-warning': 'any'
       },
-      body: JSON.stringify({
-        "estado": status
-      })
+      body: JSON.stringify(
+        body
+      )
     })
   } catch (err) {
     console.log(err)
@@ -163,6 +172,7 @@ export const fetchAppointments = async (callback) => {
   try {
     const data = await fetch(process.env.NEXT_PUBLIC_SHOW_APPOINTMENTS, {
       method: "POST",
+    cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -202,6 +212,7 @@ export const fetchAppointments = async () => {
   try {
     const data = await fetch(process.env.NEXT_PUBLIC_SHOW_APPOINTMENTS, {
       method: "POST",
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',

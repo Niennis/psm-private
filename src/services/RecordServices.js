@@ -17,11 +17,10 @@ export const createInterviewRecord = async (input) => {
 
   const data = await fetch(RECORD_URL, {
     method: "POST",
-    cors: "no-cors",
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
-      'ngrok-skip-browser-warning': 'any'
     },
     body: JSON.stringify(body)
   })

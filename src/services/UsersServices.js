@@ -4,10 +4,10 @@ export const fetchUsers = async () => {
 
   const data = await fetch(USERS_API, {
     method: 'POST',
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
-      'ngrok-skip-browser-warning': 'any'
     }
   })
 
@@ -15,14 +15,48 @@ export const fetchUsers = async () => {
   return response
 }
 
+export const fetchUserByEmail = async (email) => {
+  const USERS_BY_EMAIL = process.env.NEXT_PUBLIC_USER_BY_EMAIL
+  const body = {
+    "email": email
+  }
+  const data = await fetch(USERS_BY_EMAIL, {
+    method: 'POST',
+    cache: 'no-store',
+    headers: {
+      'content-type': 'application/json',
+      'access-control-allow-origin': '*',
+    },
+    body: JSON.stringify(
+      body
+    )
+  })
+  return data.json()
+}
+
+export const fetchPatientsDespejeFalse = async () => {
+  const USERS_BY_EMAIL = process.env.NEXT_PUBLIC_CON_DESPEJE
+  
+  const data = await fetch(USERS_BY_EMAIL, {
+    method: 'POST',
+    cache: 'no-store',
+    headers: {
+      'content-type': 'application/json',
+      'access-control-allow-origin': '*',
+    },
+  })
+  return data.json()
+}
+
+
 export const fetchUser = async (id) => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PATIENT_BY_ID
   const data = await fetch(USERS_API, {
     method: 'POST',
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
-      'ngrok-skip-browser-warning': 'any'
     },
     body: JSON.stringify({
       id
@@ -37,17 +71,16 @@ export const fetchUserMailAndPass = async (user) => {
   const USERS_API = process.env.NEXT_PUBLIC_USERS_VALIDATE_USER
   const data = await fetch(USERS_API, {
     method: "POST",
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
-      'ngrok-skip-browser-warning': 'any'
     },
     body: JSON.stringify({
       email: user.email,
       contrasena: user.contrasena
     })
   })
-  
   return data.json()
 }
 
@@ -74,6 +107,7 @@ export const addUsers = async (user) => {
   const data = await fetch(USERS_API, {
     method: "POST",
     cors: "no-cors",
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -90,7 +124,8 @@ export const addUsers = async (user) => {
 export const updateUser = async (user, id) => {
   const USERS_API = process.env.NEXT_PUBLIC_USERS_API + `/api/users/${id}`
   const data = await fetch(USERS_API, {
-    method: "PUT",
+    method: "POST",
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -115,7 +150,8 @@ export const deleteUser = async (id) => {
   const USERS_API = process.env.NEXT_PUBLIC_USERS_API + `/api/users/${id}`
   try {
     await fetch(USERS_API, {
-      method: 'DELETE',
+      method: 'POST',
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',

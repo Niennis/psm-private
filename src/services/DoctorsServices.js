@@ -11,6 +11,7 @@ export const fetchProfessionals = async () => {
   try {
     const data = await fetch(USERS_API, {
       method: 'POST',
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -29,6 +30,7 @@ export const fetchSpecialityById = async (usuario_id) => {
   try {
     const data = await fetch(SPECIALITY_URL, {
       method: 'POST',
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -50,6 +52,7 @@ export const fetchSpecialities = async () => {
   try {
     const data = await fetch(SPECIALITY_URL, {
       method: 'POST',
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -78,6 +81,7 @@ export const fetchProfessionalById = async (id) => {
   try {
     const data = await fetch(USERS_API, {
       method: 'POST',
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -123,6 +127,7 @@ export const addProfessional = async (user) => {
     const data = await fetch(USERS_API, {
       method: "POST",
       cors: "no-cors",
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -159,6 +164,7 @@ export const updateDoctor = async (user, id) => {
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -177,7 +183,8 @@ export const changeStatus = async (id, status) => {
   const USERS_API = process.env.NEXT_PUBLIC_USERS_API + `/api/users/${id}`
   try {
     const data = await fetch(USERS_API, {
-      method: "PUT",
+      method: "POST",
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',

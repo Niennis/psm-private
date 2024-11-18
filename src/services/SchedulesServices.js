@@ -1,3 +1,5 @@
+import dayjs from "dayjs"
+
 // datos para 30 días
 export const fetchScheduleByUser = async (id) => {
   const SCHEDULES_URL = process.env.NEXT_PUBLIC_SHOW_30_DAYS
@@ -6,6 +8,7 @@ export const fetchScheduleByUser = async (id) => {
   }
   const data = await fetch(SCHEDULES_URL, {
     method: "POST",
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -25,6 +28,7 @@ export const fetchScheduleByDate = async (id, date) => {
   
   const data = await fetch(SHOW_BLOQUES, {
     method: "POST",
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*'
@@ -46,6 +50,7 @@ export const fetchScheduleByAvailability = async (id) => {
   
   const data = await fetch(SCHEDULES_URL, {
     method: "POST",
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*'
@@ -250,8 +255,8 @@ export const createSchedule = async (schedule) => {
     "dias": schedule.frecuencia === "semanal" ? schedule.semanal.dia
       : schedule.frecuencia === "mensual" ? [schedule.mensual['ordinal-dia']] : semana,
     "duracionServicio": schedule.duracionServicio,
-    "fechaInicio": schedule.fechaInicio,
-    "fechaFin": schedule.fechaFin,
+    "fechaInicio": dayjs(schedule.fechaInicio).format('YYYY-DD-MM'),
+    "fechaFin": dayjs(schedule.fechaFin).format('YYYY-DD-MM'),
     "frecuencia": schedule.frecuencia,
     "horaIni": schedule.horaIni,
     "horaFin": schedule.horaFin,
@@ -274,6 +279,7 @@ export const createSchedule = async (schedule) => {
   const data = await fetch(SCHEDULES_URL, {
     method: "POST",
     cors: "no-cors",
+    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -299,6 +305,7 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
     const data = await fetch(EDIT_BLOQUE_URL, {
       method: "POST",
       cors: "no-cors",
+      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
