@@ -54,7 +54,9 @@ const AddSchedule = ({ params }) => {
   useEffect(() => {
     const fetchProfesional = async () => {
       const { especialidad: user } = await fetchSpecialityById(params.id)
+      console.log('fetchSpecialityById', user)
       const { users } = await fetchProfessionalById(params.id)
+      console.log('fetchProfessionalById', users )
       const obj = {
         ...users[0],
         especialidad: user.especialidad
@@ -984,57 +986,50 @@ La disponibilidad de horas, será hasta la fecha de finalización.`}  /></h4>
             <Calender id={params.id} />
           </div>
         </div>
-        <div className="row">
-          <div className="col-sm-12 col-lg-6">
-            {/* {success === 'success'
-              ?
-              <Alert
-                severity="success"
-                onClose={() => { setSuccess('initial') }}
-                sx={{
-                  zIndex: 'tooltip',
-                  position: 'absolute',
-                  bottom: -10,
-                  left: '10%',
-                  width: '80%'
-                }}
-                spacing={2}
-              >
-                La cita se ha creado con éxito.
-              </Alert>
 
-              : success === 'fail'
-                ?
+
+        {success === 'success'
+          ?
+          <div style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080'
+          }}>
+            {/* <div className="col-sm-12 col-lg-6"> */}
+            <Alert
+              severity="success"
+              onClose={() => { setSuccess('initial') }}
+              sx={{
+                zIndex: 'tooltip',
+                position: 'absolute',
+                left: '30%',
+                width: '50%',
+                padding: '50px',
+                bottom: '50vh'
+              }}
+              spacing={2}
+            >
+              Se ha cargado la disponibilidad correctamente.
+            </Alert>
+            {/* </div> */}
+          </div>
+
+          : success === 'fail'
+            ?
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
                 <Alert
                   severity="error"
-                  onClose={() => { setSuccess('initial') }}
-                  sx={{
-                    zIndex: 'tooltip',
-                    position: 'absolute',
-                    bottom: -10,
-                    left: '10%',
-                    width: '80%'
-                  }}
-                  spacing={2}
-                >
-                  Ha ocurrido un problema.
-                </Alert>
-                : ''
-            } */}
-
-            {success === 'success'
-              ?
-              <div style={{
-                height: '100%',
-                position: 'fixed',
-                top: '0',
-                width: '100%',
-                zIndex: 99999,
-                background: '#00000080'
-              }}>
-                {/* <div className="col-sm-12 col-lg-6"> */}
-                <Alert
-                  severity="success"
                   onClose={() => { setSuccess('initial') }}
                   sx={{
                     zIndex: 'tooltip',
@@ -1046,43 +1041,12 @@ La disponibilidad de horas, será hasta la fecha de finalización.`}  /></h4>
                   }}
                   spacing={2}
                 >
-                  Se ha agregado la disponibilidad horario con éxito.
+                  Ha ocurrido un problema. {error}
                 </Alert>
-                {/* </div> */}
               </div>
-
-              : success === 'fail'
-                ?
-                <div className="row" style={{
-                  height: '100%',
-                  position: 'fixed',
-                  top: '0',
-                  width: '100%',
-                  zIndex: 99999,
-                  background: '#00000080'
-                }}>
-                  <div className="col-sm-12 col-lg-6">
-                    <Alert
-                      severity="error"
-                      onClose={() => { setSuccess('initial') }}
-                      sx={{
-                        zIndex: 'tooltip',
-                        position: 'absolute',
-                        left: '30%',
-                        width: '50%',
-                        padding: '50px',
-                        bottom: '50vh'
-                      }}
-                      spacing={2}
-                    >
-                      Ha ocurrido un problema. {error}
-                    </Alert>
-                  </div>
-                </div>
-                : ''
-            }
-          </div>
-        </div>
+            </div>
+            : ''
+        }
       </>
 
 
