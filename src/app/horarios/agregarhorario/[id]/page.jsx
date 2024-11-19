@@ -125,19 +125,21 @@ const AddSchedule = ({ params }) => {
         } else {
           try {
             const req = await createSchedule(newData)
-            if (appointment["detalle"].includes('fail!!')) {
+            if (req["detalle"].includes('fail')) {
               setSuccess('fail')
             } else {
               setSuccess('success')
             }
           } catch (error) {
             setSuccess('fail')
-            console.log('ERRRR', err.message)
+            setError(error.message)
+            console.log('ERRRR', error.message)
           }
         }
       })
-      .catch((reason) => {
-        console.log('reason', reason);
+      .catch((error) => {
+        setError(error.message)
+        console.log('error', error);
       });
   })
 
