@@ -17,7 +17,6 @@ export const createInterviewRecord = async (input) => {
 
   const data = await fetch(RECORD_URL, {
     method: "POST",
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',

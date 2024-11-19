@@ -26,7 +26,6 @@ export const fetchBlog = async (id) => {
     const data = await fetch(BLOGS_API, {
       method: "POST",
       cors: "no-cors",
-      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -53,7 +52,6 @@ export const addBlog = async (blog) => {
     const data = await fetch(BLOGS_API, {
       method: "POST",
       cors: "no-cors",
-      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -84,7 +82,6 @@ export const updateBlog = async (blog, id) => {
   try {
     const data = await fetch(BLOGS_API, {
       method: "POST",
-      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
@@ -104,7 +101,6 @@ export const changeStatus = async (id, status) => {
   try {
     const data = await fetch(BLOGS_API, {
       method: "POST",
-      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',

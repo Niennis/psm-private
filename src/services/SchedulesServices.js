@@ -8,7 +8,6 @@ export const fetchScheduleByUser = async (id) => {
   }
   const data = await fetch(SCHEDULES_URL, {
     method: "POST",
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -28,7 +27,6 @@ export const fetchScheduleByDate = async (id, date) => {
   
   const data = await fetch(SHOW_BLOQUES, {
     method: "POST",
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*'
@@ -50,7 +48,6 @@ export const fetchScheduleByAvailability = async (id) => {
   
   const data = await fetch(SCHEDULES_URL, {
     method: "POST",
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*'
@@ -279,7 +276,6 @@ export const createSchedule = async (schedule) => {
   const data = await fetch(SCHEDULES_URL, {
     method: "POST",
     cors: "no-cors",
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -305,7 +301,6 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
     const data = await fetch(EDIT_BLOQUE_URL, {
       method: "POST",
       cors: "no-cors",
-      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',

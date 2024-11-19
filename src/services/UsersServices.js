@@ -1,10 +1,17 @@
+function formatDate(inputDate) {
+  const date = new Date(inputDate); // Crear un objeto Date
+  const year = date.getFullYear(); // Obtener el año
+  const day = String(date.getDate()).padStart(2, '0'); // Obtener el día con dos dígitos
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Obtener el mes con dos dígitos
+
+  return `${year}-${day}-${month}`; // Concatenar en el formato deseado
+}
 
 export const fetchUsers = async () => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PATIENTS
 
   const data = await fetch(USERS_API, {
     method: 'POST',
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -22,7 +29,6 @@ export const fetchUserByEmail = async (email) => {
   }
   const data = await fetch(USERS_BY_EMAIL, {
     method: 'POST',
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -36,10 +42,9 @@ export const fetchUserByEmail = async (email) => {
 
 export const fetchPatientsDespejeFalse = async () => {
   const USERS_BY_EMAIL = process.env.NEXT_PUBLIC_CON_DESPEJE
-  
+
   const data = await fetch(USERS_BY_EMAIL, {
     method: 'POST',
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -53,7 +58,6 @@ export const fetchUser = async (id) => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PATIENT_BY_ID
   const data = await fetch(USERS_API, {
     method: 'POST',
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -71,7 +75,6 @@ export const fetchUserMailAndPass = async (user) => {
   const USERS_API = process.env.NEXT_PUBLIC_USERS_VALIDATE_USER
   const data = await fetch(USERS_API, {
     method: "POST",
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -107,7 +110,6 @@ export const addUsers = async (user) => {
   const data = await fetch(USERS_API, {
     method: "POST",
     cors: "no-cors",
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
@@ -121,29 +123,25 @@ export const addUsers = async (user) => {
   return data.json()
 }
 
-export const updateUser = async (user, id) => {
-  const USERS_API = process.env.NEXT_PUBLIC_USERS_API + `/api/users/${id}`
+export const updateUser = async (user) => {
+  const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER
+  
+  const body = {
+    ...user,
+    "fecha_nacimiento": formatDate(user.fecha_nacimiento)
+  }
+
+  console.log('body', body)
   const data = await fetch(USERS_API, {
     method: "POST",
-    cache: 'no-store',
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
-      'ngrok-skip-browser-warning': 'any'
     },
-    body: JSON.stringify({
-      "nombre": user.name,
-      "apellido": user.lastName,
-      "telefono": user.mobile,
-      "email": user.email,
-      "contrasena": user.password,
-      "fecha_nacimiento": user.date,
-      "genero": user.male === "on" ? 'masculino' : 'femenino' || 'otro',
-      "tipo_usuario": user.tipo_usuario
-    })
+    body: JSON.stringify(body)
   })
 
-  return data
+  return data.json()
 }
 
 export const deleteUser = async (id) => {
@@ -151,7 +149,6 @@ export const deleteUser = async (id) => {
   try {
     await fetch(USERS_API, {
       method: 'POST',
-      cache: 'no-store',
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
