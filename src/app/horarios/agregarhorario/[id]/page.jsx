@@ -56,7 +56,7 @@ const AddSchedule = ({ params }) => {
       const { especialidad: user } = await fetchSpecialityById(params.id)
       console.log('fetchSpecialityById', user)
       const { users } = await fetchProfessionalById(params.id)
-      console.log('fetchProfessionalById', users )
+      console.log('fetchProfessionalById', users)
       const obj = {
         ...users[0],
         especialidad: user.especialidad
@@ -117,7 +117,6 @@ const AddSchedule = ({ params }) => {
     dates.forEach(date => {
       return promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id))
     })
-console.log('DATES', dates)
 
     Promise.all(promesas)
       .then(async (values) => {
@@ -126,8 +125,11 @@ console.log('DATES', dates)
         } else {
           try {
             const req = await createSchedule(newData)
-            if (req.detalle === 'fail!!!') setSuccess('fail')
-            setSuccess('success')
+            if (appointment["detalle"].includes('fail!!')) {
+              setSuccess('fail')
+            } else {
+              setSuccess('success')
+            }
           } catch (error) {
             setSuccess('fail')
             console.log('ERRRR', err.message)
@@ -475,8 +477,8 @@ console.log('DATES', dates)
                                 </label>
 
                               </div>
-                              {/* </div>
-                                  <div className="form-check-inline"> */}
+                            </div>
+                            {/* <div className="form-check-inline"> 
                               <div className="col-6 d-flex flex-column">
                                 <label className="form-check-label">
                                   <input
@@ -488,8 +490,8 @@ console.log('DATES', dates)
                                   />
                                   Grupo psicoterapéutico
                                 </label>
-                                {/* </div>
-                                  <div className="form-check-inline"> */}
+                              </div>
+                              <div className="form-check-inline">
                                 <label className="form-check-label">
                                   <input
                                     type="checkbox"
@@ -501,7 +503,7 @@ console.log('DATES', dates)
                                   Grupo psicopedagógico
                                 </label>
                               </div>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
 
@@ -610,7 +612,7 @@ console.log('DATES', dates)
                           <div className="form-heading">
                             <h4>Disponibilidad <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title={`Al seleccionar un rango de disponibilidad, el tiempo de cada sesión será dividido en N bloques según la duración del servicio.
                               
-Por ejemplo, si seleccionaste una duración de 1 hora y 0 de post servicio, y un rango de disponibilidad entre 9:00 y 12:00, entonces en ese rango caben 3 sesiones de 1 hora.`}  /></h4>
+Por ejemplo, si seleccionaste una duración de 1 hora y 0 de post servicio, y un rango de disponibilidad entre 9:00 y 12:00, entonces en ese rango caben 3 sesiones de 1 hora.`} /></h4>
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-4">
@@ -667,7 +669,7 @@ Por ejemplo, si seleccionaste una duración de 1 hora y 0 de post servicio, y un
                             <div className="form-heading">
                               <h4>Frecuencia <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title={`Al seleccionar una frecuencia, los intervalos seleccionados previamente se repetirán automáticamente para esa selección.
 
-Por ejemplo, si se selecciona diariamente, entonces todos los días, a la misma hora, estará disponible el mismo servicio o grupo de servicios.` }/></h4>
+Por ejemplo, si se selecciona diariamente, entonces todos los días, a la misma hora, estará disponible el mismo servicio o grupo de servicios.` } /></h4>
                             </div>
                           </div>
                           <div className="row">
@@ -908,7 +910,7 @@ Por ejemplo, si se selecciona diariamente, entonces todos los días, a la misma 
                             <div className="form-heading">
                               <h4>Rango de repetición <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title={`El rango de repetición permite identificar un período global en que la agenda tenga horas disponibles, por ejemplo, se puede establecer la fecha de inicio y fin de un año académico completo o de un semestre.
                               
-La disponibilidad de horas, será hasta la fecha de finalización.`}  /></h4>
+La disponibilidad de horas, será hasta la fecha de finalización.`} /></h4>
                             </div>
                           </div>
                           <div className="row">
