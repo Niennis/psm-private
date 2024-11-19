@@ -238,8 +238,9 @@ const AddInterviewRecord = ({ params }) => {
   };
 
   const handleInterview = handleSubmit(async (data, e) => {
-    setSuccess('initial')
     e.preventDefault()
+    setSuccess('initial')
+    console.log('data', data)
     const body = {
       ...data,
       id_profesional: 9,
@@ -247,24 +248,48 @@ const AddInterviewRecord = ({ params }) => {
       fecha: formatDate(data.fecha),
       fecha_nacimiento: formatDate(data.fecha_nacimiento),
     }
-    try {
-      const [resp, changeStatus] = await Promise.all([
-        createInterviewRecord(body),
-        changeStatusAppointment(params.id, 'realizada')
-      ]);
-      console.log('resp', resp)
-      console.log('changeStatus', changeStatus)
 
-      if(resp['detalle'].includes('fail') || changeStatus['detalle'].includes('fail')){
-        setSuccess('fail')
-      } else {
-        setSuccess('success')
-      }
+    // const bodyUpdate = {
+      // "apellido": data.lastName || patient.apellido,
+      // "aplica_despeje": 0,
+      // "anoIngresoCarrera": 'NA',
+      // "campus": data.campus,
+      // "comuna": data.comuna.label,
+      // "carrera": data.career.label,
+      // "contrasena": 'NA',
+      // "direccion": data.address,
+      // "email": data.email,
+      // "entrevistador": 'NA',
+      // "fecha_nacimiento": data.birthday || patient.fecha_nacimiento,
+      // "genero": data.genero || patient.genero,
+      // "jornada": 'NA',
+      // "mustChangePassword": 'NA',
+      // "nombre": data.name || patient.nombre,
+      // "region": regiones[0].label,
+      // "rut": data.rut,
+      // "status": patient.status,
+      // "telefono": data.mobile || patient.telefono,
+      // "tipo_usuario": patient.tipo_usuario,
+    // }
 
-    } catch (error) {
-      console.log('Error: ', error);
-      setSuccess('success')
-    } 
+    // try {
+    //   const [resp, changeStatus] = await Promise.all([
+    //     createInterviewRecord(body),
+    //     changeStatusAppointment(params.id, 'realizada')
+    //   ]);
+    //   console.log('resp', resp)
+    //   console.log('changeStatus', changeStatus)
+
+    //   if(resp['detalle'].includes('fail') || changeStatus['detalle'].includes('fail')){
+    //     setSuccess('fail')
+    //   } else {
+    //     setSuccess('success')
+    //   }
+
+    // } catch (error) {
+    //   console.log('Error: ', error);
+    //   setSuccess('success')
+    // } 
   })
 
   return (
