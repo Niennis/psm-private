@@ -11,7 +11,7 @@ import FeatherIcon from "feather-icons-react";
 import Link from "next/link";
 import dayjs from "dayjs";
 import Select from "react-select";
-import { TextField } from "@mui/material";
+import { TextField, Alert } from "@mui/material";
 import { useForm, Controller, useController } from 'react-hook-form';
 import { fetchAppointment, changeStatusAppointment, fetchAppointments } from "@/services/AppointmentsServices";
 import { fetchProfessionals } from "@/services/DoctorsServices";
@@ -37,6 +37,7 @@ const EditAppoinments = ({ params }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [appointment, setAppointment] = useState('');
   const [dataPatient, setDatapatient] = useState('')
+  const [success, setSuccess] = useState('initial')
 
   const [speciality, setSpeciality] = useState([
     { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality" },
@@ -143,18 +144,30 @@ const EditAppoinments = ({ params }) => {
   };
 
   const onSubmit = handleSubmit(async data => {
+    setSuccess('initial')
     try {
       const patientByEmail = await fetchUserByEmail(data.email)
 
       data.validacion = patientByEmail.validacion
       data.alumndo_id = patientByEmail.id
-      
+
       const status = session.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional'
-      if( data.status === "status" ){
-        const response = await changeStatusAppointment(data.id, status)
-        console.log('response', response)
+      if (data.status === "status") {
+        try {
+          const response = await changeStatusAppointment(data.id, status)
+          console.log('response', response)
+          if (response["detalle"].includes('fail!!')) {
+            setSuccess('fail')
+          } else {
+            setSuccess('success')
+          }
+        } catch (error) {
+          setSuccess('fail')
+
+        }
       }
     } catch (error) {
+      setSuccess('fail')
       console.log(error)
     }
 
@@ -543,29 +556,65 @@ const EditAppoinments = ({ params }) => {
           </div>
         </div>
 
-        <div
-          id="delete_patient"
-          className="modal fade delete-modal"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-body text-center">
-                <img src={imagesend} alt="#" width={50} height={46} />
-                <h3>Are you sure want to delete this ?</h3>
-                <div className="m-t-20">
-                  {" "}
-                  <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-                    Close
-                  </Link>
-                  <button type="submit" className="btn btn-danger">
-                    Delete
-                  </button>
-                </div>
+        {success === 'success'
+          ?
+          <div style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080'
+          }}>
+            {/* <div className="col-sm-12 col-lg-6"> */}
+            <Alert
+              severity="success"
+              onClose={() => { setSuccess('initial') }}
+              sx={{
+                zIndex: 'tooltip',
+                position: 'absolute',
+                left: '30%',
+                width: '50%',
+                padding: '50px',
+                bottom: '50vh'
+              }}
+              spacing={2}
+            >
+              Acción exitosa. Revisa los detalles en la sección Lista de citas.
+            </Alert>
+            {/* </div> */}
+          </div>
+
+          : success === 'fail'
+            ?
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
+                <Alert
+                  severity="error"
+                  onClose={() => { setSuccess('initial') }}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                  spacing={2}
+                >
+                  Ha ocurrido un problema.
+                </Alert>
               </div>
             </div>
-          </div>
-        </div>
+            : ''
+        }
       </>
     </div>
   );
