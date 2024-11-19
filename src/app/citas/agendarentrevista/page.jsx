@@ -45,7 +45,7 @@ const formatRut = (value) => {
 
 const formatDate = (dateString) => {
   const [year, day, month] = dateString.split("-");
-  return  `${year}-${month}-${day}`
+  return `${year}-${month}-${day}`
 };
 
 
@@ -144,7 +144,6 @@ const AddFirstAppoinments = () => {
 
   useEffect(() => {
     let filtered = allDays;
-    console.log('filtered', filtered)
     if (modalidad === "videollamada") {
       filtered = filtered.filter(item => ((item.modalidad === "videollamada") || (item.modalidad === "ambas")));
     } else if (modalidad === "presencial") {
@@ -156,6 +155,7 @@ const AddFirstAppoinments = () => {
       filtered = filtered.filter(item => ((item.modalidad === "presencial") || (item.modalidad === "ambas")));
       // }
     }
+    console.log('filtered', filtered)
     setDays(filtered);
   }, [modalidad, campus, doctor]);
 
@@ -198,16 +198,19 @@ const AddFirstAppoinments = () => {
     setTime('')
     try {
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
-      // const { bloques } = await fetchScheduleByUser(e.id)
 
       const response = byProf.map(item => ({
         ...item,
         fechaFin: formatDate(item.fechaFin),
         fechaInicio: formatDate(item.fechaInicio)
       }))
+      
+      const hoy = new Date(); 
+      const filterByDate = response.filter(item => new Date(item.fechaInicio) >= hoy);
 
-      const orderedData = orderByDate(response)
+      const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
+
       setAllDays(orderedData)
       setDays(bloque)
     } catch (error) {
@@ -286,7 +289,6 @@ const AddFirstAppoinments = () => {
 
   const fetchData = async () => {
     const users = await obtenerDoctoresDespeje()
-    console.log('obtenerdespeje', users)
     const docs = users.map((doc, i) => {
       return {
         value: i + 2,
@@ -335,7 +337,7 @@ const AddFirstAppoinments = () => {
 
     const bodyUpdate = {
       "apellido": data.lastName || patient.apellido,
-      "aplica_despeje": data.aplica_despeje,
+      "aplica_despeje": 1,
       "anoIngresoCarrera": 'NA',
       "campus": data.campus,
       "comuna": data.comuna.label,
@@ -343,11 +345,12 @@ const AddFirstAppoinments = () => {
       "contrasena": 'NA',
       "direccion": data.address,
       "email": data.email,
-      "entrevistador": 'NA',
+      "entrevistador": 0,
       "fecha_nacimiento": data.birthday || patient.fecha_nacimiento,
       "genero": data.genero || patient.genero,
+      "id": patient.id,
       "jornada": 'NA',
-      "mustChangePassword": 'NA',
+      "mustChangePassword": 0,
       "nombre": data.name || patient.nombre,
       "region": regiones[0].label,
       "rut": data.rut,
@@ -362,8 +365,11 @@ const AddFirstAppoinments = () => {
         updateUser(bodyUpdate)
       ]);
 
-      if (appointment["detalle"].includes('fail!!!') || update["detalle"].includes('fail!!!')) {
+      if (!appointment['detalle'].includes('success') && !update['detalle'].includes('success')) {
         setSuccess('fail')
+      }else if (appointment['detalle'].includes('success') && !update['detalle'].includes('success') ){
+        setSuccess('success')
+        setError('Se creó la cita, pero no se logró actualizar la información. Revisa la información en Lista de citas.')
       } else {
         setSuccess('success')
       }
@@ -372,10 +378,8 @@ const AddFirstAppoinments = () => {
 
     } catch (err) {
       setSuccess('fail')
-      console.log('ERRRR', err.message)
-      if (err.message === "Cannot read properties of undefined (reading 'id')") {
-        setError(`No se encontró al paciente`);
-      }
+      console.error('Algo falló', err)
+      setError(`Algo falló: ${err.message}`);
     } finally {
       setOpen(false)
     }
