@@ -14,7 +14,7 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import { fetchProfessionals } from "@/services/DoctorsServices";
+import { fetchProfessionals, fetchSpecialityById } from "@/services/DoctorsServices";
 import { fetchUsers, fetchUser, fetchPatientsDespejeFalse } from "@/services/UsersServices";
 import { createAppointment } from "@/services/AppointmentsServices"
 import { fetchScheduleByAvailability, fetchScheduleByUser, fetchScheduleByDate } from "@/services/SchedulesServices";
@@ -47,8 +47,8 @@ const obtenerFechasUnicas = array => {
 }
 
 const formatDate = (dateString) => {
-  const [year, part1, part2] = dateString.split("-");
-  return parseInt(part1) > 12 ? `${year}-${part2}-${part1}` : dateString;
+  const [year, day, month] = dateString.split("-");
+  return  `${year}-${month}-${day}`
 };
 
 const formatDateToService = (dateString) => {
@@ -57,7 +57,6 @@ const formatDateToService = (dateString) => {
 };
 
 const AddAppoinments = () => {
-  const VIDEOLLAMADA = false;
   const { data: session, status } = useSession()
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
   const [isClicked, setIsClicked] = useState(false);
@@ -73,6 +72,8 @@ const AddAppoinments = () => {
   const [indiceDias, setIndiceDias] = useState(0);
   const [indiceHoras, setIndiceHoras] = useState(0);
   const [selectedPatient, setSelectedPatient] = useState('')
+  const [filteredData, setFilteredData] = useState([]);
+  const [especialidad, setEspecialidad] = useState('')
   dayjs.extend(isLeapYear) // use plugin
   dayjs.locale('es-mx') // use locale
 
@@ -133,13 +134,45 @@ const AddAppoinments = () => {
     setDoctor(docs)
   }
 
-  const modalidad = watch('modalidad')
+  const getSpeciality = async () => {
+    try {
+      const { especialidad: profesional } = await fetchSpecialityById(session?.user?.id)
+      setEspecialidad(profesional[0].especialidad)
+    } catch (error) {
+      console.log('ERROR', error)
+    }
+  }
+
+  const modalidad = watch("modalidad", "videollamada"); // Valor predeterminado: videollamada
+  const campus = watch("campus", ""); // Valor predeterminado: ninguno
+
   const motivo_consulta_seleccionado = watch('motivo')
+
   useEffect(() => {
     setMenuPortalTarget(document.body);
     getProfessionals()
     getPatients()
+    getSpeciality()
   }, [])
+
+  useEffect(() => {
+    let filtered = allDays;
+    if (modalidad === "videollamada") {
+      filtered = filtered.filter(item => ((item.modalidad === "videollamada") || (item.modalidad === "ambas")));
+    } else if (modalidad === "presencial") {
+
+      if (campus) {
+        filtered = filtered.filter(
+          item => item.modalidad === "presencial" && item.location === campus
+        );
+
+      } else {
+        filtered = filtered.filter(item => ((item.modalidad === "presencial") || (item.modalidad === "ambas")));
+      }
+    }
+
+    setDays(filtered);
+  }, [modalidad, campus, doctor]);
 
 
   const onChange = (date, dateString) => {
@@ -209,6 +242,12 @@ const AddAppoinments = () => {
     { value: 5, label: "Prefiero no decir" }
   ]);
 
+  const tipo_cita = [
+    { value: "Acompañamiento psicológico", label: "Acompañamiento psicológico" },
+    { value: "Psicoterapia breve", label: "Psicoterapia breve" },
+    { value: "Psicoterapia individual", label: "Psicoterapia individual" },
+  ]
+
 
   // // // // // // // // // // // // // // // // // // // 
   const profesional = watch('professional')
@@ -225,12 +264,12 @@ const AddAppoinments = () => {
     try {
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
       // const { bloques } = await fetchScheduleByUser(e.id)
-
       const response = byProf.map(item => ({
         ...item,
         fechaFin: formatDate(item.fechaFin),
         fechaInicio: formatDate(item.fechaInicio)
       }))
+
       const orderedData = orderByDate(response)
       const bloque = obtenerDias(orderedData)
 
@@ -398,7 +437,7 @@ const AddAppoinments = () => {
                           <div className="col-12 col-md-6 col-xl-6">
                             <div className="form-group local-forms">
                               <label>Especialidad </label>
-                              <input className="form-control" type="text" {...register('speciality')} />
+                              <input className="form-control" type="text" {...register('speciality')} value={especialidad || ''} />
                             </div>
                           </div>
                         </AccordionDetails>
@@ -481,7 +520,7 @@ const AddAppoinments = () => {
                               <input
                                 className="form-control"
                                 type="text"
-                                value={selectedPatient?.name}
+                                value={selectedPatient?.name || ''}
                                 {...register('name')}
                               />
                               {
@@ -497,7 +536,7 @@ const AddAppoinments = () => {
                               <input
                                 className="form-control"
                                 type="text"
-                                value={selectedPatient?.lastName}
+                                value={selectedPatient?.lastName || ''}
                                 {...register('patientlastName')}
                               />
                               {
@@ -523,6 +562,65 @@ const AddAppoinments = () => {
                           </div>
                         </AccordionSummary>
                         <AccordionDetails>
+
+
+                          <div className="row">
+                            <div className="col-12">
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Modalidad de atención a la cual accede según evaluación</label>
+                                  <Controller
+                                    control={control}
+                                    name="tipo_cita"
+                                    {...register('tipo_cita')}
+                                    ref={null}
+                                    render={({ field: { onChange, onBlur, value, name, ref } }) => {
+                                      return (<Select
+                                        instanceId="tipo_cita"
+                                        defaultValue={selectedOption}
+                                        onChange={(e) => {
+                                          onChange(e);
+                                          handleSelectedProfessional(e);
+                                        }}
+                                        getOptionLabel={e => e.label}
+                                        options={tipo_cita}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="tipo_cita"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
+
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+                                          }),
+                                        }}
+                                      />)
+                                    }}
+                                  />
+                                  {errors.professional && <span><small>{errors.professional.message}</small></span>}
+
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+
                           <div className="row">
                             <div className="col-12 ">
                               <div className="form-group local-forms col-md-6 col-xl-6">
@@ -647,57 +745,6 @@ const AddAppoinments = () => {
                                 : <></>
                             }
 
-
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <div className="form-group local-forms">
-                                <label>Modalidad de atención a la cual accede según evaluación</label>
-                                <div className="form-group local-forms">
-                                  <Controller
-                                    control={control}
-                                    name="intervencion"
-                                    {...register('intervencion')}
-                                    ref={null}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <Select
-                                        isMulti
-                                        instanceId="intervencion"
-                                        defaultValue={selectedOption}
-                                        onChange={onChange}
-                                        options={intervencion}
-                                        // menuPortalTarget={document.body}
-                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                        id="intervencion"
-                                        components={{
-                                          IndicatorSeparator: () => null
-                                        }}
-
-                                        styles={{
-                                          control: (baseStyles, state) => ({
-                                            ...baseStyles,
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                            '&:hover': {
-                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                            },
-                                            borderRadius: '10px',
-                                            fontSize: "14px",
-                                            minHeight: "45px",
-                                          }),
-                                          dropdownIndicator: (base, state) => ({
-                                            ...base,
-                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                            transition: '250ms',
-                                            width: '35px',
-                                            height: '35px',
-
-                                          }),
-                                        }}
-                                      />
-                                    )}
-                                  />
-                                </div>
-                              </div>
-                            </div>
 
                             <div className="col-12 col-md-6 col-xl-4">
                               <div className="form-group select-gender">
@@ -880,7 +927,6 @@ const AddAppoinments = () => {
               </div>
             </div>
           </div>
-          {/* <Modal open={open} handleClose={handleClose} onClick={onSubmit} /> */}
 
         </div>
         {success === 'success'
@@ -907,7 +953,7 @@ const AddAppoinments = () => {
               }}
               spacing={2}
             >
-              La cita se ha creado con éxito. Revisa tu bandeja de entrada para confirmarla.
+              La cita se ha creado con éxito. Revisa los detalles en la sección Lista de citas.
             </Alert>
             {/* </div> */}
           </div>

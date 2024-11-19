@@ -24,11 +24,13 @@ import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { fetchProfessionals } from "@/services/DoctorsServices";
-import { fetchUser, fetchUsers } from "@/services/UsersServices";
-import { createAppointment, sendEmail } from "@/services/AppointmentsServices"
-import { regiones, comunas, motivo_consulta } from "@/utils/selects";
+import { fetchUser, fetchUsers, fetchUserByEmail, updateUser } from "@/services/UsersServices";
+import { createInterview, sendEmail } from "@/services/AppointmentsServices"
+import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 // import { formatRut } from "@/utils/managedata";
 import { fetchScheduleByDate, fetchScheduleByUser, fetchScheduleByAvailability } from "@/services/SchedulesServices";
+import { obtenerDoctoresDespeje } from "@/utils/getDoctorsWithDespeje";
+
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 
@@ -39,6 +41,17 @@ const formatRut = (value) => {
   const [number, verifierDigit] = cleanedValue.split('-');
   const formattedNumber = number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return `${formattedNumber}-${verifierDigit || ''}`;
+};
+
+const formatDate = (dateString) => {
+  const [year, day, month] = dateString.split("-");
+  return  `${year}-${month}-${day}`
+};
+
+
+const formatDateToService = (dateString) => {
+  const [year, month, day] = dateString.split("-");
+  return `${year}-${day}-${month}`
 };
 
 // Función para obtener fechas únicas
@@ -86,6 +99,7 @@ const AddFirstAppoinments = () => {
   const [indiceHoras, setIndiceHoras] = useState(0);
   // modal alert
   const [openBackdrop, setOpenBackdrop] = useState(false);
+  const [dataPatient, setDataPatient] = useState(null)
 
   const handleChange = () => {
     setChecked((prev) => !prev);
@@ -93,16 +107,19 @@ const AddFirstAppoinments = () => {
 
   const fetchInitialData = async () => {
     try {
-      const { users: patient } = await fetchUser(session.user?.id);
-      // console.log('patient', patient)
-      return {
-        name: patient[0].nombre,
-        lastName: patient[0].apellido,
+      const response = await fetchUserByEmail(session.user?.email);
+      const patient = {
+        name: response.nombre,
+        lastName: response.apellido,
         email: session.user?.email,
-        birthday: dayjs(patient[0].fecha_nacimiento).format('YYYY-MM-DD'),
-        genero: patient[0].genero === 'personalizado' ? 'No binarie' : patient[0].genero,
-        mobile: patient[0].telefono
+        birthday: dayjs(response.fecha_nacimiento).format('YYYY-MM-DD'), // "Wed, 14 Feb 1990 00:00:00 GMT"
+        genero: response.genero === 'personalizado' ? 'No binarie' : response.genero,
+        mobile: response.telefono,
+        aplica_despeje: response.aplica_despeje
       };
+
+      setDataPatient(patient)
+      return patient
     } catch (error) {
       console.error("Error fetching initial data:", error);
       return {};
@@ -122,7 +139,27 @@ const AddFirstAppoinments = () => {
 
   const selectedRegion = { value: 13, label: "Región Metropolitana", name: "metropolitana" }
   const profesional = watch('professional')
-  const modalidad = watch('modalidad')
+  const modalidad = watch("modalidad", "videollamada"); // Valor predeterminado: videollamada
+  const campus = watch("campus", ""); // Valor predeterminado: ninguno
+
+  useEffect(() => {
+    let filtered = allDays;
+    console.log('filtered', filtered)
+    if (modalidad === "videollamada") {
+      filtered = filtered.filter(item => ((item.modalidad === "videollamada") || (item.modalidad === "ambas")));
+    } else if (modalidad === "presencial") {
+      // if (campus) {
+      //   filtered = filtered.filter(
+      //     item => item.modalidad === "presencial" && item.location === campus
+      //   );
+      // } else {
+      filtered = filtered.filter(item => ((item.modalidad === "presencial") || (item.modalidad === "ambas")));
+      // }
+    }
+    setDays(filtered);
+  }, [modalidad, campus, doctor]);
+
+
 
   const handleChangeRut = (e) => {
     const inputValue = e.target.value;
@@ -148,6 +185,11 @@ const AddFirstAppoinments = () => {
     return soloDias;
   }
 
+  const orderByDate = (arr) => {
+    return arr.sort((a, b) => dayjs(a.fechaInicio).isAfter(dayjs(b.fechaInicio)) ? 1 : -1);
+  }
+
+
   /* Retorna días disponibles */
   const handleSelectedProfessional = async (e) => {
     setDays([])
@@ -156,17 +198,18 @@ const AddFirstAppoinments = () => {
     setTime('')
     try {
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
-      const { bloques } = await fetchScheduleByUser(e.id)
+      // const { bloques } = await fetchScheduleByUser(e.id)
 
-      const bloque = obtenerDias(byProf)
-      setAllDays(byProf)
+      const response = byProf.map(item => ({
+        ...item,
+        fechaFin: formatDate(item.fechaFin),
+        fechaInicio: formatDate(item.fechaInicio)
+      }))
+
+      const orderedData = orderByDate(response)
+      const bloque = obtenerDias(orderedData)
+      setAllDays(orderedData)
       setDays(bloque)
-      // setDays([
-      //   {
-      //     fechaInicio: '2024-06-20',
-      //     id_user: 2
-      //   },
-      // ])
     } catch (error) {
       console.log('Error: ', error)
     }
@@ -242,8 +285,8 @@ const AddFirstAppoinments = () => {
   const handleClose = () => setOpen(false);
 
   const fetchData = async () => {
-    const users = await fetchProfessionals()
-
+    const users = await obtenerDoctoresDespeje()
+    console.log('obtenerdespeje', users)
     const docs = users.map((doc, i) => {
       return {
         value: i + 2,
@@ -277,38 +320,49 @@ const AddFirstAppoinments = () => {
     { value: "No binarie", label: "No binarie" }
   ]
 
-  const career = [
-    { value: 2, label: "Antropologia" },
-    { value: 3, label: "Arquitectura" },
-    { value: 4, label: "Contador" },
-    { value: 5, label: "Derecho" },
-    { value: 6, label: "Ingenieria" },
-  ];
-
-
   const handleFirstInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
-    console.log('errors', errors)
-    console.log('data', data);
     setSuccess('initial')
-    const patientName = watch("name")
-    const patientLastname = watch("lastName")
-    const patients = await fetchUsers()
+    const patient = await fetchUserByEmail(session.user?.email)
 
-    console.log('session.user.email', session.user?.email);
-    const patient = patients.users.filter(user =>
-      user.email === session.user?.email
-    )
-    const body = {
+    const bodyInterview = {
       ...data,
-      "patient_id": patient[0].id,
+      "patient_id": patient.id,
       "fecha": date,
-      "hora": time
+      "hora": time,
+      "region": regiones[0].label,
+    }
+
+    const bodyUpdate = {
+      "apellido": data.lastName || patient.apellido,
+      "aplica_despeje": data.aplica_despeje,
+      "anoIngresoCarrera": 'NA',
+      "campus": data.campus,
+      "comuna": data.comuna.label,
+      "carrera": data.career.label,
+      "contrasena": 'NA',
+      "direccion": data.address,
+      "email": data.email,
+      "entrevistador": 'NA',
+      "fecha_nacimiento": data.birthday || patient.fecha_nacimiento,
+      "genero": data.genero || patient.genero,
+      "jornada": 'NA',
+      "mustChangePassword": 'NA',
+      "nombre": data.name || patient.nombre,
+      "region": regiones[0].label,
+      "rut": data.rut,
+      "status": patient.status,
+      "telefono": data.mobile || patient.telefono,
+      "tipo_usuario": patient.tipo_usuario,
     }
 
     try {
-      const appointment = await createAppointment(body)
-      if (appointment.detalle === 'fail!!!') {
+      const [appointment, update] = await Promise.all([
+        createInterview(bodyInterview),
+        updateUser(bodyUpdate)
+      ]);
+
+      if (appointment["detalle"].includes('fail!!!') || update["detalle"].includes('fail!!!')) {
         setSuccess('fail')
       } else {
         setSuccess('success')
@@ -610,6 +664,7 @@ const AddFirstAppoinments = () => {
                                 <input
                                   className="form-control"
                                   type="email"
+                                  disabled
                                   {...register('email', {
                                     required: {
                                       value: true,
@@ -658,7 +713,7 @@ const AddFirstAppoinments = () => {
                                       instanceId="career"
                                       defaultValue={selectedOption}
                                       onChange={onChange}
-                                      options={career}
+                                      options={carreras}
                                       menuPortalTarget={menuPortalTarget}
                                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                       id="career"
@@ -908,6 +963,58 @@ const AddFirstAppoinments = () => {
                         </AccordionSummary>
                         <AccordionDetails>
                           <div className="row">
+                            <div className="col-12 col-md-6 col-xl-6">
+                              <div className="form-group local-forms">
+                                <label>Profesional</label>
+                                <Controller
+                                  control={control}
+                                  name="professional"
+                                  {...register('professional')}
+                                  ref={null}
+                                  render={({ field: { onChange, onBlur, value, name, ref } }) => {
+                                    return (<Select
+                                      instanceId="professional"
+                                      defaultValue={selectedOption}
+                                      onChange={(e) => {
+                                        onChange(e);
+                                        handleSelectedProfessional(e);
+                                      }}
+                                      getOptionLabel={e => e.label}
+                                      options={doctor}
+                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                      id="professional"
+                                      components={{
+                                        IndicatorSeparator: () => null
+                                      }}
+
+                                      styles={{
+                                        control: (baseStyles, state) => ({
+                                          ...baseStyles,
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                          '&:hover': {
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                          },
+                                          borderRadius: '10px',
+                                          fontSize: "14px",
+                                          minHeight: "45px",
+                                        }),
+                                        dropdownIndicator: (base, state) => ({
+                                          ...base,
+                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                          transition: '250ms',
+                                          width: '35px',
+                                          height: '35px',
+                                        }),
+                                      }}
+                                    />)
+                                  }}
+                                />
+                                {errors.professional && <span><small>{errors.professional.message}</small></span>}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="row">
                             <div className="col-12 col-md-6 col-xl-4">
                               <div className="form-group select-gender">
                                 <label className="gen-label">
@@ -1046,57 +1153,7 @@ const AddFirstAppoinments = () => {
                               </div>
                             </div>
                           }
-                          <div className="col-12 col-md-6 col-xl-6">
-                            <div className="form-group local-forms">
-                              <label>Profesional</label>
-                              <Controller
-                                control={control}
-                                name="professional"
-                                {...register('professional')}
-                                ref={null}
-                                render={({ field: { onChange, onBlur, value, name, ref } }) => {
-                                  return (<Select
-                                    instanceId="professional"
-                                    defaultValue={selectedOption}
-                                    onChange={(e) => {
-                                      onChange(e);
-                                      handleSelectedProfessional(e);
-                                    }}
-                                    getOptionLabel={e => e.label}
-                                    options={doctor}
-                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                    id="professional"
-                                    components={{
-                                      IndicatorSeparator: () => null
-                                    }}
 
-                                    styles={{
-                                      control: (baseStyles, state) => ({
-                                        ...baseStyles,
-                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                        boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                        '&:hover': {
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                        },
-                                        borderRadius: '10px',
-                                        fontSize: "14px",
-                                        minHeight: "45px",
-                                      }),
-                                      dropdownIndicator: (base, state) => ({
-                                        ...base,
-                                        transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                        transition: '250ms',
-                                        width: '35px',
-                                        height: '35px',
-                                      }),
-                                    }}
-                                  />)
-                                }}
-                              />
-                              {errors.professional && <span><small>{errors.professional.message}</small></span>}
-
-                            </div>
-                          </div>
                           {profesional &&
 
                             <div className="row">
@@ -1236,7 +1293,7 @@ const AddFirstAppoinments = () => {
               }}
               spacing={2}
             >
-              La cita se ha creado con éxito. Revisa tu bandeja de entrada para confirmarla.
+              La cita se ha creado con éxito. Revisa los detalles en la sección Lista de citas.
             </Alert>
             {/* </div> */}
           </div>
@@ -1265,7 +1322,7 @@ const AddFirstAppoinments = () => {
                   }}
                   spacing={2}
                 >
-                  Ha ocurrido un problema. {error}
+                  Ha ocurrido un problema.
                 </Alert>
               </div>
             </div>
