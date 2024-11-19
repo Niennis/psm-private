@@ -34,7 +34,7 @@ const AppoinmentList = () => {
   const [isValidated, setIsValidated] = useState(true)
   const [loading, setLoading] = useState(true)
 
-  const cacheKey = "external-api-data";
+  // const cacheKey = "external-api-data";
 
   useEffect(() => {
 
@@ -42,14 +42,14 @@ const AppoinmentList = () => {
       setLoading(true);
 
       try {
-        let cachedData = await cacheHandler.get(cacheKey);
+        // let cachedData = await cacheHandler.get(cacheKey);
 
-        if (cachedData) {
-          setAppointments(cachedData)
-          setResults(cachedData);
-          setLoading(false);
-          return;
-        }
+        // if (cachedData) {
+        //   setAppointments(cachedData)
+        //   setResults(cachedData);
+        //   setLoading(false);
+        //   return;
+        // }
 
         const response = await fetchAppointments();
         const data = response.filter(item=> (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
