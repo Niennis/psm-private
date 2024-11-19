@@ -388,7 +388,7 @@ const AppoinmentList = () => {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-body text-center">
-                <img src={imagesend} alt="#" width={50} height={46} />
+                <img src={imagesend.src} alt="#" width={50} height={46} />
                 <h3>Antes de continuar, cambia tu contraseña</h3>
                 <div className="m-t-20">
                   {" "}
