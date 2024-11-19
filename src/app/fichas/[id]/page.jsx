@@ -10,7 +10,7 @@ import { useForm, Controller } from 'react-hook-form';
 import Sidebar from "@/components/Sidebar";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
-import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/material";
 
 import { fetchProfessionals, fetchProfessionalById } from "@/services/DoctorsServices";
 import { fetchUserByEmail, fetchUsers } from "@/services/UsersServices";
@@ -73,7 +73,6 @@ const AddInterviewRecord = ({ params }) => {
       const responseAppointment = await fetchAppointments()
       const date = responseAppointment.filter(item => item.id_cita == params.id)
       const responsePatient = await fetchUserByEmail(date[0].email_estudiante)
-      console.log(responsePatient)
       const obj = {
         profesional_evaluador: date[0].nombre_profesional,
         nombre_completo: date[0].nombre_alumno,
@@ -83,7 +82,8 @@ const AddInterviewRecord = ({ params }) => {
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         telefono: date[0].telefono_estudiante,
-        validacion: date[0].validacion
+        validacion: date[0].validacion,
+        aplica_despeje: responsePatient.aplica_despeje
       }
       setPatient(responsePatient)
       return obj
@@ -132,14 +132,13 @@ const AddInterviewRecord = ({ params }) => {
   const handleClose = () => setOpen(false);
 
   const onChange = (date, dateString) => {
-    console.log(date, dateString);
     setIsClicked(true);
   };
   const loadFile = (event) => {
     // Handle file loading logic here
   };
 
-  const onSubmit = handleSubmit(async data => {
+  const handleAppointment = handleSubmit(async data => {
     setSuccess('initial')
     const patientName = watch("name")
     const patientLastname = watch("lastName")
@@ -152,9 +151,11 @@ const AddInterviewRecord = ({ params }) => {
     )
     try {
       const appointment = await createInterviewRecord({ ...data, "patient_id": patient[0].id })
-      console.log('appointment', appointment)
-      // return bleh
-      setSuccess('success')
+      if (!appointment){
+        setSuccess('fail')
+      } else{
+        setSuccess('success')
+      }
 
     } catch (err) {
       setSuccess('fail')
@@ -162,9 +163,7 @@ const AddInterviewRecord = ({ params }) => {
       if (err.message === "Cannot read properties of undefined (reading 'id')") {
         setError(`No se encontró al paciente`);
       }
-    } finally {
-      setOpen(false)
-    }
+    } 
   })
   const gender = [
     { value: 1, label: "Femenino" },
@@ -201,7 +200,6 @@ const AddInterviewRecord = ({ params }) => {
     { value: 9, label: "Derivación externa" },
     { value: 10, label: "Derivación Psiquiatra" }
   ];
-
   const estdo_atencion = [
     { value: 2, label: "Reagendada" },
     { value: 3, label: "Realizada" },
@@ -211,7 +209,7 @@ const AddInterviewRecord = ({ params }) => {
     { value: 2, label: "Psicológica" },
     { value: 3, label: "Psicopedagógica" },
     { value: 4, label: "Psiquiátrica" },
-    { value: 4, label: "Grupal" }
+    { value: 4, label: "Trabajador social" }
   ];
 
   const handleAddContact = () => {
@@ -240,8 +238,8 @@ const AddInterviewRecord = ({ params }) => {
   };
 
   const handleInterview = handleSubmit(async (data, e) => {
+    setSuccess('initial')
     e.preventDefault()
-    console.log('DATA', data.fecha, data.fecha_nacimiento)
     const body = {
       ...data,
       id_profesional: 9,
@@ -249,20 +247,24 @@ const AddInterviewRecord = ({ params }) => {
       fecha: formatDate(data.fecha),
       fecha_nacimiento: formatDate(data.fecha_nacimiento),
     }
-    console.log('BODY', body)
     try {
       const [resp, changeStatus] = await Promise.all([
         createInterviewRecord(body),
         changeStatusAppointment(params.id, 'realizada')
       ]);
-      console.log('resp', resp);
-      console.log('changeStatus', changeStatus);
+      console.log('resp', resp)
+      console.log('changeStatus', changeStatus)
+
+      if(resp['detalle'].includes('fail') || changeStatus['detalle'].includes('fail')){
+        setSuccess('fail')
+      } else {
+        setSuccess('success')
+      }
 
     } catch (error) {
       console.log('Error: ', error);
-    } finally {
-
-    }
+      setSuccess('success')
+    } 
   })
 
   return (
@@ -297,13 +299,13 @@ const AddInterviewRecord = ({ params }) => {
             <div className="row">
               <div className="col-sm-12">
                 <div className="card">
-                  {patient?.validacion ?
+
+                  {patient?.aplica_despeje ?
 
                     <div className="card-body">
                       <h4>Registrar atención</h4>
                       <form>
                         {/* Detalles de la cita */}
-
                         <div className="row" style={{ border: '1px solid lightgrey', borderRadius: '8px', padding: '20px 0 0 0', margin: '10px' }}>
                           <div className="col-12 col-md-4 col-xl-4">
                             <div className="form-group local-forms">
@@ -520,7 +522,7 @@ const AddInterviewRecord = ({ params }) => {
                             </div>
                           </AccordionSummary>
                           <AccordionDetails>
-                          <div className="row">
+                            <div className="row">
                               <div className="col-12 col-md-12 col-xl-12">
                                 <div className="form-group local-forms">
 
@@ -569,8 +571,8 @@ const AddInterviewRecord = ({ params }) => {
                             </div>
                           </AccordionDetails>
                         </Accordion>
-                       
-                       
+
+
                         {/* 4. Acuerdos */}
                         <Accordion>
                           <AccordionSummary
@@ -608,7 +610,7 @@ const AddInterviewRecord = ({ params }) => {
                             <button
                               // type="submit"
                               className="btn btn-primary submit-form me-2"
-                              onClick={(e) => { handleInterview(e) }}
+                              onClick={(e) => { handleAppointment(e) }}
                             >
                               Enviar
                             </button>
@@ -2335,6 +2337,66 @@ const AddInterviewRecord = ({ params }) => {
           </div>
 
         </div>
+        
+        {success === 'success'
+          ?
+          <div style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080'
+          }}>
+            {/* <div className="col-sm-12 col-lg-6"> */}
+            <Alert
+              severity="success"
+              onClose={() => { setSuccess('initial') }}
+              sx={{
+                zIndex: 'tooltip',
+                position: 'absolute',
+                left: '30%',
+                width: '50%',
+                padding: '50px',
+                bottom: '50vh'
+              }}
+              spacing={2}
+            >
+              Acción exitosa. Revisa los detalles en la sección Lista de citas.
+            </Alert>
+            {/* </div> */}
+          </div>
+
+          : success === 'fail'
+            ?
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
+                <Alert
+                  severity="error"
+                  onClose={() => { setSuccess('initial') }}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                  spacing={2}
+                >
+                  Ha ocurrido un problema.
+                </Alert>
+              </div>
+            </div>
+            : ''
+        }
       </>
     </>
   );
