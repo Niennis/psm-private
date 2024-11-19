@@ -263,14 +263,17 @@ const AddAppoinments = () => {
     setTime('')
     try {
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
-      // const { bloques } = await fetchScheduleByUser(e.id)
+
       const response = byProf.map(item => ({
         ...item,
         fechaFin: formatDate(item.fechaFin),
         fechaInicio: formatDate(item.fechaInicio)
       }))
 
-      const orderedData = orderByDate(response)
+      const hoy = new Date(); 
+      const filterByDate = response.filter(item => new Date(item.fechaInicio) >= hoy);
+
+      const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
 
       setAllDays(orderedData)
