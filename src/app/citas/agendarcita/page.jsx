@@ -263,13 +263,13 @@ const AddAppoinments = () => {
     setTime('')
     try {
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
-
+      console.log('DISPONIBILIDADES', byProf)
       const response = byProf.map(item => ({
         ...item,
         fechaFin: formatDate(item.fechaFin),
         fechaInicio: formatDate(item.fechaInicio)
       }))
-
+      console.log('RESPONSE', response)
       const hoy = new Date(); 
       const filterByDate = response.filter(item => new Date(item.fechaInicio) >= hoy);
 
@@ -583,7 +583,7 @@ const AddAppoinments = () => {
                                         defaultValue={selectedOption}
                                         onChange={(e) => {
                                           onChange(e);
-                                          handleSelectedProfessional(e);
+                                          // handleSelectedProfessional(e);
                                         }}
                                         getOptionLabel={e => e.label}
                                         options={tipo_cita}
