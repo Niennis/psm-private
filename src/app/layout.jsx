@@ -8,9 +8,11 @@ import Script from 'next/script'
 import AuthProvider from "@/providers/AuthProvider";
 import { SectionProvider } from "@/context/SectionContext";
 import { getServerSession } from "next-auth";
+import { redirect } from 'next/navigation';
 const inter = Inter({ subsets: ["latin"] });
 // import Hotjar from '@hotjar/browser';
-import GoogleReCaptchaWrapper from "@/providers/GoogleCaptchaWrapper";
+// import GoogleReCaptchaWrapper from "@/providers/GoogleCaptchaWrapper";
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 const siteId = 3920275;
 // const hotjarVersion = 6;
@@ -29,19 +31,26 @@ const roboto_init = Roboto({
 
 export default async function RootLayout({ children }) {
 
-  const session = await getServerSession()
+  const session = await getServerSession();
+  console.log('SESSION layout', session);
+
+  // if (!session) {
+  //   redirect('/');
+  // }
 
   return (
-    <html lang="en">
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <title>Salud Mental Estudiantil UDP</title>
-        
-        <Script src="https://kit.fontawesome.com/7a6fedca6c.js" ></Script>
-        <Script id="fontawesome" src="https://kit.fontawesome.com/a790242b27.js" ></Script>
-        <Script id="hotjar" strategy="afterInteractive" dangerouslySetInnerHTML={{
-          __html:
-            `(function(h,o,t,j,a,r){
+    <AuthProvider session={session}>
+
+      <html lang="en">
+        <head>
+          <link rel="icon" href="/favicon.ico" sizes="any" />
+          <title>Salud Mental Estudiantil UDP</title>
+
+          <Script src="https://kit.fontawesome.com/7a6fedca6c.js" ></Script>
+          <Script id="fontawesome" src="https://kit.fontawesome.com/a790242b27.js" ></Script>
+          <Script id="hotjar" strategy="afterInteractive" dangerouslySetInnerHTML={{
+            __html:
+              `(function(h,o,t,j,a,r){
                 h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
                 h._hjSettings={hjid:3921307,hjsv:6};
                 a=o.getElementsByTagName('head')[0];
@@ -49,27 +58,26 @@ export default async function RootLayout({ children }) {
                 r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
                 a.appendChild(r);
             })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=')`
-        }}></Script>
-      </head>
-      <body className={`${roboto_init.variable}`}>
-      <Script
-          strategy="beforeInteractive"
-          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-        />
-        <AuthProvider session={session}>
+          }}></Script>
+        </head>
+        <body className={`${roboto_init.variable}`}>
+          <Script
+            strategy="beforeInteractive"
+            src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+          />
           <SectionProvider>
             {/* <TanstackProvider> */}
             <Header />
-            <GoogleReCaptchaWrapper>
+            {/* <GoogleReCaptchaWrapper> */}
 
-              {children}
-            </GoogleReCaptchaWrapper>
+            {children}
+            {/* </GoogleReCaptchaWrapper> */}
 
             {/* </TanstackProvider> */}
           </SectionProvider>
-        </AuthProvider>
-        {/* <Script src="./bot.js" data-args="Salud mental, #FFFFFF, #AA3C80FF, ./bot_salud_mental.png" id="bot"></Script> */}
-      </body>
-    </html>
+          {/* <Script src="./bot.js" data-args="Salud mental, #FFFFFF, #AA3C80FF, ./bot_salud_mental.png" id="bot"></Script> */}
+        </body>
+      </html>
+    </AuthProvider>
   );
 }
