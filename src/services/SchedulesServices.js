@@ -249,6 +249,7 @@ export const createSchedule = async (schedule) => {
 
   const body = {
     "detalleServicio": schedule.title,
+    "campus": schedule.campus,
     "dias": schedule.frecuencia === "semanal" ? schedule.semanal.dia
       : schedule.frecuencia === "mensual" ? [schedule.mensual['ordinal-dia']] : semana,
     "duracionServicio": schedule.duracionServicio,

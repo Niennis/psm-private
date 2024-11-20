@@ -48,7 +48,7 @@ const obtenerFechasUnicas = array => {
 
 const formatDate = (dateString) => {
   const [year, day, month] = dateString.split("-");
-  return  `${year}-${month}-${day}`
+  return `${year}-${month}-${day}`
 };
 
 const formatDateToService = (dateString) => {
@@ -157,21 +157,22 @@ const AddAppoinments = () => {
 
   useEffect(() => {
     let filtered = allDays;
+    let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}-${item.horaIni}`))).map(compositeKey => { return filtered.find(item => `${item.fechaInicio}-${item.horaIni}` === compositeKey); });
+
     if (modalidad === "videollamada") {
-      filtered = filtered.filter(item => ((item.modalidad === "videollamada") || (item.modalidad === "ambas")));
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas");
     } else if (modalidad === "presencial") {
-
       if (campus) {
-        filtered = filtered.filter(
-          item => item.modalidad === "presencial" && item.location === campus
-        );
-
+        console.log(uniqueFiltered)
+        uniqueFiltered = uniqueFiltered.filter(
+          item => item.modalidad === "presencial" && (item.campus === campus
+         || item.campus == null));
       } else {
-        filtered = filtered.filter(item => ((item.modalidad === "presencial") || (item.modalidad === "ambas")));
+        uniqueFiltered = uniqueFiltered.filter(item => ((item.modalidad === "presencial") || (item.modalidad === "ambas")));
       }
     }
 
-    setDays(filtered);
+    setDays(uniqueFiltered);
   }, [modalidad, campus, doctor]);
 
 
@@ -270,7 +271,7 @@ const AddAppoinments = () => {
         fechaInicio: formatDate(item.fechaInicio)
       }))
       console.log('RESPONSE', response)
-      const hoy = new Date(); 
+      const hoy = new Date();
       const filterByDate = response.filter(item => new Date(item.fechaInicio) >= hoy);
 
       const orderedData = orderByDate(filterByDate)

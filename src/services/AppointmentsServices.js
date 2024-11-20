@@ -67,20 +67,20 @@ export const createInterview = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_INTERVIEW
 console.log('appointment', appointment)
   const body = {
-    profesional_id: appointment.professional.id,
     alumno_id: appointment.patient_id,
-    fechaInicio: formatDate(appointment.fecha),
-    hora: appointment.hora,
-    estado: "pendiente",
-    modalidad: appointment.modalidad || 'modalidad',
-    campus: appointment.campus || 'no aplica',
-    notas: 'notas',
-    motivo: appointment.motivo.label || 'motivo',
+    campus: appointment.campus,
     como: 'como se entero',
     derivado_desde: 'derivado',
-    tratamiento: 'tratamientos',
     diagnostico_previo: 'diagnosticos',
+    estado: "pendiente",
+    fechaInicio: formatDate(appointment.fecha),
+    hora: appointment.hora,
+    modalidad: appointment.modalidad || 'modalidad',
+    motivo: appointment.motivo.label || 'motivo',
+    notas: 'notas',
     primera_cita: 1,
+    profesional_id: appointment.professional.id,
+    tratamiento: 'tratamientos',
   }
   console.log('BODY', body);
 
@@ -113,20 +113,20 @@ export const createAppointment = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_APPOINTMENT
 console.log('appointment', appointment)
   const body = {
-    profesional_id: appointment.professional.id,
     alumno_id: appointment.patient_id,
-    fechaInicio: appointment.fecha,
-    hora: appointment.hora,
-    estado: "pendiente",
-    modalidad: appointment.modalidad || 'modalidad',
-    campus: appointment.campus || 'no aplica',
-    notas: 'notas',
-    motivo: appointment.motivo.label || 'motivo',
+    campus: appointment.campus,
     como: 'como se entero',
     derivado_desde: 'derivado',
-    tratamiento: 'tratamientos',
     diagnostico_previo: 'diagnosticos',
+    estado: "pendiente",
+    fechaInicio: appointment.fecha,
+    hora: appointment.hora,
+    modalidad: appointment.modalidad ,
+    motivo: appointment.motivo.label || 'motivo',
+    notas: 'notas',
     primera_cita: 0,
+    profesional_id: appointment.professional.id,
+    tratamiento: 'tratamientos',
   }
   console.log('BODY', body);
 

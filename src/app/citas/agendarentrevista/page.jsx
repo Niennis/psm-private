@@ -29,7 +29,7 @@ import { createInterview, sendEmail } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 // import { formatRut } from "@/utils/managedata";
 import { fetchScheduleByDate, fetchScheduleByUser, fetchScheduleByAvailability } from "@/services/SchedulesServices";
-import { obtenerDoctoresDespeje } from "@/utils/getDoctorsWithDespeje";
+import { fetchProfDespeje } from "@/utils/getDoctorsWithDespeje";
 
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
@@ -144,19 +144,21 @@ const AddFirstAppoinments = () => {
 
   useEffect(() => {
     let filtered = allDays;
+    let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}-${item.horaIni}`))).map(compositeKey => { return filtered.find(item => `${item.fechaInicio}-${item.horaIni}` === compositeKey); });
+
     if (modalidad === "videollamada") {
-      filtered = filtered.filter(item => ((item.modalidad === "videollamada") || (item.modalidad === "ambas")));
+      uniqueFiltered = uniqueFiltered.filter(item => ((item.modalidad === "videollamada") || (item.modalidad === "ambas")));
     } else if (modalidad === "presencial") {
-      // if (campus) {
-      //   filtered = filtered.filter(
-      //     item => item.modalidad === "presencial" && item.location === campus
-      //   );
-      // } else {
-      filtered = filtered.filter(item => ((item.modalidad === "presencial") || (item.modalidad === "ambas")));
-      // }
+      if (campus) {
+        uniqueFiltered = uniqueFiltered.filter(
+          item => item.modalidad === "presencial" && (item.campus === campus
+            || item.campus === null));
+      } else {
+        uniqueFiltered = uniqueFiltered.filter(item => ((item.modalidad === "presencial") || (item.modalidad === "ambas")));
+      }
     }
-    console.log('filtered', filtered)
-    setDays(filtered);
+
+    setDays(uniqueFiltered);
   }, [modalidad, campus, doctor]);
 
 
@@ -204,8 +206,8 @@ const AddFirstAppoinments = () => {
         fechaFin: formatDate(item.fechaFin),
         fechaInicio: formatDate(item.fechaInicio)
       }))
-      
-      const hoy = new Date(); 
+
+      const hoy = new Date();
       const filterByDate = response.filter(item => new Date(item.fechaInicio) >= hoy);
 
       const orderedData = orderByDate(filterByDate)
@@ -288,7 +290,7 @@ const AddFirstAppoinments = () => {
   const handleClose = () => setOpen(false);
 
   const fetchData = async () => {
-    const users = await obtenerDoctoresDespeje()
+    const users = await fetchProfDespeje()
     const docs = users.map((doc, i) => {
       return {
         value: i + 2,
@@ -367,7 +369,7 @@ const AddFirstAppoinments = () => {
 
       if (!appointment['detalle'].includes('success') && !update['detalle'].includes('success')) {
         setSuccess('fail')
-      }else if (appointment['detalle'].includes('success') && !update['detalle'].includes('success') ){
+      } else if (appointment['detalle'].includes('success') && !update['detalle'].includes('success')) {
         setSuccess('success')
         setError('Se creó la cita, pero no se logró actualizar la información. Revisa la información en Lista de citas.')
       } else {
