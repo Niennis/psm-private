@@ -108,7 +108,6 @@ console.log('appointment', appointment)
   }
 }
 
-
 export const createAppointment = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_APPOINTMENT
 console.log('appointment', appointment)
@@ -205,45 +204,6 @@ export const changeStatusAppointment = async (id, status) => {
     console.log(err)
   }
 }
-/* 
-export const fetchAppointments = async (callback) => {
-  try {
-    const data = await fetch(process.env.NEXT_PUBLIC_SHOW_APPOINTMENTS, {
-      method: "POST",
-      headers: {
-        'content-type': 'application/json',
-        'access-control-allow-origin': '*',
-      },
-    })
-    // const data = await fetch(process.env.VITE_SHOW_APPOINTMENTS)
-    const response = await data.json()
-
-    // response['citas'].forEach(element => {
-    //   element['fecha_cita'] = element['fecha_cita'].slice(0, 10)
-    // });
-
-    const obj = response['citas'].map(async date => {
-      const doctor = await fetchProfessionalById(date.id_profesional)
-      const fetchPatient = await fetchUser(date.id_paciente)
-      const result = await fetchSpecialityById(date.id_profesional)
-      // const fetch
-      return {
-        ...date,
-        nombre_alumno: fetchPatient.users[0].nombre + ' ' + fetchPatient.users[0].apellido,
-        nombre_profesional: doctor.users[0].nombre + ' ' + doctor.users[0].apellido,
-        telefono_alumno: fetchPatient.users[0].telefono,
-        mail_alumno: fetchPatient.users[0].email,
-        genero_alumno: fetchPatient.users[0].genero,
-        especialidad: result.especialidad.length === 0 ? 'Psicologia' : result.especialidad[0].especialidad,
-        key: date.id
-      }
-    })
-    return Promise.all(obj).then(resp => callback(resp))
-  } catch (err) {
-    console.log(err)
-  }
-}
- */
 
 export const fetchAppointments = async () => {
   try {

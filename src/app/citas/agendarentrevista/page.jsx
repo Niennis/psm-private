@@ -23,7 +23,6 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import { fetchProfessionals } from "@/services/DoctorsServices";
 import { fetchUser, fetchUsers, fetchUserByEmail, updateUser } from "@/services/UsersServices";
 import { createInterview, sendEmail } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
@@ -1303,7 +1302,6 @@ const AddFirstAppoinments = () => {
             </Alert>
             {/* </div> */}
           </div>
-
           : success === 'fail'
             ?
             <div className="row" style={{
@@ -1335,7 +1333,6 @@ const AddFirstAppoinments = () => {
             : ''
         }
       </>
-
     </>
   );
 };

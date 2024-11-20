@@ -87,7 +87,6 @@ const AddAppoinments = () => {
   };
   const handleClose = () => setOpen(false);
 
-
   const { register, handleSubmit, watch, control,
     formState: { errors }, reset
   } = useForm({
@@ -906,7 +905,6 @@ const AddAppoinments = () => {
                           }
                         </AccordionDetails>
                       </Accordion>
-
 
                       <div className="col-12">
                         <div className="doctor-submit text-end mt-3">
