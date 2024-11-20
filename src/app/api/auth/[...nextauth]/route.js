@@ -8,20 +8,33 @@ import Credentials from "next-auth/providers/credentials"
 import { fetchProfessionals } from "@/services/DoctorsServices";
 import CacheHandler from "@/utils/cache-handler";
 
-const searchUser = async email => {
-  let response;
-  let professionals;
+const searchUser = async (email) => {
+  const cacheKey = `user-${email}`;
+  const cachedUser = await cacheHandler.get(cacheKey);
+  if (cachedUser) return cachedUser;
+
   try {
-    response = await fetchUsers()
-    professionals = await fetchProfessionals()
+    const [users, professionals] = await Promise.all([
+      fetchUsers(),
+      fetchProfessionals(),
+    ]);
+
+    const user = users.users.find(user => user.email === email);
+    const professional = professionals.find(prof => prof.email === email);
+
+    const foundUser = user || professional;
+    if (foundUser) {
+      // await cacheHandler.set(cacheKey, foundUser, { tags: ['users'] });
+      return foundUser;
+    } else {
+      console.error("No se encontró el usuario:", error);
+      throw new Error("No se encontró el usuario");
+    }
   } catch (error) {
-    throw new Error('No se encontró al usuario')
+    console.error("Error buscando usuario:", error);
+    throw error;
   }
-  const user = response.users.filter(user => user.email === email)
-  const prof = professionals.filter(user => user.email === email)
-  if (prof.length === 1) return prof
-  if (user.length === 1) return user
-}
+};
 
 const cacheHandler = new CacheHandler();
 
@@ -88,91 +101,61 @@ const authOptions = {
   },
   callbacks: {
     async signIn({ account, profile, credentials }) {
-      // Si el proveedor es google, validar que sea correo udp.
-
       if (account.provider === "google") {
         if (profile.email_verified && profile.email.endsWith("@gmail.com" || "@mail.udp.cl")) {
-          profile.rol === 'alumno'
-          return true
-        } else {
-          throw new Error('dominio incorrecto')
-        }
-      }
-
-      if (account.provider === "google") {
-        const response = await fetchUsers()
-        const userDB = response.users.filter(user => user[0].email === email)
-
-        if (userDB.length >= 1) {
-          profile.rol === 'alumno'
-          return true
-        } else {
-          throw new Error('no se encontró al usuario')
-        }
-      }
-
-      // Si el proveedor es credentials, validar que exista en la DB
-      if (account.provider === "credentials") {
-        try {
-          const body = {
-            email: credentials.email,
-            contrasena: credentials.password
+          const user = await searchUser(profile.email);
+          if (user) {
+            return true;
+          } else {
+            return false
           }
-          const user = await fetchUserMailAndPass(body)
-
-          if (user.length === 0) {
-            // Si length === 0 , no encontró al usuario, no puede acceder
-            // redirect(`/api/auth/error?error=noseencontroalusuario`)
-            throw new Error('no se encontró al usuario')
-          }
-          // Si lo anterior no ocurre, encontró el mail
-          return true
-
-        } catch (error) {
-          console.log('ERRRRRRRRR', error);
+        } else {
+          // throw new Error("Correo no autorizado o usuario no encontrado.");
           return false
         }
-        // return
       }
+
+      if (account.provider === "credentials") {
+        const body = { email: credentials.email, contrasena: credentials.password };
+        const user = await fetchUserMailAndPass(body);
+        if (user) {
+          return true;
+        } else {
+          // throw new Error("Credenciales incorrectas.");
+          return false
+        }
+      }
+
+      return false;
     },
     async jwt({ token, user }) {
 
       const profile = await searchUser(token.email)
+      console.log('jwt - profile', profile)
       if (token) {
-        token.id = profile[0].id
-        token.name = token ? token.name : `${token.nombre} ${token.apellido}`;
-        token.rol = profile[0].tipo_usuario;
-        if (typeof window !== 'undefined' && token) {
-          localStorage.setItem('authToken', JSON.stringify(token));
-        }
+        token.id = profile.id
+        token.name = token.name || profile.nombre;
+        token.rol = profile.tipo_usuario;
         return token;
       }
     },
     async session({ session, user, token }) {
       // const cacheKey = `session-${session.user.email}`;
       // const cachedSession = await cacheHandler.get(cacheKey);
-
-      // if (cachedSession) {
-      //   return cachedSession;
+      // if (cachedSession) return cachedSession;
+      // console.log('cached', cachedSession)
+      session.user = token;
+      session.user.id = token.id;
+      session.user.name = token.name
+      session.user.rol = token.rol;
+      // try {
+      //   // Guardar en caché
+      //   await cacheHandler.set(cacheKey, session, { tags: ['sessions'] });
+      //   return session;
+      // } catch (error) {
+      //   console.error("Error al generar sesión:", error);
       // }
-
-      // TODO buscar entre todos los usuarios para retornar el rol y agregarlo
-      try {
-        const users = await searchUser(session.user.email)
-        if (token /* && token.user */) {
-          if (session.user.email === users[0].email) {
-            session.user = token;
-            session.user.id = users[0].id;
-            session.user.name = session.user.tipo_usuario === 'alumno' ? session.user.name : users[0].nombre;
-            session.user.rol = token.rol;
-            return session;
-          }
-          return session;
-        }
-        return session;
-      } catch (error) {
-        console.log('Hubo un error: ', error)
-      }
+      return session
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

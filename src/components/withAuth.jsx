@@ -21,7 +21,7 @@ const withAuth = (WrappedComponent, allowedRoles) => {
           setIsReady(true);
         } else {
           console.log('Rol no permitido:', session.user?.rol);
-          router.push('/');
+          router.push('/citas');
         }
       } else if (!session) {
         // Si no hay sesión, redirige al usuario
