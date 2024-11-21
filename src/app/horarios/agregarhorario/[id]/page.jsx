@@ -41,7 +41,6 @@ const AddSchedule = ({ params }) => {
 
   const [prueba, setPrueba] = useState(new Date)
 
-
   const onChange = (date, dateString) => {
     // console.log(date, dateString);
   };
@@ -104,43 +103,51 @@ const AddSchedule = ({ params }) => {
       },
       dias: data.frecuencia === "semanal" ? data.semanal.dia : semana
     }
+    console.log('new data => ', newData)
 
-    const dates = getDates(newData)
-    let esValido = []
-
-    if (dates?.length === 0) {
-      esValido.push(false)
-      return
+    try {
+      const req = await createSchedule(newData)
+      console.log('req =>', req)
+    } catch (error) {
+      console.log('error =>', error)
     }
 
-    const promesas = []
-    dates.forEach(date => {
-      return promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id))
-    })
+    // const dates = getDates(newData)
+    // let esValido = []
 
-    Promise.all(promesas)
-      .then(async (values) => {
-        if (values.includes(true)) {
-          console.log('GGGGGGGGGGG')
-        } else {
-          try {
-            const req = await createSchedule(newData)
-            if (req["detalle"].includes('fail')) {
-              setSuccess('fail')
-            } else {
-              setSuccess('success')
-            }
-          } catch (error) {
-            setSuccess('fail')
-            setError(error.message)
-            console.log('ERRRR', error.message)
-          }
-        }
-      })
-      .catch((error) => {
-        setError(error.message)
-        console.log('error', error);
-      });
+    // if (dates?.length === 0) {
+    //   esValido.push(false)
+    //   return
+    // }
+
+    // const promesas = []
+    // dates.forEach(date => {
+    //   return promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id))
+    // })
+
+    // Promise.all(promesas)
+    //   .then(async (values) => {
+    //     if (values.includes(true)) {
+    //       console.log('GGGGGGGGGGG')
+    //     } else {
+    //       try {
+    //         const req = await createSchedule(newData)
+    //         if (req.estado === false) {
+    //           setSuccess('fail')
+    //         } else {
+    //           setSuccess('success')
+    //         }
+    //       } catch (error) {
+    //         setSuccess('fail')
+    //         setError(error.message)
+    //         console.log('ERRRR', error.message)
+    //       }
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     setError(error.message)
+    //     console.log('error', error);
+    //   });
   })
 
   const duracion = [
@@ -572,7 +579,7 @@ const AddSchedule = ({ params }) => {
                                 <label className="form-check-label">
                                   <input
                                     type="radio"
-                                    value="videollamada"
+                                    value="huechuraba"
                                     name="campus"
                                     className="form-check-input"
                                     {...register('campus')}
@@ -584,7 +591,7 @@ const AddSchedule = ({ params }) => {
                                 <label className="form-check-label">
                                   <input
                                     type="radio"
-                                    value="presencial"
+                                    value="centro"
                                     name="campus"
                                     className="form-check-input"
                                     {...register('campus')}
@@ -968,12 +975,14 @@ La disponibilidad de horas, será hasta la fecha de finalización.`} /></h4>
                               Agregar horario
                             </button>
                             {/* </Link> */}
-                            <button
-                              type="submit"
-                              className="btn btn-primary cancel-form"
-                            >
-                              Cancelar
-                            </button>
+                            <Link href={'/citas'}>
+                              <button
+                                type="reset"
+                                className="btn btn-primary cancel-form"
+                              >
+                                Cancelar
+                              </button>
+                            </Link>
                           </div>
                         </div>
                       </div>
