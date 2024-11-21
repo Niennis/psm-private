@@ -19,8 +19,8 @@ import CacheHandler from "@/utils/cache-handler";
 const cacheHandler = new CacheHandler();
 
 const formatDate = (dateString) => {
-  const [year, part1, part2] = dateString.split("-");
-  return parseInt(part1) > 12 ? `${year}-${part2}-${part1}` : dateString;
+  const [year, day, month] = dateString.split("-");
+  return `${year}-${month}-${day}`
 };
 
 const Calender = ({ id }) => {
@@ -78,41 +78,42 @@ const Calender = ({ id }) => {
     return timestamp;
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { users: response } = await fetchScheduleByAvailability(id)
-      const processed = response.map(item => {
-        // detalleServicio y duracionServicio
-        return (
-          {
-            ...item,
-            start: datesToTimestamp(formatDate(item.fechaInicio), item.horaIni),
-            end: datesToTimestamp(formatDate(item.fechaFin), item.horaFin),
-            className: "bg-purple",
-            title: item.detalleServicio || 'Disponible',
-          }
-        )
-      })
-      console.log('CALENDARIO', response);
-
-      const ordered = processed.sort((a, b) => a.start - b.start);
-      // console.log('ORDERED', ordered)
-      const bloquesCombinados = ordered.reduce((resultado, bloque) => {
-        // console.log('BLOQUE', bloque);
-        const ultimoBloque = resultado[resultado.length - 1];
-        if (ultimoBloque && ultimoBloque.end >= bloque.start) {
-          ultimoBloque.end = Math.max(ultimoBloque.end, bloque.end);
-        } else {
-          resultado.push(bloque);
+  const fetchData = async () => {
+    const { users: response } = await fetchScheduleByAvailability(id)
+    const processed = response.map(item => {
+      // detalleServicio y duracionServicio
+      return (
+        {
+          ...item,
+          start: datesToTimestamp(formatDate(item.fechaInicio), item.horaIni),
+          end: datesToTimestamp(formatDate(item.fechaFin), item.horaFin),
+          className: "bg-purple",
+          title: item.detalleServicio || 'Disponible',
         }
-        // console.log('RESULTADO', resultado);
+      )
+    })
+    console.log('CALENDARIO', response);
 
-        return resultado;
-      }, [])
+    const ordered = processed.sort((a, b) => a.start - b.start);
+    // console.log('ORDERED', ordered)
+    const bloquesCombinados = ordered.reduce((resultado, bloque) => {
+      // console.log('BLOQUE', bloque);
+      const ultimoBloque = resultado[resultado.length - 1];
+      if (ultimoBloque && ultimoBloque.end >= bloque.start) {
+        ultimoBloque.end = Math.max(ultimoBloque.end, bloque.end);
+      } else {
+        resultado.push(bloque);
+      }
+      // console.log('RESULTADO', resultado);
 
-      setCalendario(bloquesCombinados)
-      // setCalendario(resultadoFinal)
-    }
+      return resultado;
+    }, [])
+
+    setCalendario(processed)
+    // setCalendario(resultadoFinal)
+  }
+
+  useEffect(() => {
     fetchData()
   }, [])
 
