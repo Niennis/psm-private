@@ -645,12 +645,14 @@ const EditPatients = ({ params }) => {
                             >
                               Actualizar
                             </button>
-                            <button
-                              // type="submit"
-                              className="btn btn-primary cancel-form"
-                            >
-                              Cancelar
-                            </button>
+                            <Link href={'/citas'}>
+                              <button
+                                type="reset"
+                                className="btn btn-primary cancel-form"
+                              >
+                                Cancelar
+                              </button>
+                            </Link>
                           </div>
                         </div>
                       </div>

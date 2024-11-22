@@ -156,7 +156,7 @@ const EditAppoinments = ({ params }) => {
         try {
           const response = await changeStatusAppointment(data.id, status)
           console.log('response', response)
-          if (response["detalle"].includes('fail!!')) {
+          if (response.estado === false) {
             setSuccess('fail')
           } else {
             setSuccess('success')
@@ -537,14 +537,14 @@ const EditAppoinments = ({ params }) => {
                             >
                               Enviar
                             </button>
-                            <button
-                              // type="submit"
-                              className="btn btn-primary cancel-form"
-                            >
-                              <Link href={'/citas'}>
+                            <Link href={'/citas'}>
+                              <button
+                                type="reset"
+                                className="btn btn-primary cancel-form"
+                              >
                                 Cancelar
-                              </Link>
-                            </button>
+                              </button>
+                            </Link>
                           </div>
                         </div>
                       </div>

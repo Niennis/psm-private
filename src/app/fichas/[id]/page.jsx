@@ -151,9 +151,9 @@ const AddInterviewRecord = ({ params }) => {
     )
     try {
       const appointment = await createInterviewRecord({ ...data, "patient_id": patient[0].id })
-      if (!appointment){
+      if (appointment.estado === false) {
         setSuccess('fail')
-      } else{
+      } else {
         setSuccess('success')
       }
 
@@ -163,7 +163,7 @@ const AddInterviewRecord = ({ params }) => {
       if (err.message === "Cannot read properties of undefined (reading 'id')") {
         setError(`No se encontró al paciente`);
       }
-    } 
+    }
   })
   const gender = [
     { value: 1, label: "Femenino" },
@@ -250,26 +250,26 @@ const AddInterviewRecord = ({ params }) => {
     }
 
     // const bodyUpdate = {
-      // "apellido": data.lastName || patient.apellido,
-      // "aplica_despeje": 0,
-      // "anoIngresoCarrera": 'NA',
-      // "campus": data.campus,
-      // "comuna": data.comuna.label,
-      // "carrera": data.career.label,
-      // "contrasena": 'NA',
-      // "direccion": data.address,
-      // "email": data.email,
-      // "entrevistador": 'NA',
-      // "fecha_nacimiento": data.birthday || patient.fecha_nacimiento,
-      // "genero": data.genero || patient.genero,
-      // "jornada": 'NA',
-      // "mustChangePassword": 'NA',
-      // "nombre": data.name || patient.nombre,
-      // "region": regiones[0].label,
-      // "rut": data.rut,
-      // "status": patient.status,
-      // "telefono": data.mobile || patient.telefono,
-      // "tipo_usuario": patient.tipo_usuario,
+    // "apellido": data.lastName || patient.apellido,
+    // "aplica_despeje": 0,
+    // "anoIngresoCarrera": 'NA',
+    // "campus": data.campus,
+    // "comuna": data.comuna.label,
+    // "carrera": data.career.label,
+    // "contrasena": 'NA',
+    // "direccion": data.address,
+    // "email": data.email,
+    // "entrevistador": 'NA',
+    // "fecha_nacimiento": data.birthday || patient.fecha_nacimiento,
+    // "genero": data.genero || patient.genero,
+    // "jornada": 'NA',
+    // "mustChangePassword": 'NA',
+    // "nombre": data.name || patient.nombre,
+    // "region": regiones[0].label,
+    // "rut": data.rut,
+    // "status": patient.status,
+    // "telefono": data.mobile || patient.telefono,
+    // "tipo_usuario": patient.tipo_usuario,
     // }
 
     // try {
@@ -639,12 +639,14 @@ const AddInterviewRecord = ({ params }) => {
                             >
                               Enviar
                             </button>
-                            <button
-                              // type="submit"
-                              className="btn btn-primary cancel-form"
-                            >
-                              Cancelar
-                            </button>
+                            <Link href={'/citas'}>
+                              <button
+                                type="reset"
+                                className="btn btn-primary cancel-form"
+                              >
+                                Cancelar
+                              </button>
+                            </Link>
                           </div>
                         </div>
 
@@ -2344,12 +2346,14 @@ const AddInterviewRecord = ({ params }) => {
                             >
                               Enviar
                             </button>
-                            <button
-                              // type="submit"
-                              className="btn btn-primary cancel-form"
-                            >
-                              Cancelar
-                            </button>
+                            <Link href={'/citas'}>
+                              <button
+                                type="reset"
+                                className="btn btn-primary cancel-form"
+                              >
+                                Cancelar
+                              </button>
+                            </Link>
                           </div>
                         </div>
 
@@ -2362,7 +2366,7 @@ const AddInterviewRecord = ({ params }) => {
           </div>
 
         </div>
-        
+
         {success === 'success'
           ?
           <div style={{

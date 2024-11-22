@@ -96,21 +96,21 @@ const AddProfessional = () => {
     const dataWithHashPass = { ...data, password: hashedPassword }
     console.log('data', dataWithHashPass)
 
-     if (data) {
-       try {
-         const response = await addProfessional(dataWithHashPass)
-         console.log('page 100', response)
+    if (data) {
+      try {
+        const response = await addProfessional(dataWithHashPass)
+        console.log('page 100', response)
         //  if(response.err) setStatusPetition(prevState => ({...prevState, warning: true}))
         //  else setStatusPetition(prevState => ({...prevState, success: true}))
-         setSuccess('success')
-       } catch (err) {
-         console.log('ERR', err)
-         setSuccess('fail')
-       }
- 
-     } else {
-       console.log('FAIL')
-     }
+        setSuccess('success')
+      } catch (err) {
+        console.log('ERR', err)
+        setSuccess('fail')
+      }
+
+    } else {
+      console.log('FAIL')
+    }
   })
 
   const onConfirm = async () => {
@@ -550,13 +550,14 @@ const AddProfessional = () => {
                               Enviar
                             </button>
                             {/* } */}
-                            <button
-                              type="reset"
-                              className="btn btn-primary cancel-form"
-                            // onClick={handleCancel}
-                            >
-                              Cancelar
-                            </button>
+                            <Link href={'/citas'}>
+                              <button
+                                type="reset"
+                                className="btn btn-primary cancel-form"
+                              >
+                                Cancelar
+                              </button>
+                            </Link>
                           </div>
                         </div>
                       </div>
