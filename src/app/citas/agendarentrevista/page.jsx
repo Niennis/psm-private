@@ -23,12 +23,11 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import { fetchUser, fetchUsers, fetchUserByEmail, updateUser } from "@/services/UsersServices";
+import { fetchUserByEmail, updateUser } from "@/services/UsersServices";
 import { createInterview, sendEmail } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
-// import { formatRut } from "@/utils/managedata";
-import { fetchScheduleByDate, fetchScheduleByUser, fetchScheduleByAvailability } from "@/services/SchedulesServices";
-import { fetchProfDespeje } from "@/utils/getDoctorsWithDespeje";
+import { editBloqueDisponible, fetchScheduleByDate, fetchScheduleByAvailability, tomarHoraDisponible } from "@/services/SchedulesServices";
+import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
@@ -69,6 +68,7 @@ const obtenerFechasUnicas = array => {
   return fechasUnicas;
 }
 
+
 const AddFirstAppoinments = () => {
   const ROL = ["alumno"]
   const { data: session } = useSession()
@@ -99,6 +99,7 @@ const AddFirstAppoinments = () => {
   // modal alert
   const [openBackdrop, setOpenBackdrop] = useState(false);
   const [dataPatient, setDataPatient] = useState(null)
+  const [bloques, setBloques] = useState([])
 
   const handleChange = () => {
     setChecked((prev) => !prev);
@@ -130,11 +131,7 @@ const AddFirstAppoinments = () => {
   } = useForm({
     defaultValues: async () => await fetchInitialData()
   });
-
-  useEffect(() => {
-    fetchData()
-    setMenuPortalTarget(document.body);
-  }, [])
+ 
 
   const selectedRegion = { value: 13, label: "Región Metropolitana", name: "metropolitana" }
   const profesional = watch('professional')
@@ -142,25 +139,40 @@ const AddFirstAppoinments = () => {
   const campus = watch("campus", ""); // Valor predeterminado: ninguno
 
   useEffect(() => {
+    fetchData()
+    setMenuPortalTarget(document.body);
+  }, [])
+
+  
+  useEffect(() => {
     let filtered = allDays;
     let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}-${item.horaIni}`))).map(compositeKey => { return filtered.find(item => `${item.fechaInicio}-${item.horaIni}` === compositeKey); });
 
     if (modalidad === "videollamada") {
-      uniqueFiltered = uniqueFiltered.filter(item => ((item.modalidad === "videollamada") || (item.modalidad === "ambas")));
-    } else if (modalidad === "presencial") {
-      if (campus) {
-        uniqueFiltered = uniqueFiltered.filter(
-          item => item.modalidad === "presencial" && (item.campus === campus
-            || item.campus === null));
-      } else {
-        uniqueFiltered = uniqueFiltered.filter(item => ((item.modalidad === "presencial") || (item.modalidad === "ambas")));
-      }
+      setDays([])
+      setHours([])
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada");
+      console.log(filtered)
+
+    } else if (modalidad === "presencial" && campus === "centro") {
+      setDays([])
+      setHours([])
+
+      uniqueFiltered = uniqueFiltered.filter(
+        item => item.modalidad === "presencial" && (item.campus === campus));
+      console.log(filtered)
+
+    } else if (modalidad === "presencial" && campus === "huechuraba") {
+      setDays([])
+      setHours([])
+
+      uniqueFiltered = uniqueFiltered.filter(
+        item => item.modalidad === "presencial" && (item.campus === campus));
+      console.log(filtered)
     }
 
     setDays(uniqueFiltered);
   }, [modalidad, campus, doctor]);
-
-
 
   const handleChangeRut = (e) => {
     const inputValue = e.target.value;
@@ -198,14 +210,17 @@ const AddFirstAppoinments = () => {
     setDate('')
     setTime('')
     try {
+      // Traer disponibilidades
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
 
+      // Formatear fecha YYYY-MM-DD
       const response = byProf.map(item => ({
         ...item,
-        fechaFin: formatDate(item.fechaFin),
-        fechaInicio: formatDate(item.fechaInicio)
+        fechaFin: (item.fechaFin),
+        fechaInicio: (item.fechaInicio)
       }))
 
+      // Filtrar para que salgan solo las fechas posteriores
       const hoy = new Date();
       const filterByDate = response.filter(item => new Date(item.fechaInicio) >= hoy);
 
@@ -250,15 +265,19 @@ const AddFirstAppoinments = () => {
 
   const handleDays = async (e, fecha, id) => {
     setHours('')
-    e.preventDefault()
 
+    setBloques('')
+    e.preventDefault()
     // console.log('handle.days', fecha, id)
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
     // console.log('fechamod', fecha);
     try {
+      // showBloques
       const { bloques } = await fetchScheduleByDate(parseInt(id), fechaMod)
       console.log('BLOQUES', bloques)
       // console.log('allDays', allDays)
+      bloques.filter
+      setBloques(bloques)
       setDate(fechaMod)
       // const newBloques = agruparBloquesPorHora(bloques)
       const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod)
@@ -269,18 +288,49 @@ const AddFirstAppoinments = () => {
       })
 
       const flatted = newBloques.flat()
-
+      console.log('FLATTED', flatted)
       setHours(flatted)
     } catch (error) {
       console.log(error)
     }
   }
 
+  const handleBloques = async (id, hora) => {
+    console.log('hora', id, date)
+    const { bloques } = await fetchScheduleByDate(id, date)
+console.log(bloques)
+    const getDuracionServicio = hours.find(item1 => bloques.some(item2 => item2.hora_inicio >= item1.horaIni && item2.hora_inicio <= item1.horaFin))
+    console.log('getDuracionServicio', getDuracionServicio.duracionServicio)
+
+    return agregarBloques(bloques, hora, getDuracionServicio.duracionServicio);
+  }
+
+
+  // Función para convertir la hora en formato HH:mm:ss a segundos
+  const convertirAHoras = (hora) => {
+    const [h, m, s] = hora.split(':').map(Number);
+    return h * 3600 + m * 60 + s;  // Convertir a segundos
+  };
+
+  // Función principal que obtiene los bloques según el rango y duración
+  const agregarBloques = (bloques, horaInicio, duracionServicio) => {
+
+    const bloqueIni = bloques.filter(item => convertirAHoras(item.hora_inicio) == convertirAHoras(horaInicio))
+    const idBloqueIni = bloqueIni[0].id_bloque
+    const cantidadBloques = duracionServicio / 5
+
+    const resultado = bloques.filter(item => item.id_bloque >= idBloqueIni && item.id_bloque < (parseInt(idBloqueIni) + parseInt(cantidadBloques))
+    )
+
+    return resultado;
+  };
+
+
+
   const handleHours = (e) => {
     e.preventDefault()
     setHours(dayjs(e.id_bloque).format('DD/MM/YYYY'))
   }
-
 
   const handleOpen = (e) => {
     e.preventDefault()
@@ -289,7 +339,7 @@ const AddFirstAppoinments = () => {
   const handleClose = () => setOpen(false);
 
   const fetchData = async () => {
-    const users = await fetchProfDespeje()
+    const users = await fetchFilteredProfesssionals('despeje')
     const docs = users.map((doc, i) => {
       return {
         value: i + 2,
@@ -359,14 +409,21 @@ const AddFirstAppoinments = () => {
       "telefono": data.mobile || patient.telefono,
       "tipo_usuario": patient.tipo_usuario,
     }
+    tomarHoraDisponible(bloques, time, hours, date)
+    const professional = watch('professional')
 
     try {
+      const selectedBlocks = await handleBloques(professional.id, time)
+      console.log('selectedBlocks', selectedBlocks)
+      const promises = selectedBlocks.map(async (item) => (
+        await editBloqueDisponible(item['id_bloque'], professional.id)
+      ))
+
       const [appointment, update] = await Promise.all([
         createInterview(bodyInterview),
         updateUser(bodyUpdate)
       ]);
-
-      if (!appointment['detalle'].includes('success') && !update['detalle'].includes('success')) {
+      if (appointment.estado === false && update.estado === false) {
         setSuccess('fail')
       } else if (appointment['detalle'].includes('success') && !update['detalle'].includes('success')) {
         setSuccess('success')
@@ -978,6 +1035,7 @@ const AddFirstAppoinments = () => {
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value, name, ref } }) => {
                                     return (<Select
+                                      placeholder={doctor.length === 0 ? 'Cargando...' : 'Seleccione...'}
                                       instanceId="professional"
                                       defaultValue={selectedOption}
                                       onChange={(e) => {
@@ -1249,12 +1307,14 @@ const AddFirstAppoinments = () => {
                               >
                                 Enviar
                               </button>
-                              <button
-                                // type="submit"
-                                className="btn btn-primary cancel-form"
-                              >
-                                Cancelar
-                              </button>
+                              <Link href={'/citas'}>
+                                <button
+                                  type="reset"
+                                  className="btn btn-primary cancel-form"
+                                >
+                                  Cancelar
+                                </button>
+                              </Link>
                             </div>
                           </div>
                           {/* </div> */}

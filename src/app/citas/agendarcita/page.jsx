@@ -2,30 +2,29 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
-import { DatePicker } from "antd";
 import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller } from 'react-hook-form';
 
 import Sidebar from "@/components/Sidebar";
 
-import { TextField, Alert } from "@mui/material";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
-import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { fetchProfessionals, fetchSpecialityById } from "@/services/DoctorsServices";
-import { fetchUsers, fetchUser, fetchPatientsDespejeFalse } from "@/services/UsersServices";
+import { fetchPatientsDespejeFalse } from "@/services/UsersServices";
 import { createAppointment } from "@/services/AppointmentsServices"
-import { fetchScheduleByAvailability, fetchScheduleByUser, fetchScheduleByDate } from "@/services/SchedulesServices";
+import { editBloqueDisponible, fetchScheduleByAvailability, fetchScheduleByDate } from "@/services/SchedulesServices";
+import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from 'next/navigation';
-import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
+import {  ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
 import 'dayjs/locale/es-mx'
 import { motivo_consulta } from "@/utils/selects";
+
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 
@@ -92,11 +91,7 @@ const AddAppoinments = () => {
   } = useForm({
     defaultValues: async () => await getPatients()
   });
-  const intervencion = [
-    { value: 2, label: "Acompañamiento psicológico" },
-    { value: 3, label: "Psicoterapia breve" },
-    { value: 4, label: "Psicopedagógica individual" },
-  ]
+
   /* FETCH PACIENTES CON DESPEJE */
   const getPatients = async () => {
     try {
@@ -149,7 +144,7 @@ const AddAppoinments = () => {
 
   useEffect(() => {
     setMenuPortalTarget(document.body);
-    getProfessionals()
+    // getProfessionals()
     getPatients()
     getSpeciality()
   }, [])
@@ -159,16 +154,26 @@ const AddAppoinments = () => {
     let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}-${item.horaIni}`))).map(compositeKey => { return filtered.find(item => `${item.fechaInicio}-${item.horaIni}` === compositeKey); });
 
     if (modalidad === "videollamada") {
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas");
-    } else if (modalidad === "presencial") {
-      if (campus) {
-        console.log(uniqueFiltered)
-        uniqueFiltered = uniqueFiltered.filter(
-          item => item.modalidad === "presencial" && (item.campus === campus
-         || item.campus == null));
-      } else {
-        uniqueFiltered = uniqueFiltered.filter(item => ((item.modalidad === "presencial") || (item.modalidad === "ambas")));
-      }
+      setDays([])
+      setHours([])
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada");
+      console.log(filtered)
+
+    } else if (modalidad === "presencial" && campus === "centro") {
+      setDays([])
+      setHours([])
+
+      uniqueFiltered = uniqueFiltered.filter(
+        item => item.modalidad === "presencial" && (item.campus === campus));
+      console.log(filtered)
+
+    } else if (modalidad === "presencial" && campus === "huechuraba") {
+      setDays([])
+      setHours([])
+
+      uniqueFiltered = uniqueFiltered.filter(
+        item => item.modalidad === "presencial" && (item.campus === campus));
+      console.log(filtered)
     }
 
     setDays(uniqueFiltered);
@@ -201,8 +206,14 @@ const AddAppoinments = () => {
 
   const onSubmit = handleSubmit(async data => {
     setSuccess('initial')
-
+    const professional = watch('professional')
     try {
+      const selectedBlocks = await handleBloques(professional.id, time)
+      console.log('selectedBlocks', selectedBlocks)
+      const promises = selectedBlocks.map(async (item) => (
+        await editBloqueDisponible(item['id_bloque'], professional.id)
+      ))
+
       const appointment = await createAppointment({
         ...data,
         "patient_id": selectedPatient.id,
@@ -210,7 +221,7 @@ const AddAppoinments = () => {
         fecha: formatDateToService(date),
       })
       console.log('appointment', appointment)
-      if (appointment["detalle"].includes('fail!!')) {
+      if (appointment.estado === false) {
         setSuccess('fail')
       } else {
         setSuccess('success')
@@ -227,27 +238,11 @@ const AddAppoinments = () => {
     }
   })
 
-  const [career, setCareer] = useState([
-    { value: 2, label: "Antropologia" },
-    { value: 3, label: "Arquitectura" },
-    { value: 4, label: "Contador" },
-    { value: 5, label: "Derecho" },
-    { value: 6, label: "Ingenieria" },
-  ]);
-  const [gender, setGender] = useState([
-    { value: 1, label: "Femenino" },
-    { value: 2, label: "Masculino" },
-    { value: 3, label: "No binario" },
-    { value: 4, label: "Otro" },
-    { value: 5, label: "Prefiero no decir" }
-  ]);
-
   const tipo_cita = [
-    { value: "Acompañamiento psicológico", label: "Acompañamiento psicológico" },
-    { value: "Psicoterapia breve", label: "Psicoterapia breve" },
-    { value: "Psicoterapia individual", label: "Psicoterapia individual" },
+    { value: "Acompañamiento", label: "Acompañamiento psicológico" },
+    { value: "breve", label: "Psicoterapia breve" },
+    { value: "individual", label: "Psicopedagógica individual" },
   ]
-
 
   // // // // // // // // // // // // // // // // // // // 
   const profesional = watch('professional')
@@ -255,6 +250,22 @@ const AddAppoinments = () => {
   const orderByDate = (arr) => {
     return arr.sort((a, b) => dayjs(a.fechaInicio).isAfter(dayjs(b.fechaInicio)) ? 1 : -1);
   }
+
+  const handleSelectedType = async (e) => {
+    setDoctor([])
+    const professionals = await fetchFilteredProfesssionals(e.value)
+    const selectedProfessionals = professionals.map((doc, i) => {
+      return {
+        value: i + 2,
+        label: doc.nombre + ' ' + doc.apellido,
+        id: doc.id,
+        email: doc.email,
+        name: doc.nombre
+      }
+    })
+    setDoctor(selectedProfessionals)
+  }
+
 
   const handleSelectedProfessional = async (e) => {
     setDays([])
@@ -266,10 +277,9 @@ const AddAppoinments = () => {
       console.log('DISPONIBILIDADES', byProf)
       const response = byProf.map(item => ({
         ...item,
-        fechaFin: formatDate(item.fechaFin),
-        fechaInicio: formatDate(item.fechaInicio)
+        fechaFin: (item.fechaFin),
+        fechaInicio: (item.fechaInicio)
       }))
-      console.log('RESPONSE', response)
       const hoy = new Date();
       const filterByDate = response.filter(item => new Date(item.fechaInicio) >= hoy);
 
@@ -312,29 +322,55 @@ const AddAppoinments = () => {
     return `${String(horas).padStart(2, "0")}:${String(minutosRestantes).padStart(2, "0")}:00`;
   }
 
-  const handleDays = async (e, fecha, id) => {
-    setHours('')
+  const handleDays = (e, fecha, id) => {
+    setHours([])
+    setTime('')
     e.preventDefault()
 
-    // console.log('handle.days', fecha, id)
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
-    // console.log('fechamod', fecha);
-    try {
-      const { bloques } = await fetchScheduleByDate(parseInt(id), fechaMod)
-      setDate(fechaMod)
-      const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod)
 
-      let newBloques = []
-      selectedDays.forEach(item => {
-        newBloques.push(calcularHoraInicioDeBloques(item))
-      })
+    console.log(fechaMod)
+    setDate(fechaMod)
+    const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod)
 
-      const flatted = newBloques.flat()
-      setHours(flatted)
-    } catch (error) {
-      console.log(error)
-    }
+    let newBloques = []
+    selectedDays.forEach(item => {
+      newBloques.push(calcularHoraInicioDeBloques(item))
+    })
+
+    const flatted = newBloques.flat()
+    setHours(flatted)
   }
+
+  const handleBloques = async (id, hora) => {
+    const { bloques } = await fetchScheduleByDate(id, date)
+
+    const getDuracionServicio = hours.find(item1 => bloques.some(item2 => item2.hora_inicio >= item1.horaIni && item2.hora_inicio <= item1.horaFin))
+
+    return agregarBloques(bloques, hora, getDuracionServicio.duracionServicio);
+  }
+
+
+  // Función para convertir la hora en formato HH:mm:ss a segundos
+  const convertirAHoras = (hora) => {
+    const [h, m, s] = hora.split(':').map(Number);
+    return h * 3600 + m * 60 + s;  // Convertir a segundos
+  };
+
+  // Función principal que obtiene los bloques según el rango y duración
+  const agregarBloques = (bloques, horaInicio, duracionServicio) => {
+
+    const bloqueIni = bloques.filter(item => convertirAHoras(item.hora_inicio) == convertirAHoras(horaInicio))
+    const idBloqueIni = bloqueIni[0].id_bloque
+    const cantidadBloques = duracionServicio / 5
+
+    const resultado = bloques.filter(item => item.id_bloque >= idBloqueIni && item.id_bloque < (parseInt(idBloqueIni) + parseInt(cantidadBloques))
+    )
+
+    return resultado;
+  };
+
+
 
   const mostrarSiguientesDias = (e) => {
     e.preventDefault()
@@ -582,8 +618,9 @@ const AddAppoinments = () => {
                                         instanceId="tipo_cita"
                                         defaultValue={selectedOption}
                                         onChange={(e) => {
+                                          console.log('e', e)
                                           onChange(e);
-                                          // handleSelectedProfessional(e);
+                                          handleSelectedType(e);
                                         }}
                                         getOptionLabel={e => e.label}
                                         options={tipo_cita}
@@ -635,6 +672,7 @@ const AddAppoinments = () => {
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value, name, ref } }) => {
                                     return (<Select
+                                      placeholder={doctor.length === 0 ? 'Cargando...' : 'Seleccione...'}
                                       instanceId="professional"
                                       defaultValue={selectedOption}
                                       onChange={(e) => {
@@ -812,6 +850,7 @@ const AddAppoinments = () => {
                                       Sede Huechuraba - Av. Sta. Clara 797, Huechuraba
                                     </label>
                                   </div>
+                                  {campus && errors.campus && <span><small>{errors.campus.message}</small></span>}
 
                                 </div>
                               </div>
@@ -915,12 +954,14 @@ const AddAppoinments = () => {
                           >
                             Enviar
                           </button>
-                          <button
-                            // type="submit"
-                            className="btn btn-primary cancel-form"
-                          >
-                            Cancelar
-                          </button>
+                          <Link href={'/citas'}>
+                            <button
+                              type="reset"
+                              className="btn btn-primary cancel-form"
+                            >
+                              Cancelar
+                            </button>
+                          </Link>
                         </div>
                       </div>
                     </form>
