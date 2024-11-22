@@ -128,7 +128,6 @@ export const updateUser = async (user) => {
   
   const body = {
     ...user,
-    "fecha_nacimiento": formatDate(user.fecha_nacimiento)
   }
 
   console.log('body', body)
