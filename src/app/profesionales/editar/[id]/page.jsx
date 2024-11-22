@@ -2,6 +2,7 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
+import { redirect } from 'next/navigation';
 import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
 import { favicon, imagesend } from "@/components/imagepath";
@@ -15,36 +16,33 @@ import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
+import { updateUser } from "@/services/UsersServices";
 import CacheHandler from "@/utils/cache-handler";
+import { Alert } from "@mui/material";
 
 const cacheHandler = new CacheHandler();
 
 const EditDoctor = ({ params }) => {
-  const ROL = ["profesional"]
   const { data: session } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
+
+  if (!session) {
+    redirect('/citas');
+  }
+
+  const userId = params.id;
+  if (session.user.id != userId) {
+    redirect('/citas');
+  }
+
+  const [success, setSuccess] = useState('initial')
+  const [error, setError] = useState('')
 
   const [initial, setInitial] = useState({})
   const [passwordVisible, setPasswordVisible] = useState(true);
 
   const [selectedOption, setSelectedOption] = useState(null);
-  const [options, setOptions] = useState([
-    { value: 1, label: "Select City" },
-    { value: 2, label: "Alaska" },
-    { value: 3, label: "California" },
-  ]);
-  const [option, setOption] = useState([
-    { value: 1, label: "Select Country" },
-    { value: 2, label: "Usa" },
-    { value: 3, label: "Uk" },
-    { value: 4, label: "Italy" },
-  ]);
-  const [statevalue, setStateValue] = useState([
-    { value: 1, label: "Select City" },
-    { value: 2, label: "Alaska" },
-    { value: 3, label: "California" },
-  ]);
+
   const [speciality, setSpeciality] = useState([
     { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality" },
     { value: "Psicología", label: "Psicología", name: "speciality" },
@@ -68,6 +66,7 @@ const EditDoctor = ({ params }) => {
 
       const user = usersData.users[0];
       return {
+        ...user,
         name: user.nombre,
         lastName: user.apellido,
         mobile: user.telefono,
@@ -95,9 +94,61 @@ const EditDoctor = ({ params }) => {
     setPasswordVisible(!passwordVisible);
   };
 
-  const onSubmit = handleSubmit(data => {
+  const onSubmit = handleSubmit(async (data) => {
     console.log('DATA', data)
-    // return updateDoctor(data, id)
+
+    const formatDateToYYYYDDMM = dateString => {
+      const timestamp = Date.parse(dateString);
+
+      if (isNaN(timestamp)) {
+        throw new Error("Formato de fecha no válido");
+      }
+
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+
+      return `${year}-${day}-${month}`;
+    }
+
+    const pass = data.password === data.confirmPassword
+    const body = {
+      id: `${session.user.id}`,
+      nombre: data.name,
+      apellido: data.lastName,
+      telefono: `${data.mobile}`,
+      email: data.email,
+      contrasena: pass && data.password,
+      fecha_nacimiento: formatDateToYYYYDDMM(data.fecha_nacimiento),
+      genero: data.gender,
+      tipo_usuario: session.user.rol,
+      status: 'activo',
+      rut: '16332702-3',
+      carrera: 'Psicopedagogia',
+      anoIngresoCarrera: '0',
+      jornada: 'laboral',
+      direccion: 'random',
+      region: 'santiago',
+      comuna: 'santiago',
+      entrevistador: '1',
+      mustChangePassword: '0',
+      aplica_despeje: '0',
+      campus: 'ambas',
+    }
+
+    try {
+      const response = await updateUser(body, session.user.id)
+      console.log('response', response)
+      if( response.validacion === false){
+        setSuccess('fail')
+        setError('Ocurrió un problema. Intenta más tarde')
+      } else {
+        setSuccess('success')
+      }
+    } catch (error) {
+      console.log('error', error)
+    }
   })
 
   return (
@@ -759,12 +810,14 @@ const EditDoctor = ({ params }) => {
                             >
                               Actualizar
                             </button>
-                            <button
-                              type="submit"
-                              className="btn btn-primary cancel-form"
-                            >
-                              Cancelar
-                            </button>
+                            <Link href={'/citas'}>
+                              <button
+                                type="reset"
+                                className="btn btn-primary cancel-form"
+                              >
+                                Cancelar
+                              </button>
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -1054,6 +1107,65 @@ const EditDoctor = ({ params }) => {
             </div>
           </div>
         </div>
+        {success === 'success'
+          ?
+          <div style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080'
+          }}>
+            {/* <div className="col-sm-12 col-lg-6"> */}
+            <Alert
+              severity="success"
+              onClose={() => { setSuccess('initial') }}
+              sx={{
+                zIndex: 'tooltip',
+                position: 'absolute',
+                left: '30%',
+                width: '50%',
+                padding: '50px',
+                bottom: '50vh'
+              }}
+              spacing={2}
+            >
+              Tu contraseña ha sido actualizada.
+            </Alert>
+            {/* </div> */}
+          </div>
+
+          : success === 'fail'
+            ?
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
+                <Alert
+                  severity="error"
+                  onClose={() => { setSuccess('initial') }}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                  spacing={2}
+                >
+                  Ha ocurrido un problema. Intenta más tarde.
+                </Alert>
+              </div>
+            </div>
+            : ''
+        }
       </>
     </>
   );

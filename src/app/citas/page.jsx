@@ -19,7 +19,7 @@ import {
 } from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import useMediaQuery from '@mui/material/useMediaQuery';
-
+import PasswordAlert from '@/components/PasswordAlert';
 const cacheHandler = new CacheHandler();
 
 const AppoinmentList = () => {
@@ -52,7 +52,7 @@ const AppoinmentList = () => {
         // }
 
         const response = await fetchAppointments();
-        const data = response.filter(item=> (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
+        const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
 
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
@@ -81,7 +81,7 @@ const AppoinmentList = () => {
   }, [session, status]);
 
   if (status === 'loading') {
-    return <SimpleBackdrop/>;
+    return <SimpleBackdrop />;
   }
   const onSelectChange = (newSelectedRowKeys) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -246,8 +246,8 @@ const AppoinmentList = () => {
   ]
 
   const columns = allColumns.filter((col) => {
-    if (session.user?.rol === "profesional" && col.key !== "nombre_profesional") return true; 
-    if (session.user?.rol === "alumno" && col.key !== "nombre_alumno") return true; 
+    if (session.user?.rol === "profesional" && col.key !== "nombre_profesional") return true;
+    if (session.user?.rol === "alumno" && col.key !== "nombre_alumno") return true;
     return false;
   });
 
@@ -401,8 +401,7 @@ const AppoinmentList = () => {
           </div>
         </div> : ''}
       </>
-      <>
-      </>
+      <PasswordAlert />
     </div>
   )
 }
