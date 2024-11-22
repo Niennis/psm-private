@@ -26,6 +26,13 @@ const Sidebar = (props) => {
     e?.target?.className ? div.classList.remove('subdrop') : div.classList.add('subdrop');
   }
 
+  const handleSignOut = () => {
+    localStorage.removeItem('passwordAlertShown');
+    signOut({
+      callbackUrl: '/'
+    })
+  }
+
   useEffect(() => {
     if (props?.id && props?.id1) {
       const ele = document.getElementById(`${props?.id}`);
@@ -65,7 +72,7 @@ const Sidebar = (props) => {
               <ul>
 
                 {
-                  !session.user?.rol &&  <SidebarSkeleton  />
+                  !session.user?.rol && <SidebarSkeleton />
                 }
 
                 {
@@ -156,12 +163,12 @@ const Sidebar = (props) => {
                     <Link className={props?.activeClassName === 'shedule-list' ? 'active' : ''} href="/horarios">Lista de Horarios</Link>
                   </li> */}
                       {/* <li> */}
-                        <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario/${session.user?.sub}`} >
-                          <span className="menu-side">
-                            <img src={doctorschedule.src} alt="" />
-                          </span>{" "}
-                          <span> Agregar Horario</span> <span className="menu-arrow" />
-                        </Link>
+                      <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario/${session.user?.sub}`} >
+                        <span className="menu-side">
+                          <img src={doctorschedule.src} alt="" />
+                        </span>{" "}
+                        <span> Agregar Horario</span> <span className="menu-arrow" />
+                      </Link>
                       {/* </li> */}
                       {/* <li>
                       <Link className={props?.activeClassName === 'edit-shedule' ? 'active' : ''} href="/editschedule">Editar Horario</Link>
@@ -292,8 +299,7 @@ const Sidebar = (props) => {
               </ul>
             }
             <div className="logout-btn">
-              <Link href="/" onClick={() => signOut({ 
-                callbackUrl: '/' })}>
+              <Link href="/" onClick={handleSignOut}>
                 {/* <Link href="https://sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net" onClick={() => signOut({ 
                   callbackUrl: 'https://sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net' })}> */}
                 <span className="menu-side">
