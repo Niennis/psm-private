@@ -1,6 +1,4 @@
 import { fetchUser } from './UsersServices'
-import { fetchProfessionalById } from './DoctorsServices';
-import { fetchSpecialityById } from './DoctorsServices';
 
 import dayjs from 'dayjs';
 import axios from 'axios';
@@ -239,8 +237,8 @@ export const fetchAppointment = async (id) => {
 
 export const search = (data, query) => {
 
-  const bleh = data.filter(obj =>
+  const response = data.filter(obj =>
     JSON.stringify(obj).toLowerCase().includes(query.toLowerCase()))
 
-  return bleh
+  return response
 }
