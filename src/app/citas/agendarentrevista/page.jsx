@@ -220,12 +220,11 @@ const AddFirstAppoinments = () => {
   }
 
   const calcularHoraInicioDeBloques = (cita) => {
-    const horaIniMinutos = horaAMinutos(cita.horaIni);
+    const horaIniMinutos = horaAMinutos(cita.horaInicio);
     const duracionBloque = cita.duracionServicio;
 
     // Array para almacenar las horas de inicio de cada bloque
     const horasInicioBloques = [];
-
     // Calcular la hora de inicio para cada bloque
     for (let i = 0; i < Math.floor((horaAMinutos(cita.horaFin) - horaIniMinutos) / duracionBloque); i++) {
       // Convertir minutos a formato HH:MM
@@ -255,9 +254,9 @@ const AddFirstAppoinments = () => {
       selectedDays.forEach(item => {
         newBloques.push(calcularHoraInicioDeBloques(item))
       })
-      console.log('newbloques', selectedDays)
+      // console.log('newbloques', selectedDays)
       const flatted = newBloques.flat()
-      console.log('FLATTED', flatted)
+      // console.log('FLATTED', flatted)
 
       const arrayOrdenado = flatted.sort((a, b) => { const horaA = new Date(`1970-01-01T${a.horaIni}:00`).getTime(); const horaB = new Date(`1970-01-01T${b.horaIni}:00`).getTime(); return horaA - horaB; });
 

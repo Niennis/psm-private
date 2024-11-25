@@ -1,11 +1,11 @@
-function formatDate(inputDate) {
-  const date = new Date(inputDate); // Crear un objeto Date
-  const year = date.getFullYear(); // Obtener el año
-  const day = String(date.getDate()).padStart(2, '0'); // Obtener el día con dos dígitos
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Obtener el mes con dos dígitos
-
-  return `${year}-${day}-${month}`; // Concatenar en el formato deseado
-}
+const convertirFecha = (fechaISO) => { 
+  const fecha = new Date(fechaISO); 
+  const anio = fecha.getFullYear(); 
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0'); 
+  // Los meses en JavaScript son 0-indexados 
+  const dia = String(fecha.getDate()).padStart(2, '0'); 
+  return `${anio}-${mes}-${dia}`; 
+};
 
 export const fetchUsers = async () => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PATIENTS
@@ -128,6 +128,7 @@ export const updateUser = async (user) => {
   
   const body = {
     ...user,
+    fecha_nacimiento: convertirFecha(user.fecha_nacimiento),
   }
 
   console.log('body', body)

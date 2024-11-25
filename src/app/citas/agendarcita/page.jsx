@@ -204,7 +204,6 @@ const AddAppoinments = () => {
         hora: time,
         fecha: date,
       })
-      console.log('appointment', appointment)
       if (appointment.estado === false) {
         setSuccess('fail')
       } else {
@@ -277,7 +276,6 @@ const AddAppoinments = () => {
   }
 
   const calcularHoraInicioDeBloques = (cita) => {
-    console.log('cita', cita)
     const horaIniMinutos = horaAMinutos(cita.horaInicio);
     const duracionBloque = cita.duracionServicio;
 

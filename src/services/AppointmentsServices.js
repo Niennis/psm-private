@@ -55,7 +55,6 @@ const pruebaSendMail = (mail) => {
     });
 }
 
-
 export const createInterview = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_INTERVIEW
   console.log('appointment', appointment)
