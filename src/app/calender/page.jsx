@@ -11,11 +11,6 @@ import FullCalendar from "@fullcalendar/react";
 import { DatePicker } from "antd";
 import esLocale from '@fullcalendar/core/locales/es'
 import { 
-  fetchScheduleByDate, 
-  fetchScheduleByAvailability, 
-  fetchScheduleByUser,
-  calcularCitas,
-  fetchBlocksAvailables,
   generarHorasMedicas,
 } from "@/services/SchedulesServices";
 import Carrousel from "@/components/skeletons/Carrousel";
