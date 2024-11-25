@@ -91,7 +91,6 @@ const AddSchedule = ({ params }) => {
     setSuccess('initial')
     const semana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes']
 
-    const fechas = []
     const newData = {
       ...data,
       id_user: params.id,
@@ -107,23 +106,19 @@ const AddSchedule = ({ params }) => {
     try {
       const req = await createSchedule(newData)
       console.log('req =>', req)
+      if(req.estado === false){
+        setSuccess('fail')
+        setError('Hubo un problema. Intenta luego más tarde')
+      } else {
+        setSuccess('success')
+      }
+
     } catch (error) {
       console.log('error =>', error)
+      setSuccess('fail')
+      setError('Hubo un problema. Intenta luego más tarde')
     }
   })
-
-  const duracion = [
-    { label: '30', value: 1 },
-    { label: '45', value: 2 },
-    { label: '60', value: 3 },
-    { label: '75', value: 4 },]
-
-  const postservicio = [
-    { label: '5', value: 5 },
-    { label: '10', value: 6 },
-    { label: '15', value: 7 },
-    { label: '20', value: 8 },]
-
 
   const handleDay = (e) => {
     const nuevoNumero = e.target.value;
