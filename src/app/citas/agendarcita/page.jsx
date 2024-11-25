@@ -12,10 +12,10 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import { fetchProfessionals, fetchSpecialityById } from "@/services/DoctorsServices";
+import { fetchSpecialityById } from "@/services/DoctorsServices";
 import { fetchPatientsDespejeFalse } from "@/services/UsersServices";
 import { createAppointment } from "@/services/AppointmentsServices"
-import { editBloqueDisponible, fetchScheduleByAvailability, fetchScheduleByDate } from "@/services/SchedulesServices";
+import { editBloqueDisponible, fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas  } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 
 import { useSession } from "next-auth/react";
@@ -45,16 +45,6 @@ const obtenerFechasUnicas = array => {
   return fechasUnicas;
 }
 
-const formatDate = (dateString) => {
-  const [year, day, month] = dateString.split("-");
-  return `${year}-${month}-${day}`
-};
-
-const formatDateToService = (dateString) => {
-  const [year, month, day] = dateString.split("-");
-  return `${year}-${day}-${month}`
-};
-
 const AddAppoinments = () => {
   const { data: session, status } = useSession()
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
@@ -75,16 +65,10 @@ const AddAppoinments = () => {
   const [especialidad, setEspecialidad] = useState('')
   dayjs.extend(isLeapYear) // use plugin
   dayjs.locale('es-mx') // use locale
+  const [bloques, setBloques] = useState([])
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
-
-  const [open, setOpen] = useState(false);
-  const handleOpen = (e) => {
-    e.preventDefault()
-    setOpen(true)
-  };
-  const handleClose = () => setOpen(false);
 
   const { register, handleSubmit, watch, control,
     formState: { errors }, reset
@@ -92,6 +76,19 @@ const AddAppoinments = () => {
     defaultValues: async () => await getPatients()
   });
 
+  const tipo_cita = [
+    { value: "Acompañamiento", label: "Acompañamiento psicológico" },
+    { value: "breve", label: "Psicoterapia breve" },
+    { value: "individual", label: "Psicopedagógica individual" },
+  ]
+
+ const [open, setOpen] = useState(false);
+  const handleOpen = (e) => {
+    e.preventDefault()
+    setOpen(true)
+  };
+
+  const handleClose = () => setOpen(false);
   /* FETCH PACIENTES CON DESPEJE */
   const getPatients = async () => {
     try {
@@ -112,22 +109,6 @@ const AddAppoinments = () => {
     }
   };
 
-  /* FETCH PROFESIONALES */
-  const getProfessionals = async () => {
-    const users = await fetchProfessionals()
-
-    const docs = users.map((doc, i) => {
-      return {
-        value: i + 2,
-        label: doc.nombre + ' ' + doc.apellido,
-        id: doc.id,
-        email: doc.email,
-        name: doc.nombre
-      }
-    })
-    setDoctor(docs)
-  }
-
   const getSpeciality = async () => {
     try {
       const { especialidad: profesional } = await fetchSpecialityById(session?.user?.id)
@@ -139,25 +120,26 @@ const AddAppoinments = () => {
 
   const modalidad = watch("modalidad", "videollamada"); // Valor predeterminado: videollamada
   const campus = watch("campus", ""); // Valor predeterminado: ninguno
-
   const motivo_consulta_seleccionado = watch('motivo')
+  const profesional = watch('professional')
 
   useEffect(() => {
     setMenuPortalTarget(document.body);
-    // getProfessionals()
     getPatients()
     getSpeciality()
   }, [])
 
+
+  // Filtros
   useEffect(() => {
     let filtered = allDays;
-    let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}-${item.horaIni}`))).map(compositeKey => { return filtered.find(item => `${item.fechaInicio}-${item.horaIni}` === compositeKey); });
-
+    let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
+      return filtered.find(item => `${item.fechaInicio}` === compositeKey);
+    });
     if (modalidad === "videollamada") {
       setDays([])
       setHours([])
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada");
-      console.log(filtered)
 
     } else if (modalidad === "presencial" && campus === "centro") {
       setDays([])
@@ -165,7 +147,6 @@ const AddAppoinments = () => {
 
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === campus));
-      console.log(filtered)
 
     } else if (modalidad === "presencial" && campus === "huechuraba") {
       setDays([])
@@ -173,17 +154,16 @@ const AddAppoinments = () => {
 
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === campus));
-      console.log(filtered)
     }
 
     setDays(uniqueFiltered);
   }, [modalidad, campus, doctor]);
 
-
   const onChange = (date, dateString) => {
     console.log(date, dateString);
     setIsClicked(true);
   };
+
   const loadFile = (event) => {
     // Handle file loading logic here
   };
@@ -201,24 +181,28 @@ const AddAppoinments = () => {
       return false
     })
     const soloDias = obtenerFechasUnicas(filterWeekDays)
+
     return soloDias;
   }
 
-  const onSubmit = handleSubmit(async data => {
+  const onSubmit = handleSubmit(async (data, e) => {
+    e.preventDefault()
     setSuccess('initial')
-    const professional = watch('professional')
+    console.log('DATA', data)
     try {
-      const selectedBlocks = await handleBloques(professional.id, time)
-      console.log('selectedBlocks', selectedBlocks)
-      const promises = selectedBlocks.map(async (item) => (
-        await editBloqueDisponible(item['id_bloque'], professional.id)
-      ))
+      // const selectedBlocks = await handleBloques(profesional.id, time)
+      // console.log('selectedBlocks', selectedBlocks)
+      // const promises = selectedBlocks.map(async (item) => (
+      //   await editBloqueDisponible(item['id_bloque'], profesional.id)
+      // ))
 
+      // la función que crea la cita
+      console.log('selectedPatient', selectedPatient)
       const appointment = await createAppointment({
         ...data,
         "patient_id": selectedPatient.id,
         hora: time,
-        fecha: formatDateToService(date),
+        fecha: date,
       })
       console.log('appointment', appointment)
       if (appointment.estado === false) {
@@ -238,14 +222,7 @@ const AddAppoinments = () => {
     }
   })
 
-  const tipo_cita = [
-    { value: "Acompañamiento", label: "Acompañamiento psicológico" },
-    { value: "breve", label: "Psicoterapia breve" },
-    { value: "individual", label: "Psicopedagógica individual" },
-  ]
-
   // // // // // // // // // // // // // // // // // // // 
-  const profesional = watch('professional')
 
   const orderByDate = (arr) => {
     return arr.sort((a, b) => dayjs(a.fechaInicio).isAfter(dayjs(b.fechaInicio)) ? 1 : -1);
@@ -266,27 +243,28 @@ const AddAppoinments = () => {
     setDoctor(selectedProfessionals)
   }
 
-
+// Obtiene días según profesional seleccionado
   const handleSelectedProfessional = async (e) => {
     setDays([])
     setHours([])
     setDate('')
     setTime('')
     try {
+      const horasmedicas = await generarHorasMedicas(e.id)
+      console.log('horasmedicas', horasmedicas)
+
+      // Traer disponibilidades
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
-      console.log('DISPONIBILIDADES', byProf)
-      const response = byProf.map(item => ({
-        ...item,
-        fechaFin: (item.fechaFin),
-        fechaInicio: (item.fechaInicio)
-      }))
+
+      // Filtrar para que salgan solo las fechas posteriores
       const hoy = new Date();
-      const filterByDate = response.filter(item => new Date(item.fechaInicio) >= hoy);
+      const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy);
 
       const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
-
+      console.log('bloque', bloque)
       setAllDays(orderedData)
+      // solo los días para manejar los botones
       setDays(bloque)
     } catch (error) {
       console.log('Error: ', error)
@@ -299,19 +277,18 @@ const AddAppoinments = () => {
   }
 
   const calcularHoraInicioDeBloques = (cita) => {
-    const horaIniMinutos = horaAMinutos(cita.horaIni);
+    console.log('cita', cita)
+    const horaIniMinutos = horaAMinutos(cita.horaInicio);
     const duracionBloque = cita.duracionServicio;
 
     // Array para almacenar las horas de inicio de cada bloque
     const horasInicioBloques = [];
-
     // Calcular la hora de inicio para cada bloque
     for (let i = 0; i < Math.floor((horaAMinutos(cita.horaFin) - horaIniMinutos) / duracionBloque); i++) {
       // Convertir minutos a formato HH:MM
       const horaInicioBloque = minutosAHora(horaIniMinutos + i * duracionBloque);
       horasInicioBloques.push({ ...cita, horaInicioBloque });
     }
-
     return horasInicioBloques;
   }
 
@@ -322,26 +299,33 @@ const AddAppoinments = () => {
     return `${String(horas).padStart(2, "0")}:${String(minutosRestantes).padStart(2, "0")}:00`;
   }
 
-  const handleDays = (e, fecha, id) => {
-    setHours([])
-    setTime('')
+  // Muestra horas por día
+  const handleDays = async (e, fecha, id) => {
     e.preventDefault()
-
+    setHours('')
+    setBloques('')
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
+    try {
+      setDate(fechaMod)
+      const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod)
 
-    console.log(fechaMod)
-    setDate(fechaMod)
-    const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod)
+      let newBloques = []
+      selectedDays.forEach(item => {
+        newBloques.push(calcularHoraInicioDeBloques(item))
+      })
+      console.log('newbloques', selectedDays)
+      const flatted = newBloques.flat()
+      console.log('FLATTED', flatted)
 
-    let newBloques = []
-    selectedDays.forEach(item => {
-      newBloques.push(calcularHoraInicioDeBloques(item))
-    })
+      const arrayOrdenado = flatted.sort((a, b) => { const horaA = new Date(`1970-01-01T${a.horaInicio}:00`).getTime(); const horaB = new Date(`1970-01-01T${b.horaInicio}:00`).getTime(); return horaA - horaB; });
 
-    const flatted = newBloques.flat()
-    setHours(flatted)
+      setHours(arrayOrdenado)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
+  // Obtiene la duración y la agrega a la función agregarBloques
   const handleBloques = async (id, hora) => {
     const { bloques } = await fetchScheduleByDate(id, date)
 
@@ -369,8 +353,6 @@ const AddAppoinments = () => {
 
     return resultado;
   };
-
-
 
   const mostrarSiguientesDias = (e) => {
     e.preventDefault()

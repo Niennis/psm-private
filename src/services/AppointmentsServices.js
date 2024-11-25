@@ -5,11 +5,6 @@ import { fetchSpecialityById } from './DoctorsServices';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
-const formatDate = (dateString) => {
-  const [year, month, day] = dateString.split("-");
-  return `${year}-${day}-${month}`;
-};
-
 export const sendEmail = async (email, typeUser) => {
   console.log('el body', email, typeUser);
   const SEND_EMAIL = process.env.NEXT_PUBLIC_SEND_EMAIL;
@@ -65,7 +60,7 @@ const pruebaSendMail = (mail) => {
 
 export const createInterview = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_INTERVIEW
-console.log('appointment', appointment)
+  console.log('appointment', appointment)
   const body = {
     alumno_id: appointment.patient_id,
     campus: appointment.campus,
@@ -73,7 +68,7 @@ console.log('appointment', appointment)
     derivado_desde: 'derivado',
     diagnostico_previo: 'diagnosticos',
     estado: "pendiente",
-    fechaInicio: formatDate(appointment.fecha),
+    fechaInicio: appointment.fecha,
     hora: appointment.hora,
     modalidad: appointment.modalidad || 'modalidad',
     motivo: appointment.motivo.label || 'motivo',
@@ -98,8 +93,8 @@ console.log('appointment', appointment)
 
     // ENVÍO DE MAIL
     // if (response.detalle === 'success!!') {
-      // pruebaSendMail('estefania.osses.v@gmail.com')
-      // await sendEmail(bodyEmailProfessional)
+    // pruebaSendMail('estefania.osses.v@gmail.com')
+    // await sendEmail(bodyEmailProfessional)
     // }
 
     return response
@@ -110,7 +105,7 @@ console.log('appointment', appointment)
 
 export const createAppointment = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_APPOINTMENT
-console.log('appointment', appointment)
+  console.log('appointment', appointment)
   const body = {
     alumno_id: appointment.patient_id,
     campus: appointment.campus,
@@ -120,7 +115,7 @@ console.log('appointment', appointment)
     estado: "pendiente",
     fechaInicio: appointment.fecha,
     hora: appointment.hora,
-    modalidad: appointment.modalidad ,
+    modalidad: appointment.modalidad,
     motivo: appointment.motivo.label || 'motivo',
     notas: 'notas',
     primera_cita: 0,
@@ -143,8 +138,8 @@ console.log('appointment', appointment)
 
     // ENVÍO DE MAIL
     // if (response.detalle === 'success!!') {
-      // pruebaSendMail('estefania.osses.v@gmail.com')
-      // await sendEmail(bodyEmailProfessional)
+    // pruebaSendMail('estefania.osses.v@gmail.com')
+    // await sendEmail(bodyEmailProfessional)
     // }
 
     return response
@@ -166,7 +161,7 @@ export const updateAppointment = async (appointment) => {
     "estado": appointment.status
   }
   try {
-    const data = await fetch(APPOINTMENT_API , {
+    const data = await fetch(APPOINTMENT_API, {
       method: "POST",
       headers: {
         'content-type': 'application/json',
@@ -185,7 +180,7 @@ export const changeStatusAppointment = async (id, status) => {
 
   const body = {
     "id": id,
-    "estado" : status,
+    "estado": status,
   }
 
   try {
@@ -215,26 +210,7 @@ export const fetchAppointments = async () => {
       },
     });
 
-    const {citas} = await data.json();
-
-    // const appointments = await Promise.allSettled(
-    //   citas.map(async (date) => {
-    //     // const doctor = await fetchProfessionalById(date.id_profesional);
-    //     // const {users: fetchPatient} = await fetchUser(date.id_paciente);
-    //     const result = await fetchSpecialityById(date.id_profesional);
-
-    //     return {
-    //       ...date,
-    //       // nombre_alumno: `${fetchPatient.users[0].nombre} ${fetchPatient.users[0].apellido}`,
-    //       // nombre_profesional: `${doctor.users[0].nombre} ${doctor.users[0].apellido}`,
-    //       // telefono_alumno: fetchPatient.users[0].telefono,
-    //       // mail_alumno: fetchPatient.users[0].email,
-    //       especialidad: result.especialidad.length === 0 ? 'Psicologia' : result.especialidad[0].especialidad,
-    //       key: date.id
-    //     };
-    //   })
-    // );
-
+    const { citas } = await data.json();
     return citas;
   } catch (err) {
     console.error(err);
@@ -244,7 +220,7 @@ export const fetchAppointments = async () => {
 
 export const fetchAppointment = async (id) => {
   try {
-    const data = await fetch(process.env.NEXT_PUBLIC_APPOINTMENTS_API )
+    const data = await fetch(process.env.NEXT_PUBLIC_APPOINTMENTS_API)
     const response = await data.json()
     const fetchProfessional = await fetchUser(response.id_professional)
     const fetchPatient = await fetchUser(response.id_patient)

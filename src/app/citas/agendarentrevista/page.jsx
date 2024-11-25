@@ -26,7 +26,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { fetchUserByEmail, updateUser } from "@/services/UsersServices";
 import { createInterview, sendEmail } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
-import { editBloqueDisponible, fetchScheduleByDate, fetchScheduleByAvailability, tomarHoraDisponible } from "@/services/SchedulesServices";
+import { fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 
 import withAuth from '@/components/withAuth';
@@ -39,17 +39,6 @@ const formatRut = (value) => {
   const [number, verifierDigit] = cleanedValue.split('-');
   const formattedNumber = number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return `${formattedNumber}-${verifierDigit || ''}`;
-};
-
-const formatDate = (dateString) => {
-  const [year, day, month] = dateString.split("-");
-  return `${year}-${month}-${day}`
-};
-
-
-const formatDateToService = (dateString) => {
-  const [year, month, day] = dateString.split("-");
-  return `${year}-${day}-${month}`
 };
 
 // Función para obtener fechas únicas
@@ -67,7 +56,6 @@ const obtenerFechasUnicas = array => {
   });
   return fechasUnicas;
 }
-
 
 const AddFirstAppoinments = () => {
   const ROL = ["alumno"]
@@ -131,7 +119,6 @@ const AddFirstAppoinments = () => {
   } = useForm({
     defaultValues: async () => await fetchInitialData()
   });
- 
 
   const selectedRegion = { value: 13, label: "Región Metropolitana", name: "metropolitana" }
   const profesional = watch('professional')
@@ -143,16 +130,16 @@ const AddFirstAppoinments = () => {
     setMenuPortalTarget(document.body);
   }, [])
 
-  
+
   useEffect(() => {
     let filtered = allDays;
-    let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}-${item.horaIni}`))).map(compositeKey => { return filtered.find(item => `${item.fechaInicio}-${item.horaIni}` === compositeKey); });
-
+    let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
+      return filtered.find(item => `${item.fechaInicio}` === compositeKey);
+    });
     if (modalidad === "videollamada") {
       setDays([])
       setHours([])
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada");
-      console.log(filtered)
 
     } else if (modalidad === "presencial" && campus === "centro") {
       setDays([])
@@ -160,7 +147,6 @@ const AddFirstAppoinments = () => {
 
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === campus));
-      console.log(filtered)
 
     } else if (modalidad === "presencial" && campus === "huechuraba") {
       setDays([])
@@ -168,7 +154,6 @@ const AddFirstAppoinments = () => {
 
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === campus));
-      console.log(filtered)
     }
 
     setDays(uniqueFiltered);
@@ -193,7 +178,6 @@ const AddFirstAppoinments = () => {
       return false
     })
     const soloDias = obtenerFechasUnicas(filterWeekDays)
-    // const dias = Array.from(filterWeekDays).sort();
 
     return soloDias;
   }
@@ -210,25 +194,21 @@ const AddFirstAppoinments = () => {
     setDate('')
     setTime('')
     try {
+      const horasmedicas = await generarHorasMedicas(e.id)
+      console.log('horasmedicas', horasmedicas)
+
       // Traer disponibilidades
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
 
-      // Formatear fecha YYYY-MM-DD
-      const response = byProf.map(item => ({
-        ...item,
-        fechaFin: (item.fechaFin),
-        fechaInicio: (item.fechaInicio)
-      }))
-
       // Filtrar para que salgan solo las fechas posteriores
       const hoy = new Date();
-      const filterByDate = response.filter(item => new Date(item.fechaInicio) >= hoy);
+      const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy);
 
       const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
-
+      console.log('bloque', bloque)
       setAllDays(orderedData)
-      setDays(bloque)
+      // setDays(bloque)
     } catch (error) {
       console.log('Error: ', error)
     }
@@ -252,7 +232,6 @@ const AddFirstAppoinments = () => {
       const horaInicioBloque = minutosAHora(horaIniMinutos + i * duracionBloque);
       horasInicioBloques.push({ ...cita, horaInicioBloque });
     }
-
     return horasInicioBloques;
   }
 
@@ -264,32 +243,25 @@ const AddFirstAppoinments = () => {
   }
 
   const handleDays = async (e, fecha, id) => {
-    setHours('')
-
-    setBloques('')
     e.preventDefault()
-    // console.log('handle.days', fecha, id)
+    setHours('')
+    setBloques('')
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
-    // console.log('fechamod', fecha);
     try {
-      // showBloques
-      const { bloques } = await fetchScheduleByDate(parseInt(id), fechaMod)
-      console.log('BLOQUES', bloques)
-      // console.log('allDays', allDays)
-      bloques.filter
-      setBloques(bloques)
       setDate(fechaMod)
-      // const newBloques = agruparBloquesPorHora(bloques)
       const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod)
 
       let newBloques = []
       selectedDays.forEach(item => {
         newBloques.push(calcularHoraInicioDeBloques(item))
       })
-
+      console.log('newbloques', selectedDays)
       const flatted = newBloques.flat()
       console.log('FLATTED', flatted)
-      setHours(flatted)
+
+      const arrayOrdenado = flatted.sort((a, b) => { const horaA = new Date(`1970-01-01T${a.horaIni}:00`).getTime(); const horaB = new Date(`1970-01-01T${b.horaIni}:00`).getTime(); return horaA - horaB; });
+
+      setHours(arrayOrdenado)
     } catch (error) {
       console.log(error)
     }
@@ -298,7 +270,7 @@ const AddFirstAppoinments = () => {
   const handleBloques = async (id, hora) => {
     console.log('hora', id, date)
     const { bloques } = await fetchScheduleByDate(id, date)
-console.log(bloques)
+    console.log(bloques)
     const getDuracionServicio = hours.find(item1 => bloques.some(item2 => item2.hora_inicio >= item1.horaIni && item2.hora_inicio <= item1.horaFin))
     console.log('getDuracionServicio', getDuracionServicio.duracionServicio)
 
@@ -362,7 +334,6 @@ console.log(bloques)
     // Handle file loading logic here
   };
 
-
   const motivo_consulta_seleccionado = watch('motivo_consulta')
 
   const gender = [
@@ -409,15 +380,10 @@ console.log(bloques)
       "telefono": data.mobile || patient.telefono,
       "tipo_usuario": patient.tipo_usuario,
     }
-    tomarHoraDisponible(bloques, time, hours, date)
+    // tomarHoraDisponible(bloques, time, hours, date)
     const professional = watch('professional')
 
     try {
-      const selectedBlocks = await handleBloques(professional.id, time)
-      console.log('selectedBlocks', selectedBlocks)
-      const promises = selectedBlocks.map(async (item) => (
-        await editBloqueDisponible(item['id_bloque'], professional.id)
-      ))
 
       const [appointment, update] = await Promise.all([
         createInterview(bodyInterview),

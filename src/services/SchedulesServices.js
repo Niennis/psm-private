@@ -354,8 +354,8 @@ export const createSchedule = async (schedule) => {
     "dias": schedule.frecuencia === "semanal" ? schedule.semanal.dia
       : schedule.frecuencia === "mensual" ? [schedule.mensual['ordinal-dia']] : semana,
     "duracionServicio": schedule.duracionServicio,
-    "fechaInicio": dayjs(schedule.fechaInicio).format('YYYY-DD-MM'),
-    "fechaFin": dayjs(schedule.fechaFin).format('YYYY-DD-MM'),
+    "fechaInicio": dayjs(schedule.fechaInicio).format('YYYY-MM-DD'),
+    "fechaFin": dayjs(schedule.fechaFin).format('YYYY-MM-DD'),
     "frecuencia": schedule.frecuencia,
     "horaIni": schedule.horaIni,
     "horaFin": schedule.horaFin,
