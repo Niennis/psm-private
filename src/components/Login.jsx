@@ -5,7 +5,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react"
 import { useForm } from 'react-hook-form';
 
-import { AuthData } from "@/providers/AuthWrapper";
+// import { AuthData } from "@/providers/AuthWrapper";
 
 import { fetchUserMailAndPass } from "@/services/UsersServices";
 
@@ -23,6 +23,8 @@ const Login = () => {
   const [hash, setHash] = useState('');
   const matches = useMediaQuery('(min-width:600px)');
   const isSmallDevice = useMediaQuery('(max-width: 599px)')
+  const [error, setError] = useState('')
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setHash(window.location.hash.substring(1));
@@ -32,9 +34,8 @@ const Login = () => {
   const { register, handleSubmit, watch,
     formState: { errors }
   } = useForm()
-  const { login } = AuthData()
 
-  // const [submitMessage, setSubmitMessage] = useState('');
+  // const { login } = AuthData()
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -48,7 +49,6 @@ const Login = () => {
     const response = await logInAction(token, data)
 
     if (response && response.success) {
-      console.log('RESPONSE captcha', response)
       try {
         const res = await signIn('credentials', {
           callbackUrl: '/citas',
@@ -65,7 +65,8 @@ const Login = () => {
         console.log('Hubo un error:', err)
       }
     } else {
-      console.log('NO PUDO LOGEAR')
+      setError('Ocurrió un problema, intenta más tarde')
+      console.log('Captcha no válida')
     }
   })
 
@@ -80,10 +81,10 @@ const Login = () => {
     } catch (error) {
       console.log('ERRRR', error);
       if (error.message === 'No se pudo acceder. Correo no autorizado.') {
-        alert('No tienes acceso. Tu correo no está autorizado.');
+        setError('No tienes acceso. Tu correo no está autorizado.');
       } else {
         console.error('Error de autenticación:', error);
-        alert('Ha ocurrido un error durante la autenticación. Por favor, inténtalo de nuevo.');
+        setError('Ha ocurrido un error durante la autenticación. Por favor, inténtalo de nuevo.');
       }
       redirect('/')
     }
@@ -210,7 +211,7 @@ const Login = () => {
                                               }
                                             })}
                                           />
-                                          {errors.email && <span><small>{errors.email.message}</small></span>}
+                                          {errors.email && <span className="font-red"><small>{errors.email.message}</small></span>}
 
                                         </div>
                                         <div className="form-group">
@@ -232,9 +233,14 @@ const Login = () => {
                                             })}
                                           />
                                           {
-                                            errors.password && <span><small>{errors.password.message}</small></span>
+                                            errors.password && <span className="font-red"><small>{errors.password.message}</small></span>
                                           }
 
+                                          {isInvalid && <span style={{ color: 'red' }}><small>Usuario no encontrado</small></span>}
+                                          {error &&
+                                            <p className="account-subtitle font-red">
+                                              {error}
+                                            </p>}
                                           <span
                                             className="toggle-password"
                                             onClick={togglePasswordVisibility}
@@ -256,9 +262,7 @@ const Login = () => {
                           </div>
                           <Link href="/forgotpassword">¿Olvidaste la contraseña?</Link> */}
                                         </div>
-                                        <div>
-                                          {isInvalid && <span style={{ color: 'red' }}><small>Usuario no encontrado</small></span>}
-                                        </div>
+
                                         <div className="form-group login-btn">
                                           <button
                                             className="btn btn-primary btn-block sailec-medium"
@@ -267,6 +271,7 @@ const Login = () => {
                                             Iniciar sesión
                                           </button>
                                         </div>
+
                                       </form>
                                     </div>
                                   </div>
@@ -276,12 +281,7 @@ const Login = () => {
                           </div>
                         </section>
                         <div className="next-sign">
-                          <p className="account-subtitle">
-                            {/* ¿No tienes una cuenta? <Link href="/signup">Regístrate</Link> */}
-                          </p>
-                          {/* Social Login */}
 
-                          {/* /Social Login */}
                         </div>
                       </div>
                     </div>
