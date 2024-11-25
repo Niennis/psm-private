@@ -60,19 +60,28 @@ const EditAppoinments = ({ params }) => {
         name: doc.nombre + ' ' + doc.apellido
       }
     })
-    console.log('session', session)
     setProfesional(docs)
+  }
+  
+  const formatearHora = (hora) => { 
+    const [h, m, s] = hora.split(':').map(Number); 
+    const horaFormateada = [ 
+      String(h).padStart(2, '0'), 
+      String(m).padStart(2, '0'), 
+      String(s).padStart(2, '0') 
+    ].join(':'); 
+    return horaFormateada;
   }
 
   const getAppointments = async () => {
     try {
       const response = await fetchAppointments()
       const filteredResponse = response.filter(item => (item.id_cita == params.appointmentId) /* && (item.id_profesional == session.user?.id) */)
-
+console.log(filteredResponse)
       const obj = {
         speciality: filteredResponse[0].especialidad_profesional,
         appointment_date: dayjs(filteredResponse[0]['fecha']).format('YYYY-MM-DD'),
-        start_time: filteredResponse[0]['hora'],
+        start_time: formatearHora(filteredResponse[0]['hora']),
         // end_time: horaFin,
         id: filteredResponse[0].id_cita,
         email: filteredResponse[0].email_estudiante,
