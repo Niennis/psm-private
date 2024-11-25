@@ -103,7 +103,6 @@ const AddSchedule = ({ params }) => {
       },
       dias: data.frecuencia === "semanal" ? data.semanal.dia : semana
     }
-    console.log('new data => ', newData)
 
     try {
       const req = await createSchedule(newData)
@@ -111,43 +110,6 @@ const AddSchedule = ({ params }) => {
     } catch (error) {
       console.log('error =>', error)
     }
-
-    // const dates = getDates(newData)
-    // let esValido = []
-
-    // if (dates?.length === 0) {
-    //   esValido.push(false)
-    //   return
-    // }
-
-    // const promesas = []
-    // dates.forEach(date => {
-    //   return promesas.push(validateDates(date, data.horaIni, data.horaFin, data.id))
-    // })
-
-    // Promise.all(promesas)
-    //   .then(async (values) => {
-    //     if (values.includes(true)) {
-    //       console.log('GGGGGGGGGGG')
-    //     } else {
-    //       try {
-    //         const req = await createSchedule(newData)
-    //         if (req.estado === false) {
-    //           setSuccess('fail')
-    //         } else {
-    //           setSuccess('success')
-    //         }
-    //       } catch (error) {
-    //         setSuccess('fail')
-    //         setError(error.message)
-    //         console.log('ERRRR', error.message)
-    //       }
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     setError(error.message)
-    //     console.log('error', error);
-    //   });
   })
 
   const duracion = [

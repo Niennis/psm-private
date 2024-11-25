@@ -17,14 +17,14 @@ export const fetchScheduleByUser = async (id) => {
   return data.json()
 }
 
-// info por día
+// info por día showBloques
 export const fetchScheduleByDate = async (id, date) => {
   const SHOW_BLOQUES = process.env.NEXT_PUBLIC_SHOW_SCHEDULE_BY_DATE;
   const body = {
     usuario_id: id,
     fecha: date
   }
-  
+
   const data = await fetch(SHOW_BLOQUES, {
     method: "POST",
     headers: {
@@ -34,10 +34,32 @@ export const fetchScheduleByDate = async (id, date) => {
     body: JSON.stringify(body)
   })
   const response = await data.json()
-  console.log('fetchScheduleByDate', response);
-  
+
   return response;
 }
+
+
+
+// BLOQUES DISPONIBLES POR DIA
+export const fetchBlocksAvailables = async (id, date) => {
+  const SHOW_BLOQUES = process.env.NEXT_PUBLIC_SCHEDULE_AVAILABLE;
+  const body = {
+    usuario_id: id,
+    fecha: date
+  }
+  const data = await fetch(SHOW_BLOQUES, {
+    method: "POST",
+    headers: {
+      'content-type': 'application/json',
+      'access-control-allow-origin': '*'
+    },
+    body: JSON.stringify(body)
+  })
+  const response = await data.json()
+
+  return response;
+}
+
 
 // SHOW DISPONIBILIDADES
 export const fetchScheduleByAvailability = async (id) => {
@@ -45,7 +67,7 @@ export const fetchScheduleByAvailability = async (id) => {
   const body = {
     id_user: id
   }
-  
+
   const data = await fetch(SCHEDULES_URL, {
     method: "POST",
     headers: {
@@ -57,6 +79,85 @@ export const fetchScheduleByAvailability = async (id) => {
   const response = await data.json()
   return response
 }
+
+
+const obtenerFechasUnicas = (hours) => {
+  const fechas = hours.map((hour) => hour.fechaInicio);
+  return [...new Set(fechas)]; // Elimina duplicados usando Set
+};
+
+
+
+export const generarHorasMedicas = async (id) => {
+
+  const { users: hours } = await fetchScheduleByAvailability(id)
+  const fechasUnicas = obtenerFechasUnicas(hours);
+
+  const bloquesPromesas = fechasUnicas.map(async (date) => (
+    await fetchBlocksAvailables(id, date)
+  ))
+
+  const bloquesTotales = await Promise.all(bloquesPromesas)
+  const bloquesDisponibles = bloquesTotales.flatMap(obj => obj.bloques)
+  console.log('DISPONIBLES', bloquesDisponibles)
+  const convertirHoraAMinutos = (hora) => {
+    const [h, m, s] = hora.split(":").map(Number);
+    return h * 60 + m + s / 60;
+  };
+
+  const convertirMinutosAHora = (minutos) => {
+    const h = Math.floor(minutos / 60).toString().padStart(2, "0");
+    const m = Math.floor(minutos % 60).toString().padStart(2, "0");
+    return `${h}:${m}`;
+  };
+
+  const horasMedicas = [];
+
+  hours.forEach((hour) => {
+    const duracion = hour.duracionServicio; // duración en minutos
+    const inicioServicio = convertirHoraAMinutos(hour.horaIni);
+    const finServicio = convertirHoraAMinutos(hour.horaFin);
+
+    let tiempoActual = inicioServicio;
+
+    while (tiempoActual + duracion <= finServicio) {
+      const horaInicio = tiempoActual;
+      const horaFin = tiempoActual + duracion;
+
+      const bloqueDisponible = bloquesDisponibles.some(bloque => {
+        const inicioBloque = convertirHoraAMinutos(bloque.hora_inicio);
+        const finBloque = convertirHoraAMinutos(bloque.hora_fin);
+        return (
+          horaInicio >= inicioBloque ||
+          horaFin <= finBloque &&
+          bloque.usuario_id === hour.id_user
+        );
+      });
+      // console.log('BLOQUE DISPONIBLE', bloqueDisponible)
+      if (bloqueDisponible) {
+        horasMedicas.push({
+          detalleServicio: hour.detalleServicio,
+          duracionServicio: hour.duracionServicio,
+          fechaInicio: hour.fechaInicio,
+          horaInicio: convertirMinutosAHora(horaInicio),
+          horaFin: convertirMinutosAHora(horaFin),
+          id_bloque: hour.id_bloque,
+          id_user: hour.id_user,
+          campus: hour.campus,
+          modalidad: hour.modalidad,
+          tipoServicio: hour.tipoServicio
+        });
+      }
+
+      tiempoActual += duracion; // Avanza al siguiente bloque de tiempo
+    }
+  });
+
+  return horasMedicas;
+};
+
+
+
 
 const recurrencia = (obj) => {
   if (obj.frecuencia === "diaria") {
@@ -104,7 +205,7 @@ const obtenerFechasSemana = (objeto, fechas) => {
       const esDiaValido = esDiaDeLaSemana(fechaActual, dia) &&
         fechaActual.getDay() !== 0 && fechaActual.getDay() !== 6;
 
-        if (esDiaValido) {
+      if (esDiaValido) {
         fechas.push(fechaActual.toISOString().split('T')[0]);
       }
       fechaActual = new Date(fechaActual.setDate(fechaActual.getDate() + 1))
@@ -296,8 +397,10 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
   const body = {
     id_bloque: id_bloque,
     id_user: id_user,
-    comentario: ''
+    comentario: 'cambio'
   }
+
+  console.log('update', body)
   try {
     const data = await fetch(EDIT_BLOQUE_URL, {
       method: "POST",
@@ -320,12 +423,15 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
 
 // Retorna true si hay choque de horario
 const hayChoqueHorario = (inicioMayor, finMayor, bloquesMenores) => {
-  console.log(inicioMayor, finMayor, bloquesMenores)
+  console.log('inicio', inicioMayor, finMayor, bloquesMenores)
   for (const bloqueMenor of bloquesMenores) {
     const { hora_inicio, hora_fin } = bloqueMenor;
 
     const inicioMenor = hora_inicio.length < 8 ? (`0${hora_inicio}`).slice(0, 5) : hora_inicio.slice(0, 5)
+    console.log('iniciomenor', inicioMenor);
+
     const finMenor = hora_fin.length < 8 ? (`0${hora_fin}`).slice(0, 5) : hora_fin.slice(0, 5)
+    console.log('finMenor', finMenor);
 
     // Convertir las horas a objetos Date para facilitar la comparación
     const inicioMayorDate = new Date(`1970-01-01T${inicioMayor}`);
@@ -374,3 +480,157 @@ export const getSpecialities = async () => {
     console.log('Error: ', error)
   }
 }
+
+export const tomarHoraDisponible = (bloques, hora, disponibilidades, fecha) => {
+  console.log(bloques, hora, disponibilidades, fecha)
+  let duracion;
+  let idBloque;
+  const bloquesCambiarEstado = []
+
+  const disponibilidadIndex = disponibilidades.findIndex(item => (item.horaIni === hora) && (item.fechaInicio === fecha))
+  const bloqueIndex = bloques.findIndex(bloque => bloque.hora_inicio === hora);
+  if (disponibilidadIndex !== -1 && bloqueIndex !== -1) {
+    duracion = disponibilidades[disponibilidadIndex].duracionServicio
+    idBloque = bloques[bloqueIndex].id;
+
+    let bloquesCantidad = duracion / 5
+    for (let i = 0; i < bloquesCantidad; i++) {
+      bloquesCambiarEstado.push(bloques[bloqueIndex + i])
+    }
+  }
+  console.log('bloquesCambiarEstado', bloquesCambiarEstado)
+  return bloquesCambiarEstado
+}
+
+
+
+
+// Ejemplo de datos de entrada
+const disponibilidades = [
+  {
+    horaInicio: "01:00:00",
+    horaFin: "03:00:00",
+    duracion: 45, // en minutos
+    frecuencia: "diaria", // puede ser otro valor, no se usa en este cálculo
+  },
+];
+
+const bloques = [
+  { horaInicio: "01:00:00", horaFin: "01:05:00", disponible: false },
+  { horaInicio: "01:05:00", horaFin: "01:10:00", disponible: true },
+  // ...
+  { horaInicio: "01:45:00", horaFin: "01:50:00", disponible: true },
+];
+
+
+
+
+// Utilidades para manejar horas como objetos Date
+const parseTime = (time) => {
+  const [hours, minutes, seconds] = time.split(":").map(Number);
+  return new Date(1970, 0, 1, hours, minutes, seconds);
+};
+
+const formatTime = (date) =>
+  date.toTimeString().split(" ")[0];
+
+const addMinutes = (date, minutes) =>
+  new Date(date.getTime() + minutes * 60000);
+
+// Función para extraer el mes y año de una fecha
+const getMonthYear = (dateString) => {
+  const date = new Date(dateString);
+  return { month: date.getMonth(), year: date.getFullYear() };
+};
+
+// Estado inicial para el mes actual
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
+
+// Función para filtrar por mes y año
+const filtrarPorMes = (disponibilidades, bloques, month, year) => {
+  return {
+    disponibilidades: disponibilidades.filter(({ horaInicio }) => {
+      const { month: m, year: y } = getMonthYear(horaInicio);
+      return m === month && y === year;
+    }),
+    bloques: bloques.filter(({ horaInicio }) => {
+      const { month: m, year: y } = getMonthYear(horaInicio);
+      return m === month && y === year;
+    }),
+  };
+}
+
+
+// Navegación entre meses
+const cambiarMes = (direccion) => {
+  if (direccion === "siguiente") {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+  } else if (direccion === "anterior") {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+  }
+}
+
+// Filtrar datos según el nuevo mes
+const { disponibilidades: dispFiltradas, bloques: bloquesFiltrados } = filtrarPorMes(
+  disponibilidades,
+  bloques,
+  currentMonth,
+  currentYear
+);
+
+
+// Función principal
+const calcularCitas = (disponibilidades, bloques) => {
+  const bloquesMap = bloques.map(b => ({
+    inicio: parseTime(b.hora_inicio),
+    fin: parseTime(b.hora_fin),
+    disponible: b.disponible,
+  }));
+
+  const resultados = [];
+
+  disponibilidades.forEach((disp) => {
+    const horaInicio = parseTime(disp.horaIni);
+    const horaFin = parseTime(disp.horaFin);
+    const duracion = disp.duracionServicio;
+
+    let inicioCita = horaInicio;
+
+    while (addMinutes(inicioCita, duracion) <= horaFin) {
+      const finCita = addMinutes(inicioCita, duracion);
+
+      // Validar si todos los bloques en este rango son disponibles
+      const bloquesEnRango = bloquesMap.filter(
+        (b) => b.inicio >= inicioCita && b.fin <= finCita
+      );
+
+      const todosDisponibles = bloquesEnRango.every(b => b.disponible);
+
+      if (todosDisponibles) {
+        resultados.push({
+          horaInicio: formatTime(inicioCita),
+          horaFin: formatTime(finCita),
+        });
+      }
+
+      // Mover al siguiente intervalo de cita
+      inicioCita = finCita;
+    }
+  });
+  console.log('RESULTADOS', resultados)
+  return resultados;
+}
+
+// Llamar a la función con los datos de ejemplo
+// const citasDisponibles = calcularCitas(disponibilidades, bloques);
+// console.log(citasDisponibles);

@@ -10,8 +10,14 @@ import FullCalendar from "@fullcalendar/react";
 
 import { DatePicker } from "antd";
 import esLocale from '@fullcalendar/core/locales/es'
-// import { fetchSchedules } from "../../utils/fetchSchedules";
-import { fetchSchedules, fetchScheduleByDate, fetchScheduleByAvailability, fetchScheduleByUser } from "@/services/SchedulesServices";
+import { 
+  fetchScheduleByDate, 
+  fetchScheduleByAvailability, 
+  fetchScheduleByUser,
+  calcularCitas,
+  fetchBlocksAvailables,
+  generarHorasMedicas,
+} from "@/services/SchedulesServices";
 import Carrousel from "@/components/skeletons/Carrousel";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
@@ -22,6 +28,41 @@ const formatDate = (dateString) => {
   const [year, day, month] = dateString.split("-");
   return `${year}-${month}-${day}`
 };
+
+const timeToMinutes = (time) => {
+  const [hours, minutes, seconds] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+const isOverlap = (bloque, disponibilidad) => {
+  const bloqueInicio = timeToMinutes(bloque.hora_inicio);
+  const bloqueFin = timeToMinutes(bloque.hora_fin);
+  const disponibilidadInicio = timeToMinutes(disponibilidad.horaIni);
+  const disponibilidadFin = disponibilidadInicio + disponibilidad.duracionServicio;
+  return !(bloqueFin <= disponibilidadInicio || bloqueInicio >= disponibilidadFin);
+}
+
+const getAvailableHours = (bloques, disponibilidades) => {
+  const horasDisponibles = [];
+  disponibilidades.forEach(disponibilidad => {
+    const fechaInicio = new Date(disponibilidad.fechaInicio); 
+    const fechaFin = new Date(disponibilidad.fechaFin);
+    bloques.forEach(bloque => {
+      const choque = isOverlap(bloque, disponibilidad);
+      if (choque && bloque.disponible === 0) {
+        horasDisponibles.push({ id_bloque: bloque.id_bloque, mensaje: "Hay choque horario con el bloque no disponible" });
+      } else if (!choque && bloque.disponible === 1) {
+        horasDisponibles.push({ 
+          id_bloque: bloque.id_bloque, 
+          fechaInicio: disponibilidad.fechaInicio, 
+          fechaFin: disponibilidad.fechaFin, 
+          horaIni: disponibilidad.horaIni, 
+          horaFin: disponibilidad.horaFin, 
+          duracionServicio: disponibilidad.duracionServicio });
+      }
+    });
+  }); return horasDisponibles;
+}
 
 const Calender = ({ id }) => {
   const [menu, setMenu] = useState(false);
@@ -53,22 +94,6 @@ const Calender = ({ id }) => {
         start: Date.now() + 148000000,
         className: "bg-purple",
       },
-      {
-        title: "Test Event 1",
-        start: Date.now(),
-        end: Date.now(),
-        className: "bg-success",
-      },
-      {
-        title: "Test Event 2",
-        start: Date.now() + 168000000,
-        className: "bg-info",
-      },
-      {
-        title: "Test Event 3",
-        start: Date.now() + 338000000,
-        className: "bg-primary",
-      },
     ];
 
   const datesToTimestamp = (fecha, hora) => {
@@ -79,38 +104,23 @@ const Calender = ({ id }) => {
   };
 
   const fetchData = async () => {
-    const { users: response } = await fetchScheduleByAvailability(id)
+    const response = await generarHorasMedicas(id)
     const processed = response.map(item => {
       // detalleServicio y duracionServicio
       return (
         {
           ...item,
-          start: datesToTimestamp(formatDate(item.fechaInicio), item.horaIni),
-          end: datesToTimestamp(formatDate(item.fechaFin), item.horaFin),
+          start: datesToTimestamp(item.fechaInicio, `${item.horaInicio}:00`),
+          end: datesToTimestamp(item.fechaInicio, `${item.horaFin}:00`),
           className: "bg-purple",
           title: item.detalleServicio || 'Disponible',
         }
       )
     })
-    console.log('CALENDARIO', response);
-
-    const ordered = processed.sort((a, b) => a.start - b.start);
-    // console.log('ORDERED', ordered)
-    const bloquesCombinados = ordered.reduce((resultado, bloque) => {
-      // console.log('BLOQUE', bloque);
-      const ultimoBloque = resultado[resultado.length - 1];
-      if (ultimoBloque && ultimoBloque.end >= bloque.start) {
-        ultimoBloque.end = Math.max(ultimoBloque.end, bloque.end);
-      } else {
-        resultado.push(bloque);
-      }
-      // console.log('RESULTADO', resultado);
-
-      return resultado;
-    }, [])
+    // console.log('CALENDARIO', processed);
+    // const ordered = processed.sort((a, b) => a.start - b.start);
 
     setCalendario(processed)
-    // setCalendario(resultadoFinal)
   }
 
   useEffect(() => {
