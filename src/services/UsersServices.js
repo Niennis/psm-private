@@ -1,11 +1,18 @@
-const convertirFecha = (fechaISO) => { 
-  const fecha = new Date(fechaISO); 
-  const anio = fecha.getFullYear(); 
-  const mes = String(fecha.getMonth() + 1).padStart(2, '0'); 
+const convertirFecha = (fechaISO) => {
+  const fecha = new Date(fechaISO);
+  const anio = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
   // Los meses en JavaScript son 0-indexados 
-  const dia = String(fecha.getDate()).padStart(2, '0'); 
-  return `${anio}-${mes}-${dia}`; 
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
 };
+
+const formatDate = (date) => {
+  const newDate = new Date(date);
+
+  const formattedDate = newDate.toISOString().split("T")[0];
+  return formattedDate;
+}
 
 export const fetchUsers = async () => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PATIENTS
@@ -125,10 +132,10 @@ export const addUsers = async (user) => {
 
 export const updateUser = async (user) => {
   const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER
-  
+
   const body = {
     ...user,
-    fecha_nacimiento: convertirFecha(user.fecha_nacimiento),
+    // fecha_nacimiento: formatDate(user.fecha_nacimiento),
   }
 
   console.log('body', body)

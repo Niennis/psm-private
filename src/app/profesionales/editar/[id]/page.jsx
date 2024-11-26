@@ -99,17 +99,22 @@ const EditDoctor = ({ params }) => {
 
     const formatDateToYYYYDDMM = dateString => {
       const timestamp = Date.parse(dateString);
+      // console.log('timestamp', timestamp)
+      // if (isNaN(timestamp)) {
+      //   throw new Error("Formato de fecha no válido");
+      // }
 
-      if (isNaN(timestamp)) {
-        throw new Error("Formato de fecha no válido");
-      }
+      // const date = new Date(timestamp);
+      // const year = date.getFullYear();
+      // const day = String(date.getDate()).padStart(2, '0');
+      // const month = String(date.getMonth() + 1).padStart(2, '0');
 
+      // return `${year}-${day}-${month}`;
       const date = new Date(timestamp);
-      const year = date.getFullYear();
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
 
-      return `${year}-${day}-${month}`;
+      // Formatear la fecha a YYYY-MM-DD
+      const formattedDate = date.toISOString().split("T")[0];
+      return formattedDate
     }
 
     const pass = data.password === data.confirmPassword
@@ -140,7 +145,7 @@ const EditDoctor = ({ params }) => {
     try {
       const response = await updateUser(body, session.user.id)
       console.log('response', response)
-      if( response.validacion === false){
+      if (response.validacion === false) {
         setSuccess('fail')
         setError('Ocurrió un problema. Intenta más tarde')
       } else {
