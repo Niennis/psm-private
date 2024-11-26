@@ -2432,4 +2432,4 @@ const AddInterviewRecord = ({ params }) => {
 };
 
 // export default AddInterviewRecord;
-export default withAuth(AddInterviewRecord, ['admin', 'profesional']);
+export default withAuth(AddInterviewRecord, ['administrador', 'profesional']);

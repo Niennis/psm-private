@@ -23,7 +23,7 @@ import CacheHandler from "@/utils/cache-handler";
 const cacheHandler = new CacheHandler();
 
 const Editblog = () => {
-  const ROL = ["admin"]
+  const ROL = ["administrador"]
   const { data: session } = useSession()
   const router = useRouter();
   // useAuthorization(['alumno'])
@@ -323,4 +323,4 @@ const Editblog = () => {
 }
 
 // export default Editblog
-export default withAuth(Editblog, ['admin']);
+export default withAuth(Editblog, ['administrador']);

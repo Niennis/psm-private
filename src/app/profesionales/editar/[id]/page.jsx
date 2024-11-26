@@ -1177,4 +1177,4 @@ const EditDoctor = ({ params }) => {
 };
 
 // export default EditDoctor;
-export default withAuth(EditDoctor, ['admin', 'profesional']);
+export default withAuth(EditDoctor, ['administrador', 'profesional']);

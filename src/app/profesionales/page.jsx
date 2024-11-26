@@ -20,7 +20,7 @@ import CacheHandler from "@/utils/cache-handler";
 const cacheHandler = new CacheHandler();
 
 const DoctorList = () => {
-  const ROL = ["admin", "profesional"]
+  const ROL = ["administrador", "profesional"]
   const { data: session } = useSession()
   const router = useRouter();
   // useAuthorization(['alumno'])
@@ -331,4 +331,4 @@ const DoctorList = () => {
 }
 
 // export default DoctorList;
-export default withAuth(DoctorList, ['admin', 'profesional']);
+export default withAuth(DoctorList, ['administrador', 'profesional']);

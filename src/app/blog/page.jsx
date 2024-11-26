@@ -29,7 +29,7 @@ const truncarPalabras = (texto, num) => {
 }
 
 const BlogView = () => {
-  const ROL = ["admin"]
+  const ROL = ["administrador"]
   const { data: session } = useSession()
   const router = useRouter();
   // useAuthorization(['alumno'])
@@ -793,4 +793,4 @@ const BlogView = () => {
 }
 
 // export default BlogView;
-export default withAuth(BlogView, ['admin']);
+export default withAuth(BlogView, ['administrador']);

@@ -65,7 +65,7 @@ const ScheduleList = () => {
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   
-  if (!session && !session?.user?.rol === "admin"
+  if (!session && !session?.user?.rol === "administrador"
     // || !session?.user?.rol === "profesional"
   ) {
     // Redirige al usuario a la página de inicio de sesión si no está autenticado
@@ -492,5 +492,5 @@ const ScheduleList = () => {
 };
 
 // export default ScheduleList;
-export default withAuth(ScheduleList, ['admin']);
+export default withAuth(ScheduleList, ['administrador']);
 

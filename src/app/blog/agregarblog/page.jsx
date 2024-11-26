@@ -29,7 +29,7 @@ const DynamicTextEditor = dynamic(() => import('../../../components/TextEditor')
 })
 
 const Addblog = () => {
-  const ROL = ["admin"]
+  const ROL = ["administrador"]
   const { data: session } = useSession()
   const router = useRouter();
   // useAuthorization(['alumno'])
@@ -497,7 +497,7 @@ const Addblog = () => {
 }
 
 // export default Addblog
-export default withAuth(Addblog, ['admin']);
+export default withAuth(Addblog, ['administrador']);
 /* 
   < div >
   <>

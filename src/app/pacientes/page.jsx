@@ -282,5 +282,5 @@ const PatientsList = () => {
 }
 
 // export default PatientsList;
-export default withAuth(PatientsList, ['admin', 'profesional']);
+export default withAuth(PatientsList, ['administrador', 'profesional']);
 

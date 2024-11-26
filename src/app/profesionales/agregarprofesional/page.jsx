@@ -613,5 +613,5 @@ const AddProfessional = () => {
 };
 
 // export default AddProfessional;
-export default withAuth(AddProfessional, ['admin']);
+export default withAuth(AddProfessional, ['administrador']);
 

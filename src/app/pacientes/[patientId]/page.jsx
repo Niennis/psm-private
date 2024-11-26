@@ -950,5 +950,5 @@ const EditPatients = ({ params }) => {
 };
 
 // export default EditPatients;
-export default withAuth(EditPatients, ['admin', 'profesional']);
+export default withAuth(EditPatients, ['administrador', 'profesional']);
 

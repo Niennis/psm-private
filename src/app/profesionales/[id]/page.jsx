@@ -716,5 +716,5 @@ const DoctorProfile = () => {
 }
 
 // export default DoctorProfile;
-export default withAuth(DoctorProfile, ['admin', 'profesional']);
+export default withAuth(DoctorProfile, ['administrador', 'profesional']);
 

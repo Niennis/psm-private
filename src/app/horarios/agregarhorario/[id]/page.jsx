@@ -1037,5 +1037,5 @@ La disponibilidad de horas, será hasta la fecha de finalización.`} /></h4>
 }
 
 // export default AddSchedule;
-export default withAuth(AddSchedule, ['admin', 'profesional']);
+export default withAuth(AddSchedule, ['administrador', 'profesional']);
 

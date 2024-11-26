@@ -8,7 +8,7 @@ export const useAuthorization = (allowedRoles,userRoles) => {
   useEffect(() => {
     // Lógica de comprobación de roles
     // Esto normalmente vendría del backend o del contexto de usuario
-    // const userRoles = ['admin', 'usuario']; 
+    // const userRoles = ['administrador', 'usuario']; 
 
     // Verificar si el usuario tiene uno de los roles permitidos
     const hasPermission = allowedRoles.some(role => userRoles.includes(role));
