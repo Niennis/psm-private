@@ -136,24 +136,33 @@ const AddFirstAppoinments = () => {
     let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
       return filtered.find(item => `${item.fechaInicio}` === compositeKey);
     });
-    if (modalidad === "videollamada") {
+    console.log('modalidad', modalidad)
+    console.log('campus', campus)
+    if (modalidad === "videollamada" || modalidad === "ambas") {
       setDays([])
       setHours([])
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada");
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
+      );
+    } else if (modalidad === "presencial" || modalidad === "ambas") {
+      setDays([])
+      setHours([])
 
-    } else if (modalidad === "presencial" && campus === "centro") {
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
+      );
+    } else if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
       setDays([])
       setHours([])
 
       uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === campus));
-
-    } else if (modalidad === "presencial" && campus === "huechuraba") {
+        item => item.modalidad === "presencial" && (item.campus === "centro" || item.campus === "ambas")
+      );
+    } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
       setDays([])
       setHours([])
 
       uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === campus));
+        item => item.modalidad === "presencial" && (item.campus === "huechuraba" || item.campus === "ambas")
+      );
     }
 
     setDays(uniqueFiltered);
@@ -195,7 +204,6 @@ const AddFirstAppoinments = () => {
     setTime('')
     try {
       const horasmedicas = await generarHorasMedicas(e.id)
-      console.log('horasmedicas', horasmedicas)
 
       // Traer disponibilidades
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
@@ -207,6 +215,7 @@ const AddFirstAppoinments = () => {
       const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
       console.log('bloque', bloque)
+      console.log('orderedData', orderedData)
       setAllDays(orderedData)
       // setDays(bloque)
     } catch (error) {

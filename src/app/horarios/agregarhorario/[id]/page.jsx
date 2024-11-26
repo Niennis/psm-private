@@ -568,7 +568,7 @@ const AddSchedule = ({ params }) => {
                                   Sede Centro
                                 </label>
                               </div>
-                              <div className="form-check-inline">
+                              {/* <div className="form-check-inline">
                                 <label className="form-check-label">
                                   <input
                                     type="radio"
@@ -579,7 +579,7 @@ const AddSchedule = ({ params }) => {
                                   />
                                   Ambas
                                 </label>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         }

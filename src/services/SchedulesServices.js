@@ -99,7 +99,6 @@ export const generarHorasMedicas = async (id) => {
 
   const bloquesTotales = await Promise.all(bloquesPromesas)
   const bloquesDisponibles = bloquesTotales.flatMap(obj => obj.bloques)
-  console.log('DISPONIBLES', bloquesDisponibles)
   const convertirHoraAMinutos = (hora) => {
     const [h, m, s] = hora.split(":").map(Number);
     return h * 60 + m + s / 60;
