@@ -136,24 +136,31 @@ const AddAppoinments = () => {
     let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
       return filtered.find(item => `${item.fechaInicio}` === compositeKey);
     });
-    if (modalidad === "videollamada") {
+    if (modalidad === "videollamada" || modalidad === "ambas") {
       setDays([])
       setHours([])
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada");
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
+      );
+    } else if (modalidad === "presencial" || modalidad === "ambas") {
+      setDays([])
+      setHours([])
 
-    } else if (modalidad === "presencial" && campus === "centro") {
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
+      );
+    } else if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
       setDays([])
       setHours([])
 
       uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === campus));
-
-    } else if (modalidad === "presencial" && campus === "huechuraba") {
+        item => item.modalidad === "presencial" && (item.campus === "centro" || item.campus === "ambas")
+      );
+    } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
       setDays([])
       setHours([])
 
       uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === campus));
+        item => item.modalidad === "presencial" && (item.campus === "huechuraba" || item.campus === "ambas")
+      );
     }
 
     setDays(uniqueFiltered);

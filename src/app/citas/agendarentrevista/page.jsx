@@ -136,8 +136,6 @@ const AddFirstAppoinments = () => {
     let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
       return filtered.find(item => `${item.fechaInicio}` === compositeKey);
     });
-    console.log('modalidad', modalidad)
-    console.log('campus', campus)
     if (modalidad === "videollamada" || modalidad === "ambas") {
       setDays([])
       setHours([])
