@@ -53,7 +53,7 @@ const AppoinmentList = () => {
 
         const response = await fetchAppointments();
         const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
-
+console.log(data)
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
 
@@ -65,10 +65,9 @@ const AppoinmentList = () => {
 
           setAppointments(dataFiltered);
           setResults(dataFiltered);
-        } else if (session.user?.rol === 'admin') {
+        } else if (session.user?.rol === 'administrador') {
           setAppointments(data);
           setResults(data);
-
         }
       } catch (error) {
         setError('')
@@ -203,7 +202,7 @@ const AppoinmentList = () => {
                   : "dropdown-menu dropdown-menu-end dropdown-extra"
                 }
               >
-                {session.user?.rol === ('profesional' || 'admin') ?
+                {session.user?.rol === ('profesional' || 'administrador') ?
                   (<>
                     <Link className="dropdown-item" href={`/fichas/${record.id_cita}`}>
                       <i className="far fa-edit me-2" />
@@ -248,6 +247,7 @@ const AppoinmentList = () => {
   const columns = allColumns.filter((col) => {
     if (session.user?.rol === "profesional" && col.key !== "nombre_profesional") return true;
     if (session.user?.rol === "alumno" && col.key !== "nombre_alumno") return true;
+    if (session.user?.rol === "administrador" ) return true;
     return false;
   });
 
@@ -407,5 +407,5 @@ const AppoinmentList = () => {
 }
 
 // export default AppoinmentList;
-export default withAuth(AppoinmentList, ['alumno', 'profesional']);
+export default withAuth(AppoinmentList, ['alumno', 'profesional', 'administrador']);
 

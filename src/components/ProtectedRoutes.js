@@ -32,16 +32,16 @@ const ProtectedPage = ({ children, level }) => {
 
   useEffect(() => {
     switch (level) {
-      case level.includes('admin'):
-        console.log('ENTRÓ COMO ADMIN')
-        if ((!session && protectedToRoutes.includes(pathname)) || session.user?.rol !== "admin") {
+      case level.includes('administrador'):
+        console.log('ENTRÓ COMO administrador')
+        if ((!session && protectedToRoutes.includes(pathname)) || session.user?.rol !== "administrador") {
           router.push('/');
         }
         break;
       case level.includes('profesional'):
         console.log('ENTRÓ COMO PROFESIONAL')
         if ((!session && protectedToRoutes.includes(pathname))
-          || (session.user?.rol !== "admin" && session.user?.rol !== "profesional")) {
+          || (session.user?.rol !== "administrador"&& session.user?.rol !== "profesional")) {
           router.push('/');
         }
         break;
@@ -79,9 +79,9 @@ export default ProtectedPage;
 //     const userRole = session.user.rol;
 //     // Función para comprobar acceso 
 //     const hasAccess = () => {
-//       if (level.includes('admin') && userRole === 'admin') return true;
-//       if (level.includes('profesional') && (userRole === 'admin' || userRole === 'profesional')) return true;
-//       if (level.includes('alumno') && (userRole === 'admin' || userRole === 'profesional' || userRole === 'alumno')) return true;
+//       if (level.includes('administrador') && userRole === 'administrador') return true;
+//       if (level.includes('profesional') && (userRole === 'administrador' || userRole === 'profesional')) return true;
+//       if (level.includes('alumno') && (userRole === 'administrador' || userRole === 'profesional' || userRole === 'alumno')) return true;
 //       return false;
 //     };
 //     if (protectedToRoutes.some(route => pathname.startsWith(route)) && !hasAccess()) {

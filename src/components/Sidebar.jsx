@@ -179,7 +179,7 @@ const Sidebar = (props) => {
                 }
 
                 {
-                  session.user?.rol && session.user?.rol === "admin" &&
+                  session.user?.rol && session.user?.rol === "administrador" &&
                   <>
                     <li className="submenu">
                       <Link href="#" id="menu-item1" onClick={(e) => {
@@ -269,31 +269,31 @@ const Sidebar = (props) => {
                     </li> */}
                       </ul>
                     </li>
-                    <li className="submenu">
+                 {/*    <li className="submenu">
                       <Link href="#" id="menu-item11" onClick={(e) => handleClick(e, "menu-item11", "menu-items11")}>
                         <span className="menu-side">
                           <img src={blog.src} alt="" />
                         </span>{" "}
                         <span> Blog</span> <span className="menu-arrow" />
                       </Link>
-                      <ul style={{ display: "none" }} className="menu-items11">
+                      <ul style={{ display: "none" }} className="menu-items11"> */}
                         {/* <li>
                     <Link className={props?.activeClassName === 'blog-grid' ? 'active' : ''} href="/blogview">Blogs</Link>
                   </li> */}
-                        <li>
+                        {/* <li>
                           <Link className={props?.activeClassName === 'blog-details' ? 'active' : ''} href="/blog/1">
                             Blog
                           </Link>
                         </li>
                         <li>
                           <Link className={props?.activeClassName === 'add-blog' ? 'active' : ''} href="/blog/agregarblog">Agregar Blog</Link>
-                        </li>
+                        </li> */}
                         {/* <li>
                     <Link className={props?.activeClassName === 'edit-blog' ? 'active' : ''} href="/editblog">Edit Blog</Link>
                   </li> */}
-                      </ul>
-                    </li>
-                  </>
+                      {/* </ul>
+                    </li>*/}
+                  </> 
                 }
 
               </ul>

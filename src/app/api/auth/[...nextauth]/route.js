@@ -1,6 +1,6 @@
 import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google"
-import { fetchUsers } from "@/services/UsersServices";
+import { fetchUsers, fetchUserByEmail } from "@/services/UsersServices";
 import { redirect } from "next/dist/server/api-utils";
 import bcrypt from "bcryptjs"
 import { fetchUserMailAndPass } from "@/services/UsersServices";
@@ -14,15 +14,16 @@ const searchUser = async (email) => {
   if (cachedUser) return cachedUser;
 
   try {
-    const [users, professionals] = await Promise.all([
+    const [users, professionals, administrador] = await Promise.all([
       fetchUsers(),
       fetchProfessionals(),
+      fetchUserByEmail(email)
     ]);
 
     const user = users.users.find(user => user.email === email);
     const professional = professionals.find(prof => prof.email === email);
 
-    const foundUser = user || professional;
+    const foundUser = user || professional || administrador;
     if (foundUser) {
       // await cacheHandler.set(cacheKey, foundUser, { tags: ['users'] });
       return foundUser;
@@ -72,6 +73,8 @@ const authOptions = {
           email: credentials.email,
           contrasena: pwHash
         }
+
+        console.log('body en credentials', body)
         try {
           const user = await fetchUserMailAndPass(body)
           if (!user) {

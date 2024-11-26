@@ -8,7 +8,7 @@ export default withAuth({
   },
   authorized({ token }) {
     // Optimización: Revisa el token sin roles adicionales.
-    return token && ['admin', 'profesional', 'alumno'].includes(token.rol);
+    return token && ['administrador', 'profesional', 'alumno'].includes(token.rol);
   },
 });
 
@@ -23,7 +23,7 @@ export default withAuth({
 //   },
 //   async authorized({ token }) {
 //     if (token) {
-//       if (token.rol === 'admin') {
+//       if (token.rol === 'administrador') {
 //         // Admin tiene acceso a todo
 //         return true; 
 //       }
@@ -56,27 +56,27 @@ export async function middleware(req) {
   }
 
   // Validar roles (ejemplo: acceso solo a admins para rutas específicas)
-  if (pathname.startsWith('/calender') && (token.role !== 'profesional' || token.role !== 'admin')) {
+  if (pathname.startsWith('/calender') && (token.role !== 'profesional' || token.role !== 'administrador')) {
     return NextResponse.redirect(new URL('/citas', req.url));
   }
 
-  if (pathname.startsWith('/citas/agendarcita') && (token.role !== 'profesional' || token.role !== 'admin')) {
+  if (pathname.startsWith('/citas/agendarcita') && (token.role !== 'profesional' || token.role !== 'administrador')) {
     return NextResponse.redirect(new URL('/citas', req.url));
   }
 
-  if (pathname.startsWith('/fichas') && (token.role !== 'profesional' || token.role !== 'admin')) {
+  if (pathname.startsWith('/fichas') && (token.role !== 'profesional' || token.role !== 'administrador')) {
     return NextResponse.redirect(new URL('/citas', req.url));
   }
 
-  if (pathname.startsWith('/horrios') && (token.role !== 'profesional' || token.role !== 'admin')) {
+  if (pathname.startsWith('/horrios') && (token.role !== 'profesional' || token.role !== 'administrador')) {
     return NextResponse.redirect(new URL('/citas', req.url));
   }
 
-  if (pathname === '/profesionales/agregar' && userRole !== 'admin') {
+  if (pathname === '/profesionales/agregar' && userRole !== 'administrador') {
     return NextResponse.redirect(new URL('/citas', req.url));
   } if (pathname.startsWith('/profesionales')) {
     if (pathname === '/profesionales' || pathname === '/profesionales/editar' || /^\/profesionales\/\d+$/.test(pathname)) {
-      if (userRole !== 'profesional' && userRole !== 'admin') {
+      if (userRole !== 'profesional' && userRole !== 'administrador') {
         return NextResponse.redirect(new URL('/citas', req.url));
       }
     } else {
@@ -85,9 +85,9 @@ export async function middleware(req) {
     }
   }
 
-  if (pathname.startsWith('/profesionales/agregarprofesional') && (token.role !== 'admin')) {
+  if (pathname.startsWith('/profesionales/agregarprofesional') && (token.role !== 'administrador')) {
     return NextResponse.redirect(new URL('/citas', req.url));
-  } else if (pathname.startsWith('/profesionales/') && (token.role !== 'profesional' || token.role !== 'admin')) {
+  } else if (pathname.startsWith('/profesionales/') && (token.role !== 'profesional' || token.role !== 'administrador')) {
     return NextResponse.redirect(new URL('/citas', req.url));
   }
 
