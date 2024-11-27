@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
+import { signOut } from "next-auth/react";
 import { useSearchParams } from 'next/navigation'
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -43,6 +44,10 @@ const Error = () => {
 
   const errorMessage = error && (errors[error] ?? errors.default);
 
+  const handleUnauthorizedEmail = () => {
+    signOut({ callbackUrl: "/" }); // Redirige a la página de login
+  };
+
   return (
     <div className='center'>
       <div className="row justify-content-center " style={{ padding: 0, margin: "250px auto 0" }}>
@@ -62,7 +67,7 @@ const Error = () => {
               </Typography>
             </CardContent>
             <CardActions>
-              <Link size="small" href="/">Ir a página inicio</Link>
+              <Link size="small" onClick={handleUnauthorizedEmail}>Ir a página inicio</Link>
             </CardActions>
           </Card>
         </div>
