@@ -59,7 +59,7 @@ const getAvailableHours = (bloques, disponibilidades) => {
   }); return horasDisponibles;
 }
 
-const Calender = ({ id }) => {
+const Calender = ({ id , calendarProp}) => {
   const [menu, setMenu] = useState(false);
   const [calendario, setCalendario] = useState(' ')
 
@@ -119,7 +119,7 @@ const Calender = ({ id }) => {
   }
 
   useEffect(() => {
-    fetchData()
+    // fetchData()
   }, [])
 
   const handleChange = (date) => {
@@ -227,8 +227,8 @@ const Calender = ({ id }) => {
                 <div className="card-body">
                   <div id="calendar">
 
-                    {calendario === ' ' ? <Carrousel />
-                      : calendario.length === 0 ?
+                    {!calendarProp ? <Carrousel />
+                      : calendarProp.length === 0 ?
                         <FullCalendar
                           windowResize={true}
                           locale={esLocale}
@@ -272,7 +272,7 @@ const Calender = ({ id }) => {
                           selectMirror={true}
                           dayMaxEvents={true}
                           weekends={false}
-                          initialEvents={calendario?.length > 0 ? calendario : []} // alternatively, use the `events` setting to fetch from a feed
+                          initialEvents={calendarProp?.length > 0 ? calendarProp : []} // alternatively, use the `events` setting to fetch from a feed
                           select={handleDateSelect}
                           eventClick={(clickInfo) => handleEventClick(clickInfo)}
                         />
@@ -357,4 +357,4 @@ const Calender = ({ id }) => {
 };
 
 // export default Calender;
-export default withAuth(Calender, ['alumno', 'profesional']);
+export default withAuth(Calender, ['alumno', 'profesional', 'administrador']);

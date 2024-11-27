@@ -11,7 +11,7 @@ import { useForm, Controller } from 'react-hook-form'
 import Select from "react-select";
 
 import { fetchSpecialityById, fetchProfessionalById } from '@/services/DoctorsServices';
-import { createSchedule, getDates, fetchScheduleByDate, validateDates } from '@/services/SchedulesServices';
+import { createSchedule, getDates, fetchScheduleByDate, validateDates, generarHorasMedicas } from '@/services/SchedulesServices';
 import Calender from '../../../calender/page';
 
 import { useSession } from "next-auth/react";
@@ -38,9 +38,7 @@ const AddSchedule = ({ params }) => {
   const [success, setSuccess] = useState('initial')
   const [startDate, setStartDate] = useState('');
   const [startDay, setStartDay] = useState('');
-
-  const [prueba, setPrueba] = useState(new Date)
-
+  const [calendario, setCalendario] = useState('')
   const onChange = (date, dateString) => {
     // console.log(date, dateString);
   };
@@ -49,7 +47,41 @@ const AddSchedule = ({ params }) => {
     display: 'inline',
     width: '20%'
   }
-  // const label = { inputProps: { 'aria-label': 'Switch demo' } };
+
+  const datesToTimestamp = (fecha, hora) => {
+    // Combinar fecha y hora en un formato ISO 8601 compatible con `Date`
+    const fechaHora = `${fecha} ${hora}`;
+    const timestamp = Date.parse(fechaHora); // Obtiene el tiempo en milisegundos
+    return timestamp;
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await generarHorasMedicas(params.id)
+      const processed = response.map(item => {
+        // detalleServicio y duracionServicio
+        return (
+          {
+            ...item,
+            start: datesToTimestamp(item.fechaInicio, `${item.horaInicio}:00`),
+            end: datesToTimestamp(item.fechaInicio, `${item.horaFin}:00`),
+            className: "bg-purple",
+            title: item.detalleServicio || 'Disponible',
+          }
+        )
+      })
+      setCalendario([...processed])
+    } catch (error) {
+      console.log(error)
+      setError('No hay conexión con el servidor')
+    }
+
+  }
+
+useEffect(() => {
+  fetchData()
+  }, [])
+
   useEffect(() => {
     const fetchProfesional = async () => {
       const { especialidad: user } = await fetchSpecialityById(params.id)
@@ -75,8 +107,8 @@ const AddSchedule = ({ params }) => {
 
       const obj = {
         nombre: `${users[0].nombre} ${users[0].apellido}`,
-        especialidad: user[0].especialidad,
-        id: user[0].usuario_id,
+        especialidad: user[0]?.especialidad || 'No informada',
+        id: users[0].usuario_id,
         horaIni: '00:00:00',
         semanal: { dia: [] }
       }
@@ -94,7 +126,7 @@ const AddSchedule = ({ params }) => {
     const newData = {
       ...data,
       id_user: params.id,
-      duracionServicio: parseInt(data.duracion.label) + parseInt(data.postservicio.label),
+      duracionServicio: parseInt(data.duracion.label),
       fechaInicio: startDate,
       mensual: {
         ...data.mensual,
@@ -106,7 +138,7 @@ const AddSchedule = ({ params }) => {
     try {
       const req = await createSchedule(newData)
       console.log('req =>', req)
-      if(req.estado === false){
+      if (req.estado === false) {
         setSuccess('fail')
         setError('Hubo un problema. Intenta luego más tarde')
       } else {
@@ -125,12 +157,6 @@ const AddSchedule = ({ params }) => {
     { label: '45', value: 2 },
     { label: '60', value: 3 },
     { label: '75', value: 4 },]
-
-  const postservicio = [
-    { label: '5', value: 5 },
-    { label: '10', value: 6 },
-    { label: '15', value: 7 },
-    { label: '20', value: 8 },]
 
   const handleDay = (e) => {
     const nuevoNumero = e.target.value;
@@ -259,7 +285,7 @@ const AddSchedule = ({ params }) => {
                               {...register('duracion', {
                                 required: {
                                   value: true,
-                                  message: 'Género es requerido',
+                                  message: 'Duración de servicio es requerida',
                                 }
                               })}
                               ref={null}
@@ -300,63 +326,10 @@ const AddSchedule = ({ params }) => {
                                 />
                               )}
                             />
+                            {errors.duracion && <span><small>{errors.duracion.message}</small></span>}
+
                           </div>
                         </div>
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>
-                              Tiempo post servicio <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="El tiempo post servicio se refiere al tiempo que el profesional puede dedicar a transcribir las anotaciones de la sesión o a descansar entre una sesión y otra " />
-                            </label>
-                            <Controller
-                              control={control}
-                              name="postservicio"
-                              {...register('postservicio', {
-                                required: {
-                                  value: true,
-                                  message: 'Género es requerido',
-                                }
-                              })}
-                              ref={null}
-                              render={({ field: { onChange, onBlur, value } }) => (
-                                <Select
-                                  instanceId="postservicio"
-                                  defaultValue={selectedOption}
-                                  onChange={onChange}
-                                  options={postservicio}
-                                  // menuPortalTarget={document.body}
-                                  styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                  id="postservicio"
-                                  components={{
-                                    IndicatorSeparator: () => null
-                                  }}
-
-                                  styles={{
-                                    control: (baseStyles, state) => ({
-                                      ...baseStyles,
-                                      borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                      boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                      '&:hover': {
-                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                      },
-                                      borderRadius: '10px',
-                                      fontSize: "14px",
-                                      minHeight: "45px",
-                                    }),
-                                    dropdownIndicator: (base, state) => ({
-                                      ...base,
-                                      transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                      transition: '250ms',
-                                      width: '35px',
-                                      height: '35px',
-
-                                    }),
-                                  }}
-                                />
-                              )}
-                            />
-                          </div>
-                        </div>
-
 
 
                         {/* TIPO DE CITA */}
@@ -415,7 +388,9 @@ const AddSchedule = ({ params }) => {
                                     value="Entrevista de despeje"
                                     name="tipo_cita"
                                     className="form-check-input"
-                                    {...register('tipo_cita')}
+                                    {...register('tipo_cita', {
+                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
+                                    })}
                                   />
                                   Entrevista de despeje
                                 </label>
@@ -425,7 +400,9 @@ const AddSchedule = ({ params }) => {
                                     value="Acompañamiento psicológico"
                                     name="tipo_cita"
                                     className="form-check-input"
-                                    {...register('tipo_cita')}
+                                    {...register('tipo_cita', {
+                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
+                                    })}
                                   />
                                   Acompañamiento psicológico
                                 </label>
@@ -437,7 +414,9 @@ const AddSchedule = ({ params }) => {
                                     value="Psicoterapia breve"
                                     name="tipo_cita"
                                     className="form-check-input"
-                                    {...register('tipo_cita')}
+                                    {...register('tipo_cita', {
+                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
+                                    })}
                                   />
                                   Psicoterapia breve
                                 </label>
@@ -449,7 +428,9 @@ const AddSchedule = ({ params }) => {
                                     value="Psicopedagógica individual"
                                     name="tipo_cita"
                                     className="form-check-input"
-                                    {...register('tipo_cita')}
+                                    {...register('tipo_cita', {
+                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
+                                    })}
                                   />
                                   Psicopedagógica individual
                                 </label>
@@ -482,6 +463,8 @@ const AddSchedule = ({ params }) => {
                                 </label>
                               </div>
                             </div> */}
+
+                            {errors.tipo_cita && <span><small>{errors.tipo_cita.message}</small></span>}
                           </div>
                         </div>
 
@@ -502,7 +485,12 @@ const AddSchedule = ({ params }) => {
                                   value="videollamada"
                                   name="modalidad"
                                   className="form-check-input"
-                                  {...register('modalidad')}
+                                  {...register('modalidad', {
+                                    required: {
+                                      value: true,
+                                      message: 'Debe seleccionar una opción'
+                                    },
+                                  })}
                                 />
                                 Videollamada
                               </label>
@@ -514,7 +502,12 @@ const AddSchedule = ({ params }) => {
                                   value="presencial"
                                   name="modalidad"
                                   className="form-check-input"
-                                  {...register('modalidad')}
+                                  {...register('modalidad', {
+                                    required: {
+                                      value: true,
+                                      message: 'Debe seleccionar una opción'
+                                    },
+                                  })}
                                 />
                                 Presencial
                               </label>
@@ -526,11 +519,17 @@ const AddSchedule = ({ params }) => {
                                   value="ambas"
                                   name="modalidad"
                                   className="form-check-input"
-                                  {...register('modalidad')}
+                                  {...register('modalidad', {
+                                    required: {
+                                      value: true,
+                                      message: 'Debe seleccionar una opción'
+                                    },
+                                  })}
                                 />
                                 Ambas
                               </label>
                             </div>
+                            {errors.modalidad && <span><small>{errors.modalidad.message}</small></span>}
                           </div>
                         </div>
 
@@ -965,7 +964,7 @@ La disponibilidad de horas, será hasta la fecha de finalización.`} /></h4>
         </div >
         <div className="page-wrapper">
           <div className="content">
-            <Calender id={params.id} />
+            <Calender id={params.id} calendarProp={calendario} />
           </div>
         </div>
 
