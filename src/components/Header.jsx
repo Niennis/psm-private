@@ -19,19 +19,21 @@ const URL = 'https://sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net/'
 
 const pagesWithEvents = [
   // { title: 'INICIO', url: '/#inicio', label: 'inicio' },
+  { title: 'QUIÉNES SOMOS', url: URL + 'quienes-somos', label: 'quienes_somos' },
+  { title: 'CÓMO TRABAJAMOS', url: URL + 'como-trabajamos', label: 'como-trabajamos' },
   { title: 'TEST AUTODIAGNÓSTICO?', url: URL + '#test_autodiagnostico', label: 'test_autodiagnostico' },
   { title: 'EVENTOS', url: '/#', label: 'eventos' },
-  { title: 'PREGUNTAS FRECUENTES', url: URL + '#preguntas-frecuentes', label: 'preguntas_frecuentes' },
   { title: 'MATERIAL DESCARGABLE', url: URL + 'material-descargable', label: 'material_descargable' },
-  { title: 'QUIÉNES SOMOS', url: URL + 'quienes-somos', label: 'quienes_somos' },
+  { title: 'PREGUNTAS FRECUENTES', url: URL + '#preguntas-frecuentes', label: 'preguntas_frecuentes' },
 ];
 
 const pagesWithoutEvents = [
   // { title: 'INICIO', url: '/#inicio', label: 'inicio' },
-  { title: 'TEST AUTODIAGNÓSTICO', url: URL + '#test_autodiagnostico', label: 'test_autodiagnostico' },
-  { title: 'PREGUNTAS FRECUENTES', url: URL + '#preguntas-frecuentes', label: 'preguntas_frecuentes' },
-  { title: 'MATERIAL DESCARGABLE', url: URL + 'material-descargable', label: 'material_descargable' },
   { title: 'QUIÉNES SOMOS', url: URL + 'quienes-somos', label: 'quienes_somos' },
+  { title: 'CÓMO TRABAJAMOS', url: URL + 'como-trabajamos', label: 'como-trabajamos' },
+  { title: 'TEST AUTODIAGNÓSTICO', url: URL + '#test_autodiagnostico', label: 'test_autodiagnostico' },
+  { title: 'MATERIAL DESCARGABLE', url: URL + 'material-descargable', label: 'material_descargable' },
+  { title: 'PREGUNTAS FRECUENTES', url: URL + '#preguntas-frecuentes', label: 'preguntas_frecuentes' },
 ];
 
 const settings = [
@@ -180,7 +182,7 @@ const Header = () => {
             >
               {
                 pages.map((page) => (
-                  <MenuItem key={page.title} onClick={handleCloseNavMenu}>
+                  <MenuItem key={page.title} onClick={page.title === "QUIÉNES SOMOS" ? handleOpenUserMenu : handleCloseNavMenu}>
                     <Typography textAlign="center" className="sailec">
                       <a href={page.url} style={{ color: 'black', fontFamily: 'sailec' }}>
                         {page.title}
@@ -189,11 +191,11 @@ const Header = () => {
                   </MenuItem>
                 ))
               }
-              <MenuItem onClick={handleOpenUserMenu}>
+              {/* <MenuItem onClick={handleOpenUserMenu}>
                 <Typography textAlign="center" className="sailec" sx={{ color: '#000000', fontFamily: 'sailec' }}>
                   CÓMO TRABAJAMOS <FaChevronDown />
                 </Typography>
-              </MenuItem>
+              </MenuItem> */}
 
               <Box sx={{ flexGrow: 0 }} className={`sailec `}>
                 <Menu
@@ -249,23 +251,35 @@ const Header = () => {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-end' }}>
             {pages.map((page) => {
               return (
-                <Link style={{ color: 'black', textDecoration: 'none' }} href={page.url} key={page.title} >
-                  <Button
-                    className={`sailec ${activeSection === page.label
-                      ? 'active-header'
-                      : ''
-                      }`}
+                page.title === "CÓMO TRABAJAMOS"
+                  ?
+                  <Tooltip title="Como trabajamos" key={page.title}>
+                    <Button
+                      className={`sailec ${activeSection === 'como_trabajamos'
+                        ? 'active-header'
+                        : ''
+                        }`}
+                      onMouseOver={handleOpenUserMenu} sx={{ ...style, p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' }}>
+                      CÓMO TRABAJAMOS
+                    </Button>
+                  </Tooltip> :
+                  <Link style={{ color: 'black', textDecoration: 'none' }} href={page.url} key={page.title} >
+                    <Button
+                      className={`sailec ${activeSection === page.label
+                        ? 'active-header'
+                        : ''
+                        }`}
 
-                    onClick={() => handleNavClick(page.label)}
-                    sx={{ ...style, fontFamily: 'sailecmedium', my: 2, color: 'black', display: 'block' }}
-                  >
-                    {page.title}
-                  </Button>
-                </Link>
+                      onClick={() => handleNavClick(page.label)}
+                      sx={{ ...style, fontFamily: 'sailecmedium', my: 2, color: 'black', display: 'block' }}
+                    >
+                      {page.title}
+                    </Button>
+                  </Link>
               )
             }
             )}
-            <Tooltip title="Como trabajamos">
+            {/* <Tooltip title="Como trabajamos">
               <Button
                 className={`sailec ${activeSection === 'como_trabajamos'
                   ? 'active-header'
@@ -274,7 +288,7 @@ const Header = () => {
                 onClick={handleOpenUserMenu} sx={{ ...style, p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' }}>
                 CÓMO TRABAJAMOS
               </Button>
-            </Tooltip>
+            </Tooltip> */}
 
             <Box sx={{ flexGrow: 0 }} className={`sailec `}>
               <Menu
@@ -306,7 +320,7 @@ const Header = () => {
             </Box>
           </Box>
 
-          <Box sx={{ flexGrow: 0, maxWidth: '200px', wrap: 'balance', textAlign: 'right'}}>
+          <Box sx={{ flexGrow: 0, maxWidth: '200px', wrap: 'balance', textAlign: 'right' }}>
             {
               !session
                 ? <>
@@ -328,8 +342,8 @@ const Header = () => {
                     {session.user?.name}
                   </button>
                   :
-                  <Link href="/citas" style={{padding: 0, margin: 0, textAlign: 'right'}}>
-                    <FaUserCircle style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end'}} />
+                  <Link href="/citas" style={{ padding: 0, margin: 0, textAlign: 'right' }}>
+                    <FaUserCircle style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} />
                     Bienvenido, {session.user?.name}
                   </Link>
             }
