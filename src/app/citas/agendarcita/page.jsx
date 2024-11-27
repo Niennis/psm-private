@@ -210,6 +210,7 @@ const AddAppoinments = () => {
         "patient_id": selectedPatient.id,
         hora: time,
         fecha: date,
+        motivo: data.motivo === 'Otro' ? data.otro : data.motivo
       })
       if (appointment.estado === false) {
         setSuccess('fail')
@@ -547,7 +548,12 @@ const AddAppoinments = () => {
                                 className="form-control"
                                 type="text"
                                 value={selectedPatient?.name || ''}
-                                {...register('name')}
+                                {...register('name', {
+                                  required: {
+                                    value: Tune,
+                                    message: 'Estudiante requerido'
+                                  }
+                                })}
                               />
                               {
                                 errors.name && <span><small>{errors.name.message}</small></span>
@@ -563,7 +569,12 @@ const AddAppoinments = () => {
                                 className="form-control"
                                 type="text"
                                 value={selectedPatient?.lastName || ''}
-                                {...register('patientlastName')}
+                                {...register('patientlastName', {
+                                  required: {
+                                    value: Tune,
+                                    message: 'Estudiante requerido'
+                                  }
+                                })}
                               />
                               {
                                 errors.lastName && <span><small>{errors.lastName.message}</small></span>
@@ -767,7 +778,7 @@ const AddAppoinments = () => {
                                     <input
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('relationship_contact')} />
+                                      {...register('otro')} />
                                   </div>
                                 </div>
                                 : <></>
@@ -803,6 +814,7 @@ const AddAppoinments = () => {
                                     Presencial
                                   </label>
                                 </div>
+                                {errors.modalidad && errors.modalidad && <span><small>{errors.modalidad.message}</small></span>}
                               </div>
                             </div>
                           </div>
@@ -834,10 +846,10 @@ const AddAppoinments = () => {
                                         className="form-check-input"
                                         {...register('campus')}
                                       />
-                                      Sede Huechuraba - Av. Sta. Clara 797, Huechuraba
+                                      Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo
                                     </label>
                                   </div>
-                                  {campus && errors.campus && <span><small>{errors.campus.message}</small></span>}
+                                  {errors.campus && errors.campus && <span><small>{errors.campus.message}</small></span>}
 
                                 </div>
                               </div>
@@ -1023,4 +1035,4 @@ const AddAppoinments = () => {
   );
 };
 
-export default withAuth(AddAppoinments, ['profesional']);
+export default withAuth(AddAppoinments, ['profesional', 'administrador']);

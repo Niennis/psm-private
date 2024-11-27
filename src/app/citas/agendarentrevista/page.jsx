@@ -120,7 +120,7 @@ const AddFirstAppoinments = () => {
     defaultValues: async () => await fetchInitialData()
   });
 
-  const selectedRegion = { value: 13, label: "Región Metropolitana", name: "metropolitana" }
+  const selectedRegion = watch('region')
   const profesional = watch('professional')
   const modalidad = watch("modalidad", "videollamada"); // Valor predeterminado: videollamada
   const campus = watch("campus", ""); // Valor predeterminado: ninguno
@@ -350,6 +350,21 @@ const AddFirstAppoinments = () => {
     { value: "No binarie", label: "No binarie" }
   ]
 
+  // Función para validar el formato y largo del RUT
+  const validateRUT = (rut) => {
+    const cleanRUT = rut.replace(/[.-]/g, "");
+
+    if (cleanRUT.length < 8 || cleanRUT.length > 10) {
+      return "El RUT debe tener entre 8 y 10 caracteres.";
+    }
+
+    if (!/^\d+k?$/i.test(cleanRUT)) {
+      return "El RUT solo puede contener números y la letra K.";
+    }
+
+    return true; // RUT válido
+  };
+
   const handleFirstInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
@@ -361,6 +376,7 @@ const AddFirstAppoinments = () => {
       "fecha": date,
       "hora": time,
       "region": regiones[0].label,
+      "motivo_consulta": motivo_consulta === 'otro' ? data.otro : data.motivo_consulta
     }
 
     const bodyUpdate = {
@@ -576,6 +592,8 @@ const AddFirstAppoinments = () => {
                                 <input
                                   onChange={handleChangeRut}
                                   className="form-control"
+                                  maxLength={12}
+                                  minLength={8}
                                   // name="rut"
                                   type="text"
                                   {...register('rut', {
@@ -583,10 +601,7 @@ const AddFirstAppoinments = () => {
                                       value: true,
                                       message: 'Rut es requerido'
                                     },
-                                    minLength: {
-                                      value: 2,
-                                      message: 'Rut debe ser un número válido'
-                                    }
+                                    validate: validateRUT
                                   })}
                                 />
                                 {
@@ -688,6 +703,9 @@ const AddFirstAppoinments = () => {
                                       />)
                                   }}
                                 />
+                                
+                                {errors.genero && <span><small>{errors.genero.message}</small></span>}
+
                               </div>
                             </div>
                             <div className="col-12 col-md-6 col-xl-4">
@@ -721,9 +739,24 @@ const AddFirstAppoinments = () => {
                                 </label>
                                 <input
                                   className="form-control"
-                                  type="text"
-                                  {...register('mobile')}
+                                  type="tel"
+                                  {...register('mobile', {
+                                    required: {
+                                      value: true,
+                                      message: 'Teléfono es requerido'
+                                    },
+                                    minLength: {
+                                      value: 9,
+                                      message: 'Cantidad de números inválida'
+                                    },
+                                    maxLength: {
+                                      value: 9,
+                                      message: 'Cantidad de números inválida'
+                                    }
+                                  })}
                                 />
+                                {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
+
                               </div>
                             </div>
 
@@ -812,8 +845,7 @@ const AddFirstAppoinments = () => {
                                   render={({ field: { onChange, onBlur, value } }) => (
                                     <Select
                                       instanceId="select-region"
-                                      defaultValue={{ value: 13, label: "Región Metropolitana", name: "metropolitana" }}
-                                      isDisabled={true}
+                                      // defaultValue={{ value: 13, label: "Región Metropolitana", name: "metropolitana" }}
                                       onChange={onChange}
                                       options={regiones}
                                       value={value}
@@ -937,7 +969,15 @@ const AddFirstAppoinments = () => {
                                 <input
                                   className="form-control" type="text"
                                   defaultValue={""}
-                                  {...register('name_contact')} />
+                                  {...register('name_contact', {
+                                    required: {
+                                      value: true,
+                                      message: 'El campo es obligatorio'
+                                    }
+                                  })} />
+                                  {
+                                    errors.name_contact && <span><small>{errors.name_contact.message}</small></span>
+                                  }
                               </div>
                             </div>
                             <div className="col-12 col-sm-6">
@@ -948,7 +988,15 @@ const AddFirstAppoinments = () => {
                                 <input
                                   className="form-control" type="text"
                                   defaultValue={""}
-                                  {...register('relationship_contact')} />
+                                  {...register('relationship_contact', {
+                                    required: {
+                                      value: true,
+                                      message: 'El campo es obligatorio'
+                                    }
+                                  })} />
+                                  {
+                                    errors.relationship_contact && <span><small>{errors.relationship_contact.message}</small></span>
+                                  }
                               </div>
                             </div>
                             <div className="col-12 col-sm-6">
@@ -957,10 +1005,21 @@ const AddFirstAppoinments = () => {
                                   Celular <span className="login-danger">*</span>
                                 </label>
                                 <input
-                                  className="form-control" type="tel"
+                                  className="form-control" 
+                                  type="tel"
                                   defaultValue={""}
+                                  minLength={9}
+                                  maxLength={12}
                                   placeholder="+56"
-                                  {...register('mobile_contact')} />
+                                  {...register('mobile_contact', {
+                                    required: {
+                                      value: true,
+                                      message: 'El campo es obligatorio'
+                                    }
+                                  })} />
+                                  {
+                                    errors.mobile_contact && <span><small>{errors.mobile_contact.message}</small></span>
+                                  }
                               </div>
                             </div>
                             <div className="col-12 col-sm-6">
@@ -969,9 +1028,22 @@ const AddFirstAppoinments = () => {
                                   Correo electrónico
                                 </label>
                                 <input
-                                  className="form-control" type="text"
+                                  className="form-control" 
+                                  type="email"
                                   defaultValue={""}
-                                  {...register('email_contact')} />
+                                  {...register('email_contact', {
+                                    required: {
+                                      value: true,
+                                      message: 'El campo es obligatorio',
+                                    },
+                                    pattern: {
+                                      value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
+                                      message: 'Correo no es válido'
+                                    }
+                                  })} />
+                                  {
+                                    errors.email_contact && <span><small>{errors.email_contact.message}</small></span>
+                                  }
                               </div>
                             </div>
                             <div className="col-12 col-md-12 col-xl-12">
@@ -1045,7 +1117,9 @@ const AddFirstAppoinments = () => {
                                     />)
                                   }}
                                 />
-                                {errors.professional && <span><small>{errors.professional.message}</small></span>}
+                                {
+                                errors.professional && <span><small>{errors.professional.message}</small></span>
+                                }
                               </div>
                             </div>
                           </div>
@@ -1079,6 +1153,9 @@ const AddFirstAppoinments = () => {
                                     Presencial
                                   </label>
                                 </div>
+                                {
+                                errors.modalidad && <span><small>{errors.modalidad.message}</small></span>
+                                }
                               </div>
                             </div>
                           </div>
@@ -1110,7 +1187,7 @@ const AddFirstAppoinments = () => {
                                         className="form-check-input"
                                         {...register('campus')}
                                       />
-                                      Sede Huechuraba - Av. Sta. Clara 797, Huechuraba
+                                      Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo
                                     </label>
                                   </div>
 
@@ -1184,7 +1261,7 @@ const AddFirstAppoinments = () => {
                                 <input
                                   className="form-control" type="text"
                                   defaultValue={""}
-                                  {...register('relationship_contact')} />
+                                  {...register('otro')} />
                               </div>
                             </div>
                           }
@@ -1370,5 +1447,5 @@ const AddFirstAppoinments = () => {
 };
 
 // export default AddFirstAppoinments;
-export default withAuth(AddFirstAppoinments, ['alumno', 'profesional']);
+export default withAuth(AddFirstAppoinments, ['alumno', 'profesional', 'administrador']);
 

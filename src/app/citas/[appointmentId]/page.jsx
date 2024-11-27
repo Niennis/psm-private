@@ -62,14 +62,14 @@ const EditAppoinments = ({ params }) => {
     })
     setProfesional(docs)
   }
-  
-  const formatearHora = (hora) => { 
-    const [h, m, s] = hora.split(':').map(Number); 
-    const horaFormateada = [ 
-      String(h).padStart(2, '0'), 
-      String(m).padStart(2, '0'), 
-      String(s).padStart(2, '0') 
-    ].join(':'); 
+
+  const formatearHora = (hora) => {
+    const [h, m, s] = hora.split(':').map(Number);
+    const horaFormateada = [
+      String(h).padStart(2, '0'),
+      String(m).padStart(2, '0'),
+      String(s).padStart(2, '0')
+    ].join(':');
     return horaFormateada;
   }
 
@@ -77,7 +77,7 @@ const EditAppoinments = ({ params }) => {
     try {
       const response = await fetchAppointments()
       const filteredResponse = response.filter(item => (item.id_cita == params.appointmentId) /* && (item.id_profesional == session.user?.id) */)
-console.log(filteredResponse)
+      console.log(filteredResponse)
       const obj = {
         speciality: filteredResponse[0].especialidad_profesional,
         appointment_date: dayjs(filteredResponse[0]['fecha']).format('YYYY-MM-DD'),
@@ -285,10 +285,18 @@ console.log(filteredResponse)
                             <input
                               disabled
                               className="form-control"
-                              type="text"
+                              type="tel"
+                              maxLength={9}
+                              minLength={9}
                               // defaultValue="+1 23 456890"
-                              {...register('mobile')}
+                              {...register('mobile', {
+                                required: {
+                                  value: true,
+                                  message: 'Teléfono es requerido'
+                                }
+                              })}
                             />
+                            {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-6">
@@ -303,7 +311,7 @@ console.log(filteredResponse)
                               {...register('email', {
                                 required: {
                                   value: true,
-                                  message: 'Corre es requerido'
+                                  message: 'Correo es requerido'
                                 },
                                 pattern: {
                                   value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
@@ -375,12 +383,20 @@ console.log(filteredResponse)
                                 onChange={(event) => {
                                   setStartTime(event.target.value);
                                 }}
-                                {...register('start_time')}
+                                {...register('start_time', {
+                                  required: {
+                                    value: true,
+                                    message: 'Hora es requeruda'
+                                  }
+                                })}
                               />
+                              {
+                                errors.start_time && <span><small>{errors.start_time.message}</small></span>
+                              }
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 col-md-6 col-xl-4">
+                        {/* <div className="col-12 col-md-6 col-xl-4">
                           <div className="form-group local-forms">
                             <label>
                               Hasta <span className="login-danger">*</span>
@@ -397,9 +413,12 @@ console.log(filteredResponse)
                                 }}
                                 {...register('end_time')}
                               />
+                              {
+                                errors.end_time && <span><small>{errors.end_time.message}</small></span>
+                              }
                             </div>
                           </div>
-                        </div>
+                        </div> */}
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group local-forms">
                             <label>Profesional</label>
@@ -452,6 +471,9 @@ console.log(filteredResponse)
                                 )
                               }}
                             />
+                            {
+                              errors.selected_doctor && <span><small>{errors.selected_doctor.message}</small></span>
+                            }
 
                           </div>
                         </div>
@@ -630,4 +652,4 @@ console.log(filteredResponse)
 };
 
 // export default EditAppoinments;
-export default withAuth(EditAppoinments, ['alumno', 'profesional']);
+export default withAuth(EditAppoinments, ['alumno', 'profesional', 'administrador']);

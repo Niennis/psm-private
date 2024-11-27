@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
-import { Table } from 'antd';
+import { Form, Switch, Table } from 'antd';
 
 import Sidebar from '@/components/Sidebar';
 import SimpleBackdrop from '@/components/Backdrop';
@@ -33,9 +33,9 @@ const AppoinmentList = () => {
   const matches = useMediaQuery('(min-width:600px)');
   const [isValidated, setIsValidated] = useState(true)
   const [loading, setLoading] = useState(true)
+  const [loadTable, setLoadTable] = useState(false);
 
   // const cacheKey = "external-api-data";
-
   useEffect(() => {
 
     const loadAppointments = async () => {
@@ -53,7 +53,8 @@ const AppoinmentList = () => {
 
         const response = await fetchAppointments();
         const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
-console.log(data)
+
+
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
 
@@ -247,14 +248,33 @@ console.log(data)
   const columns = allColumns.filter((col) => {
     if (session.user?.rol === "profesional" && col.key !== "nombre_profesional") return true;
     if (session.user?.rol === "alumno" && col.key !== "nombre_alumno") return true;
-    if (session.user?.rol === "administrador" ) return true;
+    if (session.user?.rol === "administrador") return true;
     return false;
   });
 
+  const handleLoadingChange = (enable) => {
+    setLoading(enable);
+  };
+
+  const tableProps = {
+    loading,
+  }
+
   return (
-    <div>
+    <>
       <Sidebar id='menu-item4' id1='menu-items4' activeClassName='appoinment-list' />
       <>
+        <Form
+          layout="inline"
+          className="table-demo-control-bar"
+          style={{
+            marginBottom: 16,
+          }}
+        >
+          <Form.Item label="loading">
+            <Switch checked={loading} onChange={handleLoadingChange} />
+          </Form.Item>
+        </Form>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
             {/* Page Header */}
@@ -305,11 +325,11 @@ console.log(data)
                               </div>
                             </div>
                             <div className="add-group">
-                              <Link href="/citas/agendarcita"
+                             { session?.user?.rol !== "alumno" && <Link href="/citas/agendarcita"
                                 className="btn btn-primary add-pluss ms-2"
                               >
                                 <img src={plusicon.src} alt="#" />
-                              </Link>
+                              </Link>}
                               <Link
                                 href="#"
                                 onClick={handleRefresh}
@@ -338,21 +358,26 @@ console.log(data)
                     {/* /Table Header */}
 
                     <div className="table-responsive patient-list">
-                      <Table
-                        pagination={{
-                          total: results.length,
-                          showTotal: (total, range) =>
-                            `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
-                          //showSizeChanger: true,
-                          onShowSizeChange: onShowSizeChange,
-                          itemRender: itemRender,
-                        }}
-                        columns={columns}
-                        dataSource={results}
+                      {/* {
+                        !results ? <SimpleBackdrop />
+                          : */}
 
-                        rowSelection={rowSelection}
-                        rowKey={(record) => `${record.id_cita}`}
-                      />
+                          <Table
+                            pagination={{
+                              total: results.length,
+                              showTotal: (total, range) =>
+                                `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
+                              //showSizeChanger: true,
+                              onShowSizeChange: onShowSizeChange,
+                              itemRender: itemRender,
+                            }}
+                            columns={columns}
+                            dataSource={results}
+
+                            rowSelection={rowSelection}
+                            rowKey={(record) => `${record.id_cita}`}
+                          />
+                      {/* } */}
                     </div>
                   </div>
                 </div>
@@ -402,7 +427,7 @@ console.log(data)
         </div> : ''}
       </>
       <PasswordAlert />
-    </div>
+    </>
   )
 }
 
