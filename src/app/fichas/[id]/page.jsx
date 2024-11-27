@@ -44,18 +44,8 @@ const AddInterviewRecord = ({ params }) => {
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
-  // const [allRegions, setAllRegions] = useState(regiones)
-  // const [selectedCities, setSelectedCities] = useState([])
-  // const [rut, setRut] = useState('')
-  // const [appointment, setAppointment]
 
   const [open, setOpen] = useState(false);
-
-  // useEffect(() => {
-  //   fetchData()
-  //   getPatients()
-  //   // getAppointment()
-  // }, [])
 
   const calcularEdad = (fechaNacimiento) => {
     const hoy = new Date();
@@ -106,24 +96,19 @@ const AddInterviewRecord = ({ params }) => {
     }
   })
 
-  // const fetchData = async () => {
-  //   const { users } = await fetchProfessionalById('6')
-  //   console.log('users', users);
-  //   const docs = users.map((doc, i) => {
-  //     return {
-  //       value: i + 2,
-  //       label: doc.nombre + ' ' + doc.apellido,
-  //       id: doc.id
-  //     }
-  //   })
-  //   setDoctor(docs)
-  // }
+  const validateRUT = (rut) => {
+    const cleanRUT = rut.replace(/[.-]/g, "");
 
-  // const getPatients = async () => {
-  //   const { users } = await fetchUsers()
-  //   const patients = users.filter(patient => patient.tipo_usuario === 'alumno')
-  //   setPatients(patients)
-  // }
+    if (cleanRUT.length < 8 || cleanRUT.length > 10) {
+      return "El RUT debe tener entre 8 y 10 caracteres.";
+    }
+
+    if (!/^\d+k?$/i.test(cleanRUT)) {
+      return "El RUT solo puede contener números y la letra K.";
+    }
+
+    return true; // RUT válido
+  };
 
   const handleOpen = (e) => {
     e.preventDefault()
@@ -340,8 +325,17 @@ const AddInterviewRecord = ({ params }) => {
                               <input
                                 className="form-control"
                                 type="text"
-                                {...register('profesional_evaluador')}
+                                {...register('profesional_evaluador', {
+                                  required: {
+                                    value: true,
+                                    message: 'Profesional es requerido'
+                                  }
+                                })}
                               />
+                              {errors.profesional_evaluador && <span className="login-danger">
+                                <small>{errors.profesional_evaluador.message}</small>
+                              </span>
+                              }
                             </div>
                           </div>
                           <div className="col-12 col-md-4 col-xl-4">
@@ -361,7 +355,8 @@ const AddInterviewRecord = ({ params }) => {
                               />
                               {errors.fecha && <span className="login-danger">
                                 <small>{errors.fecha.message}</small>
-                              </span>}
+                              </span>
+                              }
                             </div>
                           </div>
                           <div className="col-12 col-md-4 col-xl-4">
@@ -377,7 +372,8 @@ const AddInterviewRecord = ({ params }) => {
                                   required: {
                                     value: true,
                                     message: 'Número de ficha es requerido'
-                                  }
+                                  },
+                                  validate: validateRUT
                                 })}
                               />
                               {errors.numero_ficha && <span className="login-danger">
@@ -430,7 +426,16 @@ const AddInterviewRecord = ({ params }) => {
                                   <input
                                     className="form-control" type="text"
                                     defaultValue={""}
-                                    {...register('rut')} />
+                                    maxLength={12}
+                                    minLength={8}
+                                    {...register('rut', {
+                                      required: {
+                                        value: true,
+                                        message: 'Rut es requerido'
+                                      },
+                                      validate: validateRUT
+                                    })}
+                                  />
                                   {errors.rut && <span className="login-danger">
                                     <small>{errors.rut.message}</small>
                                   </span>}
@@ -506,9 +511,19 @@ const AddInterviewRecord = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Correo electrónico</label>
                                   <input
-                                    className="form-control" type="text"
+                                    className="form-control" type="email"
                                     defaultValue={""}
-                                    {...register('correo')} />
+                                    {...register('correo', {
+                                      required: {
+                                        value: true,
+                                        message: 'Correo es requerido'
+                                      },
+                                      pattern: {
+                                        value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
+                                        message: 'Correo no es válido'
+                                      }
+                                    })}
+                                  />
                                   {errors.correo && <span className="login-danger">
                                     <small>{errors.correo.message}</small>
                                   </span>}
@@ -519,9 +534,17 @@ const AddInterviewRecord = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Teléfono</label>
                                   <input
-                                    className="form-control" type="text"
+                                    className="form-control" type="tel"
+                                    maxLength={12}
+                                    minLength={9}
                                     defaultValue={""}
-                                    {...register('telefono')} />
+                                    {...register('telefono', {
+                                      required: {
+                                        value: true,
+                                        message: 'Teléfono es requerido'
+                                      },
+                                    })}
+                                  />
                                   {errors.telefono && <span className="login-danger">
                                     <small>{errors.telefono.message}</small>
                                   </span>}
@@ -834,9 +857,19 @@ const AddInterviewRecord = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Correo electrónico</label>
                                   <input
-                                    className="form-control" type="text"
+                                    className="form-control" type="email"
                                     defaultValue={""}
-                                    {...register('correo')} />
+                                    {...register('correo', {
+                                      required: {
+                                        value: true,
+                                        message: 'Correo es requerido'
+                                      },
+                                      pattern: {
+                                        value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
+                                        message: 'Correo no es válido'
+                                      }
+                                    })}
+                                  />
                                   {errors.correo && <span className="login-danger">
                                     <small>{errors.correo.message}</small>
                                   </span>}
@@ -847,9 +880,17 @@ const AddInterviewRecord = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Teléfono</label>
                                   <input
-                                    className="form-control" type="text"
+                                    className="form-control" type="tel"
+                                    maxLength={12}
+                                    minLength={9}
                                     defaultValue={""}
-                                    {...register('telefono')} />
+                                    {...register('telefono', {
+                                      required: {
+                                        value: true,
+                                        message: 'Teléfono es requerido'
+                                      },
+                                    })}
+                                  />
                                   {errors.telefono && <span className="login-danger">
                                     <small>{errors.telefono.message}</small>
                                   </span>}
@@ -911,8 +952,9 @@ const AddInterviewRecord = ({ params }) => {
                                   </label>
                                   <input
                                     className="form-control"
-                                    // value={rut}
-                                    type="text"
+                                    maxLength={12}
+                                    minLength={9}
+                                    type="tel"
                                     {...register('celular_contacto_emergencia1')}
                                   />
                                   {errors.celular_contacto_emergencia1 && <span className="login-danger">
@@ -953,7 +995,9 @@ const AddInterviewRecord = ({ params }) => {
                                   </label>
                                   <input
                                     className="form-control"
-                                    type="text"
+                                    type="tel"
+                                    maxLength={12}
+                                    minLength={9}
                                     {...register('celular_contacto_emergencia2')}
                                   />
                                 </div>
@@ -2432,4 +2476,4 @@ const AddInterviewRecord = ({ params }) => {
 };
 
 // export default AddInterviewRecord;
-export default withAuth(AddInterviewRecord, ['administrador', 'profesional']);
+export default withAuth(AddInterviewRecord, ['administrador', 'profesional', 'administrador']);
