@@ -550,7 +550,7 @@ const AddAppoinments = () => {
                                 value={selectedPatient?.name || ''}
                                 {...register('name', {
                                   required: {
-                                    value: Tune,
+                                    value: true,
                                     message: 'Estudiante requerido'
                                   }
                                 })}
@@ -571,7 +571,7 @@ const AddAppoinments = () => {
                                 value={selectedPatient?.lastName || ''}
                                 {...register('patientlastName', {
                                   required: {
-                                    value: Tune,
+                                    value: true,
                                     message: 'Estudiante requerido'
                                   }
                                 })}
