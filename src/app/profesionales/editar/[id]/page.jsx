@@ -31,7 +31,7 @@ const EditDoctor = ({ params }) => {
   }
 
   const userId = params.id;
-  if (session.user.id != userId) {
+  if (session.user.id != userId && !session?.user?.rol === "administrador") {
     redirect('/citas');
   }
 
@@ -48,6 +48,8 @@ const EditDoctor = ({ params }) => {
     { value: "Psicología", label: "Psicología", name: "speciality" },
     { value: "Psiquiatría", label: "Psiquiatría", name: "speciality" },
     { value: "Trabajador social", label: "Trabajador social", name: "speciality" },
+    { value: "Practicante - Psicología", label: "Practicante - Psicología", name: "speciality" },
+    { value: "Practicante - Psicopedagogía", label: "Practicante - Psicopedagogía", name: "speciality" },
   ]);
 
   const [show, setShow] = useState(false);
@@ -61,8 +63,8 @@ const EditDoctor = ({ params }) => {
   const fetchInitialData = async () => {
     try {
       const usersData = await fetchProfessionalById(params.id);
-      // const speciality = await fetchSpecialityById(params.id); 
-      const speciality = 'Trabajador social';
+      console.log('usersData', usersData)
+      const { especialidad: speciality } = await fetchSpecialityById(params.id);
 
       const user = usersData.users[0];
       return {
@@ -75,7 +77,7 @@ const EditDoctor = ({ params }) => {
         confirmPassword: user.contrasena,
         dateOfBirth: user.fecha_nacimiento,
         gender: user.genero,
-        speciality: speciality,
+        speciality: speciality[0]?.especialidad || { value: 'No especificada', label: 'No especificada' },
         status: user.status,
       };
     } catch (error) {
@@ -99,37 +101,35 @@ const EditDoctor = ({ params }) => {
 
     const formatDateToYYYYDDMM = dateString => {
       const timestamp = Date.parse(dateString);
-      // console.log('timestamp', timestamp)
-      // if (isNaN(timestamp)) {
-      //   throw new Error("Formato de fecha no válido");
-      // }
-
-      // const date = new Date(timestamp);
-      // const year = date.getFullYear();
-      // const day = String(date.getDate()).padStart(2, '0');
-      // const month = String(date.getMonth() + 1).padStart(2, '0');
-
-      // return `${year}-${day}-${month}`;
       const date = new Date(timestamp);
 
-      // Formatear la fecha a YYYY-MM-DD
       const formattedDate = date.toISOString().split("T")[0];
       return formattedDate
     }
 
+    const statusPass = () => {
+      const pass = watch('password')
+      const confirmPass = watch('confirmPassword')
+      if (pass === confirmPass) {
+        return 0
+      } else if (!pass || !confirmPass) {
+        return 1
+      }
+    }
+
     const pass = data.password === data.confirmPassword
     const body = {
-      id: `${session.user.id}`,
+      id: session?.user?.id,
       nombre: data.name,
       apellido: data.lastName,
-      telefono: `${data.mobile}`,
+      telefono: data.mobile,
       email: data.email,
       contrasena: pass && data.password,
       fecha_nacimiento: formatDateToYYYYDDMM(data.fecha_nacimiento),
       genero: data.gender,
       tipo_usuario: session.user.rol,
-      status: 'activo',
-      rut: '16332702-3',
+      "status": data.status,
+      rut: '12345678-9',
       carrera: 'Psicopedagogia',
       anoIngresoCarrera: '0',
       jornada: 'laboral',
@@ -137,13 +137,14 @@ const EditDoctor = ({ params }) => {
       region: 'santiago',
       comuna: 'santiago',
       entrevistador: '1',
-      mustChangePassword: '0',
+      mustChangePassword: statusPass(),
       aplica_despeje: '0',
       campus: 'ambas',
+      id_emergencia: 0,
     }
 
     try {
-      const response = await updateUser(body, session.user.id)
+      const response = await updateUser(body)
       console.log('response', response)
       if (response.validacion === false) {
         setSuccess('fail')
@@ -250,13 +251,21 @@ const EditDoctor = ({ params }) => {
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group local-forms">
                             <label>
-                              Teléfono <span className="login-danger">*</span>
+                              Teléfono
                             </label>
                             <input
                               className="form-control"
-                              type="text"
-                              // defaultValue="+1 23 456890"
-                              {...register('mobile')}
+                              type="tel"
+                              {...register('mobile', {
+                                minLength: {
+                                  value: 9,
+                                  message: 'Cantidad de números inválida'
+                                },
+                                maxLength: {
+                                  value: 9,
+                                  message: 'Cantidad de números inválida'
+                                }
+                              })}
                             />
                           </div>
                         </div>
@@ -266,70 +275,20 @@ const EditDoctor = ({ params }) => {
                               Email <span className="login-danger">*</span>
                             </label>
                             <input
+                              disabled
                               className="form-control"
                               type="email"
                               // defaultValue="example@email.com"
                               {...register('email', {
-                                required: {
-                                  value: true,
-                                  message: 'Corre es requerido'
-                                },
                                 pattern: {
                                   value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
                                   message: 'Correo no es válido'
                                 }
                               })}
                             />
-                            {errors.email && <span><small>{errors.email.message}</small></span>}
 
                           </div>
                         </div>
-                        {/* <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>
-                              Contraseña <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="password"
-                              // defaultValue="password"
-                              {...register('password', {
-                                required: {
-                                  value: true,
-                                  message: 'Password es requerida'
-                                },
-                                minLength: {
-                                  value: 6,
-                                  message: 'Contraseña debe tener al menos 6 caracteres'
-                                }
-                              })}
-                            />
-                            {errors.password && <span><small>{errors.password.message}</small></span>}
-
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>
-                              Confirmar Contraseña{" "}
-                              <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="password"
-                              // defaultValue="password"
-                              {...register('confirmPassword', {
-                                required: {
-                                  value: true,
-                                  message: 'Confirmación requerida'
-                                },
-                                validate: value => value === watch('password') || 'Las contraseñas no coinciden'
-                              })}
-                            />
-                            {errors.confirmPassword && <span><small>{errors.confirmPassword.message}</small></span>}
-
-                          </div>
-                        </div> */}
 
                         {/* SELECT ESPECIALIDAD */}
                         <div className="col-12 col-md-6 col-xl-6">
@@ -453,7 +412,7 @@ const EditDoctor = ({ params }) => {
                                   className="form-check-input"
                                   defaultChecked={initial.genero === 'hombre trans'}
                                 />
-                                Femenino
+                                Hombre trans
                               </label>
                             </div>
                             <div className="form-check-inline">
@@ -703,10 +662,6 @@ const EditDoctor = ({ params }) => {
                               placeholder=""
                               name="password"
                               {...register('password', {
-                                required: {
-                                  value: true,
-                                  message: 'Contraseña es requerida'
-                                },
                                 minLength: {
                                   value: 8,
                                   message: 'Contraseña debe tener al menos 8 caracteres'
@@ -743,10 +698,6 @@ const EditDoctor = ({ params }) => {
                               type={passwordVisible ? 'password' : ''}
                               placeholder=""
                               {...register('confirmPassword', {
-                                required: {
-                                  value: true,
-                                  message: 'Confirmación requerida'
-                                },
                                 validate: value => value === watch('password') || 'Las contraseñas no coinciden'
                               })}
                             />
@@ -770,8 +721,8 @@ const EditDoctor = ({ params }) => {
                             <div className="form-check-inline">
                               <label className="form-check-label">
                                 <input
+                                  disabled={session?.user?.rol !== "administrador"}
                                   type="radio"
-                                  // name="status"
                                   value="activo"
                                   className="form-check-input"
                                   defaultChecked={initial.status === 'activo'}
@@ -789,8 +740,8 @@ const EditDoctor = ({ params }) => {
                             <div className="form-check-inline">
                               <label className="form-check-label">
                                 <input
+                                  disabled={session?.user?.rol !== "administrador"}
                                   type="radio"
-                                  // name="status"
                                   value="inactivo"
                                   defaultChecked={initial.status === 'inactivo'}
                                   className="form-check-input"

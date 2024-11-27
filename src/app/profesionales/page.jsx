@@ -16,6 +16,7 @@ import { imagesend, plusicon, refreshicon, searchnormal } from '@/components/ima
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
+import SimpleBackdrop from '@/components/Backdrop';
 
 const cacheHandler = new CacheHandler();
 
@@ -37,6 +38,7 @@ const DoctorList = () => {
         const specialities = await fetchSpecialities()
         const professionals = await professionalsWithSpeciality(specialities, users);
         setDoctors(professionals)
+        setResults(professionals)
         setIsLoading(false);
       } catch (error) {
         console.log('Error: ', error)
@@ -82,14 +84,14 @@ const DoctorList = () => {
       render: (text, record) => (
         <>
           <h2 className="profile-image">
-            {record.img && <Link href={`/profesionales/${record.id}`} className="avatar avatar-sm me-2">
+            {record.img && <Link href={`/profesionales/editar/${record.id}`} className="avatar avatar-sm me-2">
               <img
                 className="avatar-img rounded-circle"
                 src={record.src}
                 alt="User Image"
               />
             </Link>}
-            <Link href={`/profesionales/${record.id}`}>{record.nombre + ' ' + record.apellido}</Link>
+            <Link href={`/profesionales/editar/${record.id}`}>{record.nombre + ' ' + record.apellido}</Link>
           </h2>
         </>
       ),
@@ -185,7 +187,6 @@ const DoctorList = () => {
   return (
     < >
       <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' />
-      <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
             {/* Page Header */}
@@ -257,7 +258,7 @@ const DoctorList = () => {
                     {/* /Table Header */}
                     <div className="table-responsive doctor-list">
                       {isLoading ? (
-                        <p>Cargando...</p>
+                        <SimpleBackdrop />
                       ) : (
                         <Table
                           pagination={{
@@ -323,10 +324,7 @@ const DoctorList = () => {
             </div>
           </div>
         </div>
-      </>
-
     </>
-
   )
 }
 
