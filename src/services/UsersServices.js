@@ -135,20 +135,25 @@ export const updateUser = async (user) => {
 
   const body = {
     ...user,
-    // fecha_nacimiento: formatDate(user.fecha_nacimiento),
+    nombre_social: 0
+  }
+  console.log('body', body)
+
+  try {
+    const data = await fetch(USERS_API, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    
+    return data.json()
+  } catch (error) {
+    return error
   }
 
-  console.log('body', body)
-  const data = await fetch(USERS_API, {
-    method: "POST",
-    headers: {
-      'content-type': 'application/json',
-      'access-control-allow-origin': '*',
-    },
-    body: JSON.stringify(body)
-  })
-
-  return data.json()
 }
 
 export const deleteUser = async (id) => {

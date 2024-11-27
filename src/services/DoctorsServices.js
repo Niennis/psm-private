@@ -66,11 +66,12 @@ export const professionalsWithSpeciality = async (specialities, users) => {
   const especialidadMap = new Map(
     specialities.map((user) => [user.usuario_id, user.especialidad])
   );
-
-  return users.map((user) => ({
-    ...user,
-    especialidad: especialidadMap.get(user.id) || null, 
-  }));
+  return users.map((user) => (
+    {
+      ...user,
+      especialidad: especialidadMap.get(user.id) || 'No informado',
+    })
+  );
 }
 
 export const fetchProfessionalById = async (id) => {
@@ -95,27 +96,26 @@ export const fetchProfessionalById = async (id) => {
 }
 
 export const addProfessional = async (user) => {
-  // const USERS_API = process.env.VITE_USERS_API + `/api/professionals`
   const USERS_API = process.env.NEXT_PUBLIC_CREATE_PROFESSIONAL
   const body = {
-    "nombre": user.name,
     "apellido": user.lastName,
-    "rut": "16332702-3",
+    "nombre": user.name,
+    "rut": "no informado",
     "fechaNacimiento": "1990-03-03",
     "genero": user.genero.label,
     "email": user.email,
-    "telefono": 987654321,
+    "telefono": "no informado",
     "contrasena": user.password,
     "especialidad": user.speciality.value,
     "tipo_usuario": 'profesional',
-    "status": 'activo',
+    "status": user.status,
     "campus": user.campus,
-    "carrera": user.speciality.label,
+    "carrera": "no informada",
     "anoIngresoCarrera": "2020-03-03",
-    "jornada": "laboral",
-    "direccion": "random",
-    "region": "santiago",
-    "comuna": "santiago",
+    "jornada": "no informado",
+    "direccion": "no informado",
+    "region": "no informado",
+    "comuna": "no informado",
   }
   console.log('body', body);
 
@@ -129,20 +129,15 @@ export const addProfessional = async (user) => {
       },
       body: JSON.stringify(body)
     })
-
-    // console.log('data', data)
-    // const response = await data.json()
-    // console.log('RESPONSE', response)
-    // if (!data.ok && response?.message.includes('Duplicate entry')) return { err: 'Usuario duplicado' }
-
-    return data
+    const response = data.json()
+    return response
   } catch (err) {
     console.log('ERROR', err)
   }
 }
 
 export const updateDoctor = async (user, id) => {
-  const USERS_API = process.env.NEXT_PUBLIC_USERS_API + `/api/professionals/${id}`
+  const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER
   const body = {
     "nombre": user.name,
     "apellido": user.lastName,
@@ -153,19 +148,37 @@ export const updateDoctor = async (user, id) => {
     "genero": user.gender,
     "tipo_usuario": 'profesional',
     "especialidad": user.speciality.value,
-    "status": user.status
+    "status": user.status,
+    "id_emergencia": 0,
+    
+    // request.json['rut'],
+    // request.json['carrera'],
+    // request.json['anoIngresoCarrera'],
+    // request.json['jornada'],
+    // request.json['direccion'],
+    // request.json['region'],
+    // request.json['comuna'],
+    // request.json['entrevistador'],
+    // request.json['mustChangePassword'],
+    // request.json['aplica_despeje'],
+    // request.json['campus'],
+    // request.json['id'],
+    // request.json['id_emergencia'],
+    // request.json['nombre_social']
+
+
   }
 
   try {
-    const data = await fetch(USERS_API, {
-      method: "POST",
-      headers: {
-        'content-type': 'application/json',
-        'access-control-allow-origin': '*',
-        'ngrok-skip-browser-warning': 'any'
-      },
-      body: JSON.stringify(body)
-    })
+    // const data = await fetch(USERS_API, {
+    //   method: "POST",
+    //   headers: {
+    //     'content-type': 'application/json',
+    //     'access-control-allow-origin': '*',
+    //     'ngrok-skip-browser-warning': 'any'
+    //   },
+    //   body: JSON.stringify(body)
+    // })
 
     return data
   } catch (err) {
@@ -174,7 +187,7 @@ export const updateDoctor = async (user, id) => {
 }
 
 export const changeStatus = async (id, status) => {
-  const USERS_API = process.env.NEXT_PUBLIC_USERS_API + `/api/users/${id}`
+  const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
