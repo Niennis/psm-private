@@ -13636,3 +13636,7 @@ td:has(div.text-end) {
 .grecaptcha-badge{
   z-index: 1;
 }
+
+span small{
+  color: var(--main-light-red)
+}
