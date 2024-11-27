@@ -1,20 +1,21 @@
 "use client"
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../../components/Sidebar";
 import { favicon, imagesend } from "../../../components/imagepath";
 import FeatherIcon from "feather-icons-react";
 import Link from "next/link";
 import Select from "react-select";
-import { fetchUser, updateUser } from "../../../services/UsersServices";
-import { useForm } from 'react-hook-form'
+import { fetchUser, updateUser, fetchUserByEmail } from "../../../services/UsersServices";
+import { useForm, Controller } from 'react-hook-form'
 import { Skeleton } from "@mui/material";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
+import { regiones, comunas } from "@/utils/selects";
 
 const cacheHandler = new CacheHandler();
 
@@ -22,45 +23,53 @@ const EditPatients = ({ params }) => {
   const ROL = ["profesional"]
   const { data: session } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
+  const [menuPortalTarget, setMenuPortalTarget] = useState(null);
 
-  const { register, handleSubmit, watch,
-    formState: { errors }
-  } = useForm({
-    defaultValues: async () => fetchUser(params.patientId).then(user => {
-      console.log('USER', user.users[0].nombre);
+  const fetchInitialData = async () => {
+    try {
+      const user = await fetchUserByEmail(session?.user?.email)
+      console.log('user', user)
+
       const obj = {
-        name: user.users[0].nombre,
-        lastName: user.users[0].apellido,
-        mobile: user.users[0].telefono,
-        email: user.users[0].email,
-        password: user.users[0].contrasena,
-        confirmPassword: user.users[0].contrasena,
-        date: user.users[0].fecha_nacimiento,
-        male: user.users[0].genero === 'masculino' ? 'on' : null,
-        female: user.users[0].genero === 'femenino' ? 'on' : null,
-        active: user.users[0].status === 'activo' ? 'on' : null,
-        inactive: user.users[0].status === 'inactivo' ? 'on' : null
+        name: user.nombre,
+        lastName: user.apellido,
+        mobile: user.telefono,
+        email: user.email,
+        password: user.contrasena,
+        confirmPassword: user.contrasena,
+        date: user.fecha_nacimiento,
+        gender: user.genero
       }
       return obj
-    })
-  })
-  
+
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
+
+  const { register, handleSubmit, watch, control,
+    formState: { errors }
+  } = useForm({
+    defaultValues: async () => await fetchInitialData()
+  });
+
   const [selectedOption, setSelectedOption] = useState(null);
-/*   const [values, setValues] = useState({
-    id: id,
-    name: '',
-    lastName: '',
-    mobile: '',
-    email: '',
-    password: '',
-    date: ''
-  }) */
+
   const [show, setShow] = useState(false);
 
   const onChange = (date, dateString) => {
     // console.log(date, dateString);
   };
+
+
+  const gender = [
+    { value: "Hombre", label: "Hombre" },
+    { value: "Mujer", label: "Mujer" },
+    { value: "Hombre trans", label: "Hombre trans" },
+    { value: "Mujer trans", label: "Mujer trans" },
+    { value: "No binarie", label: "No binarie" }
+  ]
+
 
   const [option, setOption] = useState([
     { value: 1, label: "Select City" },
@@ -84,6 +93,12 @@ const EditPatients = ({ params }) => {
     { value: 3, label: "Radiology" },
     { value: 4, label: "Dentist" },
   ]);
+
+
+  useEffect(() => {
+    setMenuPortalTarget(document.body);
+  }, [])
+
   const loadFile = (event) => { };
 
   const onSubmit = handleSubmit(data => {
@@ -100,7 +115,7 @@ const EditPatients = ({ params }) => {
         activeClassName="edit-patient"
       />
       <>
-        <div className="page-wrapper">
+        <div className="page-wrapper mt-5 pt-5">
           <div className="content">
             {/* Page Header */}
             <div className="page-header">
@@ -191,10 +206,23 @@ const EditPatients = ({ params }) => {
                             </label>
                             <input
                               className="form-control"
-                              type="text"
-                              // defaultValue="+1 23 456890"
-                              {...register('mobile')}
+                              type="tel"
+                              {...register('mobile', {
+                                required: {
+                                  value: true,
+                                  message: 'Teléfono es requerido'
+                                },
+                                minLength: {
+                                  value: 9,
+                                  message: 'Cantidad de números inválida'
+                                },
+                                maxLength: {
+                                  value: 9,
+                                  message: 'Cantidad de números inválida'
+                                }
+                              })}
                             />
+                            {errors.email && <span><small>{errors.email.message}</small></span>}
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-6">
@@ -203,67 +231,24 @@ const EditPatients = ({ params }) => {
                               Correo electrónico <span className="login-danger">*</span>
                             </label>
                             <input
+                              disabled
                               className="form-control"
                               type="email"
                               // defaultValue={values.email}
                               {...register('email', {
                                 required: {
                                   value: true,
-                                  message: 'Corre es requerido'
+                                  message: 'Correo es requerido'
                                 },
-                                // pattern: {
-                                //   value: /^[a-zA-Z0-9. _-]+@[a-zA-Z0-9. -]+\. [a-zA-Z]{2,4}$/,
-                                //   message: 'Correo no es válido'
-                                // }
+                                pattern: {
+                                  value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
+                                  message: 'Correo no es válido'
+                                }
                               })}
                             />
                             {errors.email && <span><small>{errors.email.message}</small></span>}
                           </div>
                         </div>
-                        {/* <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>
-                              Contraseña <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="password"
-                              // defaultValue={values.password}
-                              {...register('password', {
-                                required: {
-                                  value: true,
-                                  message: 'Password es requerida'
-                                },
-                                minLength: {
-                                  value: 6,
-                                  message: 'Contraseña debe tener al menos 6 caracteres'
-                                }
-                              })}
-                            />
-                            {errors.password && <span><small>{errors.password.message}</small></span>}
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>
-                              Confirmar contraseña{" "}
-                              <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="password"
-                              // defaultValue={values.password}
-                              {...register('confirmPassword', {
-                                required: {
-                                  value: true,
-                                  message: 'Confirmación requerida'
-                                },
-                                validate: value => value === watch('password') || 'Las contraseñas no coinciden'
-                              })}
-                            />
-                            {errors.confirmPassword && <span><small>{errors.confirmPassword.message}</small></span>}
-                          </div>
-                        </div> */}
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group local-forms">
                             <label>
@@ -294,39 +279,55 @@ const EditPatients = ({ params }) => {
                             <label className="gen-label">
                               Género <span className="login-danger">*</span>
                             </label>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  type="radio"
-                                  name="gender"
-                                  className="form-check-input"
-                                  {...register('male')}
-                                />
-                                Masculino
-                              </label>
-                            </div>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  type="radio"
-                                  name="gender"
-                                  className="form-check-input"
-                                  {...register('female')}
-                                />
-                                Femenino
-                              </label>
-                            </div>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  type="radio"
-                                  name="gender"
-                                  className="form-check-input"
-                                  {...register('other')}
-                                />
-                                Otro
-                              </label>
-                            </div>
+
+                            <Controller
+                              control={control}
+                              name="genero"
+                              {...register('genero', {
+                                required: {
+                                  value: true,
+                                  message: 'Género es requerido',
+                                }
+                              })}
+                              ref={null}
+                              render={({ field: { onChange, onBlur, value } }) => {
+                                return (
+                                  <Select
+                                    // instanceId="genero"
+                                    value={gender.find(option => option.value === value) || null}
+                                    onChange={(option) => onChange(option.value)}
+                                    options={gender}
+                                    menuPortalTarget={menuPortalTarget}
+                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                    id="genero"
+                                    components={{
+                                      IndicatorSeparator: () => null
+                                    }}
+
+                                    styles={{
+                                      control: (baseStyles, state) => ({
+                                        ...baseStyles,
+                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                        boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                        '&:hover': {
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                        },
+                                        borderRadius: '10px',
+                                        fontSize: "14px",
+                                        minHeight: "45px",
+                                      }),
+                                      dropdownIndicator: (base, state) => ({
+                                        ...base,
+                                        transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                        transition: '250ms',
+                                        width: '35px',
+                                        height: '35px',
+
+                                      }),
+                                    }}
+                                  />)
+                              }}
+                            />
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-6">
@@ -337,7 +338,7 @@ const EditPatients = ({ params }) => {
                             <input
                               className="form-control"
                               type="text"
-                              defaultValue="M.B.B.S, M.S."
+                              defaultValue=""
                               {...register('carrera')}
                             />
                           </div>
@@ -545,7 +546,7 @@ const EditPatients = ({ params }) => {
                               // defaultValue={91403}
                             />
                           </div>
-                        </div> */}
+                        </div> */}{/* 
                         <div className="col-12 col-sm-12">
                           <div className="form-group local-forms">
                             <label>
@@ -561,10 +562,10 @@ const EditPatients = ({ params }) => {
                               }
                             />
                           </div>
-                        </div>
+                        </div> */}
                         {/* <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group local-top-form"> */}
-                            {/* <label className="local-top">
+                        {/* <label className="local-top">
                               Avatar <span className="login-danger">*</span>
                             </label>
                             <div className="settings-btn upload-files-avator">
@@ -577,7 +578,7 @@ const EditPatients = ({ params }) => {
                                 className="hide-input"
                               />
                             </div> */}
-                            {/* <div className="settings-btn upload-files-avator">
+                        {/* <div className="settings-btn upload-files-avator">
                               <input
                                 type="file"
                                 accept="image/*"
@@ -590,7 +591,7 @@ const EditPatients = ({ params }) => {
                                 Choose File
                               </label>
                             </div> */}
-                            {/* <div
+                        {/* <div
                               className="upload-images upload-size"
                               style={{ display: show ? "none" : "flex" }}
                             >
@@ -604,7 +605,7 @@ const EditPatients = ({ params }) => {
                                 </i>
                               </Link>
                             </div> */}
-                          {/* </div>
+                        {/* </div>
                         </div> */}
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group select-gender">
@@ -614,11 +615,13 @@ const EditPatients = ({ params }) => {
                             <div className="form-check-inline">
                               <label className="form-check-label">
                                 <input
+                                  disabled={session?.user?.rol !== "administrador"}
                                   type="radio"
                                   name="status"
+                                  value={'activo'}
                                   className="form-check-input"
                                   // defaultChecked="true"
-                                  {...register('active')}
+                                  {...register('status')}
                                 />
                                 Activo
                               </label>
@@ -626,10 +629,12 @@ const EditPatients = ({ params }) => {
                             <div className="form-check-inline">
                               <label className="form-check-label">
                                 <input
+                                  disabled={session?.user?.rol !== "administrador"}
                                   type="radio"
                                   name="status"
+                                  value={'inactivo'}
                                   className="form-check-input"
-                                  {...register('inactive')}
+                                  {...register('status')}
                                 />
                                 Inactivo
                               </label>
