@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
-import { redirect, useParams, usePathname } from "next/navigation";
+import { redirect, useParams, usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react"
 import { useForm } from 'react-hook-form';
@@ -14,6 +14,8 @@ import { logo } from "@/components/imagepath";
 import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 import { getCaptchaToken } from "@/utils/captcha";
 import { logInAction } from "@/app/actions";
+import SimpleBackdrop from "./Backdrop";
+import { useSession } from "next-auth/react";
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(true);
@@ -24,6 +26,9 @@ const Login = () => {
   const matches = useMediaQuery('(min-width:600px)');
   const isSmallDevice = useMediaQuery('(max-width: 599px)')
   const [error, setError] = useState('')
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -41,15 +46,19 @@ const Login = () => {
     setPasswordVisible(!passwordVisible);
   };
 
+
   /* LOGIN CON CREDENCIALES */
   const handleOnSubmit = handleSubmit(async (data) => {
-    console.log('DATA', data)
+    setIsLoading(true)
     setSubmit('')
+  // if (status === 'unauthenticated') /* <SimpleBackdrop /> */ <h1>CARGANDO...</h1>
+
     const token = await getCaptchaToken()
     const response = await logInAction(token, data)
 
     if (response && response.success) {
       try {
+        setIsLoading(true)
         const res = await signIn('credentials', {
           callbackUrl: '/citas',
           email: data.email,
@@ -61,8 +70,16 @@ const Login = () => {
           setIsInvalid(false)
           setIsLoggedIn(true)
         }
+
       } catch (err) {
+        setIsLoading(true)
         console.log('Hubo un error:', err)
+        if(err.message == `Failed to execute 'json' on 'Response': Unexpected end of JSON input`){
+          setError('El mail y la contraseña no coinciden')
+        }
+      }
+    finally {
+        setTimeout(() => setIsLoading(false), 5000); // Asegurarte de ocultar el loading después de un tiempo
       }
     } else {
       setError('Ocurrió un problema, intenta más tarde')
@@ -78,6 +95,8 @@ const Login = () => {
   const handleSignIn = async () => {
     try {
       await signIn('google', { callbackUrl: '/citas' })
+      // setIsLoading(true);
+
     } catch (error) {
       console.log('ERRRR', error);
       if (error.message === 'No se pudo acceder. Correo no autorizado.') {
@@ -88,23 +107,30 @@ const Login = () => {
       }
       redirect('/')
     }
+    finally {
+      setTimeout(() => setIsLoading(false), 3000); // Asegurarte de ocultar el loading después de un tiempo
+    }
   }
 
   return (
     <>
+    {isLoading && <SimpleBackdrop text={'el login'}/> }
       <div className="main-wrapper login-body sailec">
         <div className="container-fluid px-0">
+
           <div className="row ">
             {/* Login logo */}
             <div className="col-lg-6 login-wrap" style={{
               backgroundImage: 'url(https://dae.udp.cl/cms/wp-content/uploads/2022/05/136.jpg)',
               backgroundSize: 'cover',
-              backgroundPositionX: 'center'
+              backgroundPositionX: 'center',
+              zIndex: 999,
             }}>
             </div>
 
             <div className="col-12 col-lg-6 login-wrap-bg" style={{ padding: '15px 20px 15px' }}>
               <div className="login-wrapper">
+
                 {(matches || isSmallDevice) &&
 
                   <div className="loginbox"
