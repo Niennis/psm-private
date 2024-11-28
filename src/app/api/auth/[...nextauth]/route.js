@@ -121,10 +121,11 @@ const authOptions = {
       if (account.provider === "credentials") {
         const body = { email: credentials.email, contrasena: credentials.password };
         const user = await fetchUserMailAndPass(body);
+        console.log('user', user)
         if (user) {
           return true;
         } else {
-          // throw new Error("Credenciales incorrectas.");
+          throw new Error("Credenciales incorrectas.");
           return false
         }
       }
@@ -135,11 +136,15 @@ const authOptions = {
 
       const profile = await searchUser(token.email)
       console.log('jwt - profile', profile)
-      if (token) {
-        token.id = profile.id
-        token.name = token.name || profile.nombre;
-        token.rol = profile.tipo_usuario;
-        return token;
+      if (profile.validacion === false) {
+        throw new Error("Credenciales incorrectas.");
+      } else {
+        if (token) {
+          token.id = profile.id
+          token.name = token.name || profile.nombre;
+          token.rol = profile.tipo_usuario;
+          return token;
+        }
       }
     },
     async session({ session, user, token }) {
