@@ -260,9 +260,10 @@ const Header = () => {
                         : ''
                         }`}
                       onMouseOver={handleOpenUserMenu} sx={{ ...style, p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' }}>
-                      CÓMO TRABAJAMOS
+                      {page.title}
                     </Button>
-                  </Tooltip> :
+                  </Tooltip> 
+                  :
                   <Link style={{ color: 'black', textDecoration: 'none' }} href={page.url} key={page.title} >
                     <Button
                       className={`sailec ${activeSection === page.label
@@ -308,7 +309,7 @@ const Header = () => {
                 onClose={handleCloseUserMenu}
               >
                 {settings.map((setting) => (
-                  <MenuItem key={setting.url} onClick={handleCloseUserMenu}>
+                  <MenuItem key={setting.url} onClick={handleCloseUserMenu} onMouseLeave={handleCloseUserMenu}>
                     <Typography textAlign="center" className="sailec">
                       <a href={setting.url} style={{ color: 'black', fontFamily: 'sailec', textDecoration: 'none' }}>
                         {setting.title}
