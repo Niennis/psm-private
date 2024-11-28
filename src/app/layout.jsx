@@ -4,15 +4,16 @@ import "./globals.css";
 import "../assets/css/bootstrap.css"
 import Header from "@/components/Header";
 import Script from 'next/script'
-// import TanstackProvider from "@/providers/TanstackProvider";
+import Sidebar from "@/components/Sidebar";
 import AuthProvider from "@/providers/AuthProvider";
-import { SectionProvider } from "@/context/SectionContext";
 import { getServerSession } from "next-auth";
+import { SectionProvider } from "@/context/SectionContext";
+import { SidebarProvider } from '@/context/SidebarContext';
+import { LoadingProvider } from "@/context/LoadingContext";
+
 import { redirect } from 'next/navigation';
 const inter = Inter({ subsets: ["latin"] });
 // import Hotjar from '@hotjar/browser';
-// import GoogleReCaptchaWrapper from "@/providers/GoogleCaptchaWrapper";
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 const siteId = 3920275;
 // const hotjarVersion = 6;
@@ -29,18 +30,11 @@ const roboto_init = Roboto({
   variable: '--font-roboto'
 })
 
-export default async function RootLayout({ children }) {
+export default async function RootLayout({ children, props }) {
 
   const session = await getServerSession();
-  console.log('SESSION layout', session);
-
-  // if (!session) {
-  //   redirect('/');
-  // }
-
   return (
     <AuthProvider session={session}>
-
       <html lang="en">
         <head>
           <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -65,15 +59,15 @@ export default async function RootLayout({ children }) {
             strategy="beforeInteractive"
             src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
           />
+
           <SectionProvider>
-            {/* <TanstackProvider> */}
-            <Header />
-            {/* <GoogleReCaptchaWrapper> */}
-
-            {children}
-            {/* </GoogleReCaptchaWrapper> */}
-
-            {/* </TanstackProvider> */}
+            <SidebarProvider>
+              {/* <LoadingProvider> */}
+                <Header />
+                {session && <Sidebar />}
+                {children}
+              {/* </LoadingProvider> */}
+            </SidebarProvider>
           </SectionProvider>
           {/* <Script src="./bot.js" data-args="Salud mental, #FFFFFF, #AA3C80FF, ./bot_salud_mental.png" id="bot"></Script> */}
         </body>
