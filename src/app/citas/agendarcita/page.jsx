@@ -25,6 +25,7 @@ import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
 import 'dayjs/locale/es-mx'
 import { motivo_consulta } from "@/utils/selects";
 
+import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 
@@ -69,6 +70,15 @@ const AddAppoinments = () => {
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
+  const { setProps } = useSidebar();
+
+  useEffect(() => {
+    setProps({
+      id: "menu-item4",
+      id1: "menu-items4",
+      activeClassName: "add-appoinment",
+    });
+  }, [setProps]);
 
   const { register, handleSubmit, watch, control,
     formState: { errors }, reset
@@ -387,11 +397,11 @@ const AddAppoinments = () => {
 
   return (
     < >
-      <Sidebar
+      {/* <Sidebar
         id="menu-item4"
         id1="menu-items4"
         activeClassName="add-appoinment"
-      />
+      /> */}
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">

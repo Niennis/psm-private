@@ -11,6 +11,7 @@ import {
 
 import { fetchBlogs } from '@/services/BlogServices';
 
+import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
@@ -32,7 +33,17 @@ const BlogView = () => {
   const ROL = ["administrador"]
   const { data: session } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
+  const { setProps } = useSidebar();
+  const [blogs, setBlogs] = useState([])
+
+  useEffect(() => {
+    setProps({
+      id: "menu-item11",
+      id1: "menu-items11",
+      activeClassName: "blog-grid",
+    });
+  }, [setProps]);
+
   const data = async () => {
     try {
       const response = await fetchBlogs()
@@ -43,7 +54,6 @@ const BlogView = () => {
     }
   }
 
-  const [blogs, setBlogs] = useState([])
   useEffect(() => {
     data()
   }, [])
@@ -53,7 +63,7 @@ const BlogView = () => {
       <div className="main-wrapper">
         {/* Header */}
         {/* <Header /> */}
-        <Sidebar id='menu-item11' id1='menu-items11' activeClassName='blog-grid' />
+        {/* <Sidebar id='menu-item11' id1='menu-items11' activeClassName='blog-grid' /> */}
         {/* Sidebar */}
         {/* Page Wrapper */}
 

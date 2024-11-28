@@ -1,3 +1,4 @@
+'use client'
 import React from "react";
 import Header from "../Header";
 import Sidebar from "../Sidebar";
@@ -11,13 +12,23 @@ import {
 } from "../imagepath";
 import FeatherIcon from "feather-icons-react";
 import { Link } from "react-router-dom";
+import { useSidebar } from "@/context/SidebarContext";
 
 const PatientsProfile = () => {
+  const { setProps } = useSidebar();
+  useEffect(() => {
+    setProps({
+      id: "menu-item2",
+      id1: "menu-items2",
+      activeClassName: "patient",
+    });
+  }, [setProps]);
+
   return (
     <div>
       <>
         <Header />
-        <Sidebar id="menu-item2" id1="menu-items2" activeClassName="patient" />
+        {/* <Sidebar id="menu-item2" id1="menu-items2" activeClassName="patient" /> */}
         <>
           <div className="page-wrapper">
             <div className="content">

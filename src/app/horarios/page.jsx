@@ -14,6 +14,7 @@ import { fetchScheduleByUser, getSpecialities } from "@/services/SchedulesServic
 import { fetchProfessionals, fetchProfessionalById, addDoctor, updateDoctor } from '../../services/DoctorsServices';
 import { useForm } from 'react-hook-form';
 
+import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
@@ -31,6 +32,8 @@ const ScheduleList = () => {
   const [dropdownValue, setDropdownValue] = useState('');
   const [show, setShow] = useState({ state: false, id: '' })
   const [idSchedule, setIdSchedule] = useState('')
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const { setProps } = useSidebar();
 
   // const handleDropdownChange = (value) => {
   //   setDropdownValue(value);
@@ -39,9 +42,15 @@ const ScheduleList = () => {
     formState: { errors }
   } = useForm()
 
-  const fetchSchedules = () => {
+  
+  useEffect(() => {
+    setProps({
+      id: "menu-item5",
+      id1: "menu-items5",
+      activeClassName: "shedule-list",
+    });
+  }, [setProps]);
 
-  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,7 +72,6 @@ const ScheduleList = () => {
     fetchData()
   }, [])
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   
   if (!session && !session?.user?.rol === "administrador"
     // || !session?.user?.rol === "profesional"
@@ -342,7 +350,7 @@ const ScheduleList = () => {
     < >
       <>
         {/* <Headerudp /> */}
-        <Sidebar id='menu-item5' id1='menu-items5' activeClassName='shedule-list' />
+        {/* <Sidebar id='menu-item5' id1='menu-items5' activeClassName='shedule-list' /> */}
         <div className="page-wrapper">
           <div className="content">
             {/* Page Header */}

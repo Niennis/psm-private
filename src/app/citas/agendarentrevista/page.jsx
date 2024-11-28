@@ -29,6 +29,7 @@ import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 import { fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 
+import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 
@@ -88,6 +89,15 @@ const AddFirstAppoinments = () => {
   const [openBackdrop, setOpenBackdrop] = useState(false);
   const [dataPatient, setDataPatient] = useState(null)
   const [bloques, setBloques] = useState([])
+  const { setProps } = useSidebar();
+
+  useEffect(() => {
+    setProps({
+      id: "menu-item4",
+      id1: "menu-items4",
+      activeClassName: "add-first-appoinment",
+    });
+  }, [setProps]);
 
   const handleChange = () => {
     setChecked((prev) => !prev);
@@ -303,8 +313,6 @@ const AddFirstAppoinments = () => {
     return resultado;
   };
 
-
-
   const handleHours = (e) => {
     e.preventDefault()
     setHours(dayjs(e.id_bloque).format('DD/MM/YYYY'))
@@ -475,11 +483,11 @@ const AddFirstAppoinments = () => {
   return (
     < >
       {/* <Header /> */}
-      <Sidebar
+      {/* <Sidebar
         id="menu-item4"
         id1="menu-items4"
         activeClassName="add-first-appoinment"
-      />
+      /> */}
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
@@ -703,7 +711,7 @@ const AddFirstAppoinments = () => {
                                       />)
                                   }}
                                 />
-                                
+
                                 {errors.genero && <span><small>{errors.genero.message}</small></span>}
 
                               </div>
@@ -975,9 +983,9 @@ const AddFirstAppoinments = () => {
                                       message: 'El campo es obligatorio'
                                     }
                                   })} />
-                                  {
-                                    errors.name_contact && <span><small>{errors.name_contact.message}</small></span>
-                                  }
+                                {
+                                  errors.name_contact && <span><small>{errors.name_contact.message}</small></span>
+                                }
                               </div>
                             </div>
                             <div className="col-12 col-sm-6">
@@ -994,9 +1002,9 @@ const AddFirstAppoinments = () => {
                                       message: 'El campo es obligatorio'
                                     }
                                   })} />
-                                  {
-                                    errors.relationship_contact && <span><small>{errors.relationship_contact.message}</small></span>
-                                  }
+                                {
+                                  errors.relationship_contact && <span><small>{errors.relationship_contact.message}</small></span>
+                                }
                               </div>
                             </div>
                             <div className="col-12 col-sm-6">
@@ -1005,7 +1013,7 @@ const AddFirstAppoinments = () => {
                                   Celular <span className="login-danger">*</span>
                                 </label>
                                 <input
-                                  className="form-control" 
+                                  className="form-control"
                                   type="tel"
                                   defaultValue={""}
                                   minLength={9}
@@ -1017,9 +1025,9 @@ const AddFirstAppoinments = () => {
                                       message: 'El campo es obligatorio'
                                     }
                                   })} />
-                                  {
-                                    errors.mobile_contact && <span><small>{errors.mobile_contact.message}</small></span>
-                                  }
+                                {
+                                  errors.mobile_contact && <span><small>{errors.mobile_contact.message}</small></span>
+                                }
                               </div>
                             </div>
                             <div className="col-12 col-sm-6">
@@ -1028,7 +1036,7 @@ const AddFirstAppoinments = () => {
                                   Correo electrónico
                                 </label>
                                 <input
-                                  className="form-control" 
+                                  className="form-control"
                                   type="email"
                                   defaultValue={""}
                                   {...register('email_contact', {
@@ -1041,9 +1049,9 @@ const AddFirstAppoinments = () => {
                                       message: 'Correo no es válido'
                                     }
                                   })} />
-                                  {
-                                    errors.email_contact && <span><small>{errors.email_contact.message}</small></span>
-                                  }
+                                {
+                                  errors.email_contact && <span><small>{errors.email_contact.message}</small></span>
+                                }
                               </div>
                             </div>
                             <div className="col-12 col-md-12 col-xl-12">
@@ -1118,7 +1126,7 @@ const AddFirstAppoinments = () => {
                                   }}
                                 />
                                 {
-                                errors.professional && <span><small>{errors.professional.message}</small></span>
+                                  errors.professional && <span><small>{errors.professional.message}</small></span>
                                 }
                               </div>
                             </div>
@@ -1154,7 +1162,7 @@ const AddFirstAppoinments = () => {
                                   </label>
                                 </div>
                                 {
-                                errors.modalidad && <span><small>{errors.modalidad.message}</small></span>
+                                  errors.modalidad && <span><small>{errors.modalidad.message}</small></span>
                                 }
                               </div>
                             </div>

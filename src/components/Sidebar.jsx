@@ -1,23 +1,24 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import Link from "next/link";
 import { blog, doctor, doctorschedule, logout, menuicon04, patients } from './imagepath';
 import { signOut } from "next-auth/react";
-import { useSession } from 'next-auth/react';
 import SidebarSkeleton from './skeletons/Sidebar-skeleton';
 // import Scrollbars from "react-custom-scrollbars-2";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from './ProtectedRoutes';
+import { useSession } from 'next-auth/react';
+import { useSidebar } from '@/context/SidebarContext';
 
-const Sidebar = (props) => {
-  const ROL = ["alumno"]
+const Sidebar = () => {
   const { data: session, status } = useSession()
+  const { props } = useSidebar();
+  const ROL = ["alumno"]
   const router = useRouter();
-  const [sidebar, setSidebar] = useState("");
+  // const [sidebar, setSidebar] = useState("");
 
-  // console.log('STATUS', status)
 
   const handleClick = (e, item, item1, item3) => {
     const div = document.querySelector(`#${item}`);
@@ -27,7 +28,7 @@ const Sidebar = (props) => {
   }
 
   const handleSignOut = () => {
-    localStorage.removeItem('passwordAlertShown');
+    console.log('session', session)
     signOut({
       callbackUrl: '/'
     })
@@ -35,10 +36,17 @@ const Sidebar = (props) => {
 
   useEffect(() => {
     if (props?.id && props?.id1) {
-      const ele = document.getElementById(`${props?.id}`);
-      // handleClick(ele, props?.id, props?.id1);
+      const ele = document.getElementById(props.id);
+      if (ele) {
+        handleClick(null, props.id, props.id1); // Call handleClick with default action (no event)
+      }
     }
-  }, [])
+  }, [props]); // Use `props` in dependency array to re-run the effect when they change
+
+
+  if (!session || !props) {
+    return <p>Loading...</p>;
+  }
 
   const expandMenu = () => {
     document.body.classList.remove("expand-menu");
@@ -49,7 +57,7 @@ const Sidebar = (props) => {
   return (
     <ProtectedPage level={ROL}>
 
-      <div className="sidebar mt-5" id="sidebar">
+      <div className="sidebar mt-5" id="sidebar" style={{ zIndex: 99}}>
         {/* <Scrollbars
           autoHide
           autoHideTimeout={1000}
@@ -71,9 +79,9 @@ const Sidebar = (props) => {
             {
               <ul>
 
-                {
-                  !session.user?.rol && <SidebarSkeleton />
-                }
+                {/* {
+                  !session?.user?.rol && <SidebarSkeleton />
+                } */}
 
                 {
                   session.user?.rol && session.user?.rol === "alumno" &&
@@ -269,7 +277,7 @@ const Sidebar = (props) => {
                     </li> */}
                       </ul>
                     </li>
-                 {/*    <li className="submenu">
+                    {/*    <li className="submenu">
                       <Link href="#" id="menu-item11" onClick={(e) => handleClick(e, "menu-item11", "menu-items11")}>
                         <span className="menu-side">
                           <img src={blog.src} alt="" />
@@ -277,10 +285,10 @@ const Sidebar = (props) => {
                         <span> Blog</span> <span className="menu-arrow" />
                       </Link>
                       <ul style={{ display: "none" }} className="menu-items11"> */}
-                        {/* <li>
+                    {/* <li>
                     <Link className={props?.activeClassName === 'blog-grid' ? 'active' : ''} href="/blogview">Blogs</Link>
                   </li> */}
-                        {/* <li>
+                    {/* <li>
                           <Link className={props?.activeClassName === 'blog-details' ? 'active' : ''} href="/blog/1">
                             Blog
                           </Link>
@@ -288,20 +296,18 @@ const Sidebar = (props) => {
                         <li>
                           <Link className={props?.activeClassName === 'add-blog' ? 'active' : ''} href="/blog/agregarblog">Agregar Blog</Link>
                         </li> */}
-                        {/* <li>
+                    {/* <li>
                     <Link className={props?.activeClassName === 'edit-blog' ? 'active' : ''} href="/editblog">Edit Blog</Link>
                   </li> */}
-                      {/* </ul>
+                    {/* </ul>
                     </li>*/}
-                  </> 
+                  </>
                 }
 
               </ul>
             }
             <div className="logout-btn">
               <Link href="/" onClick={handleSignOut}>
-                {/* <Link href="https://sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net" onClick={() => signOut({ 
-                  callbackUrl: 'https://sitioprivado-b2beb6cmh0b7cuf7.eastus-01.azurewebsites.net' })}> */}
                 <span className="menu-side">
                   <img src={logout.src} alt="" />
                 </span>{" "}

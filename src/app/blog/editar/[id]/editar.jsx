@@ -14,6 +14,7 @@ import Select from "react-select";
 
 import useMediaQuery from '@mui/mater ial/useMediaQuery';
 
+import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from '@/components/ProtectedRoutes';
@@ -26,7 +27,15 @@ const Editblog = () => {
   const ROL = ["administrador"]
   const { data: session } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
+  const { setProps } = useSidebar();
+
+  useEffect(() => {
+    setProps({
+      id: "menu-item11",
+      id1: "menu-items11",
+      activeClassName: "edit-blog",
+    });
+  }, [setProps]);
 
   const loadFile = (event) => {
     // Handle file loading logic here
@@ -51,7 +60,7 @@ const Editblog = () => {
 
       <div className="main-wrapper">
         {/* <Header /> */}
-        <Sidebar id='menu-item11' id1='menu-items11' activeClassName='edit-blog' />
+        {/* <Sidebar id='menu-item11' id1='menu-items11' activeClassName='edit-blog' /> */}
         {/* page-wrapper-start  */}
         <>
           <div className="page-wrapper mt-5 pt-5">

@@ -11,6 +11,7 @@ import { fetchUser, updateUser, fetchUserByEmail } from "../../../services/Users
 import { useForm, Controller } from 'react-hook-form'
 import { Skeleton } from "@mui/material";
 
+import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
@@ -24,6 +25,15 @@ const EditPatients = ({ params }) => {
   const { data: session } = useSession()
   const router = useRouter();
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
+  const { setProps } = useSidebar();
+  
+  useEffect(() => {
+    setProps({
+      id: "menu-item2",
+      id1: "menu-items2",
+      activeClassName: "edit-patient",
+    });
+  }, [setProps]);
 
   const fetchInitialData = async () => {
     try {
@@ -109,11 +119,11 @@ const EditPatients = ({ params }) => {
   return (
     < >
       {/* <Headerudp /> */}
-      <Sidebar
+      {/* <Sidebar
         id="menu-item2"
         id1="menu-items2"
         activeClassName="edit-patient"
-      />
+      /> */}
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">

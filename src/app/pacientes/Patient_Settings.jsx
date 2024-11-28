@@ -1,15 +1,27 @@
+'use client'
 import React from 'react'
 import Header from '../Header'
 import Sidebar from '../Sidebar'
 import { Link } from 'react-router-dom'
 import { cameraicon, doctor, menuicon16, profilebg, profileuser01 } from '../imagepath'
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon'
+import { useSidebar } from "@/context/SidebarContext";
 
 const Patient_Settings = () => {
+    const { setProps } = useSidebar();
+
+    useEffect(() => {
+        setProps({
+            id: "menu-item1",
+            id1: "menu-items1",
+            activeClassName: "patient-profile",
+        });
+    }, [setProps]);
+
     return (
         <>
             <Header />
-            <Sidebar />
+            {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='patient-profile' /> */}
             <>
                 <div className="page-wrapper">
                     <div className="content">
@@ -20,8 +32,8 @@ const Patient_Settings = () => {
                                     <ul className="breadcrumb">
                                         <li className="breadcrumb-item"><Link to="patients.html">Patients </Link></li>
                                         <li className="breadcrumb-item"><i className="feather-chevron-right">
-                                            <FeatherIcon icon="chevron-right"/>
-                                            </i>
+                                            <FeatherIcon icon="chevron-right" />
+                                        </i>
                                         </li>
                                         <li className="breadcrumb-item active">Patient Profile</li>
                                     </ul>

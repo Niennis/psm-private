@@ -10,6 +10,7 @@ import Sidebar from '@/components/Sidebar';
 import SimpleBackdrop from '@/components/Backdrop';
 import { onShowSizeChange, itemRender } from '@/components/Pagination'
 
+import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 import { fetchAppointments, changeStatusAppointment, search } from '@/services/AppointmentsServices'
@@ -21,6 +22,7 @@ import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import PasswordAlert from '@/components/PasswordAlert';
 const cacheHandler = new CacheHandler();
+
 
 const AppoinmentList = () => {
   const { data: session, status } = useSession();
@@ -34,10 +36,18 @@ const AppoinmentList = () => {
   const [isValidated, setIsValidated] = useState(true)
   const [loading, setLoading] = useState(true)
   const [loadTable, setLoadTable] = useState(false);
+  const { setProps } = useSidebar();
 
-  // const cacheKey = "external-api-data";
+
   useEffect(() => {
+    setProps({
+      id: "menu-item4",
+      id1: "menu-items4",
+      activeClassName: "appoinment-list",
+    });
+  }, [setProps]);
 
+  useEffect(() => {
     const loadAppointments = async () => {
       setLoading(true);
 
@@ -48,7 +58,7 @@ const AppoinmentList = () => {
         //   setAppointments(cachedData)
         //   setResults(cachedData);
         //   setLoading(false);
-        //   return;
+        //   return; 
         // }
 
         const response = await fetchAppointments();
@@ -262,85 +272,87 @@ const AppoinmentList = () => {
 
   return (
     <>
-      <Sidebar id='menu-item4' id1='menu-items4' activeClassName='appoinment-list' />
-      <>
-        <Form
-          layout="inline"
-          className="table-demo-control-bar"
-          style={{
-            marginBottom: 16,
-          }}
-        >
-          <Form.Item label="loading">
-            <Switch checked={loading} onChange={handleLoadingChange} />
-          </Form.Item>
-        </Form>
-        <div className="page-wrapper mt-5 pt-5">
-          <div className="content">
-            {/* Page Header */}
-            <div className="page-header">
-              <div className="row">
-                <div className="col-sm-12">
-                  <ul className="breadcrumb">
-                    <li className="breadcrumb-item">
-                      <Link href="#">Citas </Link>
-                    </li>
-                    <li className="breadcrumb-item">
-                      <i className="feather-chevron-right">
-                        <FeatherIcon icon="chevron-right" />
-                      </i>
-                    </li>
-                    <li className="breadcrumb-item active">Lista de citas </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            {/* /Page Header */}
+      {/* {
+        loading && <SimpleBackdrop />
+          } */}
+      {/* <Sidebar id='menu-item4' id1='menu-items4' activeClassName='appoinment-list' /> */}
+      <Form
+        layout="inline"
+        className="table-demo-control-bar"
+        style={{
+          marginBottom: 16,
+        }}
+      >
+        <Form.Item label="loading">
+          <Switch checked={loading} onChange={handleLoadingChange} />
+        </Form.Item>
+      </Form>
+      <div className="page-wrapper mt-5 pt-5">
+        <div className="content">
+          {/* Page Header */}
+          <div className="page-header">
             <div className="row">
               <div className="col-sm-12">
-                <div className="card card-table show-entire">
-                  <div className="card-body">
-                    {/* Table Header */}
-                    <div className="page-table-header mb-2">
-                      <div className="row align-items-center">
-                        <div className="col">
-                          <div className="doctor-table-blk">
-                            {matches && <h3>Lista de citas </h3>}
-                            <div className="doctor-search-blk">
-                              <div className="top-nav-search table-search-blk col-6">
-                                <form style={{ width: `${matches ? '270px' : '150px'} ` }}>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="Busca aquí"
-                                    onChange={(e) => { handleSearch(e.target.value) }}
+                <ul className="breadcrumb">
+                  <li className="breadcrumb-item">
+                    <Link href="#">Citas </Link>
+                  </li>
+                  <li className="breadcrumb-item">
+                    <i className="feather-chevron-right">
+                      <FeatherIcon icon="chevron-right" />
+                    </i>
+                  </li>
+                  <li className="breadcrumb-item active">Lista de citas </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          {/* /Page Header */}
+          <div className="row">
+            <div className="col-sm-12">
+              <div className="card card-table show-entire">
+                <div className="card-body">
+                  {/* Table Header */}
+                  <div className="page-table-header mb-2">
+                    <div className="row align-items-center">
+                      <div className="col">
+                        <div className="doctor-table-blk">
+                          {matches && <h3>Lista de citas </h3>}
+                          <div className="doctor-search-blk">
+                            <div className="top-nav-search table-search-blk col-6">
+                              <form style={{ width: `${matches ? '270px' : '150px'} ` }}>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Busca aquí"
+                                  onChange={(e) => { handleSearch(e.target.value) }}
+                                />
+                                <Link className="btn" href="#">
+                                  <img
+                                    src={searchnormal.src}
+                                    alt="#"
                                   />
-                                  <Link className="btn" href="#">
-                                    <img
-                                      src={searchnormal.src}
-                                      alt="#"
-                                    />
-                                  </Link>
-                                </form>
-                              </div>
-                            </div>
-                            <div className="add-group">
-                             { session?.user?.rol !== "alumno" && <Link href="/citas/agendarcita"
-                                className="btn btn-primary add-pluss ms-2"
-                              >
-                                <img src={plusicon.src} alt="#" />
-                              </Link>}
-                              <Link
-                                href="#"
-                                onClick={handleRefresh}
-                                className="btn btn-primary doctor-refresh ms-2"
-                              >
-                                <img src={refreshicon.src} alt="#" />
-                              </Link>
+                                </Link>
+                              </form>
                             </div>
                           </div>
+                          <div className="add-group">
+                            {session?.user?.rol !== "alumno" && <Link href="/citas/agendarcita"
+                              className="btn btn-primary add-pluss ms-2"
+                            >
+                              <img src={plusicon.src} alt="#" />
+                            </Link>}
+                            <Link
+                              href="#"
+                              onClick={handleRefresh}
+                              className="btn btn-primary doctor-refresh ms-2"
+                            >
+                              <img src={refreshicon.src} alt="#" />
+                            </Link>
+                          </div>
                         </div>
-                        {/* <div className="col-auto text-end float-end ms-auto download-grp">
+                      </div>
+                      {/* <div className="col-auto text-end float-end ms-auto download-grp">
                           <Link href="#" className=" me-2">
                             <img src={pdficon.src} alt="#" />
                           </Link>
@@ -353,79 +365,77 @@ const AppoinmentList = () => {
                             <img src={pdficon4.src} alt="#" />
                           </Link>
                         </div> */}
-                      </div>
                     </div>
-                    {/* /Table Header */}
+                  </div>
+                  {/* /Table Header */}
 
-                    <div className="table-responsive patient-list">
-                      {/* {
-                        !results ? <SimpleBackdrop />
-                          : */}
+                  <div className="table-responsive patient-list">
 
-                          <Table
-                            pagination={{
-                              total: results.length,
-                              showTotal: (total, range) =>
-                                `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
-                              //showSizeChanger: true,
-                              onShowSizeChange: onShowSizeChange,
-                              itemRender: itemRender,
-                            }}
-                            columns={columns}
-                            dataSource={results}
 
-                            rowSelection={rowSelection}
-                            rowKey={(record) => `${record.id_cita}`}
-                          />
-                      {/* } */}
-                    </div>
+                    <Table
+                      {...tableProps}
+                      pagination={{
+                        total: results.length,
+                        showTotal: (total, range) =>
+                          `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
+                        //showSizeChanger: true,
+                        onShowSizeChange: onShowSizeChange,
+                        itemRender: itemRender,
+                      }}
+                      columns={columns}
+                      dataSource={results}
+
+                      rowSelection={rowSelection}
+                      rowKey={(record) => `${record.id_cita}`}
+                    />
+
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-        </div>
-        <div id="delete_appointment" className="modal fade delete-modal" role="dialog">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-body text-center">
-                <img src={imagesend.src} alt="#" width={50} height={46} />
-                <h3>¿Está seguro que desea cancelar la cita?</h3>
-                <div className="m-t-20">
-                  {" "}
-                  <Link href="#" className="btn btn-white me-2" /* data-bs-dismiss="modal" */>
-                    Cerrar
-                  </Link>
-                  <button
-                    type="submit"
-                    className="btn btn-danger"
-                    onClick={() => { handleCancel(idAppointment) }}
-                  >
-                    Confirmar
-                  </button>
-                </div>
+      </div>
+      <div id="delete_appointment" className="modal fade delete-modal" role="dialog">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body text-center">
+              <img src={imagesend.src} alt="#" width={50} height={46} />
+              <h3>¿Está seguro que desea cancelar la cita?</h3>
+              <div className="m-t-20">
+                {" "}
+                <Link href="#" className="btn btn-white me-2" /* data-bs-dismiss="modal" */>
+                  Cerrar
+                </Link>
+                <button
+                  type="submit"
+                  className="btn btn-danger"
+                  onClick={() => { handleCancel(idAppointment) }}
+                >
+                  Confirmar
+                </button>
               </div>
             </div>
           </div>
         </div>
-        {isValidated ? <div id="delete_patient" className="modal fade delete-modal" role="dialog">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-body text-center">
-                <img src={imagesend.src} alt="#" width={50} height={46} />
-                <h3>Antes de continuar, cambia tu contraseña</h3>
-                <div className="m-t-20">
-                  {" "}
-                  <Link href={`/profesionales/${session.user?.id}`} className="btn btn-white me-2" data-bs-dismiss="modal">
-                    Ir a editar contraseña
-                  </Link>
-                </div>
+      </div>
+      {isValidated ? <div id="delete_patient" className="modal fade delete-modal" role="dialog">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body text-center">
+              <img src={imagesend.src} alt="#" width={50} height={46} />
+              <h3>Antes de continuar, cambia tu contraseña</h3>
+              <div className="m-t-20">
+                {" "}
+                <Link href={`/profesionales/${session.user?.id}`} className="btn btn-white me-2" data-bs-dismiss="modal">
+                  Ir a editar contraseña
+                </Link>
               </div>
             </div>
           </div>
-        </div> : ''}
-      </>
+        </div>
+      </div> : ''}
       <PasswordAlert />
     </>
   )

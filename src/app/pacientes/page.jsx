@@ -1,16 +1,18 @@
 "use client"
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { Table } from "antd";
+import { Form, Switch, Table } from 'antd';
 // import Headerudp from '../Headerudp';
 import Sidebar from '../../components/Sidebar';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
 import { fetchUsers } from '../../services/UsersServices'
 import { search } from '../../services/AppointmentsServices'
-import { imagesend,  plusicon, refreshicon, searchnormal, 
+import {
+  imagesend, plusicon, refreshicon, searchnormal,
 } from '../../components/imagepath';
 import Link from "next/link";
 
+import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
@@ -22,14 +24,24 @@ const PatientsList = () => {
   const ROL = ["profesional"]
   const { data: session } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
+  const { setProps } = useSidebar();
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [users, setUsers] = useState([])
   const [results, setResults] = useState([])
   const [show, setShow] = useState({ state: false, id: '' })
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setProps({
+      id: "menu-item2",
+      id1: "menu-items2",
+      activeClassName: "patient-list",
+    });
+  }, [setProps]);
+
+  useEffect(() => {
+    setLoading(true)
     const fetchData = async () => {
       const { users } = await fetchUsers()
       // console.log(users);
@@ -37,9 +49,14 @@ const PatientsList = () => {
 
       setUsers(newArray)
       setResults(newArray)
+      setLoading(false)
     }
     fetchData()
   }, [])
+
+  const handleLoadingChange = (enable) => {
+    setLoading(enable);
+  };
 
   const onSelectChange = (newSelectedRowKeys) => {
     console.log("selectedRowKeys changed: ", selectedRowKeys);
@@ -147,11 +164,25 @@ const PatientsList = () => {
       ),
     },
   ]
-
+  
+  const tableProps = {
+    loading,
+  };
   return (
     < >
+      <Form
+        layout="inline"
+        className="table-demo-control-bar"
+        style={{
+          marginBottom: 16,
+        }}
+      >
+        <Form.Item label="loading">
+          <Switch checked={loading} onChange={handleLoadingChange} />
+        </Form.Item>
+      </Form>
       {/* <Headerudp /> */}
-      <Sidebar id='menu-item2' id1='menu-items2' activeClassName='patient-list' />
+      {/* <Sidebar id='menu-item2' id1='menu-items2' activeClassName='patient-list' /> */}
       <div className="page-wrapper mt-5 pt-5">
         <div className="content">
           {/* Page Header */}
@@ -235,6 +266,7 @@ const PatientsList = () => {
                   {/* /Table Header */}
                   <div className="table-responsive doctor-list">
                     <Table
+                      {...tableProps}
                       pagination={{
                         total: results.length,
                         showTotal: (total, range) =>

@@ -2,7 +2,6 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useId } from "react";
-import { DatePicker } from "antd";
 import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller } from 'react-hook-form';
@@ -12,17 +11,17 @@ import Sidebar from "@/components/Sidebar";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/material";
 
-import { fetchProfessionals, fetchProfessionalById } from "@/services/DoctorsServices";
 import { fetchUserByEmail, fetchUsers } from "@/services/UsersServices";
-import { createAppointment, changeStatusAppointment, fetchAppointment, fetchAppointments } from "@/services/AppointmentsServices"
+import { fetchAppointments } from "@/services/AppointmentsServices"
 import { createInterviewRecord } from "@/services/RecordServices";
 import Contact from "@/components/Contact"
 import dayjs from "dayjs";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import { regiones, comunas, motivo_consulta, existencia_servicio, quien_derivo, diagnosticos_previos } from "../../../utils/selects";
+import { carreras } from "../../../utils/selects";
 
+import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
@@ -46,6 +45,15 @@ const AddInterviewRecord = ({ params }) => {
   const [error, setError] = useState('')
 
   const [open, setOpen] = useState(false);
+  const { setProps } = useSidebar();
+
+  useEffect(() => {
+    setProps({
+      id: "menu-item4",
+      id1: "menu-items4",
+      activeClassName: "add-medical-record",
+    });
+  }, [setProps]);
 
   const calcularEdad = (fechaNacimiento) => {
     const hoy = new Date();
@@ -151,11 +159,11 @@ const AddInterviewRecord = ({ params }) => {
     }
   })
   const gender = [
-    { value: 1, label: "Femenino" },
-    { value: 2, label: "Masculino" },
-    { value: 3, label: "No binario" },
-    { value: 4, label: "Otro" },
-    { value: 5, label: "Prefiero no decir" }
+    { value: 1, label: "Hombre" },
+    { value: 2, label: "Mujer" },
+    { value: 3, label: "Hombre trans" },
+    { value: 4, label: "Mujer trans" },
+    { value: 5, label: "No binarie" }
   ];
   const career = [
     { value: 2, label: "Antropologia" },
@@ -188,7 +196,9 @@ const AddInterviewRecord = ({ params }) => {
   const estdo_atencion = [
     { value: 2, label: "Reagendada" },
     { value: 3, label: "Realizada" },
-    { value: 4, label: "Cancelada" }
+    { value: 4, label: "Cancelada" },
+    { value: 4, label: "Cancelada por profesional" },
+    { value: 4, label: "Cancelada por alumno" }
   ];
   const area_atencion = [
     { value: 2, label: "Psicológica" },
@@ -278,12 +288,12 @@ const AddInterviewRecord = ({ params }) => {
   })
 
   return (
-    < >
-      <Sidebar
-        id="menu-item4"
-        id1="menu-items4"
-        activeClassName="add-medical-record"
-      />
+    // < >
+    //   <Sidebar
+    //     id="menu-item4"
+    //     id1="menu-items4"
+    //     activeClassName="add-medical-record"
+    //   />
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
@@ -2470,7 +2480,6 @@ const AddInterviewRecord = ({ params }) => {
             </div>
             : ''
         }
-      </>
     </>
   );
 };

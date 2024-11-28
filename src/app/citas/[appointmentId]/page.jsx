@@ -17,6 +17,7 @@ import { fetchAppointment, changeStatusAppointment, fetchAppointments } from "@/
 import { fetchProfessionals } from "@/services/DoctorsServices";
 import { fetchUsers, fetchUserByEmail } from "@/services/UsersServices";
 
+import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from "@/components/ProtectedRoutes";
@@ -38,6 +39,7 @@ const EditAppoinments = ({ params }) => {
   const [appointment, setAppointment] = useState('');
   const [dataPatient, setDatapatient] = useState('')
   const [success, setSuccess] = useState('initial')
+  const { setProps } = useSidebar();
 
   const [speciality, setSpeciality] = useState([
     { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality" },
@@ -49,6 +51,14 @@ const EditAppoinments = ({ params }) => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const [profesional, setProfesional] = useState([]);
+
+  useEffect(() => {
+    setProps({
+      id: "menu-item4",
+      id1: "menu-items4",
+      activeClassName: "edit-appoinment",
+    });
+  }, [setProps]);
 
   const fetchDataProfessionals = async () => {
     const response = await fetchProfessionals()
@@ -186,11 +196,11 @@ const EditAppoinments = ({ params }) => {
   return (
     <div>
       {/* <Headerudp /> */}
-      <Sidebar
+      {/* <Sidebar
         id="menu-item4"
         id1="menu-items4"
         activeClassName="edit-appoinment"
-      />
+      /> */}
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">

@@ -14,6 +14,7 @@ import { fetchSpecialityById } from '@/services/DoctorsServices';
 import { createSchedule, getDates, fetchScheduleByDate, validateDates } from '@/services/SchedulesServices';
 import Calender from '../../calender/page';
 
+import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
@@ -34,6 +35,7 @@ const ScheduleByProfessional = ({ params }) => {
   const [success, setSuccess] = useState('initial')
   const [startDate, setStartDate] = useState();
   const [startDay, setStartDay] = useState('');
+  const { setProps } = useSidebar();
 
   const onChange = (date, dateString) => {
     // console.log(date, dateString);
@@ -43,7 +45,15 @@ const ScheduleByProfessional = ({ params }) => {
     display: 'inline',
     width: '20%'
   }
-  // const label = { inputProps: { 'aria-label': 'Switch demo' } };
+  
+  useEffect(() => {
+    setProps({
+      id: "menu-item5",
+      id1: "menu-items5",
+      activeClassName: "professional-shedule",
+    });
+  }, [setProps]);
+
   useEffect(() => {
     const fetchProfesional = async () => {
       const { especialidad: user } = await fetchSpecialityById(params.id)
@@ -127,7 +137,7 @@ const ScheduleByProfessional = ({ params }) => {
 
   return (
     < >
-      <Sidebar id='menu-item5' id1='menu-items5' activeClassName='professional-shedule' />
+      {/* <Sidebar id='menu-item5' id1='menu-items5' activeClassName='professional-shedule' /> */}
       <>
         <div className="page-wrapper">
           <div className="content">

@@ -12,6 +12,7 @@ import Select from "react-select";
 import { useForm, Controller } from 'react-hook-form';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
+import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from '@/components/ProtectedRoutes';
@@ -32,7 +33,15 @@ const Addblog = () => {
   const ROL = ["administrador"]
   const { data: session } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
+  const { setProps } = useSidebar();
+
+  useEffect(() => {
+    setProps({
+      id: "menu-item11",
+      id1: "menu-items11",
+      activeClassName: "add-blog",
+    });
+  }, [setProps]);
 
   const loadFile = (event) => {
     // Handle file loading logic here
@@ -62,7 +71,7 @@ const Addblog = () => {
   return (
     <div>
       <div className="main-wrapper">
-        <DynamicSidebar id='menu-item11' id1='menu-items11' activeClassName='add-blog' />
+        {/* <DynamicSidebar id='menu-item11' id1='menu-items11' activeClassName='add-blog' /> */}
         {/* page-wrapper-start  */}
         <>
           <div className="page-wrapper mt-5 pt-5">
