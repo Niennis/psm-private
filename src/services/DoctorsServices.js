@@ -82,7 +82,6 @@ export const fetchProfessionalById = async (id) => {
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
-        'ngrok-skip-browser-warning': 'any'
       },
       body: JSON.stringify({
         id
@@ -150,22 +149,6 @@ export const updateDoctor = async (user, id) => {
     "especialidad": user.speciality.value,
     "status": user.status,
     "id_emergencia": 0,
-    
-    // request.json['rut'],
-    // request.json['carrera'],
-    // request.json['anoIngresoCarrera'],
-    // request.json['jornada'],
-    // request.json['direccion'],
-    // request.json['region'],
-    // request.json['comuna'],
-    // request.json['entrevistador'],
-    // request.json['mustChangePassword'],
-    // request.json['aplica_despeje'],
-    // request.json['campus'],
-    // request.json['id'],
-    // request.json['id_emergencia'],
-    // request.json['nombre_social']
-
 
   }
 
@@ -186,6 +169,55 @@ export const updateDoctor = async (user, id) => {
   }
 }
 
+
+
+export const updateProfesional = async (user) => {
+  const USERS_API = process.env.NEXT_PUBLIC_EDIT_PROFESIONAL
+  const body = {
+    ...user,
+    nombre_social: " "
+  }
+  console.log('body', body)
+  try {
+    const data = await fetch(USERS_API, {
+      method: "POST",
+      cors: "no-cors",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    
+    return data.json()
+  } catch (error) {
+    return error
+  }
+}
+
+export const changePassword = async (user) => {
+  const USERS_API = process.env.NEXT_PUBLIC_CHANGE_PASSWORD
+  const body = {
+    ...user,
+  }
+  console.log('body', body)
+  try {
+    const data = await fetch(USERS_API, {
+      method: "POST",
+      cors: "no-cors",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    return data.json()
+  } catch (error) {
+    return error
+  }
+}
+
+
 export const changeStatus = async (id, status) => {
   const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER
   try {
@@ -194,7 +226,6 @@ export const changeStatus = async (id, status) => {
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
-        'ngrok-skip-browser-warning': 'any'
       },
       body: JSON.stringify({
         "status": status
@@ -206,3 +237,25 @@ export const changeStatus = async (id, status) => {
   }
 }
 
+
+
+
+// {
+//   "apellido": "profesional",
+//   "campus": "ambas",
+//   "email": "profesional@profesional.com",
+//   "fecha_nacimiento": "Mon, 20 Feb 1995 00:00:00 GMT",
+//   "genero": "personalizado",
+//   "id": 6,
+//   "mustChangePassword": 0,
+//   "nombre": "profesional",
+//   "status": "activo",
+//   "telefono": "123456789",
+//   "tipo_usuario": "profesional",
+//   "name": "profesional",
+//   "lastName": "profesional",
+//   "mobile": "123456789",
+//   "dateOfBirth": "Mon, 20 Feb 1995 00:00:00 GMT",
+//   "gender": "personalizado",
+//   "speciality": "Psicopedagogía"
+// }

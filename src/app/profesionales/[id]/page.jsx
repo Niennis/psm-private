@@ -5,6 +5,7 @@ import { Profileuser, cameraicon, doctor, imagesend, medalicon, medalicon02, med
 import FeatherIcon from "feather-icons-react";
 // import { Link } from 'react-router-dom';
 import Link from 'next/link';
+import { useSidebar } from "@/context/SidebarContext";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
@@ -17,12 +18,20 @@ const DoctorProfile = () => {
   const ROL = ["profesional"]
   const { data: session } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
+  const { setProps } = useSidebar();
+
+  useEffect(() => {
+    setProps({
+      id: "menu-item1",
+      id1: "menu-items1",
+      activeClassName: "doctor-profile",
+    });
+  }, [setProps]);
 
   return (
     < >
       <>
-        <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-profile' />
+        {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-profile' /> */}
         <div className="page-wrapper">
           <div className="content">
             {/* Page Header */}

@@ -132,13 +132,11 @@ export const addUsers = async (user) => {
 
 export const updateUser = async (user) => {
   const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER
-
   const body = {
     ...user,
     nombre_social: 0
   }
   console.log('body', body)
-
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -153,7 +151,6 @@ export const updateUser = async (user) => {
   } catch (error) {
     return error
   }
-
 }
 
 export const deleteUser = async (id) => {

@@ -16,42 +16,53 @@ import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
-import { updateUser } from "@/services/UsersServices";
+import { updateProfesional, changePassword } from "@/services/DoctorsServices";
 import CacheHandler from "@/utils/cache-handler";
 import { Alert } from "@mui/material";
+import { useSidebar } from "@/context/SidebarContext";
 
 const cacheHandler = new CacheHandler();
 
 const EditDoctor = ({ params }) => {
   const { data: session } = useSession()
   const router = useRouter();
+  const { setProps } = useSidebar();
 
   if (!session) {
     redirect('/citas');
   }
-
   const userId = params.id;
-  if (session.user.id != userId && !session?.user?.rol === "administrador") {
+  if (session.user.id != userId && session?.user?.rol !== "administrador") {
     redirect('/citas');
   }
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
-
   const [initial, setInitial] = useState({})
   const [passwordVisible, setPasswordVisible] = useState(true);
-
+  const [initialProfesional, setInitialProfesional] = useState('')
   const [selectedOption, setSelectedOption] = useState(null);
 
   const [speciality, setSpeciality] = useState([
-    { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality" },
-    { value: "Psicología", label: "Psicología", name: "speciality" },
-    { value: "Psiquiatría", label: "Psiquiatría", name: "speciality" },
-    { value: "Trabajador social", label: "Trabajador social", name: "speciality" },
-    { value: "Practicante - Psicología", label: "Practicante - Psicología", name: "speciality" },
-    { value: "Practicante - Psicopedagogía", label: "Practicante - Psicopedagogía", name: "speciality" },
+    { value: "", label: "", name: "", id: 0 },
+    { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality", id: 1 },
+    { value: "Psicología", label: "Psicología", name: "speciality", id: 2 },
+    { value: "Psiquiatría", label: "Psiquiatría", name: "speciality", id: 3 },
+    { value: "Trabajador social", label: "Trabajador social", name: "speciality", id: 4 },
+    { value: "Practicante Psicología", label: "Practicante Psicología", name: "speciality", id: 5 },
+    { value: "Practicante Psicopedagogía", label: "Practicante Psicopedagogía", name: "speciality", id: 6 },
+    { value: "Practicante Psiquiatría", label: "Practicante Psiquiatría", name: "speciality", id: 7 },
+    { value: "Practicante Trabajo Social", label: "Practicante Trabajo Social", name: "speciality", id: 8 },
   ]);
 
+  useEffect(() => {
+    setProps({
+      id: "menu-item1",
+      id1: "menu-items1",
+      activeClassName: "edit-doctor",
+    });
+  }, [setProps]);
+  
   const [show, setShow] = useState(false);
   const onChange = (date, dateString) => {
     // console.log(date, dateString);
@@ -63,23 +74,25 @@ const EditDoctor = ({ params }) => {
   const fetchInitialData = async () => {
     try {
       const usersData = await fetchProfessionalById(params.id);
-      console.log('usersData', usersData)
-      const { especialidad: speciality } = await fetchSpecialityById(params.id);
-
+      const { especialidades } = await fetchSpecialityById(params.id);
       const user = usersData.users[0];
-      return {
+      console.log('usersData', usersData)
+      const obj = {
         ...user,
         name: user.nombre,
         lastName: user.apellido,
         mobile: user.telefono,
         email: user.email,
-        password: user.contrasena,
-        confirmPassword: user.contrasena,
         dateOfBirth: user.fecha_nacimiento,
-        gender: user.genero,
-        speciality: speciality[0]?.especialidad || { value: 'No especificada', label: 'No especificada' },
+        genero: user.genero,
+        speciality: especialidades[0].especialidad,
         status: user.status,
+        password: '',
+        confirmPassword: ''
       };
+      console.log('obj', obj)
+      setInitialProfesional(obj)
+      return obj
     } catch (error) {
       console.error("Error fetching initial data:", error);
       return {};
@@ -87,7 +100,7 @@ const EditDoctor = ({ params }) => {
   };
 
   const { register, handleSubmit, watch, control,
-    formState: { errors }, reset
+    formState: { errors, dirtyFields }, reset
   } = useForm({
     defaultValues: async () => await fetchInitialData()
   });
@@ -96,39 +109,42 @@ const EditDoctor = ({ params }) => {
     setPasswordVisible(!passwordVisible);
   };
 
-  const onSubmit = handleSubmit(async (data) => {
-    console.log('DATA', data)
+  const formatDateToYYYYDDMM = dateString => {
+    const timestamp = Date.parse(dateString);
+    const date = new Date(timestamp);
 
-    const formatDateToYYYYDDMM = dateString => {
-      const timestamp = Date.parse(dateString);
-      const date = new Date(timestamp);
+    const formattedDate = date.toISOString().split("T")[0];
+    return formattedDate
+  }
 
-      const formattedDate = date.toISOString().split("T")[0];
-      return formattedDate
+  const statusPass = (data) => {
+    const pass = data.password
+    const confirmPass = data.confirmPassword
+    if (data.mustChangePassword === 1 && pass && confirmPass && pass === confirmPass) {
+      return 0
+    } else {
+      return data.mustChangePassword
     }
+  }
 
-    const statusPass = () => {
-      const pass = watch('password')
-      const confirmPass = watch('confirmPassword')
-      if (pass === confirmPass) {
-        return 0
-      } else if (!pass || !confirmPass) {
-        return 1
-      }
-    }
+  const handleEdit = handleSubmit(async (data, e) => {
+    e.preventDefault()
+    console.log('Formulario enviado con datos:', data);
 
-    const pass = data.password === data.confirmPassword
+    const match = data.password === data.confirmPassword;
+
     const body = {
-      id: session?.user?.id,
-      nombre: data.name,
-      apellido: data.lastName,
-      telefono: data.mobile,
-      email: data.email,
-      contrasena: pass && data.password,
-      fecha_nacimiento: formatDateToYYYYDDMM(data.fecha_nacimiento),
-      genero: data.gender,
-      tipo_usuario: session.user.rol,
-      "status": data.status,
+      id: initialProfesional.id,
+      nombre: data.name || initialProfesional.nombre,
+      apellido: data.lastName || initialProfesional.apellido,
+      telefono: data.mobile || initialProfesional.telefono,
+      email: initialProfesional.email,
+      especialidad: data.speciality.value || initialProfesional.speciality,
+      contrasena: (data.password && data.confirmPassword && match) && data.password,
+      fecha_nacimiento: initialProfesional.fecha_nacimiento,
+      genero: data.gender || initialProfesional.genero,
+      tipo_usuario: initialProfesional.tipo_usuario,
+      status: data.status || initialProfesional.status,
       rut: '12345678-9',
       carrera: 'Psicopedagogia',
       anoIngresoCarrera: '0',
@@ -137,34 +153,85 @@ const EditDoctor = ({ params }) => {
       region: 'santiago',
       comuna: 'santiago',
       entrevistador: '1',
-      mustChangePassword: statusPass(),
+      mustChangePassword: initialProfesional.mustChangePassword,
       aplica_despeje: '0',
       campus: 'ambas',
       id_emergencia: 0,
+    };
+
+
+    const editPass = {
+      contrasena: data.password,
+      id: initialProfesional.id
+    }
+    console.log('dirtyFields', dirtyFields)
+
+    if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
+      console.log('ENTRO AQUÍ, contraseña', editPass)
+      try {
+        const response = await changePassword(editPass)
+        console.log('response pass', response)
+        if (response.includes('TypeError')) {
+          setSuccess('fail')
+          setError('Ocurrió un problema. Intenta más tarde')
+        } else {
+          setSuccess('success')
+        }
+      } catch (error) {
+        console.log('error pass', error)
+        setSuccess('fail')
+        setError(error)
+      }
     }
 
-    try {
-      const response = await updateUser(body)
-      console.log('response', response)
-      if (response.validacion === false) {
+    else if (Object.keys(dirtyFields).length > 0 && (!data.password || !data.confirmPassword)) {
+      console.log('ENTRO ACÁ, todo', body)
+      try {
+        const response = await updateProfesional(body)
+        console.log('response total', response)
+        if (response.includes('TypeError')) {
+          setSuccess('fail')
+          setError('Ocurrió un problema. Intenta más tarde: ' )
+        } else {
+          setSuccess('success')
+        }
+      } catch (error) {
+        console.log('error todo', error)
         setSuccess('fail')
-        setError('Ocurrió un problema. Intenta más tarde')
-      } else {
-        setSuccess('success')
+        setError(error)
       }
-    } catch (error) {
-      console.log('error', error)
     }
+
+    else {
+      console.log('ENTRO POR ACULLÁ, contraseña', editPass)
+
+      try {
+        const response = await updateProfesional(body)
+        console.log('response', mix)
+        if (response.includes('TypeError')) {
+          setSuccess('fail')
+          setError('Ocurrió un problema. Intenta más tarde')
+        } else {
+          setSuccess('success')
+        }
+      } catch (error) {
+        console.log('error', error)
+        setSuccess('fail')
+        setError(error)
+      }
+    }
+
   })
+
 
   return (
     < >
       {/* <Headerudp /> */}
-      <Sidebar
+      {/* <Sidebar
         id="menu-item1"
         id1="menu-items1"
         activeClassName="edit-doctor"
-      />
+      /> */}
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
@@ -299,12 +366,6 @@ const EditDoctor = ({ params }) => {
                             <Controller
                               control={control}
                               name="speciality"
-                              rules={{
-                                required: {
-                                  value: true,
-                                  message: 'Especialidad es requerida',
-                                }
-                              }}
                               ref={null}
                               render={({ field: { onChange, onBlur, value } }) => {
                                 return (
@@ -340,6 +401,7 @@ const EditDoctor = ({ params }) => {
                                 )
                               }}
                             />
+
                           </div>
                         </div>
 
@@ -387,6 +449,7 @@ const EditDoctor = ({ params }) => {
                                   value="hombre"
                                   className="form-check-input"
                                   defaultChecked={initial.genero === 'hombre'}
+                                  {...register('genero')}
                                 />
                                 Hombre
                               </label>
@@ -399,6 +462,7 @@ const EditDoctor = ({ params }) => {
                                   value="mujer"
                                   className="form-check-input"
                                   defaultChecked={initial.genero === 'mujer'}
+                                  {...register('genero')}
                                 />
                                 Mujer
                               </label>
@@ -411,6 +475,7 @@ const EditDoctor = ({ params }) => {
                                   value="hombre trans"
                                   className="form-check-input"
                                   defaultChecked={initial.genero === 'hombre trans'}
+                                  {...register('genero')}
                                 />
                                 Hombre trans
                               </label>
@@ -423,6 +488,7 @@ const EditDoctor = ({ params }) => {
                                   value="mujer trans"
                                   className="form-check-input"
                                   defaultChecked={initial.genero === 'mujer trans'}
+                                  {...register('genero')}
                                 />
                                 Mujer trans
                               </label>
@@ -435,220 +501,13 @@ const EditDoctor = ({ params }) => {
                                   value="otro"
                                   className="form-check-input"
                                   defaultChecked={initial.genero === 'no binarie' || 'personalizado'}
+                                  {...register('genero')}
                                 />
                                 No binarie
                               </label>
                             </div>
                           </div>
                         </div>
-
-                        {/* EDUCACION */}
-                        {/*  <div className="col-12 col-md-6 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Educación <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                            // defaultValue="M.B.B.S, M.S."
-                            />
-                          </div>
-                        </div> */}
-
-                        {/* DESIGNACION */}
-                        {/*  <div className="col-12 col-md-6 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Designación{" "}
-                              <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                            // defaultValue="Physician"
-                            />
-                          </div>
-                        </div> */}
-
-                        {/* DIRECCION */}
-                        {/*  <div className="col-12 col-sm-12">
-                          <div className="form-group local-forms">
-                            <label>
-                              Dirección <span className="login-danger">*</span>
-                            </label>
-                            <textarea
-                              className="form-control"
-                              rows={3}
-                              cols={30}
-                            />
-                          </div>
-                        </div> */}
-
-                        {/* CIUDAD */}
-                        {/* <div className="col-12 col-md-6 col-xl-3">
-                          <div className="form-group local-forms">
-                            <label>
-                              Ciudad <span className="login-danger">*</span>
-                            </label>
-                            <Select
-                              // menuPortalTarget={document.body}
-                              styles={{
-                                menuPortal: (base) => ({
-                                  ...base,
-                                  zIndex: 9999,
-                                }),
-                              }}
-                              defaultValue={selectedOption}
-                              onChange={setSelectedOption}
-                              options={options}
-                              id="search-commodity"
-                              components={{
-                                IndicatorSeparator: () => null
-                              }}
-                              styles={{
-                                control: (baseStyles, state) => ({
-                                  ...baseStyles,
-                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                  boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                  '&:hover': {
-                                    borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                  },
-                                  borderRadius: '10px',
-                                  fontSize: "14px",
-                                  minHeight: "45px",
-                                }),
-                                dropdownIndicator: (base, state) => ({
-                                  ...base,
-                                  transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                  transition: '250ms',
-                                  width: '35px',
-                                  height: '35px',
-                                }),
-                              }}
-                            />
-                          </div>
-                        </div> */}
-                        {/* PAIS */}
-                        {/* <div className="col-12 col-md-6 col-xl-3">
-                          <div className="form-group local-forms">
-                            <label>
-                              País <span className="login-danger">*</span>
-                            </label>
-                            <Select
-                              // menuPortalTarget={document.body}
-                              styles={{
-                                menuPortal: (base) => ({
-                                  ...base,
-                                  zIndex: 9999,
-                                }),
-                              }}
-                              defaultValue={selectedOption}
-                              onChange={setSelectedOption}
-                              options={option}
-                              id="search-commodity"
-                              components={{
-                                IndicatorSeparator: () => null
-                              }}
-                              styles={{
-                                control: (baseStyles, state) => ({
-                                  ...baseStyles,
-                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                  boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                  '&:hover': {
-                                    borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                  },
-                                  borderRadius: '10px',
-                                  fontSize: "14px",
-                                  minHeight: "45px",
-                                }),
-                                dropdownIndicator: (base, state) => ({
-                                  ...base,
-                                  transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                  transition: '250ms',
-                                  width: '35px',
-                                  height: '35px',
-                                }),
-                              }}
-                            />
-                          </div>
-                        </div> */}
-                        {/* REGION */}
-                        {/* <div className="col-12 col-md-6 col-xl-3">
-                          <div className="form-group local-forms">
-                            <label>
-                              Región{" "}
-                              <span className="login-danger">*</span>
-                            </label>
-                            <Select
-                              // menuIsOpen={true}
-                              defaultValue={selectedOption}
-                              onChange={setSelectedOption}
-                              options={statevalue}
-                              // menuPortalTarget={document.body}
-                              styles={{
-                                menuPortal: (base) => ({
-                                  ...base,
-                                  zIndex: 9999,
-                                }),
-                              }}
-                              id="search-commodity"
-                              components={{
-                                IndicatorSeparator: () => null
-                              }}
-                              styles={{
-                                control: (baseStyles, state) => ({
-                                  ...baseStyles,
-                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                  boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                  '&:hover': {
-                                    borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                  },
-                                  borderRadius: '10px',
-                                  fontSize: "14px",
-                                  minHeight: "45px",
-                                }),
-                                dropdownIndicator: (base, state) => ({
-                                  ...base,
-                                  transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                  transition: '250ms',
-                                  width: '35px',
-                                  height: '35px',
-                                }),
-                              }}
-                            />
-                          </div>
-                        </div> */}
-                        {/* CODIGO POSTAL */}
-                        {/* <div className="col-12 col-md-6 col-xl-3">
-                          <div className="form-group local-forms">
-                            <label>
-                              Código Postal{" "}
-                              <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                            // defaultValue={91403}
-                            />
-                          </div>
-                        </div> */}
-
-                        {/* BIOGRAFIA */}
-                        {/* <div className="col-12 col-sm-12">
-                          <div className="form-group local-forms">
-                            <label>
-                              Biografía {" "}
-                              <span className="login-danger">*</span>
-                            </label>
-                            <textarea
-                              className="form-control"
-                              rows={3}
-                              cols={30}
-                            />
-                          </div>
-                        </div> */}
-
 
                         {/* Contraseña */}
                         <div className="col-12 col-md-6 col-xl-6">
@@ -668,8 +527,10 @@ const EditDoctor = ({ params }) => {
                                 },
                                 validate:
                                   value => {
-                                    const regex = /^(?=.*\d)(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).*$/;
-                                    return regex.test(value) || 'La contraseña debe contener al menos un caracter especial, un número y una mayúscula';
+                                    if (value) {
+                                      const regex = /^(?=.*\d)(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).*$/;
+                                      return regex.test(value) || 'La contraseña debe contener al menos un caracter especial, un número y una mayúscula';
+                                    } return true
                                   }
                               })}
                             />
@@ -698,7 +559,11 @@ const EditDoctor = ({ params }) => {
                               type={passwordVisible ? 'password' : ''}
                               placeholder=""
                               {...register('confirmPassword', {
-                                validate: value => value === watch('password') || 'Las contraseñas no coinciden'
+                                validate: value => {
+                                  if (value) {
+                                    return (value === watch('password') || 'Las contraseñas no coinciden')
+                                  } return true
+                                }
                               })}
                             />
                             <span
@@ -726,12 +591,7 @@ const EditDoctor = ({ params }) => {
                                   value="activo"
                                   className="form-check-input"
                                   defaultChecked={initial.status === 'activo'}
-                                  {...register('status', {
-                                    required: {
-                                      value: true,
-                                      message: 'Estado es requerido'
-                                    }
-                                  })}
+                                  {...register('status')}
                                 />
                                 {initial.status}
                                 Activo
@@ -745,12 +605,7 @@ const EditDoctor = ({ params }) => {
                                   value="inactivo"
                                   defaultChecked={initial.status === 'inactivo'}
                                   className="form-check-input"
-                                  {...register('status', {
-                                    required: {
-                                      value: true,
-                                      message: 'Estado es requerido'
-                                    }
-                                  })}
+                                  {...register('status')}
                                 />
                                 Inactivo
                               </label>
@@ -760,9 +615,9 @@ const EditDoctor = ({ params }) => {
                         <div className="col-12">
                           <div className="doctor-submit text-end">
                             <button
-                              // type="submit"
+                              type="button"
                               className="btn btn-primary submit-form me-2"
-                              onClick={onSubmit}
+                              onClick={handleEdit}
                             >
                               Actualizar
                             </button>
@@ -779,285 +634,6 @@ const EditDoctor = ({ params }) => {
                       </div>
                     </form>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="notification-box">
-            <div className="msg-sidebar notifications msg-noti">
-              <div className="topnav-dropdown-header">
-                <span>Messages</span>
-              </div>
-              <div className="drop-scroll msg-list-scroll" id="msg_list">
-                <ul className="list-box">
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">R</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Richard Miles </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item new-message">
-                        <div className="list-left">
-                          <span className="avatar">J</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">John Doe</span>
-                          <span className="message-time">1 Aug</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">T</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Tarah Shropshire{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">M</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Mike Litorus</span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">C</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Catherine Manseau{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">D</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Domenic Houston{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">B</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Buster Wigton{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">R</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Rolland Webber{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">C</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author"> Claire Mapes </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">M</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Melita Faucher</span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">J</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Jeffery Lalor</span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">L</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Loren Gatlin</span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">T</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            Tarah Shropshire
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div className="topnav-dropdown-footer">
-                <Link href="chat.html">See all messages</Link>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          id="delete_patient"
-          className="modal fade delete-modal"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-body text-center">
-                <img src={imagesend} alt="" width={50} height={46} />
-                <h3>Are you sure want to delete this ?</h3>
-                <div className="m-t-20">
-                  {" "}
-                  <Link
-                    href="#"
-                    className="btn btn-white me-2"
-                    data-bs-dismiss="modal"
-                  >
-                    Close
-                  </Link>
-                  <button type="submit" className="btn btn-danger">
-                    Delete
-                  </button>
                 </div>
               </div>
             </div>

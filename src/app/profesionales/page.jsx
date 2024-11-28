@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Table } from "antd";
+import { Form, Switch, Table } from 'antd';
 
 import { onShowSizeChange, itemRender } from '@/components/Pagination'
 import ProtectedPage from '@/components/ProtectedRoutes';
 import Sidebar from '@/components/Sidebar';
 import { fetchProfessionals, professionalsWithSpeciality, fetchSpecialities } from '@/services/DoctorsServices';
 import { search } from '@/services/AppointmentsServices'
+import { useSidebar } from "@/context/SidebarContext";
 
 import { imagesend, plusicon, refreshicon, searchnormal } from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
@@ -30,6 +31,16 @@ const DoctorList = () => {
   const [results, setResults] = useState([])
   const [show, setShow] = useState({ state: false, id: '' })
   const [isLoading, setIsLoading] = useState(true)
+  const [loading, setLoading] = useState(false);
+  const { setProps } = useSidebar();
+
+  useEffect(() => {
+    setProps({
+      id: "menu-item1",
+      id1: "menu-items1",
+      activeClassName: "doctor-list",
+    });
+  }, [setProps]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -184,9 +195,13 @@ const DoctorList = () => {
     },
   ]
 
+  const tableProps = {
+    loading,
+  };
+
   return (
     < >
-      <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' />
+      {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' /> */}
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
             {/* Page Header */}
@@ -261,6 +276,7 @@ const DoctorList = () => {
                         <SimpleBackdrop />
                       ) : (
                         <Table
+                        {...tableProps}
                           pagination={{
                             total: results.length,
                             showTotal: (total, range) =>
