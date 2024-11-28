@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable no-const-assign */
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -10,10 +10,10 @@ import FullCalendar from "@fullcalendar/react";
 
 import { DatePicker } from "antd";
 import esLocale from '@fullcalendar/core/locales/es'
-import { 
+import {
   generarHorasMedicas,
 } from "@/services/SchedulesServices";
-import Carrousel from "@/components/skeletons/Carrousel";
+import CalendarSkeleton from "@/components/skeletons/CalendarSkeleton";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 
@@ -40,36 +40,29 @@ const isOverlap = (bloque, disponibilidad) => {
 const getAvailableHours = (bloques, disponibilidades) => {
   const horasDisponibles = [];
   disponibilidades.forEach(disponibilidad => {
-    const fechaInicio = new Date(disponibilidad.fechaInicio); 
+    const fechaInicio = new Date(disponibilidad.fechaInicio);
     const fechaFin = new Date(disponibilidad.fechaFin);
     bloques.forEach(bloque => {
       const choque = isOverlap(bloque, disponibilidad);
       if (choque && bloque.disponible === 0) {
         horasDisponibles.push({ id_bloque: bloque.id_bloque, mensaje: "Hay choque horario con el bloque no disponible" });
       } else if (!choque && bloque.disponible === 1) {
-        horasDisponibles.push({ 
-          id_bloque: bloque.id_bloque, 
-          fechaInicio: disponibilidad.fechaInicio, 
-          fechaFin: disponibilidad.fechaFin, 
-          horaIni: disponibilidad.horaIni, 
-          horaFin: disponibilidad.horaFin, 
-          duracionServicio: disponibilidad.duracionServicio });
+        horasDisponibles.push({
+          id_bloque: bloque.id_bloque,
+          fechaInicio: disponibilidad.fechaInicio,
+          fechaFin: disponibilidad.fechaFin,
+          horaIni: disponibilidad.horaIni,
+          horaFin: disponibilidad.horaFin,
+          duracionServicio: disponibilidad.duracionServicio
+        });
       }
     });
   }); return horasDisponibles;
 }
 
-const Calender = ({ id , calendarProp}) => {
+const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
   const [menu, setMenu] = useState(false);
-  const [calendario, setCalendario] = useState(' ')
 
-  const onChange = (date, dateString) => {
-    // console.log(date, dateString);
-  };
-  // console.log('ID in calender', id);
-  const toggleMobileMenu = () => {
-    setMenu(!menu);
-  };
   const [startDate, setDate] = useState(new Date()),
     [showCategory, setshowCategory] = useState(false),
     [showmodel, setshowmodel] = useState(false),
@@ -98,29 +91,13 @@ const Calender = ({ id , calendarProp}) => {
     return timestamp;
   };
 
-  const fetchData = async () => {
-    const response = await generarHorasMedicas(id)
-    const processed = response.map(item => {
-      // detalleServicio y duracionServicio
-      return (
-        {
-          ...item,
-          start: datesToTimestamp(item.fechaInicio, `${item.horaInicio}:00`),
-          end: datesToTimestamp(item.fechaInicio, `${item.horaFin}:00`),
-          className: "bg-purple",
-          title: item.detalleServicio || 'Disponible',
-        }
-      )
-    })
-    // console.log('CALENDARIO', processed);
-    // const ordered = processed.sort((a, b) => a.start - b.start);
-
-    setCalendario(processed)
-  }
-
-  useEffect(() => {
-    // fetchData()
-  }, [])
+  const onChange = (date, dateString) => {
+    // console.log(date, dateString);
+  };
+  // console.log('ID in calender', id);
+  const toggleMobileMenu = () => {
+    setMenu(!menu);
+  };
 
   const handleChange = (date) => {
     setDate(date);
@@ -197,7 +174,7 @@ const Calender = ({ id , calendarProp}) => {
         newArray[i].title = event_title;
       }
     }
-    setCalendario(newArray);
+    // setCalendario(newArray);
     setiseditdelete(false);
     console.log('CLICK UPDATE EVENT');
   };
@@ -227,8 +204,8 @@ const Calender = ({ id , calendarProp}) => {
                 <div className="card-body">
                   <div id="calendar">
 
-                    {!calendarProp ? <Carrousel />
-                      : calendarProp.length === 0 ?
+                    {!calendario ? <CalendarSkeleton />
+                      : calendario.length === 0 ?
                         <FullCalendar
                           windowResize={true}
                           locale={esLocale}
@@ -254,6 +231,7 @@ const Calender = ({ id , calendarProp}) => {
                         />
                         :
                         <FullCalendar
+                          ref={calendarRef}
                           windowResize={true}
                           locale={esLocale}
                           plugins={[
@@ -272,9 +250,10 @@ const Calender = ({ id , calendarProp}) => {
                           selectMirror={true}
                           dayMaxEvents={true}
                           weekends={false}
-                          initialEvents={calendarProp?.length > 0 ? calendarProp : []} // alternatively, use the `events` setting to fetch from a feed
+                          initialEvents={calendario?.length > 0 ? calendario : []} // alternatively, use the `events` setting to fetch from a feed
                           select={handleDateSelect}
                           eventClick={(clickInfo) => handleEventClick(clickInfo)}
+                          events={calendario} 
                         />
 
                     }
@@ -354,7 +333,8 @@ const Calender = ({ id , calendarProp}) => {
       {/* /Main Wrapper */}
     </>
   )
-};
+});
 
 // export default Calender;
+Calender.displayName = 'Calender';
 export default withAuth(Calender, ['alumno', 'profesional', 'administrador']);

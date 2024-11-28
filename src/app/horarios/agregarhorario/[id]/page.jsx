@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Sidebar from '../../../../components/Sidebar';
 import Link from 'next/link';
 import { TextField, Alert } from '@mui/material';
@@ -14,6 +14,8 @@ import { fetchSpecialityById, fetchProfessionalById } from '@/services/DoctorsSe
 import { createSchedule, getDates, fetchScheduleByDate, validateDates, generarHorasMedicas } from '@/services/SchedulesServices';
 import Calender from '../../../calender/page';
 
+import { useSidebar } from "@/context/SidebarContext";
+
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
@@ -23,22 +25,23 @@ const cacheHandler = new CacheHandler();
 
 import Tooltip from '@mui/material/Tooltip';
 import { FaInfoCircle } from "react-icons/fa";
+import SimpleBackdrop from '@/components/Backdrop';
 
 const AddSchedule = ({ params }) => {
-  const ROL = ["profesional"]
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
-  // console.log(session)
 
   const [startTime, setStartTime] = useState();
   const [endTime, setEndTime] = useState();
-  const [profesional, setProfesional] = useState({})
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('initial')
   const [startDate, setStartDate] = useState('');
   const [startDay, setStartDay] = useState('');
   const [calendario, setCalendario] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const calendarRef = useRef(null); // Referencia al calendario
+  const { setProps } = useSidebar();
+
   const onChange = (date, dateString) => {
     // console.log(date, dateString);
   };
@@ -47,6 +50,14 @@ const AddSchedule = ({ params }) => {
     display: 'inline',
     width: '20%'
   }
+  
+  useEffect(() => {
+    setProps({
+      id: "menu-item5",
+      id1: "menu-items5",
+      activeClassName: "add-shedule",
+    });
+  }, [setProps]);
 
   const datesToTimestamp = (fecha, hora) => {
     // Combinar fecha y hora en un formato ISO 8601 compatible con `Date`
@@ -71,40 +82,24 @@ const AddSchedule = ({ params }) => {
         )
       })
       setCalendario([...processed])
+
     } catch (error) {
       console.log(error)
       setError('No hay conexión con el servidor')
     }
-
   }
 
-useEffect(() => {
-  fetchData()
-  }, [])
-
   useEffect(() => {
-    const fetchProfesional = async () => {
-      const { especialidad: user } = await fetchSpecialityById(params.id)
-      console.log('fetchSpecialityById', user)
-      const { users } = await fetchProfessionalById(params.id)
-      console.log('fetchProfessionalById', users)
-      const obj = {
-        ...users[0],
-        especialidad: user.especialidad
-      }
-      setProfesional(obj)
-    }
-    fetchProfesional()
+    fetchData()
   }, [])
 
   const { register, handleSubmit, watch, control,
     formState: { errors }
   } = useForm({
     defaultValues: async () => {
-      const { especialidad: user } = await fetchSpecialityById(params.id)
-
       const { users } = await fetchProfessionalById(params.id)
-
+      const { especialidades : user } = await fetchSpecialityById(params.id)
+console.log('user', user)
       const obj = {
         nombre: `${users[0].nombre} ${users[0].apellido}`,
         especialidad: user[0]?.especialidad || 'No informada',
@@ -143,12 +138,16 @@ useEffect(() => {
         setError('Hubo un problema. Intenta luego más tarde')
       } else {
         setSuccess('success')
+        fetchData()
+        setIsLoading(true)
       }
 
     } catch (error) {
       console.log('error =>', error)
       setSuccess('fail')
       setError('Hubo un problema. Intenta luego más tarde')
+    } finally {
+      setTimeout(() => setIsLoading(false), 500);
     }
   })
 
@@ -173,9 +172,15 @@ useEffect(() => {
     setStartDay(split[2]);
   }
 
+  const handleOnClose = () => {
+    setSuccess('initial')
+    fetchData()
+
+  }
+
   return (
     < >
-      <Sidebar id='menu-item5' id1='menu-items5' activeClassName='add-shedule' />
+      {/* <Sidebar id='menu-item5' id1='menu-items5' activeClassName='add-shedule' /> */}
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
@@ -964,10 +969,13 @@ La disponibilidad de horas, será hasta la fecha de finalización.`} /></h4>
         </div >
         <div className="page-wrapper">
           <div className="content">
-            <Calender id={params.id} calendarProp={calendario} />
+            {isLoading ?
+              <SimpleBackdrop />
+              :
+              <Calender id={params.id} calendarRef={calendarRef} calendario={calendario} />
+            }
           </div>
         </div>
-
 
         {success === 'success'
           ?
@@ -982,7 +990,7 @@ La disponibilidad de horas, será hasta la fecha de finalización.`} /></h4>
             {/* <div className="col-sm-12 col-lg-6"> */}
             <Alert
               severity="success"
-              onClose={() => { setSuccess('initial') }}
+              onClose={handleOnClose}
               sx={{
                 zIndex: 'tooltip',
                 position: 'absolute',
