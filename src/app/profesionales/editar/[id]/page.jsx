@@ -18,6 +18,7 @@ import CacheHandler from "@/utils/cache-handler";
 import { especialidades } from "@/utils/selects";
 import { Alert } from "@mui/material";
 import { useSidebar } from "@/context/SidebarContext";
+import { formatDateToYYYYMMDD } from "@/utils/managedata";
 
 const cacheHandler = new CacheHandler();
 
@@ -90,7 +91,7 @@ const EditDoctor = ({ params }) => {
         confirmPassword: ''
       };
       console.log('obj', obj)
-      setInitialProfesional(obj)
+      setInitial(obj)
       return obj
     } catch (error) {
       console.error("Error fetching initial data:", error);
@@ -138,17 +139,17 @@ const EditDoctor = ({ params }) => {
     const match = data.password === data.confirmPassword;
 
     const body = {
-      id: initialProfesional.id,
-      nombre: data.name || initialProfesional.nombre,
-      apellido: data.lastName || initialProfesional.apellido,
-      telefono: data.mobile || initialProfesional.telefono,
-      email: initialProfesional.email,
-      especialidad: data.speciality.value || initialProfesional.speciality,
+      id: data.id,
+      nombre: data.name || initial.nombre,
+      apellido: data.lastName || initial.apellido,
+      telefono: data.mobile || initial.telefono,
+      email: initial.email,
+      especialidad: data.speciality.value || initial.speciality,
       contrasena: (data.password && data.confirmPassword && match) && data.password,
-      fecha_nacimiento: initialProfesional.fecha_nacimiento,
-      genero: data.gender || initialProfesional.genero,
-      tipo_usuario: initialProfesional.tipo_usuario,
-      status: data.status || initialProfesional.status,
+      fecha_nacimiento: formatDateToYYYYMMDD(initial.fecha_nacimiento),
+      genero: data.genero || initial.genero,
+      tipo_usuario: initial.tipo_usuario,
+      status: data.status || initial.status,
       rut: '12345678-9',
       carrera: 'Psicopedagogia',
       anoIngresoCarrera: '0',
@@ -157,61 +158,27 @@ const EditDoctor = ({ params }) => {
       region: 'santiago',
       comuna: 'santiago',
       entrevistador: '1',
-      mustChangePassword: initialProfesional.mustChangePassword,
+      mustChangePassword: initial.mustChangePassword,
       aplica_despeje: '0',
       campus: 'ambas',
       id_emergencia: 0,
+      nombre_social: data.nombre_social || initial.nombre_social || initial.nombre
     };
 
     const editPass = {
       contrasena: data.password,
-      id: initialProfesional.id
+      id_user: initial.id
     }
     console.log('dirtyFields', dirtyFields)
 
-    if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
-      console.log('ENTRO AQUÍ, contraseña', editPass)
-      try {
-        const response = await changePassword(editPass)
-        console.log('response pass', response)
-        if (response.includes('TypeError')) {
-          setSuccess('fail')
-          setError('Ocurrió un problema. Intenta más tarde')
-        } else {
-          setSuccess('success')
-        }
-      } catch (error) {
-        console.log('error pass', error)
-        setSuccess('fail')
-        setError(error)
-      }
-    }
 
-    else if (Object.keys(dirtyFields).length > 0 && (!data.password || !data.confirmPassword)) {
-      console.log('ENTRO ACÁ, todo', body)
-      try {
-        const response = await updateProfesional(body)
-        console.log('response total', response)
-        if (response.message === 'Failed to fetch') {
-          setSuccess('fail')
-          setError('Ocurrió un problema de conexión')
-        } else {
-          setSuccess('success')
-        }
-      } catch (error) {
-        console.log('error todo', error)
-        setSuccess('fail')
-        setError(error)
-      }
-    }
-
-    else {
+    if (Object.keys(dirtyFields).length > 0 && (data.password && data.confirmPassword && data.password === data.confirmPassword)) {
       console.log('ENTRO POR ACULLÁ, contraseña', editPass)
 
       try {
         const response = await updateProfesional(body)
         console.log('response', mix)
-        if (response.includes('TypeError')) {
+        if (response.message === 'TypeError') {
           setSuccess('fail')
           setError('Ocurrió un problema. Intenta más tarde')
         } else {
@@ -224,109 +191,51 @@ const EditDoctor = ({ params }) => {
       }
     }
 
+    else if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
+      console.log('ENTRO AQUÍ, contraseña', editPass)
+      try {
+        const response = await changePassword(editPass)
+        console.log('response pass', response)
+        if (response.validacion === false) {
+          setSuccess('fail')
+          setError(`Ocurrió un problema: ${response.detalle}`)
+        } else {
+          setSuccess('success')
+        }
+      } catch (error) {
+        console.log('error pass', error)
+        setSuccess('fail')
+        setError(`Ocurrió un problema: ${error.message}. Intenta más tarde`)
+      }
+    }
+    else {
+      console.log('ENTRO ACÁ, todo', body)
+      try {
+        const response = await updateProfesional(body)
+        console.log('response total', response)
+        if (response.validacion === true) {
+          setSuccess('success')
+        }
+        else if (response.validacion === false) {
+          setSuccess('fail')
+          setError(response.detalle)
+        } else {
+          setError('Ocurrió un problema de conexión')
+        }
+      } catch (error) {
+        console.log('error todo', error)
+        setSuccess('fail')
+        setError(error.message)
+      }
+    }
+
+
   })
 
-
-  const prepareData = (data) => {
-    const match = data.password === data.confirmPassword;
-
-    const body = {
-      id: initialProfesional.id,
-      nombre: data.name || initialProfesional.nombre,
-      apellido: data.lastName || initialProfesional.apellido,
-      telefono: data.mobile || initialProfesional.telefono,
-      email: initialProfesional.email,
-      especialidad: data.speciality.value || initialProfesional.speciality,
-      contrasena: (data.password && data.confirmPassword && match) && data.password,
-      fecha_nacimiento: "1988-12-12",
-      genero: data.genero || initialProfesional.genero,
-      tipo_usuario: initialProfesional.tipo_usuario,
-      status: data.status || initialProfesional.status,
-      rut: '12345678-9',
-      carrera: 'Psicopedagogia',
-      anoIngresoCarrera: '0',
-      jornada: 'laboral',
-      direccion: 'random',
-      region: 'santiago',
-      comuna: 'santiago',
-      entrevistador: '1',
-      mustChangePassword: initialProfesional.mustChangePassword,
-      aplica_despeje: '0',
-      campus: 'ambas',
-      id_emergencia: 0,
-      nombre_social: " "
-    };
-    console.log('BODY', body)
-
-    const editPass = {
-      contrasena: data.password,
-      id: initialProfesional.id
-    };
-
-    return { body, editPass };
-  };
-
-
-  const handlePasswordChange = async (editPass) => {
-    try {
-      const response = await changePassword(editPass);
-      console.log('response pass', response);
-      return response.includes('TypeError') ? { success: false, message: 'Ocurrió un problema. Intenta más tarde' } : { success: true };
-    } catch (error) {
-      console.log('error pass', error);
-      return { success: false, message: error };
-    }
-  };
-
-  const handleUpdateProfesional = async (body) => {
-    try {
-      const response = await updateProfesional(body);
-      console.log('response total', response);
-      return response.message === 'Failed to fetch'
-        ? { success: false, message: 'Ocurrió un problema de conexión' }
-        : { success: true };
-    } catch (error) {
-      console.log('error todo', error);
-      return { success: false, message: error };
-    }
-  };
-
-  const handleEditSubmit = async (data) => {
-    const { body, editPass } = prepareData(data);
-
-    if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
-      console.log('ENTRO AQUÍ, contraseña', editPass);
-      const result = await handlePasswordChange(editPass);
-      return result;
-    } else if (Object.keys(dirtyFields).length > 0 && (!data.password || !data.confirmPassword)) {
-      console.log('ENTRO ACÁ, todo', body);
-      const result = await handleUpdateProfesional(body);
-      return result;
-    } else {
-      console.log('ENTRO POR ACULLÁ, contraseña', editPass);
-      const result = await handleUpdateProfesional(body);
-      return result;
-    }
-  };
-
-
-  const bleh = handleSubmit(async (data, e) => {
-    e.preventDefault();
-    console.log('Formulario enviado con datos:', data);
-    const { body, editPass } = prepareData(data);
-
-    const result = await handleUpdateProfesional(body);
-
-    if (result.success) {
-      setSuccess('success');
-    } else {
-      setSuccess('fail');
-      setError(result.message);
-    }
-  });
-
-
-
+  const handleClose = () => {
+    setSuccess('initial')
+    redirect('/citas');
+  }
   return (
     < >
       {/* <Headerudp /> */}
@@ -548,10 +457,10 @@ const EditDoctor = ({ params }) => {
                               <label className="form-check-label">
                                 <input
                                   type="radio"
-                                  name="gender"
+                                  name="genero"
                                   value="hombre"
                                   className="form-check-input"
-                                  defaultChecked={initial.genero === 'hombre'}
+                                  defaultChecked={initial.genero === 'Hombre'}
                                   {...register('genero')}
                                 />
                                 Hombre
@@ -561,10 +470,10 @@ const EditDoctor = ({ params }) => {
                               <label className="form-check-label">
                                 <input
                                   type="radio"
-                                  name="gender"
+                                  name="genero"
                                   value="mujer"
                                   className="form-check-input"
-                                  defaultChecked={initial.genero === 'mujer'}
+                                  defaultChecked={initial.genero === "Mujer"}
                                   {...register('genero')}
                                 />
                                 Mujer
@@ -574,10 +483,10 @@ const EditDoctor = ({ params }) => {
                               <label className="form-check-label">
                                 <input
                                   type="radio"
-                                  name="gender"
+                                  name="genero"
                                   value="hombre trans"
                                   className="form-check-input"
-                                  defaultChecked={initial.genero === 'hombre trans'}
+                                  defaultChecked={initial.genero === 'Hombre trans'}
                                   {...register('genero')}
                                 />
                                 Hombre trans
@@ -587,10 +496,10 @@ const EditDoctor = ({ params }) => {
                               <label className="form-check-label">
                                 <input
                                   type="radio"
-                                  name="gender"
+                                  name="genero"
                                   value="mujer trans"
                                   className="form-check-input"
-                                  defaultChecked={initial.genero === 'mujer trans'}
+                                  defaultChecked={initial.genero === 'Mujer trans'}
                                   {...register('genero')}
                                 />
                                 Mujer trans
@@ -600,10 +509,10 @@ const EditDoctor = ({ params }) => {
                               <label className="form-check-label">
                                 <input
                                   type="radio"
-                                  name="gender"
-                                  value="otro"
+                                  name="genero"
+                                  value="no binarie"
                                   className="form-check-input"
-                                  defaultChecked={initial.genero === 'no binarie' || 'personalizado'}
+                                  defaultChecked={initial.genero === 'No binarie' || 'personalizado'}
                                   {...register('genero')}
                                 />
                                 No binarie
@@ -721,7 +630,7 @@ const EditDoctor = ({ params }) => {
                             <button
                               type="button"
                               className="btn btn-primary submit-form me-2"
-                              onClick={bleh}
+                              onClick={handleEdit}
                             >
                               Actualizar
                             </button>
@@ -756,7 +665,7 @@ const EditDoctor = ({ params }) => {
             {/* <div className="col-sm-12 col-lg-6"> */}
             <Alert
               severity="success"
-              onClose={() => { setSuccess('initial') }}
+              onClose={() => { handleClose() }}
               sx={{
                 zIndex: 'tooltip',
                 position: 'absolute',
