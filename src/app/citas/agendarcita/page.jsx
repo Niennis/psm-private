@@ -15,11 +15,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { fetchSpecialityById } from "@/services/DoctorsServices";
 import { fetchPatientsDespejeFalse } from "@/services/UsersServices";
 import { createAppointment } from "@/services/AppointmentsServices"
-import { editBloqueDisponible, fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas  } from "@/services/SchedulesServices";
+import { editBloqueDisponible, fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 
 import { useSession } from "next-auth/react";
-import {  ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
+import { ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
 import 'dayjs/locale/es-mx'
@@ -80,7 +80,7 @@ const AddAppoinments = () => {
     });
   }, [setProps]);
 
-  const { register, handleSubmit, watch, control,
+  const { register, handleSubmit, watch, control, setValue,
     formState: { errors }, reset
   } = useForm({
     defaultValues: async () => await getPatients()
@@ -92,7 +92,7 @@ const AddAppoinments = () => {
     { value: "individual", label: "Psicopedagógica individual" },
   ]
 
- const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const handleOpen = (e) => {
     e.preventDefault()
     setOpen(true)
@@ -149,17 +149,23 @@ const AddAppoinments = () => {
     if (modalidad === "videollamada" || modalidad === "ambas") {
       setDays([])
       setHours([])
+      setDate('')
+      setTime('')
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
       );
     } else if (modalidad === "presencial" || modalidad === "ambas") {
       setDays([])
       setHours([])
+      setDate('')
+      setTime('')
 
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
       );
     } else if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
       setDays([])
       setHours([])
+      setDate('')
+      setTime('')
 
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === "centro" || item.campus === "ambas")
@@ -167,6 +173,8 @@ const AddAppoinments = () => {
     } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
       setDays([])
       setHours([])
+      setDate('')
+      setTime('')
 
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === "huechuraba" || item.campus === "ambas")
@@ -202,28 +210,26 @@ const AddAppoinments = () => {
     return soloDias;
   }
 
+  // SUBMIT FUNCTION
   const onSubmit = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
-    console.log('DATA', data)
-    try {
-      // const selectedBlocks = await handleBloques(profesional.id, time)
-      // console.log('selectedBlocks', selectedBlocks)
-      // const promises = selectedBlocks.map(async (item) => (
-      //   await editBloqueDisponible(item['id_bloque'], profesional.id)
-      // ))
 
+    try {
       // la función que crea la cita
       console.log('selectedPatient', selectedPatient)
       const appointment = await createAppointment({
         ...data,
         "patient_id": selectedPatient.id,
-        hora: time,
-        fecha: date,
+        hora: data.selectedHour,
+        fecha: data.selectedDay,
         motivo: data.motivo === 'Otro' ? data.otro : data.motivo
       })
+
+
       if (appointment.estado === false) {
         setSuccess('fail')
+        setError(appointment.detalle)
       } else {
         setSuccess('success')
       }
@@ -260,7 +266,7 @@ const AddAppoinments = () => {
     setDoctor(selectedProfessionals)
   }
 
-// Obtiene días según profesional seleccionado
+  // Obtiene días según profesional seleccionado
   const handleSelectedProfessional = async (e) => {
     setDays([])
     setHours([])
@@ -320,6 +326,8 @@ const AddAppoinments = () => {
     e.preventDefault()
     setHours('')
     setBloques('')
+    setValue('selectedDay', fecha)
+
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
     try {
       setDate(fechaMod)
@@ -339,6 +347,12 @@ const AddAppoinments = () => {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  const handleHours = (hour) => {
+    console.log(hour)
+    setTime(hour)
+    setValue('selectedHour', hour)
   }
 
   // Obtiene la duración y la agrega a la función agregarBloques
@@ -878,7 +892,7 @@ const AddAppoinments = () => {
                                   <span className="login-danger">*</span>
                                 </label>
 
-                                <div className="form-group local-forms">
+                                <div className="form-group local-forms mb-0">
                                   {days.length > 0 && (
                                     <>
                                       <button
@@ -889,14 +903,22 @@ const AddAppoinments = () => {
                                       </button>
 
                                       {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
-                                        // console.log('day en el map', date,'holo', day.fechaInicio)
                                         return (
-                                          <button
-                                            className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
-                                            key={`${day.id}${i}days`}
-                                            onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
-                                            {dayjs(day.fechaInicio).format('ddd DD MMM')}
-                                          </button>
+                                          <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
+                                            <input type="hidden" {...register("selectedDay", {
+                                              required: {
+                                                value: true,
+                                                message: 'Seleccione una fecha'
+                                              }
+                                            })} />
+                                            <button
+                                              className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
+
+                                              onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
+                                              {dayjs(day.fechaInicio).format('ddd DD MMM')}
+
+                                            </button>
+                                          </div>
                                         )
                                       }
                                       )}
@@ -909,10 +931,14 @@ const AddAppoinments = () => {
                                     </>)
                                   }
                                 </div>
+                                {
+                                  errors.selectedDay && errors.selectedDay && <span><small>{errors.selectedDay.message}</small></span>
+                                }
                               </div>
+
                               {/* <DatePick /> */}
                               {date !== '' &&
-                                <div className="col-12 col-md-12 col-xl-12">
+                                <div className="col-12 col-md-12 col-xl-12 mt-3">
                                   <label>
                                     Hora <span className="login-danger">*</span>
                                   </label>
@@ -928,13 +954,20 @@ const AddAppoinments = () => {
                                         {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
 
                                           return (
-                                            <button
-                                              type="button"
-                                              className={`btn me-2 ${time === hour.horaInicioBloque ? "btn-primary" : "btn-cancel"}`}
-                                              key={`${hour.id}${i}hours`}
-                                              onClick={() => { setTime(hour.horaInicioBloque) }}>
-                                              {hour.horaInicioBloque}
-                                            </button>
+                                            <div key={`${hour.id}${i}hours`} style={{ display: 'inline-block' }}>
+                                              <input type="hidden" {...register("selectedHour", {
+                                                required: {
+                                                  value: true,
+                                                  message: 'Seleccione una hora'
+                                                }
+                                              })} />
+                                              <button
+                                                type="button"
+                                                className={`btn me-2 ${time === hour.horaInicio ? "btn-primary" : "btn-cancel"}`}
+                                                onClick={() => { handleHours(hour.horaInicio) }}>
+                                                {hour.horaInicioBloque}
+                                              </button>
+                                            </div>
                                           )
                                         }
                                         )}
@@ -948,6 +981,9 @@ const AddAppoinments = () => {
                                     }
                                   </div>
                                 </div>
+                              }
+                              {
+                                errors.selectedHour && <span><small>{errors.selectedHour.message}</small></span>
                               }
                             </div>
                           }

@@ -32,14 +32,20 @@ import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
+import { validarRut } from "@/utils/managedata";
 
 const cacheHandler = new CacheHandler();
 
 const formatRut = (value) => {
   const cleanedValue = value.replace(/[^\dkK]/g, '');
   const [number, verifierDigit] = cleanedValue.split('-');
+
   const formattedNumber = number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return `${formattedNumber}-${verifierDigit || ''}`;
+  const response = validarRut(value)
+  if (response){
+    return `${formattedNumber}-${verifierDigit || ''}`;
+  }
+  setError('Rut inválido')
 };
 
 // Función para obtener fechas únicas
@@ -149,17 +155,23 @@ const AddFirstAppoinments = () => {
     if (modalidad === "videollamada" || modalidad === "ambas") {
       setDays([])
       setHours([])
+      setDate('')
+      setTime('')
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
       );
     } else if (modalidad === "presencial" || modalidad === "ambas") {
       setDays([])
       setHours([])
+      setDate('')
+      setTime('')
 
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
       );
     } else if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
       setDays([])
       setHours([])
+      setDate('')
+      setTime('')
 
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === "centro" || item.campus === "ambas")
@@ -167,6 +179,8 @@ const AddFirstAppoinments = () => {
     } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
       setDays([])
       setHours([])
+      setDate('')
+      setTime('')
 
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === "huechuraba" || item.campus === "ambas")
@@ -262,6 +276,8 @@ const AddFirstAppoinments = () => {
     e.preventDefault()
     setHours('')
     setBloques('')
+    setValue('selectedDay', fecha)
+
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
     try {
       setDate(fechaMod)
@@ -281,6 +297,12 @@ const AddFirstAppoinments = () => {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  const handleHours = (hour) => {
+    console.log(hour)
+    setTime(hour)
+    setValue('selectedHour', hour)
   }
 
   const handleBloques = async (id, hora) => {
@@ -312,11 +334,6 @@ const AddFirstAppoinments = () => {
 
     return resultado;
   };
-
-  const handleHours = (e) => {
-    e.preventDefault()
-    setHours(dayjs(e.id_bloque).format('DD/MM/YYYY'))
-  }
 
   const handleOpen = (e) => {
     e.preventDefault()
@@ -381,8 +398,8 @@ const AddFirstAppoinments = () => {
     const bodyInterview = {
       ...data,
       "patient_id": patient.id,
-      "fecha": date,
-      "hora": time,
+      "hora": data.selectedHour,
+      "fecha": data.selectedDay,
       "region": regiones[0].label,
       "motivo_consulta": motivo_consulta === 'otro' ? data.otro : data.motivo_consulta
     }
@@ -911,7 +928,7 @@ const AddFirstAppoinments = () => {
                                       instanceId="select-region"
                                       defaultValue={selectedOption}
                                       onChange={onChange}
-                                      options={comunas[selectedRegion?.name]}
+                                      options={comunas[selectedRegion?.value]}
                                       menuPortalTarget={menuPortalTarget}
                                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                       id="select-region"
@@ -1282,7 +1299,7 @@ const AddFirstAppoinments = () => {
                                   Día de la Cita{" "}
                                   <span className="login-danger">*</span>
                                 </label>
-                                <div className="form-group local-forms">
+                                <div className="form-group local-forms mb-0">
                                   {days.length > 0 && (
                                     <>
                                       <button
@@ -1293,14 +1310,22 @@ const AddFirstAppoinments = () => {
                                       </button>
 
                                       {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
-                                        // console.log('day en el map', date,'holo', day.fechaInicio)
                                         return (
-                                          <button
-                                            className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
-                                            key={`${day.id}${i}days`}
-                                            onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
-                                            {dayjs(day.fechaInicio).format('ddd DD MMM')}
-                                          </button>
+                                          <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
+                                            <input type="hidden" {...register("selectedDay", {
+                                              required: {
+                                                value: true,
+                                                message: 'Seleccione una fecha'
+                                              }
+                                            })} />
+                                            <button
+                                              className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
+
+                                              onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
+                                              {dayjs(day.fechaInicio).format('ddd DD MMM')}
+
+                                            </button>
+                                          </div>
                                         )
                                       }
                                       )}
@@ -1313,10 +1338,13 @@ const AddFirstAppoinments = () => {
                                     </>)
                                   }
                                 </div>
+                                {
+                                  errors.selectedDay && errors.selectedDay && <span><small>{errors.selectedDay.message}</small></span>
+                                }
                               </div>
                               {/* <DatePick /> */}
                               {date !== '' &&
-                                <div className="col-12 col-md-12 col-xl-12">
+                                <div className="col-12 col-md-12 col-xl-12 mt-3">
                                   <label>
                                     Hora <span className="login-danger">*</span>
                                   </label>
@@ -1330,15 +1358,22 @@ const AddFirstAppoinments = () => {
                                           <ChevronLeft />
                                         </button>
                                         {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
-                                          // console.log('hour', hour.horaInicioBloque, time)
+
                                           return (
-                                            <button
-                                              type="button"
-                                              className={`btn me-2 ${time === hour.horaInicioBloque ? "btn-primary" : "btn-cancel"}`}
-                                              key={`${hour.id}${i}hours`}
-                                              onClick={() => { setTime(hour.horaInicioBloque) }}>
-                                              {hour.horaInicioBloque}
-                                            </button>
+                                            <div key={`${hour.id}${i}hours`} style={{ display: 'inline-block' }}>
+                                              <input type="hidden" {...register("selectedHour", {
+                                                required: {
+                                                  value: true,
+                                                  message: 'Seleccione una hora'
+                                                }
+                                              })} />
+                                              <button
+                                                type="button"
+                                                className={`btn me-2 ${time === hour.horaInicio ? "btn-primary" : "btn-cancel"}`}
+                                                onClick={() => { handleHours(hour.horaInicio) }}>
+                                                {hour.horaInicioBloque}
+                                              </button>
+                                            </div>
                                           )
                                         }
                                         )}
@@ -1352,6 +1387,9 @@ const AddFirstAppoinments = () => {
                                     }
                                   </div>
                                 </div>
+                              }
+                              {
+                                errors.selectedHour && <span><small>{errors.selectedHour.message}</small></span>
                               }
                             </div>
                           }
