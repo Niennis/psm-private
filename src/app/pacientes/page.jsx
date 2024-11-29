@@ -140,13 +140,17 @@ const PatientsList = () => {
                 <i className="fas fa-ellipsis-v" />
               </Link>
               <div
+                style={{ right: '35px', top: 0 }}
                 className=
                 {show.state === true && show.id === record.id
-                  ? "dropdown-menu dropdown-menu-end show"
-                  : "dropdown-menu dropdown-menu-end "
+                  ? "dropdown-menu dropdown-menu-end dropdown-extra show"
+                  : "dropdown-menu dropdown-menu-end dropdown-extra"
                 }
               >
-                <Link className="dropdown-item" href={`/pacientes/${record.id}`}>
+                <Link className="dropdown-item" href={`/pacientes/${record.id}`}
+                // data-bs-toggle="modal" 
+                // data-bs-target="#delete_patient"
+                >
                   <i className="far fa-edit me-2" />
                   Editar
                 </Link>
@@ -164,7 +168,7 @@ const PatientsList = () => {
       ),
     },
   ]
-  
+
   const tableProps = {
     loading,
   };
