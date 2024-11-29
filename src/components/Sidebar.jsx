@@ -17,8 +17,6 @@ const Sidebar = () => {
   const { props } = useSidebar();
   const ROL = ["alumno"]
   const router = useRouter();
-  // const [sidebar, setSidebar] = useState("");
-
 
   const handleClick = (e, item, item1, item3) => {
     const div = document.querySelector(`#${item}`);
@@ -57,7 +55,7 @@ const Sidebar = () => {
   return (
     <ProtectedPage level={ROL}>
 
-      <div className="sidebar mt-5" id="sidebar" style={{ zIndex: 99}}>
+      <div className="sidebar mt-5" id="sidebar" style={{ zIndex: 99 }}>
         {/* <Scrollbars
           autoHide
           autoHideTimeout={1000}
@@ -116,11 +114,37 @@ const Sidebar = () => {
                   session.user?.rol && session.user?.rol === "profesional" &&
                   <>
                     <li className="submenu">
+                      <Link href="#" id="menu-item1" onClick={(e) => {
+                        // setSidebar('Doctors')
+                        handleClick(e, "menu-item1", "menu-items1")
+                      }}>
+                        <span className="menu-side">
+                          <img src={doctor.src} alt="" />
+                        </span>{" "}
+                        <span> Profesionales </span> <span className="menu-arrow" />
+                      </Link>
+                      <ul style={{ display: "none"  }} className="menu-items1">
+                       {/*  <li>
+                          <Link className={props?.activeClassName === 'doctor-list' ? 'active' : ''} href="/profesionales">Lista de Profesionales</Link>
+                        </li>
+                        <li>
+                          <Link className={props?.activeClassName === 'add-doctor' ? 'active' : ''} href="/profesionales/agregarprofesional">Agregar Profesional</Link>
+                        </li> */}
+                        <li>
+                          <Link className={props?.activeClassName === 'edit-doctor' ? 'active' : ''} href={`/profesionales/editar/${session.user?.sub}`}>Editar Perfil</Link>
+                        </li>
+                        {/* <li>
+                    <Link className={props?.activeClassName === 'doctor-profile' ? 'active' : ''} href="/doctorprofile">Perfil Profesional</Link>
+                  </li> */}
+                      </ul>
+                    </li>
+
+                    <li className="submenu">
                       <Link href="#" id="menu-item2" onClick={(e) => handleClick(e, "menu-item2", "menu-items2")}>
                         <span className="menu-side">
                           <img src={patients.src} alt="" />
                         </span>{" "}
-                        <span>Pacientes </span> {/* <span className="menu-arrow" /> */}
+                        <span>Pacientes </span> <span className="menu-arrow" />
                       </Link>
                       <ul style={{ display: "none" }} className="menu-items2">
                         <li>
@@ -199,7 +223,7 @@ const Sidebar = () => {
                         </span>{" "}
                         <span> Profesionales </span> <span className="menu-arrow" />
                       </Link>
-                      <ul style={{ display: sidebar === 'Doctors' ? 'block' : 'none' }} className="menu-items1">
+                      <ul style={{ display: 'none' }} className="menu-items1">
                         <li>
                           <Link className={props?.activeClassName === 'doctor-list' ? 'active' : ''} href="/profesionales">Lista de Profesionales</Link>
                         </li>
