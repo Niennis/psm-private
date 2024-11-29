@@ -1875,15 +1875,14 @@ export const carreras = [
 
 ]
 
-
 export const especialidades = [
   { value: "", label: "", name: "", id: 0 },
   { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality", id: 1 },
   { value: "Psicología", label: "Psicología", name: "speciality", id: 2 },
   { value: "Psiquiatría", label: "Psiquiatría", name: "speciality", id: 3 },
-  { value: "Trabajador social", label: "Trabajador social", name: "speciality", id: 4 },
+  { value: "Trabajo Social", label: "Trabajo Social", name: "speciality", id: 4 },
   { value: "Practicante Psicología", label: "Practicante Psicología", name: "speciality", id: 5 },
   { value: "Practicante Psicopedagogía", label: "Practicante Psicopedagogía", name: "speciality", id: 6 },
   { value: "Practicante Psiquiatría", label: "Practicante Psiquiatría", name: "speciality", id: 7 },
-  { value: "Practicante Trabajo Social", label: "Practicante Trabajo Social", name: "speciality", id: 8 },
+  { value: "Practicante Trabajo Social", label: "Practicante Trabajo Social", name: "speciality", id: 8 },
 ]

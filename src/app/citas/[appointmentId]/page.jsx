@@ -45,7 +45,7 @@ const EditAppoinments = ({ params }) => {
     { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality" },
     { value: "Psicología", label: "Psicología", name: "speciality" },
     { value: "Psiquiatría", label: "Psiquiatría", name: "speciality" },
-    { value: "Trabajador social", label: "Trabajador social", name: "speciality" },
+    { value: "Trabajo Social", label: "Trabajo Social", name: "speciality" },
   ]);
 
   const handleClose = () => setShow(false);

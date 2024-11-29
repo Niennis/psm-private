@@ -204,7 +204,7 @@ const AddInterviewRecord = ({ params }) => {
     { value: 2, label: "Psicológica" },
     { value: 3, label: "Psicopedagógica" },
     { value: 4, label: "Psiquiátrica" },
-    { value: 4, label: "Trabajador social" }
+    { value: 4, label: "Trabajo Social" }
   ];
 
   const handleAddContact = () => {
