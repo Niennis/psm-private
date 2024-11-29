@@ -24,6 +24,7 @@ import CacheHandler from "@/utils/cache-handler";
 const cacheHandler = new CacheHandler();
 
 import Tooltip from '@mui/material/Tooltip';
+import CustomizedTooltips from '@/components/Tooltip';
 import { FaInfoCircle } from "react-icons/fa";
 import SimpleBackdrop from '@/components/Backdrop';
 
@@ -50,7 +51,7 @@ const AddSchedule = ({ params }) => {
     display: 'inline',
     width: '20%'
   }
-  
+
   useEffect(() => {
     setProps({
       id: "menu-item5",
@@ -98,8 +99,8 @@ const AddSchedule = ({ params }) => {
   } = useForm({
     defaultValues: async () => {
       const { users } = await fetchProfessionalById(params.id)
-      const { especialidades : user } = await fetchSpecialityById(params.id)
-console.log('user', user)
+      const { especialidades: user } = await fetchSpecialityById(params.id)
+      console.log('user', user)
       const obj = {
         nombre: `${users[0].nombre} ${users[0].apellido}`,
         especialidad: user[0]?.especialidad || 'No informada',
@@ -265,12 +266,13 @@ console.log('user', user)
                         </div>
                         <div className="col-12 col-md-12 col-xl-12">
                           <div className="form-group local-forms">
-
-                            {/* <Tooltip title="Delete" placement="top-start"> */}
-                            <label>
-                              Nombre servicio o evento <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="El nombre del servicio es un nombre de fantasía para identificar las horas disponibles en los reportes. Este nombre permite agrupar diferentes tipos de disponibilidad en un mismo grupo. " />
-                              <span className="login-danger">*</span>
-                            </label>
+                            <CustomizedTooltips text={(
+                              <>El nombre del servicio es un nombre de fantasía para identificar las horas disponibles en los reportes. Este nombre permite agrupar diferentes tipos de disponibilidad en un mismo grupo.</>
+                            )}>
+                              <label>
+                                Nombre servicio o evento  <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} />
+                              </label>
+                            </CustomizedTooltips>
                             <input
                               className="form-control"
                               type="text"
@@ -281,9 +283,14 @@ console.log('user', user)
                         </div>
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group local-forms">
-                            <label>
-                              Duración servicio <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="La duración del servicio indica cuánto tiempo se dedicará a la atención profesional indicada" /><span className="login-danger">*</span>
-                            </label>
+                            <CustomizedTooltips text={(
+                              <>La duración del servicio indica cuánto tiempo se dedicará a la atención profesional indicada.</>
+                            )}>
+                              <label>
+                                Duración servicio <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} />
+                              </label>
+
+                            </CustomizedTooltips>
                             <Controller
                               control={control}
                               name="duracion"
@@ -341,7 +348,11 @@ console.log('user', user)
                         <div className="col-12 col-lg-12" >
                           <div className="col-12">
                             <div className="form-heading">
-                              <h4>Tipo de disponibilidad <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="El tiempo post servicio se refiere al tiempo que el profesional puede dedicar a transcribir las anotaciones de la sesión o a descansar entre una sesión y otra " /></h4>
+                              <CustomizedTooltips text={(
+                                <>Es el tipo de cita para las que se abrirán horas.</>
+                              )}>
+                                <h4 style={{ width: 'max-content' }}>Tipo de disponibilidad <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                              </CustomizedTooltips>
                             </div>
                           </div>
                           {/* <div className="form-group select-gender">
@@ -479,7 +490,11 @@ console.log('user', user)
                         <div className="col-12 col-lg-12" >
                           <div className="col-12">
                             <div className="form-heading">
-                              <h4>Modalidad <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="Al seleccionar un tipo de modalidad u otra, se ofrecerá como opción al momento de agendar una cita. Si estarás disponible para todos los tipos de modalidad, selecciona Ambas." /></h4>
+                              <CustomizedTooltips text={(
+                                <>Al seleccionar un tipo de modalidad u otra, se ofrecerá como opción al momento de agendar una cita. Si estarás disponible para todos los tipos de modalidad, selecciona Ambas.</>
+                              )}>
+                                <h4 style={{ width: 'max-content' }}>Modalidad <span className="login-danger">*</span><FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                              </CustomizedTooltips>
                             </div>
                           </div>
                           <div className="form-group select-gender">
@@ -544,7 +559,11 @@ console.log('user', user)
                           < div className="col-12 col-lg-12" >
                             <div className="col-12">
                               <div className="form-heading">
-                                <h4>Campus <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title="Al seleccionar un campus, se podrán asignar horas de atención para dicho lugar. Si estarás disponible para ambas sedes, selecciona Ambas." /></h4>
+                                <CustomizedTooltips text={(
+                                  <>Al seleccionar un campus, se podrán asignar horas de atención para dicho lugar. Si estarás disponible para ambas sedes, selecciona Ambas.</>
+                                )}>
+                                  <h4 style={{ width: 'max-content' }}>Campus <span className="login-danger">*</span><FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                                </CustomizedTooltips>
                               </div>
                             </div>
                             <div className="form-group select-gender">
@@ -592,9 +611,18 @@ console.log('user', user)
                         {/* HORARIOS */}
                         <div className="col-12">
                           <div className="form-heading">
-                            <h4>Disponibilidad <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title={`Al seleccionar un rango de disponibilidad, el tiempo de cada sesión será dividido en N bloques según la duración del servicio.
-                              
-Por ejemplo, si seleccionaste una duración de 1 hora y 0 de post servicio, y un rango de disponibilidad entre 9:00 y 12:00, entonces en ese rango caben 3 sesiones de 1 hora.`} /></h4>
+                            <CustomizedTooltips text={(
+                              <>
+                                <p>
+                                  Al seleccionar un rango de disponibilidad, el tiempo de cada sesión será dividido en N bloques según la duración del servicio.
+                                </p>
+                                <p>
+                                  Por ejemplo, si seleccionaste una duración de 1 hora y 0 de post servicio, y un rango de disponibilidad entre 9:00 y 12:00, entonces en ese rango caben 3 sesiones de 1 hora.
+                                </p>
+                              </>
+                            )}>
+                              <h4 style={{ width: 'max-content' }}>Disponibilidad <span className="login-danger">*</span><FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} data-placement="right" /></h4>
+                            </CustomizedTooltips>
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-4">
@@ -649,9 +677,18 @@ Por ejemplo, si seleccionaste una duración de 1 hora y 0 de post servicio, y un
                         <div className="col-12 col-lg-12" >
                           <div className="col-12">
                             <div className="form-heading">
-                              <h4>Frecuencia <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title={`Al seleccionar una frecuencia, los intervalos seleccionados previamente se repetirán automáticamente para esa selección.
-
-Por ejemplo, si se selecciona diariamente, entonces todos los días, a la misma hora, estará disponible el mismo servicio o grupo de servicios.` } /></h4>
+                              <CustomizedTooltips text={(
+                                <>
+                                  <p>
+                                    Al seleccionar una frecuencia, los intervalos seleccionados previamente se repetirán automáticamente para esa selección.
+                                  </p>
+                                  <p>
+                                    Por ejemplo, si se selecciona diariamente, entonces todos los días, a la misma hora, estará disponible el mismo servicio o grupo de servicios.
+                                  </p>
+                                </>
+                              )}>
+                                <h4 style={{ width: 'max-content' }}>Frecuencia <span className="login-danger">*</span><FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                              </CustomizedTooltips>
                             </div>
                           </div>
                           <div className="row">
@@ -890,9 +927,18 @@ Por ejemplo, si se selecciona diariamente, entonces todos los días, a la misma 
                         <div className="col-12 col-md-6 col-xl-12">
                           <div className="col-12">
                             <div className="form-heading">
-                              <h4>Rango de repetición <FaInfoCircle style={{ fontSize: '14px' }} data-toggle="tooltip" data-placement="top" title={`El rango de repetición permite identificar un período global en que la agenda tenga horas disponibles, por ejemplo, se puede establecer la fecha de inicio y fin de un año académico completo o de un semestre.
-                              
-La disponibilidad de horas, será hasta la fecha de finalización.`} /></h4>
+                              <CustomizedTooltips text={(
+                                <>
+                                  <p>
+                                    El rango de repetición permite identificar un período global en que la agenda tenga horas disponibles, por ejemplo, se puede establecer la fecha de inicio y fin de un año académico completo o de un semestre.
+                                  </p>
+                                  <p>
+                                    La disponibilidad de horas, será hasta la fecha de finalización.
+                                  </p>
+                                </>
+                              )}>
+                                <h4 style={{ width: 'max-content' }}>Rango de repetición <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                              </CustomizedTooltips>
                             </div>
                           </div>
                           <div className="row">
@@ -977,38 +1023,10 @@ La disponibilidad de horas, será hasta la fecha de finalización.`} /></h4>
           </div>
         </div>
 
-        {success === 'success'
-          ?
-          <div style={{
-            height: '100%',
-            position: 'fixed',
-            top: '0',
-            width: '100%',
-            zIndex: 99999,
-            background: '#00000080'
-          }}>
-            {/* <div className="col-sm-12 col-lg-6"> */}
-            <Alert
-              severity="success"
-              onClose={handleOnClose}
-              sx={{
-                zIndex: 'tooltip',
-                position: 'absolute',
-                left: '30%',
-                width: '50%',
-                padding: '50px',
-                bottom: '50vh'
-              }}
-              spacing={2}
-            >
-              Se ha cargado la disponibilidad correctamente.
-            </Alert>
-            {/* </div> */}
-          </div>
-
-          : success === 'fail'
+        {
+          success === 'success'
             ?
-            <div className="row" style={{
+            <div style={{
               height: '100%',
               position: 'fixed',
               top: '0',
@@ -1016,25 +1034,54 @@ La disponibilidad de horas, será hasta la fecha de finalización.`} /></h4>
               zIndex: 99999,
               background: '#00000080'
             }}>
-              <div className="col-sm-12 col-lg-6">
-                <Alert
-                  severity="error"
-                  onClose={() => { setSuccess('initial') }}
-                  sx={{
-                    zIndex: 'tooltip',
-                    position: 'absolute',
-                    left: '30%',
-                    width: '50%',
-                    padding: '50px',
-                    bottom: '50vh'
-                  }}
-                  spacing={2}
-                >
-                  Ha ocurrido un problema. {error}
-                </Alert>
-              </div>
+              {/* <div className="col-sm-12 col-lg-6"> */}
+              <Alert
+                severity="success"
+                onClose={handleOnClose}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+                spacing={2}
+              >
+                Se ha cargado la disponibilidad correctamente.
+              </Alert>
+              {/* </div> */}
             </div>
-            : ''
+
+            : success === 'fail'
+              ?
+              <div className="row" style={{
+                height: '100%',
+                position: 'fixed',
+                top: '0',
+                width: '100%',
+                zIndex: 99999,
+                background: '#00000080'
+              }}>
+                <div className="col-sm-12 col-lg-6">
+                  <Alert
+                    severity="error"
+                    onClose={() => { setSuccess('initial') }}
+                    sx={{
+                      zIndex: 'tooltip',
+                      position: 'absolute',
+                      left: '30%',
+                      width: '50%',
+                      padding: '50px',
+                      bottom: '50vh'
+                    }}
+                    spacing={2}
+                  >
+                    Ha ocurrido un problema. {error}
+                  </Alert>
+                </div>
+              </div>
+              : ''
         }
       </>
 
