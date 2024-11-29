@@ -15,7 +15,7 @@ const errors = {
   OAuthCallback: "Ocurrió un problema. Revisa tu información o ingresa más tarde.",
   OAuthCreateAccount: "Ocurrió un problema. Revisa tu información o ingresa más tarde.",
   EmailCreateAccount: "Ocurrió un problema. Revisa tu información o ingresa más tarde.",
-  Callback: "Ocurrió un problema. Revisa tu información o ingresa más tarde.",
+  Callback: "Ocurrió un problema. Revisa tu información o ingresa más tarde. Recuerda usar tu mail UDP.",
   OAuthAccountNotLinked:
     "Para confirmar tu identidad, ingresa con la misma cuenta con que ingresasteoriginalmente.",
   EmailSignin: "Revisa el email ingresado.",
@@ -50,7 +50,7 @@ const Error = () => {
 
   return (
     <div className='center'>
-      <div className="row justify-content-center " style={{ padding: 0, margin: "250px auto 0" }}>
+      <div className="row justify-content-center " style={{ padding: 0, margin: "250px auto 0" , width: '500px'}}>
         <div className="col-sm-12 col-xl-4 text-center " style={{ padding: 0, margin: '32px 0 0' }}>
 
           <Card sx={{ minWidth: 275, padding: '20px' }}>
@@ -67,7 +67,7 @@ const Error = () => {
               </Typography>
             </CardContent>
             <CardActions>
-              <Link size="small" onClick={handleUnauthorizedEmail}>Ir a página inicio</Link>
+              <button className="btn btn-primary" size="small" onClick={handleUnauthorizedEmail}>Ir a página inicio</button>
             </CardActions>
           </Card>
         </div>

@@ -113,7 +113,7 @@ const authOptions = {
             return false
           }
         } else {
-          // throw new Error("Correo no autorizado o usuario no encontrado.");
+          throw new Error("Correo no autorizado o usuario no encontrado.");
           return false
         }
       }
@@ -137,7 +137,7 @@ const authOptions = {
       const profile = await searchUser(token.email)
       console.log('jwt - profile', profile)
       if (profile.validacion === false) {
-        throw new Error("Credenciales incorrectas.");
+        throw new Error("Usuario no encontrado.");
       } else {
         if (token) {
           token.id = profile.id
