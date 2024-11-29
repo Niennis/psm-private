@@ -17,7 +17,6 @@ export const fetchProfessionals = async () => {
       }
     })
     const { users: response } = await data.json()
-
     return response
   } catch (err) {
     console.log(err)
@@ -55,8 +54,8 @@ export const fetchSpecialities = async () => {
         'access-control-allow-origin': '*',
       },
     })
-    const { especialidad } = await data.json()
-    return especialidad;
+    const { especialidades } = await data.json()
+    return especialidades;
   } catch (err) {
     console.log(err)
   }
@@ -66,6 +65,7 @@ export const professionalsWithSpeciality = async (specialities, users) => {
   const especialidadMap = new Map(
     specialities.map((user) => [user.usuario_id, user.especialidad])
   );
+
   return users.map((user) => (
     {
       ...user,
@@ -135,6 +135,30 @@ export const addProfessional = async (user) => {
   }
 }
 
+export const addEspecialidad = async (data)=> {
+  const URL = process.env.NEXT_PUBLIC_ADD_ESPECIALIDAD
+  const body = {
+    id_user: data.id,
+    id_especialidad: data.especialidad_id
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      cors: "no-cors",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    const response = data.json()
+    return response
+  } catch (err) {
+    console.log('ERROR', err)
+  }
+}
+
 export const updateDoctor = async (user, id) => {
   const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER
   const body = {
@@ -174,21 +198,18 @@ export const updateDoctor = async (user, id) => {
 export const updateProfesional = async (user) => {
   const USERS_API = process.env.NEXT_PUBLIC_EDIT_PROFESIONAL
   const body = {
-    ...user,
-    nombre_social: " "
+    ...user
   }
-  console.log('body', body)
+  console.log('user', user)
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
-      cors: "no-cors",
       headers: {
         'content-type': 'application/json',
-        'access-control-allow-origin': '*',
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(user)
     })
-    
+
     return data.json()
   } catch (error) {
     return error
