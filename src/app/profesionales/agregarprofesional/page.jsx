@@ -15,13 +15,14 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 
 import ChildModal from "@/components/ChildModal";
-import { addProfessional } from "../../../services/DoctorsServices";
+import { addProfessional, addEspecialidad } from "../../../services/DoctorsServices";
 
 import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
+import { especialidades } from "@/utils/selects";
 
 const cacheHandler = new CacheHandler();
 
@@ -64,16 +65,6 @@ const AddProfessional = () => {
     { value: 5, label: "No binarie" }
   ]);
 
-  const [department, setDepartment] = useState([
-    { value: "", label: "", name: "" },
-    { value: "Psicopedagogia", label: "Psicopedagogía", name: "speciality" },
-    { value: "Psicologia", label: "Psicología", name: "speciality" },
-    { value: "Psiquiatria", label: "Psiquiatría", name: "speciality" },
-    { value: "Trabajador social", label: "Trabajador social", name: "speciality" },
-    { value: "Practicante - Psicología", label: "Practicante - Psicología", name: "speciality" },
-    { value: "Practicante - Psicopedagogía", label: "Practicante - Psicopedagogía", name: "speciality" },
-  ]);
-
   useEffect(() => {
     setProps({
       id: "menu-item1",
@@ -96,18 +87,26 @@ const AddProfessional = () => {
     setIsClicked(true);
   };
 
-  const onSubmit = handleSubmit(async data => {
+  const onSubmit = handleSubmit(async (data,e) => {
+    e.preventDefault()
     setSuccess('initial')
 
     const saltRound = 10;
     const hashedPassword = await bcrypt.hash(data.password, saltRound)
     const dataWithHashPass = { ...data, password: hashedPassword }
-    // console.log('data', dataWithHashPass)
+    console.log('data', data)
+
+    // const bodyEspecialidad = {
+    //   id_user: params.id,
+    //   id_especialidad: data.speciality.id
+    // }
 
     if (data) {
       try {
         const response = await addProfessional(data)
         // const response = await addProfessional(dataWithHashPass)
+        // const responseEspecialidad = await addEspecialidad(bodyEspecialidad)
+        // console.log(responseEspecialidad)
         if (response.validacion === false) {
           setSuccess('fail')
           setErrorMessage('Revisa los datos')
@@ -417,7 +416,7 @@ const AddProfessional = () => {
                                   defaultValue={''}
                                   value={value || ""}
                                   onChange={onChange}
-                                  options={department}
+                                  options={especialidades}
                                   id="search-commodity"
                                   components={{
                                     IndicatorSeparator: () => null

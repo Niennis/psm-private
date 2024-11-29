@@ -3,11 +3,8 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
-import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
-import { favicon, imagesend } from "@/components/imagepath";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
-import { DatePicker } from "antd";
 import Select from "react-select";
 import { useForm, Controller } from 'react-hook-form'
 import { fetchProfessionalById, fetchSpecialityById } from "@/services/DoctorsServices";
@@ -18,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import { updateProfesional, changePassword } from "@/services/DoctorsServices";
 import CacheHandler from "@/utils/cache-handler";
+import { especialidades } from "@/utils/selects";
 import { Alert } from "@mui/material";
 import { useSidebar } from "@/context/SidebarContext";
 
@@ -62,7 +60,7 @@ const EditDoctor = ({ params }) => {
       activeClassName: "edit-doctor",
     });
   }, [setProps]);
-  
+
   const [show, setShow] = useState(false);
   const onChange = (date, dateString) => {
     // console.log(date, dateString);
@@ -71,6 +69,7 @@ const EditDoctor = ({ params }) => {
     // Handle file loading logic here
   };
 
+  // DATOS PRECARGADOS
   const fetchInitialData = async () => {
     try {
       const usersData = await fetchProfessionalById(params.id);
@@ -99,7 +98,7 @@ const EditDoctor = ({ params }) => {
     }
   };
 
-  const { register, handleSubmit, watch, control,
+  const { register, handleSubmit, watch, control, getValues,
     formState: { errors, dirtyFields }, reset
   } = useForm({
     defaultValues: async () => await fetchInitialData()
@@ -127,7 +126,12 @@ const EditDoctor = ({ params }) => {
     }
   }
 
+
+  const valores = getValues()
+
+  // FUNCIÓN UPDATE
   const handleEdit = handleSubmit(async (data, e) => {
+    console.log('data', data)
     e.preventDefault()
     console.log('Formulario enviado con datos:', data);
 
@@ -159,7 +163,6 @@ const EditDoctor = ({ params }) => {
       id_emergencia: 0,
     };
 
-
     const editPass = {
       contrasena: data.password,
       id: initialProfesional.id
@@ -189,9 +192,9 @@ const EditDoctor = ({ params }) => {
       try {
         const response = await updateProfesional(body)
         console.log('response total', response)
-        if (response.includes('TypeError')) {
+        if (response.message === 'Failed to fetch') {
           setSuccess('fail')
-          setError('Ocurrió un problema. Intenta más tarde: ' )
+          setError('Ocurrió un problema de conexión')
         } else {
           setSuccess('success')
         }
@@ -222,6 +225,106 @@ const EditDoctor = ({ params }) => {
     }
 
   })
+
+
+  const prepareData = (data) => {
+    const match = data.password === data.confirmPassword;
+
+    const body = {
+      id: initialProfesional.id,
+      nombre: data.name || initialProfesional.nombre,
+      apellido: data.lastName || initialProfesional.apellido,
+      telefono: data.mobile || initialProfesional.telefono,
+      email: initialProfesional.email,
+      especialidad: data.speciality.value || initialProfesional.speciality,
+      contrasena: (data.password && data.confirmPassword && match) && data.password,
+      fecha_nacimiento: "1988-12-12",
+      genero: data.genero || initialProfesional.genero,
+      tipo_usuario: initialProfesional.tipo_usuario,
+      status: data.status || initialProfesional.status,
+      rut: '12345678-9',
+      carrera: 'Psicopedagogia',
+      anoIngresoCarrera: '0',
+      jornada: 'laboral',
+      direccion: 'random',
+      region: 'santiago',
+      comuna: 'santiago',
+      entrevistador: '1',
+      mustChangePassword: initialProfesional.mustChangePassword,
+      aplica_despeje: '0',
+      campus: 'ambas',
+      id_emergencia: 0,
+      nombre_social: " "
+    };
+    console.log('BODY', body)
+
+    const editPass = {
+      contrasena: data.password,
+      id: initialProfesional.id
+    };
+
+    return { body, editPass };
+  };
+
+
+  const handlePasswordChange = async (editPass) => {
+    try {
+      const response = await changePassword(editPass);
+      console.log('response pass', response);
+      return response.includes('TypeError') ? { success: false, message: 'Ocurrió un problema. Intenta más tarde' } : { success: true };
+    } catch (error) {
+      console.log('error pass', error);
+      return { success: false, message: error };
+    }
+  };
+
+  const handleUpdateProfesional = async (body) => {
+    try {
+      const response = await updateProfesional(body);
+      console.log('response total', response);
+      return response.message === 'Failed to fetch'
+        ? { success: false, message: 'Ocurrió un problema de conexión' }
+        : { success: true };
+    } catch (error) {
+      console.log('error todo', error);
+      return { success: false, message: error };
+    }
+  };
+
+  const handleEditSubmit = async (data) => {
+    const { body, editPass } = prepareData(data);
+
+    if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
+      console.log('ENTRO AQUÍ, contraseña', editPass);
+      const result = await handlePasswordChange(editPass);
+      return result;
+    } else if (Object.keys(dirtyFields).length > 0 && (!data.password || !data.confirmPassword)) {
+      console.log('ENTRO ACÁ, todo', body);
+      const result = await handleUpdateProfesional(body);
+      return result;
+    } else {
+      console.log('ENTRO POR ACULLÁ, contraseña', editPass);
+      const result = await handleUpdateProfesional(body);
+      return result;
+    }
+  };
+
+
+  const bleh = handleSubmit(async (data, e) => {
+    e.preventDefault();
+    console.log('Formulario enviado con datos:', data);
+    const { body, editPass } = prepareData(data);
+
+    const result = await handleUpdateProfesional(body);
+
+    if (result.success) {
+      setSuccess('success');
+    } else {
+      setSuccess('fail');
+      setError(result.message);
+    }
+  });
+
 
 
   return (
@@ -577,47 +680,48 @@ const EditDoctor = ({ params }) => {
                             </span>}
                           </div>
                         </div>
-
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group select-gender">
-                            <label className="gen-label">
-                              Estado <span className="login-danger">*</span>
-                            </label>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  disabled={session?.user?.rol !== "administrador"}
-                                  type="radio"
-                                  value="activo"
-                                  className="form-check-input"
-                                  defaultChecked={initial.status === 'activo'}
-                                  {...register('status')}
-                                />
-                                {initial.status}
-                                Activo
+                        {
+                          session?.user?.rol == "administrador" &&
+                          <div className="col-12 col-md-6 col-xl-6">
+                            <div className="form-group select-gender">
+                              <label className="gen-label">
+                                Estado <span className="login-danger">*</span>
                               </label>
-                            </div>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  disabled={session?.user?.rol !== "administrador"}
-                                  type="radio"
-                                  value="inactivo"
-                                  defaultChecked={initial.status === 'inactivo'}
-                                  className="form-check-input"
-                                  {...register('status')}
-                                />
-                                Inactivo
-                              </label>
+                              <div className="form-check-inline">
+                                <label className="form-check-label">
+                                  <input
+                                    disabled={session?.user?.rol !== "administrador"}
+                                    type="radio"
+                                    value="activo"
+                                    className="form-check-input"
+                                    defaultChecked={initial.status === 'activo'}
+                                    {...register('status')}
+                                  />
+                                  Activo
+                                </label>
+                              </div>
+                              <div className="form-check-inline">
+                                <label className="form-check-label">
+                                  <input
+                                    disabled={session?.user?.rol !== "administrador"}
+                                    type="radio"
+                                    value="inactivo"
+                                    defaultChecked={initial.status === 'inactivo'}
+                                    className="form-check-input"
+                                    {...register('status')}
+                                  />
+                                  Inactivo
+                                </label>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        }
                         <div className="col-12">
                           <div className="doctor-submit text-end">
                             <button
                               type="button"
                               className="btn btn-primary submit-form me-2"
-                              onClick={handleEdit}
+                              onClick={bleh}
                             >
                               Actualizar
                             </button>
@@ -692,7 +796,7 @@ const EditDoctor = ({ params }) => {
                   }}
                   spacing={2}
                 >
-                  Ha ocurrido un problema. Intenta más tarde.
+                  {error}
                 </Alert>
               </div>
             </div>
