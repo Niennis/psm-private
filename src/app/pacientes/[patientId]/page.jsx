@@ -8,7 +8,7 @@ import FeatherIcon from "feather-icons-react";
 import Link from "next/link";
 import Select from "react-select";
 import { fetchUser, updateUser, fetchUserByEmail } from "../../../services/UsersServices";
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, useController } from 'react-hook-form';
 import { Skeleton } from "@mui/material";
 
 import { useSidebar } from "@/context/SidebarContext";
@@ -16,17 +16,19 @@ import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
-import { regiones, comunas } from "@/utils/selects";
-
+import { regiones, comunas, carreras } from "@/utils/selects";
+import { formatDateToYYYYMMDD } from "@/utils/managedata";
 const cacheHandler = new CacheHandler();
 
 const EditPatients = ({ params }) => {
   const ROL = ["profesional"]
   const { data: session } = useSession()
   const router = useRouter();
+  const userRole = session?.user?.rol
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
   const { setProps } = useSidebar();
-  
+  const [initial, setInitial] = useState('')
+
   useEffect(() => {
     setProps({
       id: "menu-item2",
@@ -47,9 +49,11 @@ const EditPatients = ({ params }) => {
         email: user.email,
         password: user.contrasena,
         confirmPassword: user.contrasena,
-        date: user.fecha_nacimiento,
-        gender: user.genero
+        date: formatDateToYYYYMMDD(user.fecha_nacimiento),
+        genero: user.genero,
+        status: user.status
       }
+      setInitial(obj)
       return obj
 
     } catch (error) {
@@ -80,34 +84,17 @@ const EditPatients = ({ params }) => {
     { value: "No binarie", label: "No binarie" }
   ]
 
-
-  const [option, setOption] = useState([
-    { value: 1, label: "Select City" },
-    { value: 2, label: "Alaska" },
-    { value: 3, label: "California" },
-  ]);
-  const [options, setOptions] = useState([
-    { value: 1, label: "Select Country" },
-    { value: 2, label: "Usa" },
-    { value: 3, label: "Uk" },
-    { value: 4, label: "Italy" },
-  ]);
-  const [value, setValue] = useState([
-    { value: 1, label: "Select State" },
-    { value: 2, label: "Usa" },
-    { value: 3, label: "Uk" },
-    { value: 4, label: "Italy" },
-  ]);
   const [department, setDepartment] = useState([
     { value: 2, label: "Orthopedics" },
     { value: 3, label: "Radiology" },
     { value: 4, label: "Dentist" },
   ]);
 
-
   useEffect(() => {
     setMenuPortalTarget(document.body);
   }, [])
+
+  const selectedRegion = watch('region')
 
   const loadFile = (event) => { };
 
@@ -265,16 +252,30 @@ const EditPatients = ({ params }) => {
                               Fecha de nacimiento{" "}
                               <span className="login-danger">*</span>
                             </label>
-                            <input
-                              className="form-control datetimepicker"
-                              type="date"
-                              placeholder=""
+                            <Controller
+                              control={control}
+                              name="date"
                               {...register('date', {
                                 required: {
                                   value: true,
-                                  message: 'Fecha de nacimiento es requerida'
+                                  message: 'Fecha es requerido',
                                 }
                               })}
+                              ref={null}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <input
+                                  className="form-control datetimepicker"
+                                  type="date"
+                                  defaultValue={value}
+                                />
+                                // <DatePicker
+                                //   className="form-control datetimepicker"
+                                //   onChange={onChange}
+                                //   suffixIcon={null}
+
+                                // // value={appoinmentDate['fecha_cita']}
+                                // />
+                              )}
                             />
                             {errors.date && <span><small>{errors.date.message}</small></span>}
                             {/* <input
@@ -285,8 +286,8 @@ const EditPatients = ({ params }) => {
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group select-gender">
-                            <label className="gen-label">
+                          <div className="form-group local-forms">
+                            <label>
                               Género <span className="login-danger">*</span>
                             </label>
 
@@ -345,11 +346,48 @@ const EditPatients = ({ params }) => {
                             <label>
                               Carrera <span className="login-danger">*</span>
                             </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              defaultValue=""
+
+                            <Controller
+                              control={control}
+                              name="carrera"
                               {...register('carrera')}
+                              ref={null}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <Select
+                                  instanceId="select-career"
+                                  defaultValue={selectedOption}
+                                  onChange={onChange}
+                                  options={carreras}
+                                  menuPortalTarget={menuPortalTarget}
+                                  styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                  id="select-career"
+                                  components={{
+                                    IndicatorSeparator: () => null
+                                  }}
+
+                                  styles={{
+                                    control: (baseStyles, state) => ({
+                                      ...baseStyles,
+                                      borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                      boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                      '&:hover': {
+                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                      },
+                                      borderRadius: '10px',
+                                      fontSize: "14px",
+                                      minHeight: "45px",
+                                    }),
+                                    dropdownIndicator: (base, state) => ({
+                                      ...base,
+                                      transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                      transition: '250ms',
+                                      width: '35px',
+                                      height: '35px',
+
+                                    }),
+                                  }}
+                                />
+                              )}
                             />
                           </div>
                         </div>
@@ -413,134 +451,116 @@ const EditPatients = ({ params }) => {
                               className="form-control"
                               rows={3}
                               cols={30}
-                              defaultValue={
-                                "101, Elanxa Apartments, 340 N Madison Avenue"
+                              placeholder={
+                                "Nombre de calle Númweo de Casa Departamento"
                               }
                             />
                           </div>
                         </div>
-                        <div className="col-12 col-md-6 col-xl-4">
+
+                        <div className="col-12 col-sm-6">
                           <div className="form-group local-forms">
                             <label>
-                              Ciudad <span className="login-danger"></span>
+                              Región <span className="login-danger">*</span>
                             </label>
-                            <Select
-                              defaultValue={selectedOption}
-                              onChange={setSelectedOption}
-                              options={option}
-                              menuPortalTarget={document.body}
-                              styles={{
-                                menuPortal: (base) => ({
-                                  ...base,
-                                  zIndex: 9999,
-                                }),
-                              }}
-                              id="search-commodity"
-                              components={{
-                                IndicatorSeparator: () => null
-                              }}
-                              styles={{
-                                control: (baseStyles, state) => ({
-                                  ...baseStyles,
-                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                  boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                  '&:hover': {
-                                    borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                  },
-                                  borderRadius: '10px',
-                                  fontSize: "14px",
-                                  minHeight: "45px",
-                                }),
-                                dropdownIndicator: (base, state) => ({
-                                  ...base,
-                                  transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                  transition: '250ms',
-                                  width: '35px',
-                                  height: '35px',
-                                }),
-                              }}
-                            />
+                            <Controller
+                              control={control}
+                              name="region"
+                              {...register('region')}
+                              ref={null}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <Select
+                                  instanceId="select-region"
+                                  // defaultValue={{ value: 13, label: "Región Metropolitana", name: "metropolitana" }}
+                                  onChange={onChange}
+                                  options={regiones}
+                                  value={value}
+                                  // isDisabled={true}
+                                  menuPortalTarget={menuPortalTarget}
+                                  styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                  id="select-region"
+                                  components={{
+                                    IndicatorSeparator: () => null
+                                  }}
 
+                                  styles={{
+                                    control: (baseStyles, state) => ({
+                                      ...baseStyles,
+                                      borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                      boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                      '&:hover': {
+                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                      },
+                                      borderRadius: '10px',
+                                      fontSize: "14px",
+                                      minHeight: "45px",
+                                    }),
+                                    dropdownIndicator: (base, state) => ({
+                                      ...base,
+                                      transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                      transition: '250ms',
+                                      width: '35px',
+                                      height: '35px',
+
+                                    }),
+                                  }}
+                                />
+                              )}
+                            />
                           </div>
                         </div>
-                        <div className="col-12 col-md-6 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              País <span className="login-danger"></span>
-                            </label>
-                            <Select
-                              defaultValue={selectedOption}
-                              onChange={setSelectedOption}
-                              options={options}
-                              menuPortalTarget={document.body}
-                              styles={{
-                                menuPortal: (base) => ({
-                                  ...base,
-                                  zIndex: 9999,
-                                }),
-                              }}
-                              id="search-commodity"
-                              components={{
-                                IndicatorSeparator: () => null
-                              }}
-                              styles={{
-                                control: (baseStyles, state) => ({
-                                  ...baseStyles,
-                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                  boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                  '&:hover': {
-                                    borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                  },
-                                  borderRadius: '10px',
-                                  fontSize: "14px",
-                                  minHeight: "45px",
-                                }),
-                                dropdownIndicator: (base, state) => ({
-                                  ...base,
-                                  transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                  transition: '250ms',
-                                  width: '35px',
-                                  height: '35px',
-                                }),
-                              }}
-                            />
 
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-6 col-xl-4">
+                        <div className="col-12 col-sm-6">
                           <div className="form-group local-forms">
                             <label>
-                              Región {" "}
-                              <span className="login-danger"></span>
+                              Comuna <span className="login-danger">*</span>
                             </label>
-                            <Select
-                              defaultValue={selectedOption}
-                              onChange={setSelectedOption}
-                              options={value}
-                              id="search-commodity"
-                              components={{
-                                IndicatorSeparator: () => null
-                              }}
-                              styles={{
-                                control: (baseStyles, state) => ({
-                                  ...baseStyles,
-                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                  boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                  '&:hover': {
-                                    borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                  },
-                                  borderRadius: '10px',
-                                  fontSize: "14px",
-                                  minHeight: "45px",
-                                }),
-                                dropdownIndicator: (base, state) => ({
-                                  ...base,
-                                  transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                  transition: '250ms',
-                                  width: '35px',
-                                  height: '35px',
-                                }),
-                              }}
+                            <Controller
+                              control={control}
+                              name="comuna"
+                              {...register('comuna', {
+                                required: {
+                                  value: true,
+                                  message: 'Comuna es requerida',
+                                }
+                              })}
+                              ref={null}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <Select
+                                  instanceId="select-region"
+                                  defaultValue={selectedOption}
+                                  onChange={onChange}
+                                  options={comunas[selectedRegion?.value]}
+                                  menuPortalTarget={menuPortalTarget}
+                                  styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                  id="select-region"
+                                  components={{
+                                    IndicatorSeparator: () => null
+                                  }}
+
+                                  styles={{
+                                    control: (baseStyles, state) => ({
+                                      ...baseStyles,
+                                      borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                      boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                      '&:hover': {
+                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                      },
+                                      borderRadius: '10px',
+                                      fontSize: "14px",
+                                      minHeight: "45px",
+                                    }),
+                                    dropdownIndicator: (base, state) => ({
+                                      ...base,
+                                      transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                      transition: '250ms',
+                                      width: '35px',
+                                      height: '35px',
+
+                                    }),
+                                  }}
+                                />
+                              )}
                             />
                           </div>
                         </div>
@@ -617,20 +637,20 @@ const EditPatients = ({ params }) => {
                             </div> */}
                         {/* </div>
                         </div> */}
+                        {session?.user?.rol === "administrador" && 
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group select-gender">
                             <label className="gen-label">
-                              Status <span className="login-danger">*</span>
+                              Estado <span className="login-danger">*</span>
                             </label>
                             <div className="form-check-inline">
                               <label className="form-check-label">
                                 <input
                                   disabled={session?.user?.rol !== "administrador"}
                                   type="radio"
-                                  name="status"
-                                  value={'activo'}
+                                  value="activo"
                                   className="form-check-input"
-                                  // defaultChecked="true"
+                                  defaultChecked={initial.status === 'activo'}
                                   {...register('status')}
                                 />
                                 Activo
@@ -641,8 +661,8 @@ const EditPatients = ({ params }) => {
                                 <input
                                   disabled={session?.user?.rol !== "administrador"}
                                   type="radio"
-                                  name="status"
-                                  value={'inactivo'}
+                                  value="inactivo"
+                                  defaultChecked={initial.status === 'inactivo'}
                                   className="form-check-input"
                                   {...register('status')}
                                 />
@@ -650,7 +670,7 @@ const EditPatients = ({ params }) => {
                               </label>
                             </div>
                           </div>
-                        </div>
+                        </div>}
                         <div className="col-12">
                           <div className="doctor-submit text-end">
                             <button
