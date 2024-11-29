@@ -238,6 +238,29 @@ export const changePassword = async (user) => {
   }
 }
 
+export const changeEspecialidad = async (user) => {
+  const USERS_API = process.env.NEXT_PUBLIC_EDIT_ESPECIALIDAD
+  // (id_user, id_esp_nueva)
+  const body = {
+    ...user,
+  }
+  console.log('body', body)
+  try {
+    const data = await fetch(USERS_API, {
+      method: "POST",
+      cors: "no-cors",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    return data.json()
+  } catch (error) {
+    return error
+  }
+}
+
 
 export const changeStatus = async (id, status) => {
   const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER

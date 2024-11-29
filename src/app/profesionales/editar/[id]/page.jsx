@@ -2,23 +2,23 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
-import { redirect } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import Link from "next/link";
-import FeatherIcon from "feather-icons-react/build/FeatherIcon";
+import { useSession } from "next-auth/react";
 import Select from "react-select";
 import { useForm, Controller } from 'react-hook-form'
-import { fetchProfessionalById, fetchSpecialityById } from "@/services/DoctorsServices";
-import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
+import { fetchProfessionalById, fetchSpecialityById, changeEspecialidad, updateProfesional, changePassword } from "@/services/DoctorsServices";
 
-import { useSession } from "next-auth/react";
-import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
-import { updateProfesional, changePassword } from "@/services/DoctorsServices";
 import CacheHandler from "@/utils/cache-handler";
-import { especialidades } from "@/utils/selects";
 import { Alert } from "@mui/material";
+
 import { useSidebar } from "@/context/SidebarContext";
+import { especialidades } from "@/utils/selects";
 import { formatDateToYYYYMMDD } from "@/utils/managedata";
+
+import FeatherIcon from "feather-icons-react/build/FeatherIcon";
+import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 
 const cacheHandler = new CacheHandler();
 
@@ -47,11 +47,11 @@ const EditDoctor = ({ params }) => {
     { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality", id: 1 },
     { value: "Psicología", label: "Psicología", name: "speciality", id: 2 },
     { value: "Psiquiatría", label: "Psiquiatría", name: "speciality", id: 3 },
-    { value: "Trabajador social", label: "Trabajador social", name: "speciality", id: 4 },
+    { value: "Trabajo Social", label: "Trabajo Social", name: "speciality", id: 4 },
     { value: "Practicante Psicología", label: "Practicante Psicología", name: "speciality", id: 5 },
     { value: "Practicante Psicopedagogía", label: "Practicante Psicopedagogía", name: "speciality", id: 6 },
     { value: "Practicante Psiquiatría", label: "Practicante Psiquiatría", name: "speciality", id: 7 },
-    { value: "Practicante Trabajo Social", label: "Practicante Trabajo Social", name: "speciality", id: 8 },
+    { value: "Practicante Trabajo Social", label: "Practicante Trabajo Social", name: "speciality", id: 8 },
   ]);
 
   useEffect(() => {
@@ -144,7 +144,6 @@ const EditDoctor = ({ params }) => {
       apellido: data.lastName || initial.apellido,
       telefono: data.mobile || initial.telefono,
       email: initial.email,
-      especialidad: data.speciality.value || initial.speciality,
       contrasena: (data.password && data.confirmPassword && match) && data.password,
       fecha_nacimiento: formatDateToYYYYMMDD(initial.fecha_nacimiento),
       genero: data.genero || initial.genero,
@@ -169,38 +168,49 @@ const EditDoctor = ({ params }) => {
       contrasena: data.password,
       id_user: initial.id
     }
-    console.log('dirtyFields', dirtyFields)
 
+    const prevEspecialidad = especialidades.filter(item => item.value === initial.speciality)
+    const newEspecialidad = especialidades.filter(item => item.value === data.speciality)
 
+    const bodyEspecialidad = {
+      id_user: initial.id,
+      id_especialidad: newEspecialidad[0].id || prevEspecialidad[0].id
+    }
+
+    // CAMBIA TODOS LOS DATOS Y/O ESPECIALIDAD + CONTRASEÑA
     if (Object.keys(dirtyFields).length > 0 && (data.password && data.confirmPassword && data.password === data.confirmPassword)) {
-      console.log('ENTRO POR ACULLÁ, contraseña', editPass)
 
       try {
-        const response = await updateProfesional(body)
-        console.log('response', mix)
-        if (response.message === 'TypeError') {
-          setSuccess('fail')
-          setError('Ocurrió un problema. Intenta más tarde')
-        } else {
+        const [respProfesional, respEspecialidad, respPass] = await Promise.all([
+          updateProfesional(body), changeEspecialidad(bodyEspecialidad), changePassword(editPass)
+        ])
+
+        if (respProfesional.validacion === true && respEspecialidad.validacion === true && respPass.validacion === true) {
           setSuccess('success')
+        } else {
+          setSuccess('fail')
+          setError(`Ocurrió un problema: 
+            ${respProfesional.validacion === false && respProfesional.detalle} 
+            ${respEspecialidad.validacion === false && respEspecialidad.detalle}
+            ${respPass.validacion === false && respPass.detalle}
+             `)
         }
       } catch (error) {
-        console.log('error', error)
+        console.log('error todo', error)
         setSuccess('fail')
-        setError(error)
+        setError(`Problema con el servicio: ${error.message}. Vuelve a intentar más tarde.`)
       }
     }
 
+    //  CAMBIA SOLO CONTRASEÑA
     else if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
-      console.log('ENTRO AQUÍ, contraseña', editPass)
       try {
         const response = await changePassword(editPass)
-        console.log('response pass', response)
-        if (response.validacion === false) {
+        if (response.validacion === true) {
+          setSuccess('success')
+        } else {
           setSuccess('fail')
           setError(`Ocurrió un problema: ${response.detalle}`)
-        } else {
-          setSuccess('success')
         }
       } catch (error) {
         console.log('error pass', error)
@@ -208,34 +218,36 @@ const EditDoctor = ({ params }) => {
         setError(`Ocurrió un problema: ${error.message}. Intenta más tarde`)
       }
     }
+
+    // CAMBIA EL RESTO DE CAMPOS Y/O ESPECIALIDAD
     else {
-      console.log('ENTRO ACÁ, todo', body)
       try {
-        const response = await updateProfesional(body)
-        console.log('response total', response)
-        if (response.validacion === true) {
+        const [respProfesional, respEspecialidad] = await Promise.all([
+          updateProfesional(body), changeEspecialidad(bodyEspecialidad)
+        ])
+
+        if (respProfesional.validacion === true && respEspecialidad.validacion === true) {
           setSuccess('success')
-        }
-        else if (response.validacion === false) {
-          setSuccess('fail')
-          setError(response.detalle)
         } else {
-          setError('Ocurrió un problema de conexión')
+          setSuccess('fail')
+          setError(`Ocurrió un problema:
+            ${respProfesional.validacion === false && respProfesional.detalle} 
+            ${respEspecialidad.validacion === false && respEspecialidad.detalle}
+            `)
         }
       } catch (error) {
         console.log('error todo', error)
         setSuccess('fail')
-        setError(error.message)
+        setError(`Problema con el servicio: ${error.message}. Vuelve a intentar más tarde.`)
       }
     }
-
-
   })
 
   const handleClose = () => {
     setSuccess('initial')
     redirect('/citas');
   }
+
   return (
     < >
       {/* <Headerudp /> */}
@@ -382,9 +394,9 @@ const EditDoctor = ({ params }) => {
                               render={({ field: { onChange, onBlur, value } }) => {
                                 return (
                                   <Select
-                                    value={speciality.find(option => option.value === value) || null}
+                                    value={especialidades.find(option => option.value === value) || value}
                                     onChange={(option) => onChange(option.value)}
-                                    options={speciality}
+                                    options={especialidades}
                                     id="speciality"
                                     components={{
                                       IndicatorSeparator: () => null
@@ -676,7 +688,7 @@ const EditDoctor = ({ params }) => {
               }}
               spacing={2}
             >
-              Tu contraseña ha sido actualizada.
+              Tus datos han sido actualizados.
             </Alert>
             {/* </div> */}
           </div>
