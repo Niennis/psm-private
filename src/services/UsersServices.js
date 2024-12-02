@@ -130,11 +130,12 @@ export const addUsers = async (user) => {
   return data.json()
 }
 
+// TODO todas las keys acá, desglosar en el front
 export const updateUser = async (user) => {
   const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER
   const body = {
     ...user,
-    nombre_social: 0
+    nombre_social: user.nombre_social || ' '
   }
   console.log('body', body)
   try {

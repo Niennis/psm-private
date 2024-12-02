@@ -28,11 +28,12 @@ import { createInterview, sendEmail } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 import { fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
+import { fetchUser } from "@/services/UsersServices";
 
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
-import { validarRut } from "@/utils/managedata";
+import { formatDateToDDMMYYYY, validarRut } from "@/utils/managedata";
 
 const cacheHandler = new CacheHandler();
 
@@ -42,7 +43,7 @@ const formatRut = (value) => {
 
   const formattedNumber = number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   const response = validarRut(value)
-  if (response){
+  if (response) {
     return `${formattedNumber}-${verifierDigit || ''}`;
   }
   setError('Rut inválido')
@@ -109,17 +110,29 @@ const AddFirstAppoinments = () => {
     setChecked((prev) => !prev);
   };
 
+  const parseDate = (formattedDate) => {
+    if (!formattedDate) return null;
+    const [day, month, year] = formattedDate.split("-").map(Number);
+    return new Date(year, month - 1, day); // Devuelve un objeto Date
+  };
+
   const fetchInitialData = async () => {
     try {
-      const response = await fetchUserByEmail(session.user?.email);
+      const { users: response } = await fetchUser(session.user?.id);
       const patient = {
-        name: response.nombre,
-        lastName: response.apellido,
+        name: response[0].nombre,
+        lastName: response[0].apellido,
+        nombre_social: response[0].nombre_social || ' ',
         email: session.user?.email,
-        birthday: dayjs(response.fecha_nacimiento).format('YYYY-MM-DD'), // "Wed, 14 Feb 1990 00:00:00 GMT"
-        genero: response.genero === 'personalizado' ? 'No binarie' : response.genero,
-        mobile: response.telefono,
-        aplica_despeje: response.aplica_despeje
+        birthday: dayjs(response[0].fecha_nacimiento).format('YYYY-MM-DD'),
+        genero: response[0].genero === 'personalizado' ? 'No binarie' : response[0].genero,
+        mobile: response[0].telefono,
+        aplica_despeje: response[0].aplica_despeje,
+        rut: response[0].rut,
+        career: response[0].carrera,
+        address: response[0].direccion,
+        region: response[0].region,
+        comuna: response[0].comuna,
       };
 
       setDataPatient(patient)
@@ -130,7 +143,7 @@ const AddFirstAppoinments = () => {
     }
   };
 
-  const { register, handleSubmit, watch, control,
+  const { register, handleSubmit, watch, control, setValue,
     formState: { errors }, reset
   } = useForm({
     defaultValues: async () => await fetchInitialData()
@@ -146,6 +159,16 @@ const AddFirstAppoinments = () => {
     setMenuPortalTarget(document.body);
   }, [])
 
+  const getComuna = (region, comunaName) => {
+    const reg = region.toLowerCase()
+    if (!comunas[reg]) {
+      return `Región "${reg}" no encontrada.`;
+    }
+
+    const comuna = comunas[reg].find((comuna) => comuna.label === comunaName);
+
+    return comuna
+  }
 
   useEffect(() => {
     let filtered = allDays;
@@ -236,8 +259,6 @@ const AddFirstAppoinments = () => {
 
       const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
-      console.log('bloque', bloque)
-      console.log('orderedData', orderedData)
       setAllDays(orderedData)
       // setDays(bloque)
     } catch (error) {
@@ -300,17 +321,13 @@ const AddFirstAppoinments = () => {
   }
 
   const handleHours = (hour) => {
-    console.log(hour)
     setTime(hour)
     setValue('selectedHour', hour)
   }
 
   const handleBloques = async (id, hora) => {
-    console.log('hora', id, date)
     const { bloques } = await fetchScheduleByDate(id, date)
-    console.log(bloques)
     const getDuracionServicio = hours.find(item1 => bloques.some(item2 => item2.hora_inicio >= item1.horaIni && item2.hora_inicio <= item1.horaFin))
-    console.log('getDuracionServicio', getDuracionServicio.duracionServicio)
 
     return agregarBloques(bloques, hora, getDuracionServicio.duracionServicio);
   }
@@ -588,7 +605,7 @@ const AddFirstAppoinments = () => {
                             <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group local-forms">
                                 <label>
-                                  Nombre social <span className="login-danger">*</span>
+                                  Apellido <span className="login-danger">*</span>
                                 </label>
                                 <input
                                   className="form-control"
@@ -596,8 +613,28 @@ const AddFirstAppoinments = () => {
                                   {...register('lastName', {
                                     required: {
                                       value: true,
-                                      message: 'Nombre es requerido'
+                                      message: 'Apellido es requerido'
                                     },
+                                    minLength: {
+                                      value: 2,
+                                      message: 'Apellido debe tener al menos 2 caracteres'
+                                    }
+                                  })}
+                                />
+                                {
+                                  errors.lastName && <span><small>{errors.lastName.message}</small></span>
+                                }
+                              </div>
+                            </div>
+                            <div className="col-12 col-md-6 col-xl-6">
+                              <div className="form-group local-forms">
+                                <label>
+                                  Nombre social
+                                </label>
+                                <input
+                                  className="form-control"
+                                  type="text"
+                                  {...register('nombre_social', {
                                     minLength: {
                                       value: 2,
                                       message: 'Nombre debe tener al menos 2 caracteres'
@@ -609,7 +646,7 @@ const AddFirstAppoinments = () => {
                                 }
                               </div>
                             </div>
-                            <div className="col-12 col-md-6 col-xl-4">
+                            <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group local-forms">
                                 <label>
                                   Rut <span className="login-danger">*</span>
@@ -636,7 +673,7 @@ const AddFirstAppoinments = () => {
                             </div>
 
                             <div className="col-12 col-md-6 col-xl-4">
-                              <div className="form-group local-forms cal-icon">
+                              <div className="form-group local-forms">
                                 <label>
                                   Fecha de nacimiento {" "}
                                   <span className="login-danger">*</span>
@@ -644,30 +681,18 @@ const AddFirstAppoinments = () => {
                                 <Controller
                                   control={control}
                                   name="birthday"
-                                  rules={{
+                                  {...register('birthday', {
                                     required: {
                                       value: true,
-                                      message: 'Fecha es requerida',
+                                      message: 'Fecha es requerido',
                                     }
-                                  }}
+                                  })}
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value } }) => (
-                                    <DatePicker
+                                    <input
                                       className="form-control datetimepicker"
-                                      onChange={onChange}
-                                      // value={value}
-                                      onBlur={onBlur}
-                                      suffixIcon={null}
-                                      format={'DD-MM-YYYY'}
-                                      style={{
-                                        control: (baseStyles, state) => ({
-                                          ...baseStyles,
-                                          borderColor: isClicked ? '#2E37A4' : '2px solid rgba(46, 55, 164, 0.1)',
-                                          '&:hover': {
-                                            borderColor: state.isFocused ? 'none' : 'none',
-                                          },
-                                        })
-                                      }}
+                                      type="date"
+                                      defaultValue={value}
                                     />
                                   )}
                                 />
@@ -757,7 +782,7 @@ const AddFirstAppoinments = () => {
 
                               </div>
                             </div>
-                            <div className="col-12 col-md-6 col-xl-4">
+                            <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group local-forms">
                                 <label>
                                   Teléfono <span className="login-danger">*</span>
@@ -805,6 +830,8 @@ const AddFirstAppoinments = () => {
                                       instanceId="career"
                                       defaultValue={selectedOption}
                                       onChange={onChange}
+                                      value={carreras.find(option => option.label === value) || value}
+
                                       options={carreras}
                                       menuPortalTarget={menuPortalTarget}
                                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -873,7 +900,8 @@ const AddFirstAppoinments = () => {
                                       // defaultValue={{ value: 13, label: "Región Metropolitana", name: "metropolitana" }}
                                       onChange={onChange}
                                       options={regiones}
-                                      value={value}
+                                      value={regiones.find(option => option.label === value) || value}
+
                                       // isDisabled={true}
                                       menuPortalTarget={menuPortalTarget}
                                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -923,42 +951,53 @@ const AddFirstAppoinments = () => {
                                     }
                                   })}
                                   ref={null}
-                                  render={({ field: { onChange, onBlur, value } }) => (
-                                    <Select
-                                      instanceId="select-region"
-                                      defaultValue={selectedOption}
-                                      onChange={onChange}
-                                      options={comunas[selectedRegion?.value]}
-                                      menuPortalTarget={menuPortalTarget}
-                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                      id="select-region"
-                                      components={{
-                                        IndicatorSeparator: () => null
-                                      }}
+                                  render={({ field: { onChange, onBlur, value } }) => {
+                                    const regionKey = dataPatient?.region?.toLowerCase()
+                                      .normalize("NFD") // Descompone caracteres con acentos
+                                      .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
+                                      .replace(/\s+/g, "_"); // Reemplaza espacios por "_"
+                                    const opcionesComunas = regionKey ? comunas[regionKey] : []; // Busca las comunas según la región
+                                    return (
+                                      <Select
+                                        instanceId="select-region"
+                                        defaultValue={selectedOption}
+                                        value={
+                                          opcionesComunas.find((comuna) => comuna.label === value) || null
+                                        }
 
-                                      styles={{
-                                        control: (baseStyles, state) => ({
-                                          ...baseStyles,
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                          '&:hover': {
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                          },
-                                          borderRadius: '10px',
-                                          fontSize: "14px",
-                                          minHeight: "45px",
-                                        }),
-                                        dropdownIndicator: (base, state) => ({
-                                          ...base,
-                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                          transition: '250ms',
-                                          width: '35px',
-                                          height: '35px',
+                                        onChange={onChange}
+                                        options={comunas[selectedRegion?.value]}
+                                        menuPortalTarget={menuPortalTarget}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="select-region"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
 
-                                        }),
-                                      }}
-                                    />
-                                  )}
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+
+                                          }),
+                                        }}
+                                      />
+                                    )
+                                  }}
                                 />
                               </div>
                             </div>
@@ -1148,6 +1187,61 @@ const AddFirstAppoinments = () => {
                               </div>
                             </div>
                           </div>
+
+                          <div className="col-12 col-md-12 col-xl-12">
+                            <div className="form-group local-forms">
+                              <label>Motivo de la consulta</label>
+                              <Controller
+                                control={control}
+                                name="motivo"
+                                {...register('motivo', {
+                                  required: {
+                                    value: true,
+                                    message: 'Motivo es requerido',
+                                  }
+                                })}
+                                ref={null}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                  <Select
+                                    instanceId="motivo"
+                                    defaultValue={selectedOption}
+                                    onChange={onChange}
+                                    options={motivo_consulta}
+                                    menuPortalTarget={menuPortalTarget}
+                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                    id="motivo"
+                                    components={{
+                                      IndicatorSeparator: () => null
+                                    }}
+
+                                    styles={{
+                                      control: (baseStyles, state) => ({
+                                        ...baseStyles,
+                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                        boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                        '&:hover': {
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                        },
+                                        borderRadius: '10px',
+                                        fontSize: "14px",
+                                        minHeight: "45px",
+                                      }),
+                                      dropdownIndicator: (base, state) => ({
+                                        ...base,
+                                        transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                        transition: '250ms',
+                                        width: '35px',
+                                        height: '35px',
+                                        zIndex: '90000000'
+                                      }),
+                                    }}
+                                  />
+                                )}
+                              />
+                              {errors.motivo && <span><small>{errors.motivo.message}</small></span>}
+                            </div>
+                          </div>
+
                           <div className="row">
                             <div className="col-12 col-md-6 col-xl-4">
                               <div className="form-group select-gender">
@@ -1221,60 +1315,6 @@ const AddFirstAppoinments = () => {
                             </div>
 
                           }
-
-                          <div className="col-12 col-md-12 col-xl-12">
-                            <div className="form-group local-forms">
-                              <label>Motivo de la consulta</label>
-                              <Controller
-                                control={control}
-                                name="motivo"
-                                {...register('motivo', {
-                                  required: {
-                                    value: true,
-                                    message: 'Motivo es requerido',
-                                  }
-                                })}
-                                ref={null}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                  <Select
-                                    instanceId="motivo"
-                                    defaultValue={selectedOption}
-                                    onChange={onChange}
-                                    options={motivo_consulta}
-                                    menuPortalTarget={menuPortalTarget}
-                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                    id="motivo"
-                                    components={{
-                                      IndicatorSeparator: () => null
-                                    }}
-
-                                    styles={{
-                                      control: (baseStyles, state) => ({
-                                        ...baseStyles,
-                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                        boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                        '&:hover': {
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                        },
-                                        borderRadius: '10px',
-                                        fontSize: "14px",
-                                        minHeight: "45px",
-                                      }),
-                                      dropdownIndicator: (base, state) => ({
-                                        ...base,
-                                        transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                        transition: '250ms',
-                                        width: '35px',
-                                        height: '35px',
-                                        zIndex: '90000000'
-                                      }),
-                                    }}
-                                  />
-                                )}
-                              />
-                              {errors.motivo && <span><small>{errors.motivo.message}</small></span>}
-                            </div>
-                          </div>
 
                           {
                             motivo_consulta_seleccionado === 'Otro' &&
@@ -1392,6 +1432,10 @@ const AddFirstAppoinments = () => {
                                 errors.selectedHour && <span><small>{errors.selectedHour.message}</small></span>
                               }
                             </div>
+                          }
+
+                          {
+                            errors && <span><small>Hay campos sin completar.</small></span>
                           }
                           <div className="col-12">
                             <div className="doctor-submit text-end mt-3">

@@ -2,17 +2,17 @@ export const regiones = [
   { value: "antofagasta", label: "Antofagasta" },
   { value: "arica_y_parinacota", label: "Arica y Parinacota" },
   { value: "atacama", label: "Atacama", },
-  { value: "aysen", label: "Aysén del Gral. C. Ibáñez del Campo", },
+  { value: "aysen_del_gral_c_ibanez_del_campo", label: "Aysén del Gral. C. Ibáñez del Campo", },
   { value: "biobio", label: "Biobío", },
   { value: "coquimbo", label: "Coquimbo", },
-  { value: "ohiggins", label: "Lib. Gral. Bernardo O'Higgins", },
+  { value: "lib_gral_bernardo_o_higgins", label: "Lib. Gral. Bernardo O'Higgins", },
   { value: "los_lagos", label: "Los Lagos", },
   { value: "los_rios", label: "Los Ríos", },
-  { value: "magallanes", label: "Magallanes y Antártica Chilena", },
+  { value: "magallanes_y_antartica_chilena", label: "Magallanes y Antártica Chilena", },
   { value: "maule", label: "Maule", },
   { value: "nuble", label: "Ñuble", },
   { value: "metropolitana", label: "Región Metropolitana", },
-  { value: "araucania", label: "Región de la Araucanía", },
+  { value: "region_de_la_araucania", label: "Región de la Araucanía", },
   { value: "tarapaca", label: "Tarapacá", },
   { value: "valparaiso", label: "Valparaíso", }
 ]
@@ -134,7 +134,7 @@ export const comunas = {
       "value": "zona26"
     }
   ],
-  aysen: [
+  aysen_del_gral_c_ibanez_del_campo: [
     {
       "label": "Aysén",
       "id": "aysen",
@@ -430,7 +430,7 @@ export const comunas = {
       "value": "zona35"
     }
   ],
-  ohiggins: [
+  ohiglib_gral_bernardo_o_higginsgins: [
     {
       "label": "Chimbarongo",
       "id": "chimbarongo",
@@ -811,7 +811,7 @@ export const comunas = {
       "value": "zona232"
     }
   ],
-  magallanes: [
+  magallanes_y_antartica_chilena: [
     {
       "label": "Antártica",
       "id": "antartica",
@@ -1020,7 +1020,7 @@ export const comunas = {
       "value": "zona145"
     }
   ],
-  araucania: [
+  region_de_la_araucania: [
     {
       "label": "Angol",
       "id": "angol",
@@ -1182,7 +1182,7 @@ export const comunas = {
       "value": "zona219"
     }
   ],
-  metropolitana: [
+  region_metropolitana: [
     {
       "label": "Alhué",
       "id": "alhue",
