@@ -262,7 +262,7 @@ const Header = () => {
                       onMouseOver={handleOpenUserMenu} sx={{ ...style, p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' }}>
                       {page.title}
                     </Button>
-                  </Tooltip> 
+                  </Tooltip>
                   :
                   <Link style={{ color: 'black', textDecoration: 'none' }} href={page.url} key={page.title} >
                     <Button
@@ -340,12 +340,18 @@ const Header = () => {
                         height={40}
                       />
                     </Link>
-                    {session.user?.name}
+                    <small style={{ display: 'block', textAlign: 'right', width: 'min-content' }}>
+                      {`Bienvenido, 
+                      ${(session.user?.name).split(' ')[0]}`}
+                    </small>
                   </button>
                   :
                   <Link href="/citas" style={{ padding: 0, margin: 0, textAlign: 'right' }}>
                     <FaUserCircle style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} />
-                    Bienvenido, {session.user?.name}
+                    <small style={{ display: 'block', textAlign: 'right', width: 'min-content' }}>
+                      {`Bienvenido, 
+                      ${(session.user?.name).split(' ')[0]}`}
+                    </small>
                   </Link>
             }
           </Box>
