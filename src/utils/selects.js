@@ -1886,3 +1886,12 @@ export const especialidades = [
   { value: "Practicante Psiquiatría", label: "Practicante Psiquiatría", name: "speciality", id: 7 },
   { value: "Practicante Trabajo Social", label: "Practicante Trabajo Social", name: "speciality", id: 8 },
 ]
+
+
+const genero = [
+  { value: "Hombre", label: "Hombre" },
+  { value: "Mujer", label: "Mujer" },
+  { value: "Hombre trans", label: "Hombre trans" },
+  { value: "Mujer trans", label: "Mujer trans" },
+  { value: "No binarie", label: "No binarie" }
+]
