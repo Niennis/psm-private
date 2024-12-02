@@ -16,10 +16,11 @@ import { useForm, Controller, useController } from 'react-hook-form';
 import { fetchAppointment, changeStatusAppointment, fetchAppointments } from "@/services/AppointmentsServices";
 import { fetchProfessionals } from "@/services/DoctorsServices";
 import { fetchUsers, fetchUserByEmail } from "@/services/UsersServices";
+import SimpleBackdrop from "@/components/Backdrop";
 
 import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import ProtectedPage from "@/components/ProtectedRoutes";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
@@ -48,7 +49,10 @@ const EditAppoinments = ({ params }) => {
     { value: "Trabajo Social", label: "Trabajo Social", name: "speciality" },
   ]);
 
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setSuccess('initial')
+    router.push('/citas')
+  };
   const handleShow = () => setShow(true);
   const [profesional, setProfesional] = useState([]);
 
@@ -163,6 +167,7 @@ const EditAppoinments = ({ params }) => {
   };
 
   const onSubmit = handleSubmit(async data => {
+    setLoading(true)
     setSuccess('initial')
     try {
       const patientByEmail = await fetchUserByEmail(data.email)
@@ -188,6 +193,8 @@ const EditAppoinments = ({ params }) => {
     } catch (error) {
       setSuccess('fail')
       console.log(error)
+    } finally {
+      setLoading(false)
     }
 
     // return updateAppointment({ ...data, "patient_id": patient[0].id }, id)
@@ -201,6 +208,7 @@ const EditAppoinments = ({ params }) => {
         id1="menu-items4"
         activeClassName="edit-appoinment"
       /> */}
+      { loading && <SimpleBackdrop /> }
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
@@ -610,7 +618,7 @@ const EditAppoinments = ({ params }) => {
             {/* <div className="col-sm-12 col-lg-6"> */}
             <Alert
               severity="success"
-              onClose={() => { setSuccess('initial') }}
+              onClose={handleClose}
               sx={{
                 zIndex: 'tooltip',
                 position: 'absolute',

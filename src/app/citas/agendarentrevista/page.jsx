@@ -2,7 +2,6 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
-import { DatePicker } from "antd";
 import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller } from 'react-hook-form';
@@ -13,12 +12,11 @@ import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
 import 'dayjs/locale/es-mx'
 
-import Sidebar from "@/components/Sidebar";
 import Modal from "@/components/Modal";
 import Contact from "@/components/Contact"
 import SimpleBackdrop from "@/components/Backdrop";
 
-import { Alert, Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import { Alert, Accordion, AccordionSummary, AccordionDetails, Box, LinearProgress } from "@mui/material";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -97,6 +95,8 @@ const AddFirstAppoinments = () => {
   const [dataPatient, setDataPatient] = useState(null)
   const [bloques, setBloques] = useState([])
   const { setProps } = useSidebar();
+  const [loadingDays, setLoadingDays] = useState(false)
+  const [loadingHours, setLoadingHours] = useState(false)
 
   useEffect(() => {
     setProps({
@@ -108,12 +108,6 @@ const AddFirstAppoinments = () => {
 
   const handleChange = () => {
     setChecked((prev) => !prev);
-  };
-
-  const parseDate = (formattedDate) => {
-    if (!formattedDate) return null;
-    const [day, month, year] = formattedDate.split("-").map(Number);
-    return new Date(year, month - 1, day); // Devuelve un objeto Date
   };
 
   const fetchInitialData = async () => {
@@ -171,6 +165,8 @@ const AddFirstAppoinments = () => {
   }
 
   useEffect(() => {
+
+    setLoadingDays(true)
     let filtered = allDays;
     let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
       return filtered.find(item => `${item.fechaInicio}` === compositeKey);
@@ -182,6 +178,7 @@ const AddFirstAppoinments = () => {
       setTime('')
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
       );
+      setLoadingDays(false)
     } else if (modalidad === "presencial" || modalidad === "ambas") {
       setDays([])
       setHours([])
@@ -190,6 +187,7 @@ const AddFirstAppoinments = () => {
 
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
       );
+      setLoadingDays(false)
     } else if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
       setDays([])
       setHours([])
@@ -199,6 +197,7 @@ const AddFirstAppoinments = () => {
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === "centro" || item.campus === "ambas")
       );
+      setLoadingDays(false)
     } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
       setDays([])
       setHours([])
@@ -208,6 +207,7 @@ const AddFirstAppoinments = () => {
       uniqueFiltered = uniqueFiltered.filter(
         item => item.modalidad === "presencial" && (item.campus === "huechuraba" || item.campus === "ambas")
       );
+      setLoadingDays(false)
     }
 
     setDays(uniqueFiltered);
@@ -247,6 +247,7 @@ const AddFirstAppoinments = () => {
     setHours([])
     setDate('')
     setTime('')
+    setLoadingDays(true)
     try {
       const horasmedicas = await generarHorasMedicas(e.id)
 
@@ -260,7 +261,7 @@ const AddFirstAppoinments = () => {
       const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
       setAllDays(orderedData)
-      // setDays(bloque)
+      setLoadingDays(false)
     } catch (error) {
       console.log('Error: ', error)
     }
@@ -325,12 +326,12 @@ const AddFirstAppoinments = () => {
     setValue('selectedHour', hour)
   }
 
-  const handleBloques = async (id, hora) => {
-    const { bloques } = await fetchScheduleByDate(id, date)
-    const getDuracionServicio = hours.find(item1 => bloques.some(item2 => item2.hora_inicio >= item1.horaIni && item2.hora_inicio <= item1.horaFin))
+  // const handleBloques = async (id, hora) => {
+  //   const { bloques } = await fetchScheduleByDate(id, date)
+  //   const getDuracionServicio = hours.find(item1 => bloques.some(item2 => item2.hora_inicio >= item1.horaIni && item2.hora_inicio <= item1.horaFin))
 
-    return agregarBloques(bloques, hora, getDuracionServicio.duracionServicio);
-  }
+  //   return agregarBloques(bloques, hora, getDuracionServicio.duracionServicio);
+  // }
 
 
   // Función para convertir la hora en formato HH:mm:ss a segundos
@@ -370,8 +371,9 @@ const AddFirstAppoinments = () => {
       }
     })
 
-    // console.log('docs', docs);
-    setDoctor(docs)
+    if (docs.length > 0) {
+      setDoctor(docs)
+    }
   }
 
   const onChange = (date, dateString) => {
@@ -438,7 +440,7 @@ const AddFirstAppoinments = () => {
       "jornada": 'NA',
       "mustChangePassword": 0,
       "nombre": data.name || patient.nombre,
-      "region": regiones[0].label,
+      "region": data.region.label || patient.region,
       "rut": data.rut,
       "status": patient.status,
       "telefono": data.mobile || patient.telefono,
@@ -489,7 +491,6 @@ const AddFirstAppoinments = () => {
     const newArray = contacts.filter((_, i) => i !== key);
     setContacts(newArray)
   }
-
 
   const mostrarSiguientesDias = (e) => {
     e.preventDefault()
@@ -1339,45 +1340,50 @@ const AddFirstAppoinments = () => {
                                   Día de la Cita{" "}
                                   <span className="login-danger">*</span>
                                 </label>
-                                <div className="form-group local-forms mb-0">
-                                  {days.length > 0 && (
-                                    <>
-                                      <button
-                                        className="btn btn-primary"
-                                        onClick={e => { mostrarAnterioresDias(e) }}
-                                        disabled={indiceDias === 0}>
-                                        <ChevronLeft />
-                                      </button>
+                                {loadingDays ?
 
-                                      {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
-                                        return (
-                                          <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
-                                            <input type="hidden" {...register("selectedDay", {
-                                              required: {
-                                                value: true,
-                                                message: 'Seleccione una fecha'
-                                              }
-                                            })} />
-                                            <button
-                                              className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
+                                  <Box sx={{ width: '100%' }}>
+                                    <LinearProgress />
+                                  </Box>
+                                  : <div className="form-group local-forms mb-0">
+                                    {days.length > 0 && (
+                                      <>
+                                        <button
+                                          className="btn btn-primary"
+                                          onClick={e => { mostrarAnterioresDias(e) }}
+                                          disabled={indiceDias === 0}>
+                                          <ChevronLeft />
+                                        </button>
 
-                                              onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
-                                              {dayjs(day.fechaInicio).format('ddd DD MMM')}
+                                        {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
+                                          return (
+                                            <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
+                                              <input type="hidden" {...register("selectedDay", {
+                                                required: {
+                                                  value: true,
+                                                  message: 'Seleccione una fecha'
+                                                }
+                                              })} />
+                                              <button
+                                                className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
 
-                                            </button>
-                                          </div>
-                                        )
-                                      }
-                                      )}
-                                      <button
-                                        className="btn btn-primary"
-                                        onClick={e => { mostrarSiguientesDias(e) }}
-                                        disabled={indiceDias + 5 >= days.length}>
-                                        <ChevronRight />
-                                      </button>
-                                    </>)
-                                  }
-                                </div>
+                                                onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
+                                                {dayjs(day.fechaInicio).format('ddd DD MMM')}
+
+                                              </button>
+                                            </div>
+                                          )
+                                        }
+                                        )}
+                                        <button
+                                          className="btn btn-primary"
+                                          onClick={e => { mostrarSiguientesDias(e) }}
+                                          disabled={indiceDias + 5 >= days.length}>
+                                          <ChevronRight />
+                                        </button>
+                                      </>)
+                                    }
+                                  </div>}
                                 {
                                   errors.selectedDay && errors.selectedDay && <span><small>{errors.selectedDay.message}</small></span>
                                 }
@@ -1435,12 +1441,12 @@ const AddFirstAppoinments = () => {
                           }
 
                           {
-                            errors && <span><small>Hay campos sin completar.</small></span>
+                            Object.keys(errors).length > 0 && <span><small>Hay campos sin completar.</small></span>
                           }
                           <div className="col-12">
                             <div className="doctor-submit text-end mt-3">
                               <button
-                                // type="button"
+                                disabled={Object.keys(errors).length > 0}
                                 className="btn btn-primary submit-form me-2"
                                 onClick={handleFirstInterview}
                               >
