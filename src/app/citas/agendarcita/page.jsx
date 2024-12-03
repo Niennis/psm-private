@@ -121,7 +121,7 @@ const AddAppoinments = () => {
 
   const getSpeciality = async () => {
     try {
-      const { especialidad: profesional } = await fetchSpecialityById(session?.user?.id)
+      const { especialidades: profesional } = await fetchSpecialityById(session?.user?.id)
       setEspecialidad(profesional[0].especialidad)
     } catch (error) {
       console.log('ERROR', error)
@@ -217,7 +217,6 @@ const AddAppoinments = () => {
 
     try {
       // la función que crea la cita
-      console.log('selectedPatient', selectedPatient)
       const appointment = await createAppointment({
         ...data,
         "patient_id": selectedPatient.id,
@@ -236,7 +235,6 @@ const AddAppoinments = () => {
 
     } catch (err) {
       setSuccess('fail')
-      console.log('ERRRR', err.message)
       if (err.message === "Cannot read properties of undefined (reading 'id')") {
         setError(`No se encontró al paciente`);
       }
@@ -274,7 +272,6 @@ const AddAppoinments = () => {
     setTime('')
     try {
       const horasmedicas = await generarHorasMedicas(e.id)
-      console.log('horasmedicas', horasmedicas)
 
       // Traer disponibilidades
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
@@ -285,7 +282,6 @@ const AddAppoinments = () => {
 
       const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
-      console.log('bloque', bloque)
       setAllDays(orderedData)
       // solo los días para manejar los botones
       setDays(bloque)
@@ -337,9 +333,7 @@ const AddAppoinments = () => {
       selectedDays.forEach(item => {
         newBloques.push(calcularHoraInicioDeBloques(item))
       })
-      console.log('newbloques', selectedDays)
       const flatted = newBloques.flat()
-      console.log('FLATTED', flatted)
 
       const arrayOrdenado = flatted.sort((a, b) => { const horaA = new Date(`1970-01-01T${a.horaInicio}:00`).getTime(); const horaB = new Date(`1970-01-01T${b.horaInicio}:00`).getTime(); return horaA - horaB; });
 
@@ -350,7 +344,6 @@ const AddAppoinments = () => {
   }
 
   const handleHours = (hour) => {
-    console.log(hour)
     setTime(hour)
     setValue('selectedHour', hour)
   }
@@ -404,9 +397,10 @@ const AddAppoinments = () => {
     setIndiceHoras(prevIndice => Math.max(0, prevIndice - 5));
   };
 
-  const handleSelectedalumno = async (e) => {
-    console.log(e)
+  const handleSelectedalumno = async (e, selectedOption) => {
     setSelectedPatient(e)
+    setValue('patientName', selectedOption.name);
+    setValue('patientLastname', selectedOption.lastName); 
   }
 
   return (
@@ -477,7 +471,7 @@ const AddAppoinments = () => {
                                 className="form-control"
                                 type="text"
                                 value={session.user?.name}
-                                {...register('lastName')}
+                                {...register('nombre_quien_agenda')}
                               />
                               {errors.professional && <span><small>{errors.professional.message}</small></span>}
                             </div>
@@ -488,7 +482,8 @@ const AddAppoinments = () => {
                           <div className="col-12 col-md-6 col-xl-6">
                             <div className="form-group local-forms">
                               <label>Especialidad </label>
-                              <input className="form-control" type="text" {...register('speciality')} value={especialidad || ''} />
+                              <input className="form-control" type="text"
+                                {...register('speciality')} value={especialidad || ''} />
                             </div>
                           </div>
                         </AccordionDetails>
@@ -525,7 +520,7 @@ const AddAppoinments = () => {
                                       defaultValue={selectedOption}
                                       onChange={(e) => {
                                         onChange(e);
-                                        handleSelectedalumno(e);
+                                        handleSelectedalumno(e, value);
                                       }}
                                       getOptionLabel={e => e.label}
                                       options={patients}
@@ -572,15 +567,15 @@ const AddAppoinments = () => {
                                 className="form-control"
                                 type="text"
                                 value={selectedPatient?.name || ''}
-                                {...register('name', {
+                                {...register('patientName', {
                                   required: {
                                     value: true,
-                                    message: 'Estudiante requerido'
+                                    message: 'Nombre de estudiante requerido'
                                   }
                                 })}
                               />
                               {
-                                errors.name && <span><small>{errors.name.message}</small></span>
+                                errors.patientName && <span><small>{errors.patientName.message}</small></span>
                               }
                             </div>
                           </div>
@@ -593,15 +588,15 @@ const AddAppoinments = () => {
                                 className="form-control"
                                 type="text"
                                 value={selectedPatient?.lastName || ''}
-                                {...register('patientlastName', {
+                                {...register('patientLastname', {
                                   required: {
                                     value: true,
-                                    message: 'Estudiante requerido'
+                                    message: 'Apellido de estudiante requerido'
                                   }
                                 })}
                               />
                               {
-                                errors.lastName && <span><small>{errors.lastName.message}</small></span>
+                                errors.patientLastname && <span><small>{errors.patientLastname.message}</small></span>
                               }
                             </div>
                           </div>
@@ -640,7 +635,6 @@ const AddAppoinments = () => {
                                         instanceId="tipo_cita"
                                         defaultValue={selectedOption}
                                         onChange={(e) => {
-                                          console.log('e', e)
                                           onChange(e);
                                           handleSelectedType(e);
                                         }}
