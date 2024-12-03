@@ -1888,7 +1888,7 @@ export const especialidades = [
 ]
 
 
-const genero = [
+export const genero = [
   { value: "Hombre", label: "Hombre" },
   { value: "Mujer", label: "Mujer" },
   { value: "Hombre trans", label: "Hombre trans" },
