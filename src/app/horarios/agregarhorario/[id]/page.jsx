@@ -560,7 +560,7 @@ const AddSchedule = ({ params }) => {
                             <div className="col-12">
                               <div className="form-heading">
                                 <CustomizedTooltips text={(
-                                  <>Al seleccionar un campus, se podrán asignar horas de atención para dicho lugar. Si estarás disponible para ambas sedes, selecciona Ambas.</>
+                                  <>Al seleccionar un campus, se podrán asignar horas de atención para dicho lugar.</>
                                 )}>
                                   <h4 style={{ width: 'max-content' }}>Campus <span className="login-danger">*</span><FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
                                 </CustomizedTooltips>
