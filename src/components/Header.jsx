@@ -333,10 +333,10 @@ const Header = () => {
                 </>
                 : session.user?.picture ?
                   <button className="btn">
-                    <Link href={`/profesionales/editar/${session?.user?.id}`} style={{ textDecoration: 'none' }}>
+                    <Link href={`/citas`} style={{ textDecoration: 'none' }}>
                       <img
                         className="avatar-img rounded-circle"
-                        src={session.user?.picture}
+                        src={session?.user?.picture}
                         alt="avatar"
                         height={40}
                       />
