@@ -24,14 +24,14 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { fetchUserByEmail, updateUser } from "@/services/UsersServices";
 import { createInterview, sendEmail } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
-import { fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
+import { fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 import { fetchUser } from "@/services/UsersServices";
 
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
-import { formatDateToDDMMYYYY, validarRut } from "@/utils/managedata";
+import { validarRut } from "@/utils/managedata";
 
 const cacheHandler = new CacheHandler();
 
@@ -64,7 +64,6 @@ const obtenerFechasUnicas = array => {
 }
 
 const AddFirstAppoinments = () => {
-  const ROL = ["alumno"]
   const { data: session } = useSession()
   const router = useRouter();
   // useAuthorization(['alumno'])
@@ -171,33 +170,15 @@ const AddFirstAppoinments = () => {
     let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
       return filtered.find(item => `${item.fechaInicio}` === compositeKey);
     });
-    if (modalidad === "videollamada" || modalidad === "ambas") {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
-      );
-      setLoadingDays(false)
-    } else if (modalidad === "presencial" || modalidad === "ambas") {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
 
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
-      );
-      setLoadingDays(false)
-    } else if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
+    if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
       setDays([])
       setHours([])
       setDate('')
       setTime('')
-
-      uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === "centro" || item.campus === "ambas")
-      );
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" && (item.campus === "centro"));
       setLoadingDays(false)
+
     } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
       setDays([])
       setHours([])
@@ -205,7 +186,25 @@ const AddFirstAppoinments = () => {
       setTime('')
 
       uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === "huechuraba" || item.campus === "ambas")
+        item => item.modalidad === "presencial" && (item.campus === "huechuraba")
+      );
+      setLoadingDays(false)
+    } else if (modalidad === "videollamada" || modalidad === "ambas") {
+      setDays([])
+      setHours([])
+      setDate('')
+      setTime('')
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
+      );
+      setLoadingDays(false)
+
+    } else if (modalidad === "presencial" || modalidad === "ambas") {
+      setDays([])
+      setHours([])
+      setDate('')
+      setTime('')
+
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
       );
       setLoadingDays(false)
     }
@@ -427,7 +426,7 @@ const AddFirstAppoinments = () => {
       "apellido": data.lastName || patient.apellido,
       "aplica_despeje": 1,
       "anoIngresoCarrera": 'NA',
-      "campus": data.campus,
+      "campus": data.campus || 'NA',
       "comuna": data.comuna.label,
       "carrera": data.career.label,
       "contrasena": 'NA',
@@ -1340,50 +1339,52 @@ const AddFirstAppoinments = () => {
                                   Día de la Cita{" "}
                                   <span className="login-danger">*</span>
                                 </label>
-                                {loadingDays ?
+                                {
+                                  loadingDays ?
 
-                                  <Box sx={{ width: '100%' }}>
-                                    <LinearProgress />
-                                  </Box>
-                                  : <div className="form-group local-forms mb-0">
-                                    {days.length > 0 && (
-                                      <>
-                                        <button
-                                          className="btn btn-primary"
-                                          onClick={e => { mostrarAnterioresDias(e) }}
-                                          disabled={indiceDias === 0}>
-                                          <ChevronLeft />
-                                        </button>
+                                    <Box sx={{ width: '100%' }}>
+                                      <LinearProgress />
+                                    </Box>
+                                    : <div className="form-group local-forms mb-0">
+                                      {days.length > 0 && modalidad !== null && (
+                                        <>
+                                          <button
+                                            className="btn btn-primary"
+                                            onClick={e => { mostrarAnterioresDias(e) }}
+                                            disabled={indiceDias === 0}>
+                                            <ChevronLeft />
+                                          </button>
 
-                                        {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
-                                          return (
-                                            <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
-                                              <input type="hidden" {...register("selectedDay", {
-                                                required: {
-                                                  value: true,
-                                                  message: 'Seleccione una fecha'
-                                                }
-                                              })} />
-                                              <button
-                                                className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
+                                          {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
+                                            return (
+                                              <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
+                                                <input type="hidden" {...register("selectedDay", {
+                                                  required: {
+                                                    value: true,
+                                                    message: 'Seleccione una fecha'
+                                                  }
+                                                })} />
+                                                <button
+                                                  className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
 
-                                                onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
-                                                {dayjs(day.fechaInicio).format('ddd DD MMM')}
+                                                  onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
+                                                  {dayjs(day.fechaInicio).format('ddd DD MMM')}
 
-                                              </button>
-                                            </div>
-                                          )
-                                        }
-                                        )}
-                                        <button
-                                          className="btn btn-primary"
-                                          onClick={e => { mostrarSiguientesDias(e) }}
-                                          disabled={indiceDias + 5 >= days.length}>
-                                          <ChevronRight />
-                                        </button>
-                                      </>)
-                                    }
-                                  </div>}
+                                                </button>
+                                              </div>
+                                            )
+                                          }
+                                          )}
+                                          <button
+                                            className="btn btn-primary"
+                                            onClick={e => { mostrarSiguientesDias(e) }}
+                                            disabled={indiceDias + 5 >= days.length}>
+                                            <ChevronRight />
+                                          </button>
+                                        </>)
+                                      }
+                                    </div>
+                                }
                                 {
                                   errors.selectedDay && errors.selectedDay && <span><small>{errors.selectedDay.message}</small></span>
                                 }

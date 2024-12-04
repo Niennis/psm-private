@@ -6,16 +6,14 @@ import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller } from 'react-hook-form';
 
-import Sidebar from "@/components/Sidebar";
-
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
-import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/material";
+import { Accordion, AccordionSummary, AccordionDetails, Alert, Box, LinearProgress } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { fetchSpecialityById } from "@/services/DoctorsServices";
 import { fetchPatientsDespejeFalse } from "@/services/UsersServices";
 import { createAppointment } from "@/services/AppointmentsServices"
-import { editBloqueDisponible, fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
+import { fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 
 import { useSession } from "next-auth/react";
@@ -70,6 +68,7 @@ const AddAppoinments = () => {
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
+  const [loadingDays, setLoadingDays] = useState(false)
   const { setProps } = useSidebar();
 
   useEffect(() => {
@@ -128,7 +127,7 @@ const AddAppoinments = () => {
     }
   }
 
-  const modalidad = watch("modalidad", "videollamada"); // Valor predeterminado: videollamada
+  const modalidad = watch("modalidad"); // Valor predeterminado: videollamada
   const campus = watch("campus", ""); // Valor predeterminado: ninguno
   const motivo_consulta_seleccionado = watch('motivo')
   const profesional = watch('professional')
@@ -142,17 +141,39 @@ const AddAppoinments = () => {
 
   // Filtros
   useEffect(() => {
+    setLoadingDays(true)
     let filtered = allDays;
     let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
       return filtered.find(item => `${item.fechaInicio}` === compositeKey);
     });
-    if (modalidad === "videollamada" || modalidad === "ambas") {
+
+    if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
+      setDays([])
+      setHours([])
+      setDate('')
+      setTime('')
+      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" && (item.campus === "centro"));
+      setLoadingDays(false)
+
+    } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
+      setDays([])
+      setHours([])
+      setDate('')
+      setTime('')
+
+      uniqueFiltered = uniqueFiltered.filter(
+        item => item.modalidad === "presencial" && (item.campus === "huechuraba")
+      );
+      setLoadingDays(false)
+    } else if (modalidad === "videollamada" || modalidad === "ambas") {
       setDays([])
       setHours([])
       setDate('')
       setTime('')
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
       );
+      setLoadingDays(false)
+
     } else if (modalidad === "presencial" || modalidad === "ambas") {
       setDays([])
       setHours([])
@@ -161,24 +182,7 @@ const AddAppoinments = () => {
 
       uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
       );
-    } else if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
-
-      uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === "centro" || item.campus === "ambas")
-      );
-    } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
-
-      uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === "huechuraba" || item.campus === "ambas")
-      );
+      setLoadingDays(false)
     }
 
     setDays(uniqueFiltered);
@@ -214,7 +218,7 @@ const AddAppoinments = () => {
   const onSubmit = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
-
+    console.log('data', data)
     try {
       // la función que crea la cita
       const appointment = await createAppointment({
@@ -222,13 +226,15 @@ const AddAppoinments = () => {
         "patient_id": selectedPatient.id,
         hora: data.selectedHour,
         fecha: data.selectedDay,
-        motivo: data.motivo === 'Otro' ? data.otro : data.motivo
+        motivo: data.motivo === 'Otro' ? data.otro : data.motivo,
+        campus: data.campus || 'NA'
       })
 
 
       if (appointment.estado === false) {
         setSuccess('fail')
         setError(appointment.detalle)
+        console.log(appointment)
       } else {
         setSuccess('success')
       }
@@ -270,6 +276,7 @@ const AddAppoinments = () => {
     setHours([])
     setDate('')
     setTime('')
+    setLoadingDays(true)
     try {
       const horasmedicas = await generarHorasMedicas(e.id)
 
@@ -283,8 +290,9 @@ const AddAppoinments = () => {
       const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
       setAllDays(orderedData)
-      // solo los días para manejar los botones
+      setLoadingDays(false)
       setDays(bloque)
+      console.log('set all days', orderedData)
     } catch (error) {
       console.log('Error: ', error)
     }
@@ -397,10 +405,11 @@ const AddAppoinments = () => {
     setIndiceHoras(prevIndice => Math.max(0, prevIndice - 5));
   };
 
-  const handleSelectedalumno = async (e, selectedOption) => {
+  const handleSelectedalumno = async (e ) => {
+    console.log('e', e)
     setSelectedPatient(e)
-    setValue('patientName', selectedOption.name);
-    setValue('patientLastname', selectedOption.lastName); 
+    setValue('patientName', e?.name);
+    setValue('patientLastname', e?.lastName);
   }
 
   return (
@@ -520,7 +529,7 @@ const AddAppoinments = () => {
                                       defaultValue={selectedOption}
                                       onChange={(e) => {
                                         onChange(e);
-                                        handleSelectedalumno(e, value);
+                                        handleSelectedalumno(e);
                                       }}
                                       getOptionLabel={e => e.label}
                                       options={patients}
@@ -875,8 +884,6 @@ const AddAppoinments = () => {
 
                           }
 
-
-
                           {profesional &&
 
                             <div className="row">
@@ -885,46 +892,53 @@ const AddAppoinments = () => {
                                   Día de la Cita{" "}
                                   <span className="login-danger">*</span>
                                 </label>
+                                {
+                                  loadingDays ?
 
-                                <div className="form-group local-forms mb-0">
-                                  {days.length > 0 && (
-                                    <>
-                                      <button
-                                        className="btn btn-primary"
-                                        onClick={e => { mostrarAnterioresDias(e) }}
-                                        disabled={indiceDias === 0}>
-                                        <ChevronLeft />
-                                      </button>
+                                    <Box sx={{ width: '100%' }}>
+                                      <LinearProgress />
+                                    </Box>
+                                    :
+                                    <div className="form-group local-forms mb-0">
+                                      {days.length > 0 && modalidad !== null && (
+                                        <>
+                                          <button
+                                            className="btn btn-primary"
+                                            onClick={e => { mostrarAnterioresDias(e) }}
+                                            disabled={indiceDias === 0}>
+                                            <ChevronLeft />
+                                          </button>
 
-                                      {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
-                                        return (
-                                          <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
-                                            <input type="hidden" {...register("selectedDay", {
-                                              required: {
-                                                value: true,
-                                                message: 'Seleccione una fecha'
-                                              }
-                                            })} />
-                                            <button
-                                              className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
+                                          {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
+                                            return (
+                                              <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
+                                                <input type="hidden" {...register("selectedDay", {
+                                                  required: {
+                                                    value: true,
+                                                    message: 'Seleccione una fecha'
+                                                  }
+                                                })} />
+                                                <button
+                                                  className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
 
-                                              onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
-                                              {dayjs(day.fechaInicio).format('ddd DD MMM')}
+                                                  onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
+                                                  {dayjs(day.fechaInicio).format('ddd DD MMM')}
 
-                                            </button>
-                                          </div>
-                                        )
+                                                </button>
+                                              </div>
+                                            )
+                                          }
+                                          )}
+                                          <button
+                                            className="btn btn-primary"
+                                            onClick={e => { mostrarSiguientesDias(e) }}
+                                            disabled={indiceDias + 5 >= days.length}>
+                                            <ChevronRight />
+                                          </button>
+                                        </>)
                                       }
-                                      )}
-                                      <button
-                                        className="btn btn-primary"
-                                        onClick={e => { mostrarSiguientesDias(e) }}
-                                        disabled={indiceDias + 5 >= days.length}>
-                                        <ChevronRight />
-                                      </button>
-                                    </>)
-                                  }
-                                </div>
+                                    </div>
+                                }
                                 {
                                   errors.selectedDay && errors.selectedDay && <span><small>{errors.selectedDay.message}</small></span>
                                 }
