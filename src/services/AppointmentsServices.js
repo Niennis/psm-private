@@ -28,33 +28,6 @@ export const sendEmail = async (email, typeUser) => {
   }
 }
 
-const pruebaSendMail = (mail) => {
-  let data = JSON.stringify({
-    "tarjet": mail,
-    "paciente": true,
-    "asunto": 'Holi'
-  });
-
-  let config = {
-    method: 'post',
-    maxBodyLength: Infinity,
-    url: 'https://us-central1-mkt-003001-00813.cloudfunctions.net/ZRZ-SendMail',
-    headers: {
-      'Content-Type': 'application/json',
-      "Accept": "application/json, text/plain, */*",
-    },
-    data: data
-  };
-
-  axios.request(config)
-    .then((response) => {
-      console.log(JSON.stringify(response.data));
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
-
 export const createInterview = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_INTERVIEW
   console.log('appointment', appointment)
@@ -65,7 +38,7 @@ export const createInterview = async (appointment) => {
     derivado_desde: 'derivado',
     diagnostico_previo: 'diagnosticos',
     estado: "pendiente",
-    fechaInicio: appointment.fecha,
+    fechaInicio: appointment.fecha_inicio,
     hora: appointment.hora,
     modalidad: appointment.modalidad || 'modalidad',
     motivo: appointment.motivo.label || 'motivo',

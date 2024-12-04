@@ -346,7 +346,7 @@ export const getDates = (body) => {
 // CREATE DISPONIBILIDADES
 export const createSchedule = async (schedule) => {
   const SCHEDULES_URL = process.env.NEXT_PUBLIC_CREATE_DISPONIBILIDADES
-  const semana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes']
+  const semana = ["lunes", "martes", "miércoles", "jueves", "viernes"]
 
   const body = {
     "detalleServicio": schedule.title,
@@ -354,7 +354,7 @@ export const createSchedule = async (schedule) => {
     "dias": schedule.frecuencia === "semanal" ? schedule.semanal.dia
       : schedule.frecuencia === "mensual" ? [schedule.mensual['ordinal-dia']] : semana,
     "duracionServicio": schedule.duracionServicio,
-    "fechaInicio": dayjs(schedule.fechaInicio).format('YYYY-MM-DD'),
+    "fechaInicio": dayjs(schedule.fecha_inicio).format('YYYY-MM-DD'),
     "fechaFin": dayjs(schedule.fechaFin).format('YYYY-MM-DD'),
     "frecuencia": schedule.frecuencia,
     "horaIni": schedule.horaIni,
@@ -364,15 +364,19 @@ export const createSchedule = async (schedule) => {
     "orden": schedule?.mensual?.["ordinal-orden"] || " ",
     "repeticiones": "",
     "tipo": "profesional",
-    "tipo_cita": schedule.tipo_cita
+    "tipo_cita": schedule.tipo_cita,
   }
 
-  if (body.frecuencia !== 'semanal') {
+  if (body.frecuencia !== "semanal") {
     body.recurrencia = recurrencia(schedule)
-    body.diaNumero = schedule.mensual["cardinal-numero"]
   }
 
-  // console.log('BODY', body)
+  if (schedule.mensual["cardinal-numero"]) {
+    body.diaNumero = schedule.mensual["cardinal-numero"]
+
+  }
+
+  console.log('BODY', body)
 
   // getDates(body)
   const data = await fetch(SCHEDULES_URL, {
@@ -381,7 +385,6 @@ export const createSchedule = async (schedule) => {
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
-      'ngrok-skip-browser-warning': 'any'
     },
     body: JSON.stringify(body)
   })

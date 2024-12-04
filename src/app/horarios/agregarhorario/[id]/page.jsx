@@ -116,8 +116,11 @@ const AddSchedule = ({ params }) => {
   const modalidad = watch('modalidad')
 
   const onSubmit = handleSubmit(async data => {
+    console.log(data)
+//  console.log('startDay', startDay)
+ console.log(params.id)
     setSuccess('initial')
-    const semana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes']
+    const semana = ["lunes", "martes", "miércoles", "jueves", "viernes"]
     const fechas = []
     const newData = {
       ...data,
@@ -128,10 +131,11 @@ const AddSchedule = ({ params }) => {
         ...data.mensual,
         'cardinal-numero': startDay
       },
-      dias: data.frecuencia === "semanal" ? data.semanal.dia : semana
+      dias: data.frecuencia === "semanal" ? data.semanal.dia : semana,
+      fecha_inicio: data.fecha_inicio,
     }
 
-    // console.log('newData', newData);
+    console.log('newData', newData);
     const dates = getDates(newData, fechas)
     let esValido = []
     if (dates.length === 0) {
@@ -147,6 +151,8 @@ const AddSchedule = ({ params }) => {
     Promise.all(promesas)
       .then(async (values) => {
         if (values.includes(true)) {
+          console.log('GGGGGG')
+
           setSuccess('fail')
           setError('Hay choque de horario.')
         } else {
@@ -978,10 +984,15 @@ const AddSchedule = ({ params }) => {
                                   placeholder=""
 
                                   onChange={handleDate}
-                                  value={startDate}
-                                  {...register('fecha_inicio')}
+                                  // value={startDate}
+                                  {...register('fecha_inicio', {
+                                    required: {
+                                      value: true,
+                                      message: 'Fecha de inicio es requerida'
+                                    }
+                                  })}
                                 />
-                                {/* {errors.fechaInicio && <span><small>{errors.fechaInicio.message}</small></span>} */}
+                                {errors.fecha_inicio && <span><small>{errors.fecha_inicio.message}</small></span>}
                               </div>
                             </div>
                             <div className="col-12 col-md-6 col-xl-4">
