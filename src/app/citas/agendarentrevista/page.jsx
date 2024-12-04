@@ -439,6 +439,7 @@ const AddFirstAppoinments = () => {
       "jornada": 'NA',
       "mustChangePassword": 0,
       "nombre": data.name || patient.nombre,
+      "nombre_social": data.nombre_social || patient.nombre_social,
       "region": data.region.label || patient.region,
       "rut": data.rut,
       "status": patient.status,
