@@ -175,9 +175,9 @@ const Sidebar = () => {
                         <li>
                           <Link className={props?.activeClassName === 'add-appoinment' ? 'active' : ''} href="/citas/agendarcita">Agendar Cita</Link>
                         </li>
-                        <li>
+                        {/* <li>
                           <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
-                        </li>
+                        </li> */}
                         {/* <li>
                       <Link className={props?.activeClassName === 'edit-appoinment' ? 'active' : ''} href="/editappoinments">Edit Appointment</Link>
                     </li> */}
