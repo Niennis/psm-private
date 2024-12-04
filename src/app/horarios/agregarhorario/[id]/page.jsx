@@ -11,7 +11,7 @@ import { useForm, Controller } from 'react-hook-form'
 import Select from "react-select";
 
 import { fetchSpecialityById, fetchProfessionalById } from '@/services/DoctorsServices';
-import { createSchedule, getDates, fetchScheduleByDate, validateDates, generarHorasMedicas } from '@/services/SchedulesServices';
+import { createSchedule, getDates, fetchScheduleByDate, validateDates, generarHorasMedicas, fetchBlocksAvailables } from '@/services/SchedulesServices';
 import Calender from '../../../calender/page';
 
 import { useSidebar } from "@/context/SidebarContext";
@@ -118,12 +118,12 @@ const AddSchedule = ({ params }) => {
   const onSubmit = handleSubmit(async data => {
     setSuccess('initial')
     const semana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes']
-
+    const fechas = []
     const newData = {
       ...data,
       id_user: params.id,
       duracionServicio: parseInt(data.duracion.label),
-      fechaInicio: startDate,
+      fechaInicio: startDay,
       mensual: {
         ...data.mensual,
         'cardinal-numero': startDay
@@ -131,25 +131,51 @@ const AddSchedule = ({ params }) => {
       dias: data.frecuencia === "semanal" ? data.semanal.dia : semana
     }
 
-    try {
-      const req = await createSchedule(newData)
-      console.log('req =>', req)
-      if (req.estado === false) {
-        setSuccess('fail')
-        setError('Hubo un problema. Intenta luego más tarde')
-      } else {
-        setSuccess('success')
-        fetchData()
-        setIsLoading(true)
-      }
-
-    } catch (error) {
-      console.log('error =>', error)
-      setSuccess('fail')
-      setError('Hubo un problema. Intenta luego más tarde')
-    } finally {
-      setTimeout(() => setIsLoading(false), 500);
+    // console.log('newData', newData);
+    const dates = getDates(newData, fechas)
+    let esValido = []
+    if (dates.length === 0) {
+      // console.log('CHAO NO SE PUEDE')
+      esValido.push(false)
+      return
     }
+
+    const promesas = []
+    dates.forEach(date => {
+      return promesas.push(validateDates(date, data.horaIni, data.horaFin, params.id))
+    })
+    Promise.all(promesas)
+      .then(async (values) => {
+        if (values.includes(true)) {
+          setSuccess('fail')
+          setError('Hay choque de horario.')
+        } else {
+          console.log('HHHHHHHHHH')
+
+          try {
+            const req = await createSchedule(newData)
+            if (req.estado === false) {
+              setSuccess('fail')
+              setError(`Hubo un problema. Intenta más tarde. ${req.detalle}}`)
+            } else {
+              setSuccess('success')
+              fetchData()
+              setIsLoading(true)
+            }
+
+          } catch (error) {
+            console.log('error =>', error)
+            setSuccess('fail')
+            setError(`Hubo un problema. Intenta más tarde. ${error}`)
+          } finally {
+            setTimeout(() => setIsLoading(false), 500);
+          }
+        }
+      })
+      .catch((error) => {
+        setSuccess('fail')
+        setError(`Hubo un problema. Intenta más tarde. ${error}`)
+      });
   })
 
   const duracion = [
@@ -953,12 +979,7 @@ const AddSchedule = ({ params }) => {
 
                                   onChange={handleDate}
                                   value={startDate}
-                                // {...register('fechaInicio', {
-                                //   required: {
-                                //     value: true,
-                                //     message: 'Fecha de inicio es requerida'
-                                //   }
-                                // })}
+                                  {...register('fecha_inicio')}
                                 />
                                 {/* {errors.fechaInicio && <span><small>{errors.fechaInicio.message}</small></span>} */}
                               </div>

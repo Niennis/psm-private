@@ -318,9 +318,10 @@ const obtenerFechasMensuales = (objeto, fechas) => {
 
 // Calcula las fechas pedidas, entra un objeto, debe retornar un array con fechas
 export const getDates = (body) => {
+  // console.log(body)
   const fechas = []
   if (body.frecuencia === 'diaria') {
-    let fechaActual = new Date(`${body.fechaInicio}T14:00:00`)
+    let fechaActual = new Date(`${body.fecha_inicio}T14:00:00`)
     let fechaFin = new Date(`${body.fechaFin}T14:00:00`)
 
     while (fechaActual <= fechaFin) {
@@ -371,7 +372,7 @@ export const createSchedule = async (schedule) => {
     body.diaNumero = schedule.mensual["cardinal-numero"]
   }
 
-  console.log('BODY', body)
+  // console.log('BODY', body)
 
   // getDates(body)
   const data = await fetch(SCHEDULES_URL, {
@@ -385,7 +386,7 @@ export const createSchedule = async (schedule) => {
     body: JSON.stringify(body)
   })
   const response = await data.json()
-  console.log('RESPONSE', response)
+  // console.log('RESPONSE', response)
   return response
 }
 
@@ -399,7 +400,7 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
     comentario: 'cambio'
   }
 
-  console.log('update', body)
+  // console.log('update', body)
   try {
     const data = await fetch(EDIT_BLOQUE_URL, {
       method: "POST",
@@ -413,7 +414,7 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
 
     const response = await data.json()
 
-    console.log('RESPONSE de editBloqueDisponibles', response)
+    // console.log('RESPONSE de editBloqueDisponibles', response)
     return response
   } catch (error) {
     console.log('Error', error)
@@ -422,15 +423,15 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
 
 // Retorna true si hay choque de horario
 const hayChoqueHorario = (inicioMayor, finMayor, bloquesMenores) => {
-  console.log('inicio', inicioMayor, finMayor, bloquesMenores)
+  // console.log('inicio', inicioMayor, finMayor, bloquesMenores)
   for (const bloqueMenor of bloquesMenores) {
     const { hora_inicio, hora_fin } = bloqueMenor;
 
     const inicioMenor = hora_inicio.length < 8 ? (`0${hora_inicio}`).slice(0, 5) : hora_inicio.slice(0, 5)
-    console.log('iniciomenor', inicioMenor);
+    // console.log('iniciomenor', inicioMenor);
 
     const finMenor = hora_fin.length < 8 ? (`0${hora_fin}`).slice(0, 5) : hora_fin.slice(0, 5)
-    console.log('finMenor', finMenor);
+    // console.log('finMenor', finMenor);
 
     // Convertir las horas a objetos Date para facilitar la comparación
     const inicioMayorDate = new Date(`1970-01-01T${inicioMayor}`);
@@ -450,15 +451,15 @@ const hayChoqueHorario = (inicioMayor, finMayor, bloquesMenores) => {
 }
 
 export const validateDates = async (fecha, horaInicio, horaFin, id) => {
-  console.log('VALIDA', fecha, horaInicio, horaFin, id)
+  // console.log('VALIDA', fecha, horaInicio, horaFin, id)
   const { bloques: bloquesMenores } = await fetchScheduleByDate(id, fecha)
-  console.log('BLOQUESMENORES', bloquesMenores)
+  // console.log('BLOQUESMENORES', bloquesMenores)
 
   if (bloquesMenores.length === 0) {
-    console.log('TAMBIÉN ENTRA AQUÍ');
+    // console.log('TAMBIÉN ENTRA AQUÍ');
     return false
   } else {
-    console.log('HAY CHOQUE', hayChoqueHorario(horaInicio, horaFin, bloquesMenores))
+    // console.log('HAY CHOQUE', hayChoqueHorario(horaInicio, horaFin, bloquesMenores))
     return hayChoqueHorario(horaInicio, horaFin, bloquesMenores)
   }
 

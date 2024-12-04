@@ -102,7 +102,6 @@ export const createInterview = async (appointment) => {
 
 export const createAppointment = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_APPOINTMENT
-  console.log('appointment', appointment)
   const body = {
     alumno_id: appointment.patient_id,
     campus: appointment.campus,
