@@ -38,13 +38,6 @@ export const validarRut = rut => {
   return dvEsperado === dv;
 }
 
-const rutEjemplo = '12.345.678-5';
-if (validarRut(rutEjemplo)) {
-  console.log('RUT válido');
-} else {
-  console.log('RUT inválido');
-}
-
 export const formatDateToYYYYMMDD = (dateString) => {
   const date = new Date(dateString);
   const year = date.getFullYear();
