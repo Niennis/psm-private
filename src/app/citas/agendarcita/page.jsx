@@ -119,11 +119,15 @@ const AddAppoinments = () => {
   };
 
   const getSpeciality = async () => {
-    try {
-      const { especialidades: profesional } = await fetchSpecialityById(session?.user?.id)
-      setEspecialidad(profesional[0].especialidad)
-    } catch (error) {
-      console.log('ERROR', error)
+    if (session?.user?.rol === 'administrador') {
+      setEspecialidad('Administrador')
+    } else {
+      try {
+        const { especialidades: profesional } = await fetchSpecialityById(session?.user?.id)
+        setEspecialidad(profesional[0].especialidad)
+      } catch (error) {
+        console.log('ERROR', error)
+      }
     }
   }
 
@@ -405,7 +409,7 @@ const AddAppoinments = () => {
     setIndiceHoras(prevIndice => Math.max(0, prevIndice - 5));
   };
 
-  const handleSelectedalumno = async (e ) => {
+  const handleSelectedalumno = async (e) => {
     console.log('e', e)
     setSelectedPatient(e)
     setValue('patientName', e?.name);

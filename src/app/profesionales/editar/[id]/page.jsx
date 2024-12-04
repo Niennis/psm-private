@@ -19,6 +19,7 @@ import { formatDateToYYYYMMDD } from "@/utils/managedata";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
+import { fetchUserByEmail } from "@/services/UsersServices";
 
 const cacheHandler = new CacheHandler();
 
@@ -75,8 +76,10 @@ const EditDoctor = ({ params }) => {
     try {
       const usersData = await fetchProfessionalById(params.id);
       const { especialidades } = await fetchSpecialityById(params.id);
-      const user = usersData.users[0];
-      console.log('usersData', usersData)
+
+      const user = await fetchUserByEmail(session?.user?.email)
+
+      // const user = usersData.users[0];
       const obj = {
         ...user,
         name: user.nombre,
@@ -85,12 +88,11 @@ const EditDoctor = ({ params }) => {
         email: user.email,
         dateOfBirth: user.fecha_nacimiento,
         genero: user.genero,
-        speciality: especialidades[0].especialidad,
+        speciality: session?.user?.rol === "profesional" ? especialidades[0].especialidad : 'Administrador',
         status: user.status,
         password: '',
         confirmPassword: ''
       };
-      console.log('obj', obj)
       setInitial(obj)
       return obj
     } catch (error) {
@@ -134,34 +136,34 @@ const EditDoctor = ({ params }) => {
   const handleEdit = handleSubmit(async (data, e) => {
     console.log('data', data)
     e.preventDefault()
-    console.log('Formulario enviado con datos:', data);
+    console.log('Formulario enviado con datos:', data, initial);
 
     const match = data.password === data.confirmPassword;
 
     const body = {
       id: data.id,
-      nombre: data.name || initial.nombre,
-      apellido: data.lastName || initial.apellido,
-      telefono: data.mobile || initial.telefono,
-      email: initial.email,
-      contrasena: (data.password && data.confirmPassword && match) && data.password,
-      fecha_nacimiento: formatDateToYYYYMMDD(initial.fecha_nacimiento),
-      genero: data.genero || initial.genero,
-      tipo_usuario: initial.tipo_usuario,
-      status: data.status || initial.status,
-      rut: '12345678-9',
-      carrera: 'Psicopedagogia',
+      id_emergencia: 0,
       anoIngresoCarrera: '0',
-      jornada: 'laboral',
-      direccion: 'random',
-      region: 'santiago',
-      comuna: 'santiago',
-      entrevistador: '1',
-      mustChangePassword: initial.mustChangePassword,
+      apellido: data.lastName || initial.apellido,
       aplica_despeje: '0',
       campus: 'ambas',
-      id_emergencia: 0,
-      nombre_social: data.nombre_social || initial.nombre_social || initial.nombre
+      carrera: 'Psicopedagogia',
+      comuna: 'santiago',
+      contrasena: (data.password && data.confirmPassword && match) && data.password,
+      direccion: 'random',
+      email: initial.email,
+      entrevistador: '1',
+      fecha_nacimiento: formatDateToYYYYMMDD(initial.fecha_nacimiento),
+      genero: data.genero || initial.genero,
+      jornada: 'laboral',
+      mustChangePassword: initial.mustChangePassword || 0,
+      nombre: data.name || initial.nombre,
+      nombre_social: data.nombre_social || initial.nombre_social || initial.nombre,
+      region: 'santiago',
+      rut: '12345678-9',
+      status: data.status || initial.status,
+      telefono: data.mobile || initial.telefono,
+      tipo_usuario: initial.tipo_usuario,
     };
 
     const editPass = {
