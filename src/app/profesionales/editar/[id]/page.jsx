@@ -137,9 +137,9 @@ const EditDoctor = ({ params }) => {
 
   // FUNCIÓN UPDATE
   const handleEdit = handleSubmit(async (data, e) => {
-    console.log('data', data)
+    // console.log('data', data)
     e.preventDefault()
-    console.log('Formulario enviado con datos:', data, initial);
+    // console.log('Formulario enviado con datos:', data, initial);
 
     const match = data.password === data.confirmPassword;
 
