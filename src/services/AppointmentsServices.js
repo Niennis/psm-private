@@ -6,11 +6,14 @@ import axios from 'axios';
 export const sendEmail = async (email, typeUser) => {
   console.log('el body', email, typeUser);
   const SEND_EMAIL = process.env.NEXT_PUBLIC_SEND_EMAIL;
-  const lebody = {
-    "tarjet": "estefania.osses.v@gmail.com",
-    "paciente": true
+  const body = {
+    'nombre': 'Prueba',
+    'apellido': 'Usuario',
+    'mail':"estefania.osses.v@gmail.com",
+    'test': 'Don test',
+    'puntaje': (25).toString(),
+    'resultado': 'el resultado',
   }
-  console.log('lebody', lebody);
   try {
     const data = await fetch(SEND_EMAIL, {
       method: "POST",
@@ -18,11 +21,10 @@ export const sendEmail = async (email, typeUser) => {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       },
-      body: JSON.stringify(lebody)
+      body: JSON.stringify(body)
     })
-    // const resp = await data.json()
-    console.log('RESP', data);
-    return data
+    const resp = await data.json()
+    return resp
   } catch (error) {
     console.log('ERROR', error)
   }
@@ -30,15 +32,15 @@ export const sendEmail = async (email, typeUser) => {
 
 export const createInterview = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_INTERVIEW
-  console.log('appointment', appointment)
   const body = {
     alumno_id: appointment.patient_id,
     campus: appointment.campus,
+    carrera: appointment.carrera,
     como: 'como se entero',
     derivado_desde: 'derivado',
     diagnostico_previo: 'diagnosticos',
     estado: "pendiente",
-    fechaInicio: appointment.fecha_inicio,
+    fechaInicio: appointment.fecha,
     hora: appointment.hora,
     modalidad: appointment.modalidad || 'modalidad',
     motivo: appointment.motivo.label || 'motivo',
@@ -47,7 +49,6 @@ export const createInterview = async (appointment) => {
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
   }
-  console.log('BODY', body);
 
   try {
     const data = await fetch(APPOINTMENT_API, {
@@ -59,13 +60,20 @@ export const createInterview = async (appointment) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    console.log('response', response.detalle);
+    // console.log('response', response);
 
-    // ENVÍO DE MAIL
-    // if (response.detalle === 'success!!') {
-    // pruebaSendMail('estefania.osses.v@gmail.com')
-    // await sendEmail(bodyEmailProfessional)
-    // }
+ /*    // ENVÍO DE MAIL
+    if (response.estado === true) {
+      // pruebaSendMail('estefania.osses.v@gmail.com')
+      try {
+        const data = await sendEmail()
+        // const response = await data.json()
+        console.log('RESPONSE', data)
+
+      } catch (error) {
+        console.log('ERROR SEND MAIL: ', error)
+      }
+    } */
 
     return response
   } catch (err) {

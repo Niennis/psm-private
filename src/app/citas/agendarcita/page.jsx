@@ -865,7 +865,7 @@ const AddAppoinments = () => {
                                         className="form-check-input"
                                         {...register('campus')}
                                       />
-                                      Sede Centro - Manuel Rodríguez 343 sur, 2° piso
+                                      Sede Centro - Manuel Rodríguez Sur 343 , 2° piso
                                     </label>
                                   </div>
                                   <div className="form-check-inline">

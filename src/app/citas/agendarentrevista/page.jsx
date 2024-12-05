@@ -112,6 +112,7 @@ const AddFirstAppoinments = () => {
   const fetchInitialData = async () => {
     try {
       const { users: response } = await fetchUser(session.user?.id);
+      console.log('response', response)
       const patient = {
         name: response[0].nombre,
         lastName: response[0].apellido,
@@ -411,11 +412,11 @@ const AddFirstAppoinments = () => {
   const handleFirstInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
-    const patient = await fetchUserByEmail(session.user?.email)
+    const {users: patient} = await fetchUser(session.user?.id)
 
     const bodyInterview = {
       ...data,
-      "patient_id": patient.id,
+      "patient_id": patient[0].id,
       "hora": data.selectedHour,
       "fecha": data.selectedDay,
       "region": regiones[0].label,
@@ -423,28 +424,29 @@ const AddFirstAppoinments = () => {
     }
 
     const bodyUpdate = {
-      "apellido": data.lastName || patient.apellido,
+      "apellido": data.lastName || patient[0].apellido,
       "aplica_despeje": 1,
       "anoIngresoCarrera": 'NA',
       "campus": data.campus || 'NA',
-      "comuna": data.comuna.label,
-      "carrera": data.career.label,
+      "comuna": data.comuna.label || patient[0].comuna,
+      "carrera": data.career.label || patient[0].carrera,
       "contrasena": 'NA',
       "direccion": data.address,
       "email": data.email,
       "entrevistador": 0,
-      "fecha_nacimiento": data.birthday || patient.fecha_nacimiento,
-      "genero": data.genero || patient.genero,
-      "id": patient.id,
+      "fecha_nacimiento": data.birthday || patient[0].fecha_nacimiento,
+      "genero": data.genero || patient[0].genero,
+      "id": patient[0].id,
       "jornada": 'NA',
       "mustChangePassword": 0,
-      "nombre": data.name || patient.nombre,
-      "nombre_social": data.nombre_social || patient.nombre_social,
-      "region": data.region.label || patient.region,
+      "nombre": data.name || patient[0].nombre,
+      "nombre_social": data.nombre_social || patient[0].nombre_social,
+      "region": data.region.label || patient[0].region,
       "rut": data.rut,
-      "status": patient.status,
-      "telefono": data.mobile || patient.telefono,
-      "tipo_usuario": patient.tipo_usuario,
+      "status": patient[0].status,
+      "telefono": data.mobile || patient[0].telefono,
+      "tipo_usuario": patient[0].tipo_usuario,
+      "id_emergencia": patient[0].id_emergencia || 0
     }
     // tomarHoraDisponible(bloques, time, hours, date)
     const professional = watch('professional')
@@ -455,9 +457,10 @@ const AddFirstAppoinments = () => {
         createInterview(bodyInterview),
         updateUser(bodyUpdate)
       ]);
+      console.log('appointment', appointment)
       if (appointment.estado === false && update.estado === false) {
         setSuccess('fail')
-      } else if (appointment['detalle'].includes('success') && !update['detalle'].includes('success')) {
+      } else if (appointment.estado === true && update.estado === false) {
         setSuccess('success')
         setError('Se creó la cita, pero no se logró actualizar la información. Revisa la información en Lista de citas.')
       } else {

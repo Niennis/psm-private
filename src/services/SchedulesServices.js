@@ -56,7 +56,7 @@ export const fetchBlocksAvailables = async (id, date) => {
     body: JSON.stringify(body)
   })
   const response = await data.json()
-
+// console.log('ahora si?', response)
   return response;
 }
 
