@@ -74,12 +74,15 @@ const EditDoctor = ({ params }) => {
   // DATOS PRECARGADOS
   const fetchInitialData = async () => {
     try {
-      const usersData = await fetchProfessionalById(params.id);
+      let user;
       const { especialidades } = await fetchSpecialityById(params.id);
+      if (params.id == session?.user?.id) {
+        user = await fetchUserByEmail(session?.user?.email)
+      } else {
+        const usersData = await fetchProfessionalById(params.id);
+        user = usersData.users[0];
+      }
 
-      const user = await fetchUserByEmail(session?.user?.email)
-
-      // const user = usersData.users[0];
       const obj = {
         ...user,
         name: user.nombre,
@@ -617,7 +620,7 @@ const EditDoctor = ({ params }) => {
                                     type="radio"
                                     value="activo"
                                     className="form-check-input"
-                                    defaultChecked={initial.status === 'activo'}
+                                    // defaultChecked={initial.status === 'activo'}
                                     {...register('status')}
                                   />
                                   Activo
@@ -629,7 +632,7 @@ const EditDoctor = ({ params }) => {
                                     disabled={session?.user?.rol !== "administrador"}
                                     type="radio"
                                     value="inactivo"
-                                    defaultChecked={initial.status === 'inactivo'}
+                                    // defaultChecked={initial.status === 'inactivo'}
                                     className="form-check-input"
                                     {...register('status')}
                                   />
