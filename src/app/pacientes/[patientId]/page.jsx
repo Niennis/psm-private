@@ -62,6 +62,8 @@ const EditPatients = ({ params }) => {
         id_emergencia: user[0].id_emergencia,
       }
       setInitial(obj)
+      console.log(user[0])
+
       return obj
     } catch (error) {
       console.log('error', error)
@@ -710,7 +712,7 @@ const EditPatients = ({ params }) => {
                                     type="radio"
                                     value="activo"
                                     className="form-check-input"
-                                    defaultChecked={initial.status === 'activo'}
+                                    // defaultChecked={initial.status === 'activo'}
                                     {...register('status')}
                                   />
                                   Activo
@@ -722,7 +724,7 @@ const EditPatients = ({ params }) => {
                                     disabled={session?.user?.rol !== "administrador"}
                                     type="radio"
                                     value="inactivo"
-                                    defaultChecked={initial.status === 'inactivo'}
+                                    // defaultChecked={initial.status === 'inactivo'}
                                     className="form-check-input"
                                     {...register('status')}
                                   />
