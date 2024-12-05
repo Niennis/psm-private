@@ -179,14 +179,14 @@ const DoctorList = () => {
                   <i className="far fa-edit me-2" />
                   Editar
                 </Link>
-                <Link
+                {/* <Link
                   href="#"
                   className="dropdown-item"
                   data-bs-toggle="modal"
                   data-bs-target="#delete_patient">
                   <i className="fa fa-trash-alt m-r-5"></i>
                   Eliminar
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>
