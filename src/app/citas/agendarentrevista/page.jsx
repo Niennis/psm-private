@@ -250,7 +250,7 @@ const AddFirstAppoinments = () => {
     setLoadingDays(true)
     try {
       const horasmedicas = await generarHorasMedicas(e.id)
-
+console.log('horasmedicas', horasmedicas)
       // Traer disponibilidades
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
 

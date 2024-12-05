@@ -93,12 +93,15 @@ export const generarHorasMedicas = async (id) => {
   const { users: hours } = await fetchScheduleByAvailability(id)
   const fechasUnicas = obtenerFechasUnicas(hours);
 
-  const bloquesPromesas = fechasUnicas.map(async (date) => (
-    await fetchBlocksAvailables(id, date)
-  ))
+  const bloquesPromesas = fechasUnicas.map(async (date) => {
+    const {bloques} = await fetchBlocksAvailables(id, date)
+    return bloques.map((item) => ({ ...item, fecha: date }));
+  })
 
   const bloquesTotales = await Promise.all(bloquesPromesas)
-  const bloquesDisponibles = bloquesTotales.flatMap(obj => obj.bloques)
+
+  // const bloquesDisponibles = bloquesTotales.flatMap(obj => obj.bloques)
+  const bloquesDisponibles = bloquesTotales.flat()
   const convertirHoraAMinutos = (hora) => {
     const [h, m, s] = hora.split(":").map(Number);
     return h * 60 + m + s / 60;
@@ -116,6 +119,7 @@ export const generarHorasMedicas = async (id) => {
     const duracion = hour.duracionServicio; // duración en minutos
     const inicioServicio = convertirHoraAMinutos(hour.horaIni);
     const finServicio = convertirHoraAMinutos(hour.horaFin);
+    const fechaServicio = hour.fechaInicio;
 
     let tiempoActual = inicioServicio;
 
@@ -127,12 +131,14 @@ export const generarHorasMedicas = async (id) => {
         const inicioBloque = convertirHoraAMinutos(bloque.hora_inicio);
         const finBloque = convertirHoraAMinutos(bloque.hora_fin);
         return (
+          bloque.fecha === fechaServicio && 
           horaInicio >= inicioBloque ||
           horaFin <= finBloque &&
-          bloque.usuario_id === hour.id_user
+          bloque.usuario_id === hour.id_user &&
+          hour.disponible === 1
         );
       });
-      // console.log('BLOQUE DISPONIBLE', bloqueDisponible)
+      
       if (bloqueDisponible) {
         horasMedicas.push({
           detalleServicio: hour.detalleServicio,
@@ -151,7 +157,7 @@ export const generarHorasMedicas = async (id) => {
       tiempoActual += duracion; // Avanza al siguiente bloque de tiempo
     }
   });
-
+// console.log('horasMedicas', horasMedicas)
   return horasMedicas;
 };
 
