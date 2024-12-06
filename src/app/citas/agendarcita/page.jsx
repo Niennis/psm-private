@@ -193,7 +193,7 @@ const AddAppoinments = () => {
   }, [modalidad, campus, doctor]);
 
   const onChange = (date, dateString) => {
-    console.log(date, dateString);
+    // console.log(date, dateString);
     setIsClicked(true);
   };
 
@@ -222,7 +222,7 @@ const AddAppoinments = () => {
   const onSubmit = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
-    console.log('data', data)
+    // console.log('data', data)
     try {
       // la función que crea la cita
       const appointment = await createAppointment({
@@ -238,7 +238,7 @@ const AddAppoinments = () => {
       if (appointment.estado === false) {
         setSuccess('fail')
         setError(appointment.detalle)
-        console.log(appointment)
+        // console.log(appointment)
       } else {
         setSuccess('success')
       }
@@ -296,7 +296,7 @@ const AddAppoinments = () => {
       setAllDays(orderedData)
       setLoadingDays(false)
       setDays(bloque)
-      console.log('set all days', orderedData)
+      // console.log('set all days', orderedData)
     } catch (error) {
       console.log('Error: ', error)
     }
@@ -410,7 +410,7 @@ const AddAppoinments = () => {
   };
 
   const handleSelectedalumno = async (e) => {
-    console.log('e', e)
+    // console.log('e', e)
     setSelectedPatient(e)
     setValue('patientName', e?.name);
     setValue('patientLastname', e?.lastName);
