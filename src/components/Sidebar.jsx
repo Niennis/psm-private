@@ -3,7 +3,7 @@
 "use client"
 import React, { useEffect, useState, useContext } from 'react'
 import Link from "next/link";
-import { blog, doctor, doctorschedule, logout, menuicon04, patients } from './imagepath';
+import { blog, doctor, doctorschedule, logout, menuicon04, patients, dashboard } from './imagepath';
 import { signOut } from "next-auth/react";
 import SidebarSkeleton from './skeletons/Sidebar-skeleton';
 // import Scrollbars from "react-custom-scrollbars-2";
@@ -123,8 +123,8 @@ const Sidebar = () => {
                         </span>{" "}
                         <span> Profesionales </span> <span className="menu-arrow" />
                       </Link>
-                      <ul style={{ display: "none"  }} className="menu-items1">
-                       {/*  <li>
+                      <ul style={{ display: "none" }} className="menu-items1">
+                        {/*  <li>
                           <Link className={props?.activeClassName === 'doctor-list' ? 'active' : ''} href="/profesionales">Lista de Profesionales</Link>
                         </li>
                         <li>
@@ -207,6 +207,7 @@ const Sidebar = () => {
                     </li> */}
                       {/* </ul> */}
                     </li>
+                
                   </>
                 }
 
@@ -300,6 +301,14 @@ const Sidebar = () => {
                       <Link className={props?.activeClassName === 'edit-shedule' ? 'active' : ''} href="/editschedule">Editar Horario</Link>
                     </li> */}
                       </ul>
+                    </li>
+                    <li className="submenu">
+                      <Link className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`} href={`/admin-dashboard`} >
+                        <span className="menu-side">
+                          <img src={dashboard.src} alt="" />
+                        </span>{" "}
+                        <span>Dashboard</span> <span className="menu-arrow" />
+                      </Link>
                     </li>
                     {/*    <li className="submenu">
                       <Link href="#" id="menu-item11" onClick={(e) => handleClick(e, "menu-item11", "menu-items11")}>
