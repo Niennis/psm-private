@@ -28,7 +28,7 @@ import {
 } from "@/components/imagepath";
 // import { Link } from "react-router-dom";
 import Link from 'next/link';
-import CountUp from "react-countup";
+// import CountUp from "react-countup";
 
 import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
