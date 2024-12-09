@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from "react";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
+import Image from "next/image";
 // import DonutChart from "./DonutChart";
 // import Sidebar from "../../Sidebar";
 import Header from "@/components/Header";
@@ -60,27 +61,27 @@ const Admin_Dashboard = () => {
   }, [setProps]);
 
 
-const handleReportes = async (tabla) => {
-  setLoading(true)
-  console.log('Cargando...')
-  try {
-    const response = await reportes(tabla)
-    console.log('response', response)
-    
-  } catch (error) {
-    console.log('Error: ', error)
-  } finally {
-    setLoading(false)
+  const handleReportes = async (tabla) => {
+    setLoading(true)
+    console.log('Cargando...')
+    try {
+      const response = await reportes(tabla)
+      console.log('response', response)
+
+    } catch (error) {
+      console.log('Error: ', error)
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
 
   return (
     <>
       <Header />
-    
+
       <>
-      {loading && <SimpleBackdrop />}
+        {loading && <SimpleBackdrop />}
         <div className="page-wrapper">
           <div className="content">
             {/* Page Header */}
@@ -107,17 +108,23 @@ const handleReportes = async (tabla) => {
                 <div className="col-md-6">
                   <div className="morning-user">
                     <h2>
-                      Good Morning, <span>{session?.user?.name}</span>
+                      Buen día, <span>{session?.user?.name}</span>
                     </h2>
-                    <p>Have a nice day at work</p>
+                    <p>Ten un buen día en el trabajo</p>
                   </div>
                 </div>
-                {/* <div className="col-md-6 position-blk">
+                <div className="col-md-6 position-blk" style={{overflow:'hidden'}}>
                   <div className="morning-img">
-                    <img src={morning_img_01}
-                     alt="#" />
+                    <Image
+                      src={morning_img_01}
+                      alt="#"
+                      style={{
+                        objectFit: 'bottom',
+                        bottom: '-50px'
+                      }}
+                    />
                   </div>
-                </div> */}
+                </div>
               </div>
             </div>
             {/* <div className="row">
@@ -691,12 +698,12 @@ const handleReportes = async (tabla) => {
                     <h4 className="card-title d-inline-block">
                       Reportes{" "}
                     </h4>{" "}
-                    <Link
+                    {/* <Link
                       href="/editpatients"
                       className="float-end patient-views"
                     >
                       Show all
-                    </Link>
+                    </Link> */}
                   </div>
                   <div className="card-block table-dash">
                     <div className="table-responsive">
@@ -728,16 +735,16 @@ const handleReportes = async (tabla) => {
                                 />
                               </div>
                             </td>
-                            
+
                             <td className="table-image">
-                            
+
                               <h2>Profesionales</h2>
                             </td>
                             {/* <td>Heart attack</td> */}
                             <td>
-                              <button 
-                              className="custom-badge status-green "
-                              onClick={() => {handleReportes('usuarios')}}
+                              <button
+                                className="custom-badge status-green "
+                                onClick={() => { handleReportes('usuarios') }}
                               >
                                 Descargar
                               </button>
@@ -782,9 +789,9 @@ const handleReportes = async (tabla) => {
                                 />
                               </div>
                             </td>
-                            
+
                             <td className="table-image">
-                            
+
                               <h2>Citas</h2>
                             </td>
                             {/* <td>23</td> */}
@@ -792,7 +799,7 @@ const handleReportes = async (tabla) => {
                             {/* <td>Jaundice</td> */}
                             <td>
                               <button className="custom-badge status-green"
-                              onClick={() => {handleReportes('citas')}}
+                                onClick={() => { handleReportes('citas') }}
                               >
                                 Descargar
                               </button>
@@ -837,9 +844,9 @@ const handleReportes = async (tabla) => {
                                 />
                               </div>
                             </td>
-                            
+
                             <td className="table-image">
-                           
+
                               <h2>Disponibilidades</h2>
                             </td>
                             {/* <td>25</td> */}
@@ -847,7 +854,7 @@ const handleReportes = async (tabla) => {
                             {/* <td>Malaria</td> */}
                             <td>
                               <button className="custom-badge status-green"
-                              onClick={() => {handleReportes('disponibilidades')}}
+                                onClick={() => { handleReportes('disponibilidades') }}
                               >
                                 Descargar
                               </button>
@@ -950,43 +957,43 @@ const handleReportes = async (tabla) => {
             </div>
           </div>
           <div id="delete_patient" className="modal fade delete-modal" role="dialog">
-    <div className="modal-dialog modal-dialog-centered">
-      <div className="modal-content">
-        <div className="modal-body text-center">
-          <img src={imagesend.src} alt="#" width={50} height={46} />
-          <h3>Are you sure want to delete this ?</h3>
-          <div className="m-t-20">
-            {" "}
-            <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-              Close
-            </Link>
-            <button type="submit" className="btn btn-danger">
-              Delete
-            </button>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-body text-center">
+                  <img src={imagesend.src} alt="#" width={50} height={46} />
+                  <h3>Are you sure want to delete this ?</h3>
+                  <div className="m-t-20">
+                    {" "}
+                    <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
+                      Close
+                    </Link>
+                    <button type="submit" className="btn btn-danger">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="delete_patient" className="modal fade delete-modal" role="dialog">
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content">
+                  <div className="modal-body text-center">
+                    <img src={imagesend.src} alt="#" width={50} height={46} />
+                    <h3>Are you sure want to delete this ?</h3>
+                    <div className="m-t-20">
+                      {" "}
+                      <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
+                        Close
+                      </Link>
+                      <button type="submit" className="btn btn-danger">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
-    <div id="delete_patient" className="modal fade delete-modal" role="dialog">
-    <div className="modal-dialog modal-dialog-centered">
-      <div className="modal-content">
-        <div className="modal-body text-center">
-          <img src={imagesend.src} alt="#" width={50} height={46} />
-          <h3>Are you sure want to delete this ?</h3>
-          <div className="m-t-20">
-            {" "}
-            <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-              Close
-            </Link>
-            <button type="submit" className="btn btn-danger">
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  </div>
         </div>
       </>
     </>
