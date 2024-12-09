@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link';
 import dynamic from 'next/dynamic'
 
@@ -34,6 +34,7 @@ const Addblog = () => {
   const { data: session } = useSession()
   const router = useRouter();
   const { setProps } = useSidebar();
+  const [texto, setTexto] = useState('')
 
   useEffect(() => {
     setProps({
@@ -60,9 +61,15 @@ const Addblog = () => {
     { value: 3, label: "Estudios" },
   ];
 
-  const { register, handleSubmit, watch, control,
+  const { register, handleSubmit, watch, control, setValue,
     formState: { errors }
   } = useForm()
+
+
+  const handleText = (data) => {
+    console.log('data en componente padre', data)
+    setValue('content', data)
+  }
 
   const onSubmit = handleSubmit(async data => {
     console.log(data)
@@ -389,7 +396,7 @@ const Addblog = () => {
                                     name="estado"
                                     value="activo"
                                     className="form-check-input"
-                                    {...register('estado', {
+                                    {...register('destacar', {
                                       required: {
                                         value: true,
                                         message: 'Estado es requerido',
@@ -413,23 +420,18 @@ const Addblog = () => {
                               <Controller
                                 control={control}
                                 name="content"
-                                {...register('content', {
-                                  required: {
-                                    value: true,
-                                    message: 'Contenido es requerido',
-                                  }
-                                })}
+                                {...register('content')}
                                 ref={null}
                                 render={({ field: { onChange, onBlur, value } }) => (
-                                  <DynamicTextEditor />
+                                  <DynamicTextEditor handleText={handleText} />
                                 )}
                               />
-                              {
+                              {/* {
                                 errors.content
                                 && <span className="login-danger">
                                   <small>{errors.content.message}</small>
                                 </span>
-                              }
+                              } */}
                             </div>
                           </div>
                           {/* <div className="col-12 col-md-6 col-xl-12">
@@ -455,9 +457,9 @@ const Addblog = () => {
                           <div className="col-12">
                             <div className="doctor-submit text-end">
                               <button
-                                type="submit"
+                                // type="submit"
                                 className="btn btn-primary submit-form me-2"
-                                onSubmit={onSubmit}
+                                onClick={onSubmit}
                               >
                                 Publicar
                               </button>
