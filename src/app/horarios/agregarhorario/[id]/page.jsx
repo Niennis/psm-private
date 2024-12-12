@@ -44,7 +44,7 @@ const AddSchedule = ({ params }) => {
   const { setProps } = useSidebar();
 
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
+    console.log('onChange', date, dateString);
   };
   const [selectedOption, setSelectedOption] = useState(null);
   const styleInput = {
@@ -82,6 +82,11 @@ const AddSchedule = ({ params }) => {
           }
         )
       })
+    const prueba = [...processed]
+
+    console.log('processed', processed)
+    console.log('prueba', prueba)
+
       setCalendario([...processed])
 
     } catch (error) {
@@ -117,8 +122,6 @@ const AddSchedule = ({ params }) => {
 
   const onSubmit = handleSubmit(async data => {
     console.log(data)
-//  console.log('startDay', startDay)
- console.log(params.id)
     setSuccess('initial')
     const semana = ["lunes", "martes", "miércoles", "jueves", "viernes"]
     const fechas = []
@@ -135,11 +138,9 @@ const AddSchedule = ({ params }) => {
       fecha_inicio: data.fecha_inicio,
     }
 
-    console.log('newData', newData);
     const dates = getDates(newData, fechas)
     let esValido = []
     if (dates.length === 0) {
-      // console.log('CHAO NO SE PUEDE')
       esValido.push(false)
       return
     }
@@ -151,13 +152,11 @@ const AddSchedule = ({ params }) => {
     Promise.all(promesas)
       .then(async (values) => {
         if (values.includes(true)) {
-          console.log('GGGGGG')
+          console.log('Hay choque de horario')
 
           setSuccess('fail')
           setError('Hay choque de horario.')
         } else {
-          console.log('HHHHHHHHHH')
-
           try {
             const req = await createSchedule(newData)
             if (req.estado === false) {
@@ -165,10 +164,10 @@ const AddSchedule = ({ params }) => {
               setError(`Hubo un problema. Intenta más tarde. ${req.detalle}}`)
             } else {
               setSuccess('success')
+              console.log('Success')
               fetchData()
               setIsLoading(true)
             }
-
           } catch (error) {
             console.log('error =>', error)
             setSuccess('fail')

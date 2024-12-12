@@ -19,48 +19,8 @@ import CacheHandler from "@/utils/cache-handler";
 
 const cacheHandler = new CacheHandler();
 
-const formatDate = (dateString) => {
-  const [year, day, month] = dateString.split("-");
-  return `${year}-${month}-${day}`
-};
-
-const timeToMinutes = (time) => {
-  const [hours, minutes, seconds] = time.split(':').map(Number);
-  return hours * 60 + minutes;
-}
-
-const isOverlap = (bloque, disponibilidad) => {
-  const bloqueInicio = timeToMinutes(bloque.hora_inicio);
-  const bloqueFin = timeToMinutes(bloque.hora_fin);
-  const disponibilidadInicio = timeToMinutes(disponibilidad.horaIni);
-  const disponibilidadFin = disponibilidadInicio + disponibilidad.duracionServicio;
-  return !(bloqueFin <= disponibilidadInicio || bloqueInicio >= disponibilidadFin);
-}
-
-const getAvailableHours = (bloques, disponibilidades) => {
-  const horasDisponibles = [];
-  disponibilidades.forEach(disponibilidad => {
-    const fechaInicio = new Date(disponibilidad.fechaInicio);
-    const fechaFin = new Date(disponibilidad.fechaFin);
-    bloques.forEach(bloque => {
-      const choque = isOverlap(bloque, disponibilidad);
-      if (choque && bloque.disponible === 0) {
-        horasDisponibles.push({ id_bloque: bloque.id_bloque, mensaje: "Hay choque horario con el bloque no disponible" });
-      } else if (!choque && bloque.disponible === 1) {
-        horasDisponibles.push({
-          id_bloque: bloque.id_bloque,
-          fechaInicio: disponibilidad.fechaInicio,
-          fechaFin: disponibilidad.fechaFin,
-          horaIni: disponibilidad.horaIni,
-          horaFin: disponibilidad.horaFin,
-          duracionServicio: disponibilidad.duracionServicio
-        });
-      }
-    });
-  }); return horasDisponibles;
-}
-
 const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
+  console.log('calendario', calendario)
   const [menu, setMenu] = useState(false);
 
   const [startDate, setDate] = useState(new Date()),
@@ -250,7 +210,7 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
                           selectMirror={true}
                           dayMaxEvents={true}
                           weekends={false}
-                          initialEvents={calendario?.length > 0 ? calendario : []} // alternatively, use the `events` setting to fetch from a feed
+                          // initialEvents={calendario?.length > 0 ? calendario : []} // alternatively, use the `events` setting to fetch from a feed
                           select={handleDateSelect}
                           eventClick={(clickInfo) => handleEventClick(clickInfo)}
                           events={calendario} 
