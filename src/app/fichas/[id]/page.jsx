@@ -295,8 +295,8 @@ const AddInterviewRecord = ({ params }) => {
         changeStatusAppointment(params.id, 'realizada'),
         updateUser(bodyUpdate)
       ]);
-console.log('response', response)
-      if(resp['detalle'].includes('fail') || changeStatus['detalle'].includes('fail')){
+      console.log('response', response)
+      if (resp['detalle'].includes('fail') || changeStatus['detalle'].includes('fail')) {
         setSuccess('fail')
       } else {
         setSuccess('success')
@@ -305,7 +305,7 @@ console.log('response', response)
     } catch (error) {
       console.log('Error: ', error);
       setSuccess('success')
-    } 
+    }
   })
 
   return (
@@ -563,24 +563,30 @@ console.log('response', response)
                             <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group local-forms">
                                 <label>Teléfono</label>
-                                <input
-                                  className="form-control" type="tel"
-                                  maxLength={12}
-                                  minLength={9}
-                                  defaultValue={""}
-                                  {...register('telefono', {
-                                    required: {
-                                      value: true,
-                                      message: 'Teléfono es requerido'
-                                    },
-                                  })}
-                                />
-                                {errors.telefono && <span className="login-danger">
-                                  <small>{errors.telefono.message}</small>
-                                </span>}
+                                <div className="input-group">
+                                  <div className="input-group-prepend">
+                                    <span className="input-group-text">+56</span>
+                                  </div>
+                                  <input
+                                    className="form-control" type="tel"
+                                    defaultValue={""}
+                                    {...register('telefono', {
+                                      required: {
+                                        value: true,
+                                        message: 'Teléfono es requerido'
+                                      },
+                                      validate: (value) =>
+                                        value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                    })}
+                                    maxLength={9}
+                                    minLength={9}
+                                  />
+                                  {errors.telefono && <span className="login-danger">
+                                    <small>{errors.telefono.message}</small>
+                                  </span>}
+                                </div>
                               </div>
                             </div>
-
                           </div>
                         </AccordionDetails>
                       </Accordion>
@@ -909,24 +915,30 @@ console.log('response', response)
                             <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group local-forms">
                                 <label>Teléfono</label>
-                                <input
-                                  className="form-control" type="tel"
-                                  maxLength={12}
-                                  minLength={9}
-                                  defaultValue={""}
-                                  {...register('telefono', {
-                                    required: {
-                                      value: true,
-                                      message: 'Teléfono es requerido'
-                                    },
-                                  })}
-                                />
-                                {errors.telefono && <span className="login-danger">
-                                  <small>{errors.telefono.message}</small>
-                                </span>}
+                                <div className="input-group">
+                                  <div className="input-group-prepend">
+                                    <span className="input-group-text">+56</span>
+                                  </div>
+                                  <input
+                                    className="form-control" type="tel"
+                                    defaultValue={""}
+                                    {...register('telefono', {
+                                      required: {
+                                        value: true,
+                                        message: 'Teléfono es requerido'
+                                      },
+                                      validate: (value) =>
+                                        value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                    })}
+                                    maxLength={9}
+                                    minLength={9}
+                                  />
+                                  {errors.telefono && <span className="login-danger">
+                                    <small>{errors.telefono.message}</small>
+                                  </span>}
+                                </div>
                               </div>
                             </div>
-
                           </div>
                         </AccordionDetails>
                       </Accordion>
@@ -980,19 +992,26 @@ console.log('response', response)
                                 <label>
                                   Teléfono
                                 </label>
-                                <input
-                                  className="form-control"
-                                  maxLength={12}
-                                  minLength={9}
-                                  type="tel"
-                                  {...register('celular_contacto_emergencia1')}
-                                />
-                                {errors.celular_contacto_emergencia1 && <span className="login-danger">
-                                  <small>{errors.celular_contacto_emergencia1.message}</small>
-                                </span>}
+                                <div className="input-group">
+                                  <div className="input-group-prepend">
+                                    <span className="input-group-text">+56</span>
+                                  </div>
+                                  <input
+                                    className="form-control"
+                                    type="tel"
+                                    {...register('celular_contacto_emergencia1', {
+                                      validate: (value) =>
+                                        value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                    })}
+                                    maxLength={9}
+                                    minLength={9}
+                                  />
+                                  {errors.celular_contacto_emergencia1 && <span className="login-danger">
+                                    <small>{errors.celular_contacto_emergencia1.message}</small>
+                                  </span>}
+                                </div>
                               </div>
                             </div>
-
 
                             <div className="col-12 col-md-4 col-xl-4">
                               <div className="form-group local-forms">
@@ -1023,13 +1042,21 @@ console.log('response', response)
                                 <label>
                                   Teléfono
                                 </label>
-                                <input
-                                  className="form-control"
-                                  type="tel"
-                                  maxLength={12}
-                                  minLength={9}
-                                  {...register('celular_contacto_emergencia2')}
-                                />
+                                <div className="input-group">
+                                  <div className="input-group-prepend">
+                                    <span className="input-group-text">+56</span>
+                                  </div>
+                                  <input
+                                    className="form-control"
+                                    type="tel"
+                                    {...register('celular_contacto_emergencia2', {
+                                      validate: (value) =>
+                                        value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                    })}
+                                    maxLength={9}
+                                    minLength={9}
+                                  />
+                                </div>
                               </div>
                             </div>
                           </div>

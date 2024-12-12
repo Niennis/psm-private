@@ -208,7 +208,7 @@ const EditAppoinments = ({ params }) => {
         id1="menu-items4"
         activeClassName="edit-appoinment"
       /> */}
-      { loading && <SimpleBackdrop /> }
+      {loading && <SimpleBackdrop />}
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
@@ -300,21 +300,23 @@ const EditAppoinments = ({ params }) => {
                             <label>
                               Teléfono <span className="login-danger">*</span>
                             </label>
-                            <input
-                              disabled
-                              className="form-control"
-                              type="tel"
-                              maxLength={9}
-                              minLength={9}
-                              // defaultValue="+1 23 456890"
-                              {...register('mobile', {
-                                required: {
-                                  value: true,
-                                  message: 'Teléfono es requerido'
-                                }
-                              })}
-                            />
-                            {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
+                            <div className="input-group">
+                              <div className="input-group-prepend">
+                                <span className="input-group-text">+56</span>
+                              </div>
+                              <input
+                                disabled
+                                className="form-control"
+                                type="tel"
+                                {...register('mobile', {
+                                  validate: (value) =>
+                                    value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                })}
+                                maxLength={9}
+                                minLength={9}
+                              />
+                              {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
+                            </div>
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-6">

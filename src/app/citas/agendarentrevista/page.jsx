@@ -411,7 +411,7 @@ const AddFirstAppoinments = () => {
   const handleFirstInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
-    const {users: patient} = await fetchUser(session.user?.id)
+    const { users: patient } = await fetchUser(session.user?.id)
 
     const bodyInterview = {
       ...data,
@@ -790,26 +790,27 @@ const AddFirstAppoinments = () => {
                                 <label>
                                   Teléfono <span className="login-danger">*</span>
                                 </label>
-                                <input
-                                  className="form-control"
-                                  type="tel"
-                                  {...register('mobile', {
-                                    required: {
-                                      value: true,
-                                      message: 'Teléfono es requerido'
-                                    },
-                                    minLength: {
-                                      value: 9,
-                                      message: 'Cantidad de números inválida'
-                                    },
-                                    maxLength: {
-                                      value: 9,
-                                      message: 'Cantidad de números inválida'
-                                    }
-                                  })}
-                                />
-                                {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
+                                <div className="input-group">
+                                  <div className="input-group-prepend">
+                                    <span className="input-group-text">+56</span>
+                                  </div>
+                                  <input
+                                    className="form-control"
+                                    type="tel"
+                                    {...register('mobile', {
+                                      required: {
+                                        value: true,
+                                        message: 'Teléfono es requerido'
+                                      },
+                                      validate: (value) =>
+                                        value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                    })}
+                                    maxLength={9}
+                                    minLength={9}
+                                  />
+                                  {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
 
+                                </div>
                               </div>
                             </div>
 
@@ -1071,22 +1072,29 @@ const AddFirstAppoinments = () => {
                                 <label>
                                   Celular <span className="login-danger">*</span>
                                 </label>
-                                <input
-                                  className="form-control"
-                                  type="tel"
-                                  defaultValue={""}
-                                  minLength={9}
-                                  maxLength={12}
-                                  placeholder="+56"
-                                  {...register('mobile_contact', {
-                                    required: {
-                                      value: true,
-                                      message: 'El campo es obligatorio'
-                                    }
-                                  })} />
-                                {
-                                  errors.mobile_contact && <span><small>{errors.mobile_contact.message}</small></span>
-                                }
+                                <div className="input-group">
+                                  <div className="input-group-prepend">
+                                    <span className="input-group-text">+56</span>
+                                  </div>
+                                  <input
+                                    className="form-control"
+                                    type="tel"
+                                    defaultValue={""}
+                                    {...register('mobile_contact', {
+                                      required: {
+                                        value: true,
+                                        message: 'El campo es obligatorio'
+                                      },
+                                      validate: (value) =>
+                                        value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                    })}
+                                    maxLength={9}
+                                    minLength={9}
+                                  />
+                                  {
+                                    errors.mobile_contact && <span><small>{errors.mobile_contact.message}</small></span>
+                                  }
+                                </div>
                               </div>
                             </div>
                             <div className="col-12 col-sm-6">

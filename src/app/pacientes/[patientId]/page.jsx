@@ -269,21 +269,22 @@ const EditPatients = ({ params }) => {
                             <label>
                               Teléfono <span className="login-danger">*</span>
                             </label>
-                            <input
-                              className="form-control"
-                              type="tel"
-                              {...register('mobile', {
-                                minLength: {
-                                  value: 9,
-                                  message: 'Cantidad de números inválida'
-                                },
-                                maxLength: {
-                                  value: 9,
-                                  message: 'Cantidad de números inválida'
-                                }
-                              })}
-                            />
-                            {errors.email && <span><small>{errors.email.message}</small></span>}
+                            <div className="input-group">
+                              <div className="input-group-prepend">
+                                <span className="input-group-text">+56</span>
+                              </div>
+                              <input
+                                className="form-control"
+                                type="tel"
+                                {...register('mobile', {
+                                  validate: (value) =>
+                                    value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                })}
+                                maxLength={9}
+                                minLength={9}
+                              />
+                              {errors.email && <span><small>{errors.email.message}</small></span>}
+                            </div>
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-6">

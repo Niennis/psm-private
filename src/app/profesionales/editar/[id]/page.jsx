@@ -250,7 +250,7 @@ const EditDoctor = ({ params }) => {
 
   const handleClose = () => {
     setSuccess('initial')
-    redirect('/citas');
+    router.push('/citas');
   }
 
   return (
@@ -349,20 +349,23 @@ const EditDoctor = ({ params }) => {
                             <label>
                               Teléfono
                             </label>
-                            <input
-                              className="form-control"
-                              type="tel"
-                              {...register('mobile', {
-                                minLength: {
-                                  value: 9,
-                                  message: 'Cantidad de números inválida'
-                                },
-                                maxLength: {
-                                  value: 9,
-                                  message: 'Cantidad de números inválida'
-                                }
-                              })}
-                            />
+
+                            <div className="input-group">
+                              <div className="input-group-prepend">
+                                <span className="input-group-text">+56</span>
+                              </div>
+                              <input
+                                className="form-control"
+                                type="tel"
+                                {...register('mobile', {
+                                  validate: (value) =>
+                                    value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                })}
+                                maxLength={9}
+                                minLength={9}
+                              />
+                            </div>
+                            {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-6">
@@ -406,6 +409,7 @@ const EditDoctor = ({ params }) => {
                                     components={{
                                       IndicatorSeparator: () => null
                                     }}
+                                    disabled={session?.user?.rol !== 'administrador'}
                                     styles={{
                                       control: (baseStyles, state) => ({
                                         ...baseStyles,
