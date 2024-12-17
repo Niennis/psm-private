@@ -191,7 +191,7 @@ const sumarDiasAFecha = (fechaOriginal, diasASumar) => {
 }
 
 const obtenerFechasSemana = (objeto, fechas) => {
-  const { dias, fecha_inicio, fechaFin } = objeto;
+  const { dias, fechaInicio, fechaFin } = objeto;
   const recurrencia = objeto.semanal.recurrencia
   // const fechas = [];
   const semana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
@@ -204,7 +204,7 @@ const obtenerFechasSemana = (objeto, fechas) => {
   }
 
   dias.forEach(dia => {
-    let fechaActual = new Date(fecha_inicio + 'T00:00:00');
+    let fechaActual = new Date(fechaInicio + 'T00:00:00');
     while (fechaActual <= new Date(fechaFin + 'T00:00:00')) {
 
       const esDiaValido = esDiaDeLaSemana(fechaActual, dia) &&
@@ -216,23 +216,22 @@ const obtenerFechasSemana = (objeto, fechas) => {
       fechaActual = new Date(fechaActual.setDate(fechaActual.getDate() + 1))
     }
   })
-  
   console.log('obtenerFechasSemana', 'fechas', fechas)
   return fechas;
 }
 
 const obtenerFechasMensualesDia = (objeto, fechas) => {
-  const { fecha_inicio, fechaFin, mensual } = objeto;
+  const { fechaInicio, fechaFin, mensual } = objeto;
 
   // Convertir la fecha de inicio y fin a objetos Date
-  let fechaActual = new Date(fecha_inicio + 'T00:00:00');
+  let fechaActual = new Date(fechaInicio + 'T00:00:00');
   const fechaFinal = new Date(fechaFin + 'T00:00:00');
   console.log('fechaActual', fechaActual);
   // Extraer la frecuencia mensual y el día especificado
   const frecuenciaMensual = parseInt(mensual['cardinal-frecuencia']);
   const diaMensual = parseInt(mensual['cardinal-numero']);
 
-  // Obtener el mes y año del `fecha_inicio`
+  // Obtener el mes y año del `fechaInicio`
   let mes = fechaActual.getMonth() + 1;
   let año = fechaActual.getFullYear();
 
@@ -263,14 +262,14 @@ const obtenerFechasMensualesDia = (objeto, fechas) => {
 }
 
 const obtenerFechasMensuales = (objeto, fechas) => {
-  const { fecha_inicio, fechaFin, mensual } = objeto;
+  const { fechaInicio, fechaFin, mensual } = objeto;
   const { 'ordinal-orden': tipo, 'ordinal-dia': diaSemana, 'ordinal-frecuencia': frecuencia } = mensual;
 
   const semana = { 'lunes': 1, 'martes': 2, 'miércoles': 3, 'jueves': 4, 'viernes': 5 }
   const ordenDia = {
     'primer': 1, "segundo": 2, "tercer": 3, "cuarto": 4, "último": 5
   }
-  const [añoInicio, mesInicio, diaInicio] = fecha_inicio.split('-').map(Number);
+  const [añoInicio, mesInicio, diaInicio] = fechaInicio.split('-').map(Number);
   const [añoFin, mesFin] = fechaFin.split('-').map(Number);
 
   let mesActual = mesInicio;
@@ -311,7 +310,7 @@ const obtenerFechasMensuales = (objeto, fechas) => {
               (tipo === 'cuarto' && contador === 4) ||
               (tipo === 'último' && dia + 7 > diasEnMes)) {
               const fechaFormateada = fecha.toISOString().split('T')[0];
-              if (fechaFormateada >= fecha_inicio && fechaFormateada <= fechaFin) {
+              if (fechaFormateada >= fechaInicio && fechaFormateada <= fechaFin) {
                 fechas.push(fechaFormateada);
               }
             }
