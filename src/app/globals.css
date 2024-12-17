@@ -13095,10 +13095,46 @@ input#react-select-genero-input {
 
 /* Calendar */
 
-div.fc-daygrid-event-harness {
+/* div.fc-daygrid-event-harness {
   background-color: #3788d8;
+} */
+
+.bg-videollamada{
+  background-color: var(--main-bg-blue);
+  border: 1px solid var(--main-bg-blue)
 }
 
+.bg-videollamada:hover{
+  background-color: var(--main-light-blue);
+  border: 1px solid var(--main-light-blue)
+}
+
+.bg-videollamada::after {
+  text-decoration: white;
+  color: black
+}
+
+
+.bg-presencial{
+  background-color: var(--main-bg-green);
+  border: 1px solid var(--main-bg-green)
+}
+
+.bg-presencial:hover{
+  background-color: var(--main-light-green);
+  border: 1px solid var(--main-light-green)
+}
+
+
+.bg-ambas{
+  background-color: var(--main-bg-red);
+  border: 1px solid var(--main-bg-red)
+}
+
+.bg-ambas:hover{
+  background-color: var(--main-light-red);
+  border: 1px solid var(--main-light-red)
+}
 
 
 /* fonts; */
