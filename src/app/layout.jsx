@@ -1,5 +1,3 @@
-import { Inter } from "next/font/google";
-import { Roboto } from "next/font/google";
 import "./globals.css";
 import "../assets/css/bootstrap.css"
 import Header from "@/components/Header";
@@ -12,7 +10,6 @@ import { SidebarProvider } from '@/context/SidebarContext';
 import { LoadingProvider } from "@/context/LoadingContext";
 
 import { redirect } from 'next/navigation';
-const inter = Inter({ subsets: ["latin"] });
 // import Hotjar from '@hotjar/browser';
 
 const siteId = 3920275;
@@ -23,12 +20,6 @@ const siteId = 3920275;
 // export const metadata = {
 //   title: "UDP Portal Salud Mental",
 // };
-
-const roboto_init = Roboto({
-  subsets: ['latin'],
-  weight: ['100', '300', '700'],
-  variable: '--font-roboto'
-})
 
 export default async function RootLayout({ children, props }) {
 
@@ -54,7 +45,7 @@ export default async function RootLayout({ children, props }) {
             })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=')`
           }}></Script>
         </head>
-        <body className={`${roboto_init.variable}`}>
+        <body>
           <Script
             strategy="beforeInteractive"
             src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
