@@ -11,7 +11,7 @@ export const regiones = [
   { value: "magallanes_y_antartica_chilena", label: "Magallanes y Antártica Chilena", },
   { value: "maule", label: "Maule", },
   { value: "nuble", label: "Ñuble", },
-  { value: "metropolitana", label: "Región Metropolitana", },
+  { value: "region_metropolitana", label: "Región Metropolitana", },
   { value: "region_de_la_araucania", label: "Región de la Araucanía", },
   { value: "tarapaca", label: "Tarapacá", },
   { value: "valparaiso", label: "Valparaíso", }
@@ -430,7 +430,7 @@ export const comunas = {
       "value": "zona35"
     }
   ],
-  ohiglib_gral_bernardo_o_higginsgins: [
+  lib_gral_bernardo_o_higgins: [
     {
       "label": "Chimbarongo",
       "id": "chimbarongo",
