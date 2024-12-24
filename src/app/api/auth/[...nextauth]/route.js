@@ -74,7 +74,7 @@ const authOptions = {
           contrasena: pwHash
         }
 
-        console.log('body en credentials', body)
+        // console.log('body en credentials', body)
         try {
           const user = await fetchUserMailAndPass(body)
           if (!user) {
@@ -121,7 +121,7 @@ const authOptions = {
       if (account.provider === "credentials") {
         const body = { email: credentials.email, contrasena: credentials.password };
         const user = await fetchUserMailAndPass(body);
-        console.log('user', user)
+        // console.log('user', user)
         if (user) {
           return true;
         } else {
