@@ -76,6 +76,7 @@ const EditDoctor = ({ params }) => {
     try {
       let user;
       const { especialidades } = await fetchSpecialityById(params.id);
+      console.log('especialidades', especialidades)
       if (params.id == session?.user?.id) {
         user = await fetchUserByEmail(session?.user?.email)
       } else {
@@ -91,7 +92,7 @@ const EditDoctor = ({ params }) => {
         email: user.email,
         dateOfBirth: user.fecha_nacimiento,
         genero: user.genero,
-        speciality: session?.user?.rol === "profesional" ? especialidades[0].especialidad : 'Administrador',
+        speciality: especialidades[0].especialidad,
         status: user.status,
         password: '',
         confirmPassword: ''
@@ -249,18 +250,12 @@ const EditDoctor = ({ params }) => {
   })
 
   const handleClose = () => {
-    setSuccess('initial')
     router.push('/citas');
+    setSuccess('initial')
   }
 
   return (
     < >
-      {/* <Headerudp /> */}
-      {/* <Sidebar
-        id="menu-item1"
-        id1="menu-items1"
-        activeClassName="edit-doctor"
-      /> */}
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
@@ -359,10 +354,10 @@ const EditDoctor = ({ params }) => {
                                 type="tel"
                                 {...register('mobile', {
                                   validate: (value) =>
-                                    value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                    value.length === 9 || value.length === 0 || "Cantidad de caracteres debe ser igual a 9",
                                 })}
                                 maxLength={9}
-                                minLength={9}
+                                minLength={0}
                               />
                             </div>
                             {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
@@ -409,7 +404,7 @@ const EditDoctor = ({ params }) => {
                                     components={{
                                       IndicatorSeparator: () => null
                                     }}
-                                    disabled={session?.user?.rol !== 'administrador'}
+                                    isDisabled={session?.user?.rol !== 'administrador'}
                                     styles={{
                                       control: (baseStyles, state) => ({
                                         ...baseStyles,
