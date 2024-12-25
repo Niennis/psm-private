@@ -5,18 +5,21 @@ import React, { useEffect, useState, useContext } from 'react'
 import Link from "next/link";
 import { blog, doctor, doctorschedule, logout, menuicon04, patients, dashboard } from './imagepath';
 import { signOut } from "next-auth/react";
-import SidebarSkeleton from './skeletons/Sidebar-skeleton';
+
+import { fetchUser } from '@/services/UsersServices';
 // import Scrollbars from "react-custom-scrollbars-2";
 import { useRouter } from 'next/navigation';
 import ProtectedPage from './ProtectedRoutes';
 import { useSession } from 'next-auth/react';
 import { useSidebar } from '@/context/SidebarContext';
+import SimpleBackdrop from './Backdrop';
 
 const Sidebar = () => {
   const { data: session, status } = useSession()
   const { props } = useSidebar();
   const ROL = ["alumno"]
   const router = useRouter();
+  const [alumno, setAlumno] = useState('')
 
   const handleClick = (e, item, item1, item3) => {
     const div = document.querySelector(`#${item}`);
@@ -39,12 +42,28 @@ const Sidebar = () => {
         handleClick(null, props.id, props.id1); // Call handleClick with default action (no event)
       }
     }
+
   }, [props]); // Use `props` in dependency array to re-run the effect when they change
 
+  const patientLoggedIn = async () => {
+    try {
+      const { users: response } = await fetchUser(session?.user?.id)
+      setAlumno(response[0])
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
+
+  useEffect(() => {
+    if(session?.user?.rol === 'alumno'){
+      patientLoggedIn()
+    }
+  })
 
   if (!session || !props) {
-    return <p>Loading...</p>;
+    return <SimpleBackdrop />;
   }
+
 
   const expandMenu = () => {
     document.body.classList.remove("expand-menu");
@@ -69,7 +88,7 @@ const Sidebar = () => {
         > */}
 
 
-        <div className="sidebar-inner slimscroll">
+        <div className="sidebar-inner slimscroll overflow-scroll">
           <div id="sidebar-menu" className="sidebar-menu"
             onMouseLeave={expandMenu}
             onMouseOver={expandMenuOpen}
@@ -98,9 +117,9 @@ const Sidebar = () => {
                     {/* <li>
                           <Link className={props?.activeClassName === 'add-appoinment' ? 'active' : ''} href="/citas/agendarcita">Agendar Cita</Link>
                         </li> */}
-                    <li>
+                   { alumno?.aplica_despeje === 1 && <li>
                       <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
-                    </li>
+                    </li>}
                     {/* <li>
                       <Link className={props?.activeClassName === 'edit-appoinment' ? 'active' : ''} href="/editappoinments">Edit Appointment</Link>
                     </li> */}
@@ -207,7 +226,7 @@ const Sidebar = () => {
                     </li> */}
                       {/* </ul> */}
                     </li>
-                
+
                   </>
                 }
 
@@ -336,17 +355,25 @@ const Sidebar = () => {
                     </li>*/}
                   </>
                 }
+                <li>
+                  <Link href="/" onClick={handleSignOut}>
+                    <span className="menu-side">
+                      <img src={logout.src} alt="" />
+                    </span>{" "}
+                    <span>Logout</span>
+                  </Link>
+                </li>
 
               </ul>
             }
-            <div className="logout-btn">
+            {/* <div className="logout-btn">
               <Link href="/" onClick={handleSignOut}>
                 <span className="menu-side">
                   <img src={logout.src} alt="" />
                 </span>{" "}
                 <span>Logout</span>
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
 
