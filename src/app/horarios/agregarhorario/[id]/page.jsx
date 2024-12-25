@@ -40,7 +40,7 @@ const AddSchedule = ({ params }) => {
   const [startDay, setStartDay] = useState('');
   const [calendario, setCalendario] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const calendarRef = useRef(null); // Referencia al calendario
+  // const calendarRef = useRef(null); // Referencia al calendario
   const { setProps } = useSidebar();
 
   const onChange = (date, dateString) => {
@@ -77,15 +77,15 @@ const AddSchedule = ({ params }) => {
             ...item,
             start: datesToTimestamp(item.fechaInicio, `${item.horaInicio}:00`),
             end: datesToTimestamp(item.fechaInicio, `${item.horaFin}:00`),
-            className: "bg-purple",
+            className:
+              item.modalidad === 'videollamada'
+                ? 'bg-videollamada' : item.modalidad === 'presencial'
+                  ? 'bg-presencial' : 'bg-ambas',
             title: item.detalleServicio || 'Disponible',
           }
         )
       })
-    const prueba = [...processed]
-
-    console.log('processed', processed)
-    console.log('prueba', prueba)
+      const prueba = [...processed]
 
       setCalendario([...processed])
 
@@ -99,13 +99,12 @@ const AddSchedule = ({ params }) => {
     fetchData()
   }, [])
 
-  const { register, handleSubmit, watch, control,
+  const { register, handleSubmit, watch, control, setValue,
     formState: { errors }
   } = useForm({
     defaultValues: async () => {
       const { users } = await fetchProfessionalById(params.id)
       const { especialidades: user } = await fetchSpecialityById(params.id)
-      console.log('user', user)
       const obj = {
         nombre: `${users[0].nombre} ${users[0].apellido}`,
         especialidad: user[0]?.especialidad || 'No informada',
@@ -119,9 +118,18 @@ const AddSchedule = ({ params }) => {
 
   const frecuencia = watch('frecuencia')
   const modalidad = watch('modalidad')
+  const horaIni = watch("horaIni");
+  const horaFin = watch("horaFin");
+
+  // Validación personalizada para horaFin
+  const validateHoraFin = (value) => {
+    if (value < horaIni) {
+      return "La hora de fin no puede ser menor que la hora de inicio.";
+    }
+    return true;
+  };
 
   const onSubmit = handleSubmit(async data => {
-    console.log(data)
     setSuccess('initial')
     const semana = ["lunes", "martes", "miércoles", "jueves", "viernes"]
     const fechas = []
@@ -164,7 +172,7 @@ const AddSchedule = ({ params }) => {
               setError(`Hubo un problema. Intenta más tarde. ${req.detalle}}`)
             } else {
               setSuccess('success')
-              console.log('Success')
+              // console.log('Success')
               fetchData()
               setIsLoading(true)
             }
@@ -325,13 +333,13 @@ const AddSchedule = ({ params }) => {
                             <Controller
                               control={control}
                               name="duracion"
-                              {...register('duracion', {
+                              rules={{
                                 required: {
                                   value: true,
                                   message: 'Duración de servicio es requerida',
-                                }
-                              })}
-                              ref={null}
+                                },
+                              }}
+                              // ref={null}
                               render={({ field: { onChange, onBlur, value } }) => (
                                 <Select
                                   instanceId="duracion"
@@ -380,7 +388,7 @@ const AddSchedule = ({ params }) => {
                           <div className="col-12">
                             <div className="form-heading">
                               <CustomizedTooltips text={(
-                                <>Es el tipo de cita para las que se abrirán horas.</>
+                                <>Selecciona el tipo de disponibilidad para indicar cuándo y para qué tipos de atención estás disponible. Si no seleccionas un tipo, no se podrán agendar citas de esa categoría en el bloque horario especificado.</>
                               )}>
                                 <h4 style={{ width: 'max-content' }}>Tipo de disponibilidad <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
                               </CustomizedTooltips>
@@ -648,7 +656,7 @@ const AddSchedule = ({ params }) => {
                                   Al seleccionar un rango de disponibilidad, el tiempo de cada sesión será dividido en N bloques según la duración del servicio.
                                 </p>
                                 <p>
-                                  Por ejemplo, si seleccionaste una duración de 1 hora y 0 de post servicio, y un rango de disponibilidad entre 9:00 y 12:00, entonces en ese rango caben 3 sesiones de 1 hora.
+                                  Por ejemplo, si seleccionaste una duración de 1 hora y un rango de disponibilidad entre 9:00 y 12:00, entonces en ese rango caben 3 sesiones de 1 hora.
                                 </p>
                               </>
                             )}>
@@ -664,18 +672,30 @@ const AddSchedule = ({ params }) => {
                             <Controller
                               control={control}
                               defaultValue='00:00:00'
+                              rules={{
+                                required: {
+                                  value: true,
+                                  message: 'Hora inicio es requerida',
+                                }
+                              }}
                               render={({ field: { onChange, onBlur, value } }) => (
                                 <TextField
-                                  className="form-control"
+                                  // className="form-control"
                                   // id="outlined-controlled"
                                   type="time"
                                   onBlur={onBlur}
-                                  onChange={onChange}
+                                  onChange={(e) => {
+                                    onChange(e);
+                                    setValue("horaFin", e.target.value); // Ajusta automáticamente horaFin si es menor
+                                  }}
                                   value={value}
+                                  InputLabelProps={{ shrink: true }}
+                                  fullWidth
                                 />
                               )}
                               name="horaIni"
                             />
+                            {errors.horaIni && <span> <small>{errors.horaIni.message}</small></span>}
                           </div>
                         </div>
                         <div className="col-12 col-md-6 col-xl-4">
@@ -687,18 +707,33 @@ const AddSchedule = ({ params }) => {
                               <Controller
                                 control={control}
                                 defaultValue='00:00:00'
+                                rules={{
+                                  validate: validateHoraFin,
+                                  required: {
+                                    value: true,
+                                    message: 'Hora inicio es requerida',
+                                  }
+                                }}
                                 render={({ field: { onChange, onBlur, value } }) => (
                                   <TextField
-                                    className="form-control"
+                                    // className="form-control"
                                     // id="outlined-controlled"
                                     type="time"
                                     onBlur={onBlur}
                                     onChange={onChange}
+                                    InputProps={{
+                                      inputProps: {
+                                        min: horaIni, // Configura el mínimo como la hora de inicio seleccionada
+                                      },
+                                    }}
+                                    InputLabelProps={{ shrink: true }}
                                     value={value}
+                                    fullWidth
                                   />
                                 )}
                                 name="horaFin"
                               />
+                              {errors.horaFin && <span> <small>{errors.horaFin.message}</small></span>}
                             </div>
                           </div>
                         </div>
@@ -1049,7 +1084,7 @@ const AddSchedule = ({ params }) => {
             {isLoading ?
               <SimpleBackdrop />
               :
-              <Calender id={params.id} calendarRef={calendarRef} calendario={calendario} />
+              <Calender id={params.id} /* calendarRef={calendarRef}  */ calendario={calendario} />
             }
           </div>
         </div>
