@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller } from 'react-hook-form';
@@ -96,6 +96,8 @@ const AddFirstAppoinments = () => {
   const { setProps } = useSidebar();
   const [loadingDays, setLoadingDays] = useState(false)
   const [loadingHours, setLoadingHours] = useState(false)
+  const [disabled, setDisabled] = useState(false)
+  const childFormRef = useRef();
 
   useEffect(() => {
     setProps({
@@ -313,8 +315,7 @@ const AddFirstAppoinments = () => {
       // console.log('FLATTED', flatted)
 
       const arrayOrdenado = flatted.sort((a, b) => { const horaA = new Date(`1970-01-01T${a.horaIni}:00`).getTime(); const horaB = new Date(`1970-01-01T${b.horaIni}:00`).getTime(); return horaA - horaB; });
-
-      setHours(arrayOrdenado)
+      setHours(arrayOrdenado.reverse())
     } catch (error) {
       console.log(error)
     }
@@ -409,6 +410,10 @@ const AddFirstAppoinments = () => {
   };
 
   const handleFirstInterview = handleSubmit(async (data, e) => {
+    console.log('childFormRef.current', childFormRef)
+    if (childFormRef.current) {
+    const childFormData = await childFormRef.current.submitForm();
+    console.log('childFormData', childFormData)
     e.preventDefault()
     setSuccess('initial')
     const { users: patient } = await fetchUser(session.user?.id)
@@ -445,7 +450,8 @@ const AddFirstAppoinments = () => {
       "status": patient[0].status,
       "telefono": data.mobile || patient[0].telefono,
       "tipo_usuario": patient[0].tipo_usuario,
-      "id_emergencia": patient[0].id_emergencia || 0
+      "id_emergencia": patient[0].id_emergencia || 0,
+      "id_emergencia_2": patient[0].id_emergencia_2 || 0,
     }
     // tomarHoraDisponible(bloques, time, hours, date)
     const professional = watch('professional')
@@ -474,22 +480,25 @@ const AddFirstAppoinments = () => {
       setError(`Algo falló: ${err.message}`);
     } finally {
       setOpen(false)
-    }
+    }}
   })
 
   const handleAddContact = () => {
+    setDisabled(true)
     const newContact = [
       ...contacts,
       <Contact
         key={contacts.length}
         index={contacts.length}
         deleteContact={() => handleDeleteContact(contacts.length)}
+        ref={childFormRef} 
       />
     ];
     setContacts(newContact);
   }
 
   const handleDeleteContact = (key) => {
+    setDisabled(false)
     const newArray = contacts.filter((_, i) => i !== key);
     setContacts(newArray)
   }
@@ -1121,10 +1130,11 @@ const AddFirstAppoinments = () => {
                                 }
                               </div>
                             </div>
-                            <div className="col-12 col-md-12 col-xl-12">
-                              <h5 className="font-blue">Agregar contacto <PlusCircle onClick={() => { handleAddContact() }} /></h5>
-                              {contacts.map((item) => item)}
-                            </div>
+                            <h5 className="font-blue">Agregar contacto {disabled ? '' : <PlusCircle
+                              onClick={() => { handleAddContact() }}
+                            />}
+                            </h5>
+                            {contacts.map((item) => item)}
                           </div>
                         </AccordionDetails>
                       </Accordion>
