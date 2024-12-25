@@ -147,6 +147,7 @@ const EditDoctor = ({ params }) => {
     const body = {
       id: data.id,
       id_emergencia: 0,
+      id_emergencia_2: 0,
       anoIngresoCarrera: '0',
       apellido: data.lastName || initial.apellido,
       aplica_despeje: '0',
