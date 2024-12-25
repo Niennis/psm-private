@@ -7,6 +7,7 @@ import Sidebar from '../../components/Sidebar';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
 import { fetchUsers } from '../../services/UsersServices'
 import { search } from '../../services/AppointmentsServices'
+import { fetchAppointments } from '../../services/AppointmentsServices';
 import {
   imagesend, plusicon, refreshicon, searchnormal,
 } from '../../components/imagepath';
@@ -44,11 +45,28 @@ const PatientsList = () => {
     setLoading(true)
     const fetchData = async () => {
       const { users } = await fetchUsers()
-      // console.log(users);
       const newArray = [...users.filter(user => user.tipo_usuario === 'alumno')]
 
-      setUsers(newArray)
-      setResults(newArray)
+      const response = await fetchAppointments();
+      const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
+
+      const emailsCitas = new Set(data.map(cita => cita.email_estudiante));
+
+      const usuariosFiltrados = newArray.filter(usuario => emailsCitas.has(usuario.email));
+
+      if (session.user?.rol === 'profesional') {
+        const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
+
+        setUsers(dataFiltered);
+        setResults(dataFiltered);
+        // setIsValidated(false)
+      } else if (session.user?.rol === 'administrador') {
+        setUsers(data);
+        setResults(data);
+      }
+
+      // setUsers(usuariosFiltrados)
+      // setResults(usuariosFiltrados)
       setLoading(false)
     }
     fetchData()
@@ -234,13 +252,13 @@ const PatientsList = () => {
                               </form>
                             </div>
                             <div className="add-group">
-                              <Link
+                              {/* <Link
                                 href="/addpatients"
                                 className="btn btn-primary add-pluss ms-2"
                               >
 
                                 <img src={plusicon.src} alt="#" />
-                              </Link>
+                              </Link> */}
                               <Link
                                 href="#"
                                 onClick={handleRefresh}
