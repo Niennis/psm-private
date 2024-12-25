@@ -97,5 +97,5 @@ const Contact = forwardRef(({ index, deleteContact }, ref) => {
 
 
 // Asignar el displayName
-ChildForm.displayName = "Contact";
+Contact.displayName = "Contact";
 export default Contact;
