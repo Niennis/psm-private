@@ -310,7 +310,6 @@ const AddAppoinments = () => {
   const calcularHoraInicioDeBloques = (cita) => {
     const horaIniMinutos = horaAMinutos(cita.horaInicio);
     const duracionBloque = cita.duracionServicio;
-
     // Array para almacenar las horas de inicio de cada bloque
     const horasInicioBloques = [];
     // Calcular la hora de inicio para cada bloque
@@ -324,9 +323,9 @@ const AddAppoinments = () => {
 
   // Función para convertir minutos a formato HH:MM
   const minutosAHora = (minutos) => {
-    const horas = Math.floor(minutos / 60);
-    const minutosRestantes = minutos % 60;
-    return `${String(horas).padStart(2, "0")}:${String(minutosRestantes).padStart(2, "0")}:00`;
+    const horas = Math.floor(minutos / 60); // Obtener las horas
+    const minutosRestantes = minutos % 60; // Obtener los minutos restantes
+    return `${String(horas).padStart(2, '0')}:${String(minutosRestantes).padStart(2, '0')}`; // Formato HH:mm
   }
 
   // Muestra horas por día
@@ -347,7 +346,11 @@ const AddAppoinments = () => {
       })
       const flatted = newBloques.flat()
 
-      const arrayOrdenado = flatted.sort((a, b) => { const horaA = new Date(`1970-01-01T${a.horaInicio}:00`).getTime(); const horaB = new Date(`1970-01-01T${b.horaInicio}:00`).getTime(); return horaA - horaB; });
+      const arrayOrdenado = flatted.sort((a, b) => {
+        const horaA = new Date(`1970-01-01T${a.horaInicio}:00`).getTime();
+        const horaB = new Date(`1970-01-01T${b.horaInicio}:00`).getTime();
+        return horaA - horaB;
+      });
 
       setHours(arrayOrdenado)
     } catch (error) {
@@ -481,6 +484,7 @@ const AddAppoinments = () => {
                             <div className="form-group local-forms">
                               <label>Profesional</label>
                               <input
+                                disabled
                                 className="form-control"
                                 type="text"
                                 value={session.user?.name}
@@ -496,6 +500,7 @@ const AddAppoinments = () => {
                             <div className="form-group local-forms">
                               <label>Especialidad </label>
                               <input className="form-control" type="text"
+                                disabled
                                 {...register('speciality')} value={especialidad || ''} />
                             </div>
                           </div>
@@ -580,6 +585,7 @@ const AddAppoinments = () => {
                                 className="form-control"
                                 type="text"
                                 value={selectedPatient?.name || ''}
+                                disabled
                                 {...register('patientName', {
                                   required: {
                                     value: true,
@@ -600,6 +606,7 @@ const AddAppoinments = () => {
                               <input
                                 className="form-control"
                                 type="text"
+                                disabled
                                 value={selectedPatient?.lastName || ''}
                                 {...register('patientLastname', {
                                   required: {
