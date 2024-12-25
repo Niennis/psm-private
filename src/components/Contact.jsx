@@ -1,16 +1,27 @@
 'use client'
-import { useState } from 'react';
+import { forwardRef, useImperativeHandle } from "react";
 import { useForm } from 'react-hook-form';
 import { MinusCircle } from 'feather-icons-react/build/IconComponents';
 
-const Contact = ({ index, deleteContact }) => {
-  const { register,
+const Contact = forwardRef(({ index, deleteContact }, ref) => {
+  const { register, handleSubmit, getValues, trigger,
     formState: { errors }
   } = useForm()
 
   const handleClick = () => {
     deleteContact(index)
   }
+
+  useImperativeHandle(ref, () => ({
+    submitForm: async () => {
+      // Valida y obtiene los valores del formulario
+      const isValid = await trigger();
+      if (isValid) {
+        return getValues(); // Retorna los datos si son válidos
+      }
+      return null; // Retorna null si hay errores
+    },
+  }));
 
   return (
     <>
@@ -33,30 +44,40 @@ const Contact = ({ index, deleteContact }) => {
           <input
             className="form-control" type="text"
             defaultValue={""}
-            {...register('address')} />
+            {...register('name_contact')} />
         </div>
       </div>
       <div className="col-12 col-sm-6">
         <div className="form-group local-forms">
           <label>
-            Parentesco <span className="login-danger">*</span>
+            Parentesco o tipo de relación <span className="login-danger">*</span>
           </label>
           <input
             className="form-control" type="text"
             defaultValue={""}
-            {...register('address')} />
+            {...register('relationship_contact')} />
         </div>
       </div>
       <div className="col-12 col-sm-6">
         <div className="form-group local-forms">
           <label>
-            Celular <span className="login-danger">*</span>
+            Teléfono <span className="login-danger">*</span>
           </label>
-          <input
-            className="form-control" type="tel"
-            defaultValue={""}
-            placeholder="+56"
-            {...register('address')} />
+          <div className="input-group">
+            <div className="input-group-prepend">
+              <span className="input-group-text">+56</span>
+            </div>
+            <input
+              className="form-control" type="tel"
+              defaultValue={""}
+              {...register('mobile_contact', {
+                validate: (value) =>
+                  value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+              })}
+              maxLength={9}
+              minLength={9}
+            />
+          </div>
         </div>
       </div>
       <div className="col-12 col-sm-6">
@@ -67,11 +88,11 @@ const Contact = ({ index, deleteContact }) => {
           <input
             className="form-control" type="text"
             defaultValue={""}
-            {...register('address')} />
+            {...register('email_contact')} />
         </div>
       </div>
     </>
   )
-}
+})
 
 export default Contact;
