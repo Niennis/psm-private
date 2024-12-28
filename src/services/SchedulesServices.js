@@ -56,7 +56,6 @@ export const fetchBlocksAvailables = async (id, date) => {
     body: JSON.stringify(body)
   })
   const response = await data.json()
-// console.log('ahora si?', response)
   return response;
 }
 
@@ -94,7 +93,7 @@ export const generarHorasMedicas = async (id) => {
   const fechasUnicas = obtenerFechasUnicas(hours);
 
   const bloquesPromesas = fechasUnicas.map(async (date) => {
-    const {bloques} = await fetchBlocksAvailables(id, date)
+    const { bloques } = await fetchBlocksAvailables(id, date)
     return bloques.map((item) => ({ ...item, fecha: date }));
   })
 
@@ -131,25 +130,31 @@ export const generarHorasMedicas = async (id) => {
         const inicioBloque = convertirHoraAMinutos(bloque.hora_inicio);
         const finBloque = convertirHoraAMinutos(bloque.hora_fin);
         return (
-          bloque.fecha === fechaServicio && 
+          bloque.fecha === fechaServicio &&
           horaInicio >= inicioBloque ||
           horaFin <= finBloque &&
           bloque.usuario_id === hour.id_user &&
           hour.disponible === 1
         );
       });
-      
+
       if (bloqueDisponible) {
         horasMedicas.push({
           detalleServicio: hour.detalleServicio,
+          dia: hour.dia,
           duracionServicio: hour.duracionServicio,
           fechaInicio: hour.fechaInicio,
+          fechaFin: hour.fechaFin,
+          frecuencia: hour.frecuencia,
           horaInicio: convertirMinutosAHora(horaInicio),
           horaFin: convertirMinutosAHora(horaFin),
+          id_disponibilidad: hour.id,
           id_bloque: hour.id_bloque,
           id_user: hour.id_user,
           campus: hour.campus,
           modalidad: hour.modalidad,
+          repeticiones: hour.repeticiones,
+          tipo: hour.tipo,
           tipoServicio: hour.tipoServicio
         });
       }
@@ -157,7 +162,7 @@ export const generarHorasMedicas = async (id) => {
       tiempoActual += duracion; // Avanza al siguiente bloque de tiempo
     }
   });
-// console.log('horasMedicas', horasMedicas)
+  // console.log('horasMedicas', horasMedicas)
   return horasMedicas;
 };
 
@@ -191,24 +196,27 @@ const sumarDiasAFecha = (fechaOriginal, diasASumar) => {
 }
 
 const obtenerFechasSemana = (objeto, fechas) => {
-  const { dias, fechaInicio, fechaFin } = objeto;
-  const recurrencia = objeto.semanal.recurrencia
+  const { dias, fecha_inicio, fechaFin } = objeto;
+  console.log('obtenerFechasSemana', dias)
   // const fechas = [];
   const semana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
-  // console.log('obtenerFechasSemana', dias)
 
   // Función para verificar si una fecha corresponde a un día de la semana
   const esDiaDeLaSemana = (fecha, dia) => {
-    // console.log('bleh', fecha.getDay(), semana.indexOf(dia), dia);
+    console.log('bleh', fecha.getDay(), semana.indexOf(dia), dia);
     return fecha.getDay() === semana.indexOf(dia);
   }
 
   dias.forEach(dia => {
-    let fechaActual = new Date(fechaInicio + 'T00:00:00');
+    console.log('fecha_inicio', fecha_inicio)
+    let fechaActual = new Date(fecha_inicio + 'T00:00:00');
+    console.log('fechaActual', fechaActual)
     while (fechaActual <= new Date(fechaFin + 'T00:00:00')) {
 
       const esDiaValido = esDiaDeLaSemana(fechaActual, dia) &&
         fechaActual.getDay() !== 0 && fechaActual.getDay() !== 6;
+
+      console.log('esvalido', esDiaValido)
 
       if (esDiaValido) {
         fechas.push(fechaActual.toISOString().split('T')[0]);
@@ -221,10 +229,10 @@ const obtenerFechasSemana = (objeto, fechas) => {
 }
 
 const obtenerFechasMensualesDia = (objeto, fechas) => {
-  const { fechaInicio, fechaFin, mensual } = objeto;
+  const { fecha_inicio, fechaFin, mensual } = objeto;
 
   // Convertir la fecha de inicio y fin a objetos Date
-  let fechaActual = new Date(fechaInicio + 'T00:00:00');
+  let fechaActual = new Date(fecha_inicio + 'T00:00:00');
   const fechaFinal = new Date(fechaFin + 'T00:00:00');
   console.log('fechaActual', fechaActual);
   // Extraer la frecuencia mensual y el día especificado
@@ -262,14 +270,14 @@ const obtenerFechasMensualesDia = (objeto, fechas) => {
 }
 
 const obtenerFechasMensuales = (objeto, fechas) => {
-  const { fechaInicio, fechaFin, mensual } = objeto;
+  const { fecha_inicio, fechaFin, mensual } = objeto;
   const { 'ordinal-orden': tipo, 'ordinal-dia': diaSemana, 'ordinal-frecuencia': frecuencia } = mensual;
 
   const semana = { 'lunes': 1, 'martes': 2, 'miércoles': 3, 'jueves': 4, 'viernes': 5 }
   const ordenDia = {
     'primer': 1, "segundo": 2, "tercer": 3, "cuarto": 4, "último": 5
   }
-  const [añoInicio, mesInicio, diaInicio] = fechaInicio.split('-').map(Number);
+  const [añoInicio, mesInicio, diaInicio] = fecha_inicio.split('-').map(Number);
   const [añoFin, mesFin] = fechaFin.split('-').map(Number);
 
   let mesActual = mesInicio;
@@ -310,7 +318,7 @@ const obtenerFechasMensuales = (objeto, fechas) => {
               (tipo === 'cuarto' && contador === 4) ||
               (tipo === 'último' && dia + 7 > diasEnMes)) {
               const fechaFormateada = fecha.toISOString().split('T')[0];
-              if (fechaFormateada >= fechaInicio && fechaFormateada <= fechaFin) {
+              if (fechaFormateada >= fecha_inicio && fechaFormateada <= fechaFin) {
                 fechas.push(fechaFormateada);
               }
             }
@@ -379,10 +387,9 @@ export const createSchedule = async (schedule) => {
 
   if (schedule.mensual["cardinal-numero"]) {
     body.diaNumero = schedule.mensual["cardinal-numero"]
-
   }
 
-  console.log('BODY', body)
+  // console.log('BODY', body)
 
   // getDates(body)
   const data = await fetch(SCHEDULES_URL, {
@@ -514,22 +521,6 @@ export const tomarHoraDisponible = (bloques, hora, disponibilidades, fecha) => {
 
 
 
-// Ejemplo de datos de entrada
-const disponibilidades = [
-  {
-    horaInicio: "01:00:00",
-    horaFin: "03:00:00",
-    duracion: 45, // en minutos
-    frecuencia: "diaria", // puede ser otro valor, no se usa en este cálculo
-  },
-];
-
-const bloques = [
-  { horaInicio: "01:00:00", horaFin: "01:05:00", disponible: false },
-  { horaInicio: "01:05:00", horaFin: "01:10:00", disponible: true },
-  // ...
-  { horaInicio: "01:45:00", horaFin: "01:50:00", disponible: true },
-];
 
 
 
@@ -589,57 +580,48 @@ const cambiarMes = (direccion) => {
   }
 }
 
-// Filtrar datos según el nuevo mes
-const { disponibilidades: dispFiltradas, bloques: bloquesFiltrados } = filtrarPorMes(
-  disponibilidades,
-  bloques,
-  currentMonth,
-  currentYear
-);
+export const editDisponibilidad = async (body) => {
+  const url = 'https://showdisponibilidad-bjffenhjdyabcgh2.eastus-01.azurewebsites.net/editdisponibilidad'
+  console.log('body', body)
+  try {
+    const data = await fetch(url, {
+      method: "POST",
+      cors: "no-cors",
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body)
+    })
 
+    const response = await data.json()
 
-// Función principal
-const calcularCitas = (disponibilidades, bloques) => {
-  const bloquesMap = bloques.map(b => ({
-    inicio: parseTime(b.hora_inicio),
-    fin: parseTime(b.hora_fin),
-    disponible: b.disponible,
-  }));
-
-  const resultados = [];
-
-  disponibilidades.forEach((disp) => {
-    const horaInicio = parseTime(disp.horaIni);
-    const horaFin = parseTime(disp.horaFin);
-    const duracion = disp.duracionServicio;
-
-    let inicioCita = horaInicio;
-
-    while (addMinutes(inicioCita, duracion) <= horaFin) {
-      const finCita = addMinutes(inicioCita, duracion);
-
-      // Validar si todos los bloques en este rango son disponibles
-      const bloquesEnRango = bloquesMap.filter(
-        (b) => b.inicio >= inicioCita && b.fin <= finCita
-      );
-
-      const todosDisponibles = bloquesEnRango.every(b => b.disponible);
-
-      if (todosDisponibles) {
-        resultados.push({
-          horaInicio: formatTime(inicioCita),
-          horaFin: formatTime(finCita),
-        });
-      }
-
-      // Mover al siguiente intervalo de cita
-      inicioCita = finCita;
-    }
-  });
-  console.log('RESULTADOS', resultados)
-  return resultados;
+    return response
+  } catch (error) {
+    console.log('Error', error)
+  }
 }
 
-// Llamar a la función con los datos de ejemplo
-// const citasDisponibles = calcularCitas(disponibilidades, bloques);
-// console.log(citasDisponibles);
+export const deleteDisponibilidad = async (id) => {
+  const url = 'https://showdisponibilidad-bjffenhjdyabcgh2.eastus-01.azurewebsites.net/deletedisponibilidad'
+  console.log('id', id)
+  const body = {
+    "id_disponibilidad": id
+  }
+
+  try {
+    const data = await fetch(url, {
+      method: "POST",
+      cors: "no-cors",
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body)
+    })
+
+    return data.json()
+
+
+  } catch (error) {
+    console.log('Error', error)
+  }
+}
