@@ -7,7 +7,7 @@ export const createInterviewRecord = async (input) => {
     area_atencion_preferencia: input.area_atencion_preferencia.label,
     diagnostico_salud_mental: 'no recuerda',
     diagnostico_salud_fisica: 'no recuerda',
-    modalidad_atencion_evaluacion: input.modalidad_atencion_evaluacion[0].label,
+    modalidad_atencion_evaluacion: input.modalidad_atencion_evaluacion,
     tipos_apoyo_actual: (input.tipos_apoyo_actual.map(item => item.label)).toString(),
     "prevision_salud_isapre": "Fonasa",
     "prevision_salud_fonasa": "",
