@@ -8,24 +8,7 @@ import Header from "@/components/Header";
 import SimpleBackdrop from "@/components/Backdrop";
 // import PatientChart from "./PaitentChart";
 import Select from "react-select";
-import {
-  Avatar2,
-  Avatar3,
-  Avatar4,
-  Avatar5,
-  calendar,
-  dep_icon1,
-  dep_icon2,
-  dep_icon3,
-  dep_icon4,
-  dep_icon5,
-  empty_wallet,
-  imagesend,
-  morning_img_01,
-  profile_add,
-  scissor,
-  user001,
-} from "@/components/imagepath";
+import { morning_img_01 } from "@/components/imagepath";
 // import { Link } from "react-router-dom";
 import Link from 'next/link';
 // import CountUp from "react-countup";
@@ -50,7 +33,6 @@ const Admin_Dashboard = () => {
     { value: 3, label: "2020" },
     { value: 4, label: "2019" },
   ]);
-
 
   useEffect(() => {
     setProps({
@@ -78,7 +60,7 @@ const Admin_Dashboard = () => {
 
   return (
     <>
-      <Header />
+      <div className="sidebar-overlay" data-reff="" style={{zIndex: 98}}/>
 
       <>
         {loading && <SimpleBackdrop />}
@@ -104,7 +86,7 @@ const Admin_Dashboard = () => {
             </div>
             {/* /Page Header */}
             <div className="good-morning-blk">
-              <div className="row">
+              <div className="row mt-4">
                 <div className="col-md-6">
                   <div className="morning-user">
                     <h2>
@@ -956,11 +938,11 @@ const Admin_Dashboard = () => {
               </div>
             </div>
           </div>
-          <div id="delete_patient" className="modal fade delete-modal" role="dialog">
+          {/* <div id="delete_patient" className="modal fade delete-modal" role="dialog">
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-body text-center">
-                  <img src={imagesend.src} alt="#" width={50} height={46} />
+                  <Image src={imagesend} alt="#" width={50} height={46} />
                   <h3>Are you sure want to delete this ?</h3>
                   <div className="m-t-20">
                     {" "}
@@ -978,7 +960,7 @@ const Admin_Dashboard = () => {
               <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">
                   <div className="modal-body text-center">
-                    <img src={imagesend.src} alt="#" width={50} height={46} />
+                    <Image src={imagesend} alt="#" width={50} height={46} />
                     <h3>Are you sure want to delete this ?</h3>
                     <div className="m-t-20">
                       {" "}
@@ -993,7 +975,7 @@ const Admin_Dashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </>
     </>
