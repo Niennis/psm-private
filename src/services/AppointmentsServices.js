@@ -33,6 +33,7 @@ export const sendEmail = async (email, typeUser) => {
 export const createInterview = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_INTERVIEW
   const body = {
+    ...appointment,
     alumno_id: appointment.patient_id,
     campus: appointment.campus,
     carrera: appointment.carrera,
