@@ -257,6 +257,7 @@ const EditDoctor = ({ params }) => {
 
   return (
     < >
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">

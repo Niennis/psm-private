@@ -30,6 +30,7 @@ const DoctorProfile = () => {
 
   return (
     < >
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
         {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-profile' /> */}
         <div className="page-wrapper">

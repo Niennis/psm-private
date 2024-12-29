@@ -152,12 +152,7 @@ const EditPatients = ({ params }) => {
 
   return (
     < >
-      {/* <Headerudp /> */}
-      {/* <Sidebar
-        id="menu-item2"
-        id1="menu-items2"
-        activeClassName="edit-patient"
-      /> */}
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
