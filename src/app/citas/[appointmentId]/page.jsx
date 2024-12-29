@@ -202,12 +202,7 @@ const EditAppoinments = ({ params }) => {
 
   return (
     <div>
-      {/* <Headerudp /> */}
-      {/* <Sidebar
-        id="menu-item4"
-        id1="menu-items4"
-        activeClassName="edit-appoinment"
-      /> */}
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       {loading && <SimpleBackdrop />}
       <>
         <div className="page-wrapper mt-5 pt-5">

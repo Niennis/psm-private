@@ -38,7 +38,6 @@ const AppoinmentList = () => {
   const [loadTable, setLoadTable] = useState(false);
   const { setProps } = useSidebar();
 
-
   useEffect(() => {
     setProps({
       id: "menu-item4",
@@ -90,9 +89,10 @@ const AppoinmentList = () => {
     // }
   }, [session, status]);
 
-  if (status === 'loading') {
-    return <SimpleBackdrop />;
-  }
+  // if ( loading) {
+  //   return <SimpleBackdrop />;
+  // }
+
   const onSelectChange = (newSelectedRowKeys) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
@@ -131,7 +131,7 @@ const AppoinmentList = () => {
                 alt="User Image"
               />
             </Link> */}
-            <Link href="#">{record.nombre_alumno}</Link>
+            <Link href={`/fichas/${record.id_paciente}`}>{record.nombre_alumno}</Link>
           </h2>
         </>
       ),
@@ -215,7 +215,7 @@ const AppoinmentList = () => {
               >
                 {session.user?.rol === ('profesional' || 'administrador') ?
                   (<>
-                    <Link className="dropdown-item" href={`/fichas/${record.id_cita}`}>
+                    <Link className="dropdown-item" href={`/fichas/agregarficha/${record.id_cita}`}>
                       <i className="far fa-edit me-2" />
                       Registrar atención
                     </Link>
@@ -272,10 +272,11 @@ const AppoinmentList = () => {
 
   return (
     <>
+      <div className="sidebar-overlay" data-reff="" style={{zIndex: 98}}/>
       {/* {
         loading && <SimpleBackdrop />
-          } */}
-      {/* <Sidebar id='menu-item4' id1='menu-items4' activeClassName='appoinment-list' /> */}
+          }
+           */}
       <Form
         layout="inline"
         className="table-demo-control-bar"

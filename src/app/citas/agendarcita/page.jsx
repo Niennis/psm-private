@@ -421,11 +421,7 @@ const AddAppoinments = () => {
 
   return (
     < >
-      {/* <Sidebar
-        id="menu-item4"
-        id1="menu-items4"
-        activeClassName="add-appoinment"
-      /> */}
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">

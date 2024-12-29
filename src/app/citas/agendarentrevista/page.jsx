@@ -21,12 +21,11 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import { fetchUserByEmail, updateUser } from "@/services/UsersServices";
+import { fetchUserByEmail, updateUser, fetchUser, fetchUsers } from "@/services/UsersServices";
 import { createInterview, sendEmail } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 import { fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
-import { fetchUser } from "@/services/UsersServices";
 
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
@@ -111,10 +110,10 @@ const AddFirstAppoinments = () => {
     setChecked((prev) => !prev);
   };
 
-  const fetchInitialData = async () => {
+  const fetchInitialData = async (id) => {
     try {
-      const { users: response } = await fetchUser(session.user?.id);
-      console.log('response', response)
+      const { users: response } = await fetchUser(id);
+
       const patient = {
         name: response[0].nombre,
         lastName: response[0].apellido,
@@ -141,9 +140,19 @@ const AddFirstAppoinments = () => {
 
   const { register, handleSubmit, watch, control, setValue,
     formState: { errors }, reset
-  } = useForm({
-    defaultValues: async () => await fetchInitialData()
-  });
+  } = useForm();
+
+  // Efecto para manejar valores predeterminados condicionalmente
+  useEffect(() => {
+    const setDefaultValues = async () => {
+      if (session?.user?.rol !== 'administrador') {
+        const defaultValues = await fetchInitialData(session?.user?.id);
+        reset(defaultValues); // Actualiza los valores del formulario
+      }
+    };
+
+    setDefaultValues();
+  }, [session?.user?.rol, reset]);
 
   const selectedRegion = watch('region')
   const profesional = watch('professional')
@@ -411,15 +420,21 @@ const AddFirstAppoinments = () => {
 
   const handleFirstInterview = handleSubmit(async (data, e) => {
     console.log('childFormRef.current', childFormRef)
+    let childFormData;
     if (childFormRef.current) {
-    const childFormData = await childFormRef.current.submitForm();
-    console.log('childFormData', childFormData)
+      childFormData = await childFormRef.current.submitForm();
+      console.log('childFormData', childFormData)
+    }
+
     e.preventDefault()
     setSuccess('initial')
     const { users: patient } = await fetchUser(session.user?.id)
 
     const bodyInterview = {
       ...data,
+      "nombre_contacto_emergencia2": childFormData?.nombre_contacto_emergencia2 || '',
+      "parentesco_contacto_emergencia2": childFormData?.parentesco_contacto_emergencia2 || '',
+      "celular_contacto_emergencia2": childFormData?.celular_contacto_emergencia2 || '',
       "patient_id": patient[0].id,
       "hora": data.selectedHour,
       "fecha": data.selectedDay,
@@ -455,7 +470,7 @@ const AddFirstAppoinments = () => {
     }
     // tomarHoraDisponible(bloques, time, hours, date)
     const professional = watch('professional')
-
+    console.log('bodyInterview', bodyInterview)
     try {
 
       const [appointment, update] = await Promise.all([
@@ -480,7 +495,7 @@ const AddFirstAppoinments = () => {
       setError(`Algo falló: ${err.message}`);
     } finally {
       setOpen(false)
-    }}
+    }
   })
 
   const handleAddContact = () => {
@@ -491,7 +506,7 @@ const AddFirstAppoinments = () => {
         key={contacts.length}
         index={contacts.length}
         deleteContact={() => handleDeleteContact(contacts.length)}
-        ref={childFormRef} 
+        ref={childFormRef}
       />
     ];
     setContacts(newContact);
@@ -528,12 +543,7 @@ const AddFirstAppoinments = () => {
 
   return (
     < >
-      {/* <Header /> */}
-      {/* <Sidebar
-        id="menu-item4"
-        id1="menu-items4"
-        activeClassName="add-first-appoinment"
-      /> */}
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
@@ -565,7 +575,12 @@ const AddFirstAppoinments = () => {
                         <div className="col-12">
                           <div className="form-heading">
                             <h4 >Agendar Entrevista</h4>
-                            <small className="font-red">* Completa toda la información del formulario para agendar una primera entrevista inicial.</small>
+
+                            {session?.user?.rol === "alumno"
+                              ? <small className="font-red">* Completa toda la información del formulario para agendar una primera entrevista inicial.</small>
+                              : <small className="font-red">* Solo el alumno puede completar este formulario.</small>
+                            }
+
                           </div>
                         </div>
                       </div>
@@ -641,12 +656,16 @@ const AddFirstAppoinments = () => {
                             <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group local-forms">
                                 <label>
-                                  Nombre social
+                                  Nombre social <span className="login-danger">*</span>
                                 </label>
                                 <input
                                   className="form-control"
                                   type="text"
                                   {...register('nombre_social', {
+                                    required: {
+                                      value: true,
+                                      message: 'Nombre social es requerido'
+                                    },
                                     minLength: {
                                       value: 2,
                                       message: 'Nombre debe tener al menos 2 caracteres'
@@ -654,7 +673,7 @@ const AddFirstAppoinments = () => {
                                   })}
                                 />
                                 {
-                                  errors.lastName && <span><small>{errors.lastName.message}</small></span>
+                                  errors.nombre_social && <span><small>{errors.nombre_social.message}</small></span>
                                 }
                               </div>
                             </div>
@@ -1046,14 +1065,14 @@ const AddFirstAppoinments = () => {
                                 <input
                                   className="form-control" type="text"
                                   defaultValue={""}
-                                  {...register('name_contact', {
+                                  {...register('nombre_contacto_emergencia1', {
                                     required: {
                                       value: true,
                                       message: 'El campo es obligatorio'
                                     }
                                   })} />
                                 {
-                                  errors.name_contact && <span><small>{errors.name_contact.message}</small></span>
+                                  errors.nombre_contacto_emergencia1 && <span><small>{errors.nombre_contacto_emergencia1.message}</small></span>
                                 }
                               </div>
                             </div>
@@ -1065,14 +1084,14 @@ const AddFirstAppoinments = () => {
                                 <input
                                   className="form-control" type="text"
                                   defaultValue={""}
-                                  {...register('relationship_contact', {
+                                  {...register('parentesco_contacto_emergencia1', {
                                     required: {
                                       value: true,
                                       message: 'El campo es obligatorio'
                                     }
                                   })} />
                                 {
-                                  errors.relationship_contact && <span><small>{errors.relationship_contact.message}</small></span>
+                                  errors.parentesco_contacto_emergencia1 && <span><small>{errors.parentesco_contacto_emergencia1.message}</small></span>
                                 }
                               </div>
                             </div>
@@ -1089,7 +1108,7 @@ const AddFirstAppoinments = () => {
                                     className="form-control"
                                     type="tel"
                                     defaultValue={""}
-                                    {...register('mobile_contact', {
+                                    {...register('celular_contacto_emergencia1', {
                                       required: {
                                         value: true,
                                         message: 'El campo es obligatorio'
@@ -1101,7 +1120,7 @@ const AddFirstAppoinments = () => {
                                     minLength={9}
                                   />
                                   {
-                                    errors.mobile_contact && <span><small>{errors.mobile_contact.message}</small></span>
+                                    errors.celular_contacto_emergencia1 && <span><small>{errors.celular_contacto_emergencia1.message}</small></span>
                                   }
                                 </div>
                               </div>
