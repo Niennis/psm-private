@@ -41,28 +41,44 @@ const PatientsList = () => {
     });
   }, [setProps]);
 
+  const uniqueByEmail = (array) => {
+    const seenEmails = new Set();
+    return array.filter((item) => {
+      if (!seenEmails.has(item.email_estudiante)) {
+        seenEmails.add(item.email_estudiante); // Agregar el email al conjunto
+        return true; // Incluir el objeto en el resultado
+      }
+      return false; // Ignorar objetos con email repetido
+    });
+  };
+
   useEffect(() => {
     setLoading(true)
     const fetchData = async () => {
       const { users } = await fetchUsers()
-      const newArray = [...users.filter(user => user.tipo_usuario === 'alumno')]
-
       const response = await fetchAppointments();
-      const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
 
-      const emailsCitas = new Set(data.map(cita => cita.email_estudiante));
-
-      const usuariosFiltrados = newArray.filter(usuario => emailsCitas.has(usuario.email));
-
+      const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
+      const citasActivas = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
+      const citasConStatus = citasActivas.map(item => {
+        const alumno = alumnos.find(alumno => alumno.id === item.id_paciente); // Buscar el alumno por ID
+        return {
+          ...item,                      // Copiar los datos de la cita
+          status: alumno?.status || null // Agregar `status`, manejar casos donde no exista alumno
+        };
+      });
       if (session.user?.rol === 'profesional') {
-        const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
-
-        setUsers(dataFiltered);
-        setResults(dataFiltered);
+        const dataFiltered = citasConStatus.filter(item => item.id_profesional == parseInt(session.user?.id));
+        const resp = uniqueByEmail(dataFiltered)
+        console.log('resp', resp)
+        setUsers(resp);
+        setResults(resp);
         // setIsValidated(false)
       } else if (session.user?.rol === 'administrador') {
-        setUsers(data);
-        setResults(data);
+        const resp = uniqueByEmail(citasConStatus)
+
+        setUsers(resp);
+        setResults(resp);
       }
 
       // setUsers(usuariosFiltrados)
@@ -100,7 +116,7 @@ const PatientsList = () => {
     {
       title: "Nombre",
       dataIndex: "nombre",
-      sorter: (a, b) => a.nombre.length - b.nombre.length,
+      sorter: (a, b) => a.nombre_alumno,
       fixed: 'left',
       render: (text, record) => (
         <>
@@ -112,7 +128,7 @@ const PatientsList = () => {
                 alt="profile image"
               />
             </Link> */}
-            <Link href="#">{record.nombre} {record.apellido}</Link>
+            <Link href="#">{record.nombre_alumno}</Link>
           </h2>
 
         </>
@@ -121,24 +137,38 @@ const PatientsList = () => {
     {
       title: "Teléfono",
       dataIndex: "mobile",
-      sorter: (a, b) => a.telefono.length - b.telefono.length,
+      sorter: (a, b) => a.telefono_estudiante.length - b.telefono_estudiante.length,
       render: (text, record) => (
         <>
 
-          <Link href="#">{record.telefono}</Link>
+          <Link href="#">{record.telefono_estudiante}</Link>
 
         </>
       )
     },
     {
       title: "Email",
-      dataIndex: "email",
-      sorter: (a, b) => a.email.length - b.email.length
+      dataIndex: "email_estudiante",
+      sorter: (a, b) => a.email_estudiante.length - b.email_estudiante.length
     },
     {
       title: "Estado",
       dataIndex: "status",
-      sorter: (a, b) => a.status.length - b.status.length
+      sorter: (a, b) => a.status.length - b.status.length,
+      render: (text, record) => (
+        <div>
+          {record.status === "activo" && (
+            <span className="custom-badge status-green">
+              {record.status}
+            </span>
+          )}
+          {record.status === "inactivo" && (
+            <span className="custom-badge status-pink">
+              {record.status}
+            </span>
+          )}
+        </div>
+      )
     },
     {
       title: "",
@@ -192,6 +222,7 @@ const PatientsList = () => {
   };
   return (
     < >
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <Form
         layout="inline"
         className="table-demo-control-bar"
@@ -301,7 +332,7 @@ const PatientsList = () => {
                       dataSource={results}
 
                       rowSelection={rowSelection}
-                      rowKey={(record) => record.id}
+                      rowKey={(record) => record.id_paciente}
                     />
                   </div>
                 </div>
