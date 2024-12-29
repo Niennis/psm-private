@@ -2,7 +2,8 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react'
-import Sidebar from '../../../../components/Sidebar';
+import { usePathname } from 'next/navigation';
+import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
 import { TextField, Alert } from '@mui/material';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
@@ -10,9 +11,9 @@ import { useForm, Controller } from 'react-hook-form'
 
 import Select from "react-select";
 
-import { fetchSpecialityById, fetchProfessionalById } from '@/services/DoctorsServices';
-import { createSchedule, getDates, fetchScheduleByDate, validateDates, generarHorasMedicas, fetchBlocksAvailables } from '@/services/SchedulesServices';
-import Calender from '../../../calender/page';
+import { fetchSpecialityById, fetchProfessionalById, fetchProfessionals } from '@/services/DoctorsServices';
+import { createSchedule, getDates, fetchScheduleByDate, validateDates, generarHorasMedicas, fetchBlocksAvailables, deleteDisponibilidad } from '@/services/SchedulesServices';
+import Calender from '../../calender/page';
 
 import { useSidebar } from "@/context/SidebarContext";
 
@@ -28,7 +29,7 @@ import CustomizedTooltips from '@/components/Tooltip';
 import { FaInfoCircle } from "react-icons/fa";
 import SimpleBackdrop from '@/components/Backdrop';
 
-const AddSchedule = ({ params }) => {
+const AddSchedule = () => {
   const { data: session, status } = useSession()
   const router = useRouter();
 
@@ -40,7 +41,9 @@ const AddSchedule = ({ params }) => {
   const [startDay, setStartDay] = useState('');
   const [calendario, setCalendario] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  // const calendarRef = useRef(null); // Referencia al calendario
+  const [profesional, setProfesional] = useState([])
+  const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
   const { setProps } = useSidebar();
 
   const onChange = (date, dateString) => {
@@ -67,9 +70,9 @@ const AddSchedule = ({ params }) => {
     return timestamp;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (id) => {
     try {
-      const response = await generarHorasMedicas(params.id)
+      const response = await generarHorasMedicas(id)
       const processed = response.map(item => {
         // detalleServicio y duracionServicio
         return (
@@ -95,31 +98,83 @@ const AddSchedule = ({ params }) => {
     }
   }
 
+  const getProfessionals = async () => {
+    try {
+      const response = await fetchProfessionals()
+
+      const responseWithSpeciality = response.map(async item => {
+        const { especialidades } = await fetchSpecialityById(item.id)
+        return ({
+          ...item,
+          especialidad: especialidades[0]?.especialidad || 'No informada',
+        })
+      })
+      const promises = await Promise.all(responseWithSpeciality)
+
+      const docs = promises.map((doc, i) => {
+        return {
+          value: i + 2,
+          label: doc.nombre + ' ' + doc.apellido,
+          id: doc.id,
+          email: doc.email,
+          name: doc.nombre,
+          especialidad: doc.especialidad
+        }
+      })
+
+      if (docs.length > 0) {
+        setProfesional(docs)
+      }
+
+      return promises
+    } catch (error) {
+      console.log('Error', error)
+    }
+  }
+
   useEffect(() => {
-    fetchData()
+    console.log('session', session)
+    session?.user?.rol === 'administrador'
+      ?
+      getProfessionals()
+      :
+      fetchData(session?.user?.id)
   }, [])
 
-  const { register, handleSubmit, watch, control, setValue,
-    formState: { errors }
-  } = useForm({
-    defaultValues: async () => {
-      const { users } = await fetchProfessionalById(params.id)
-      const { especialidades: user } = await fetchSpecialityById(params.id)
-      const obj = {
-        nombre: `${users[0].nombre} ${users[0].apellido}`,
-        especialidad: user[0]?.especialidad || 'No informada',
-        id: users[0].usuario_id,
-        horaIni: '00:00:00',
-        semanal: { dia: [] }
-      }
-      return obj
+  const { register, handleSubmit, watch, control, setValue, reset, formState: { errors } } = useForm();
+
+  // Lógica para manejar los valores predeterminados asíncronos
+  useEffect(() => {
+    if (session?.user?.rol === "profesional") {
+      const fetchDefaults = async () => {
+        setLoading(true); // Indicamos que estamos cargando los datos
+        try {
+          const { users } = await fetchProfessionalById(session?.user?.id);
+          const { especialidades: user } = await fetchSpecialityById(session?.user?.id);
+          const defaultValues = {
+            nombre: `${users[0].nombre} ${users[0].apellido}`,
+            especialidad: user[0]?.especialidad || "No informada",
+            id: users[0].usuario_id,
+            horaIni: "00:00:00",
+            semanal: { dia: [] },
+          };
+          reset(defaultValues); // Establece los valores predeterminados
+        } catch (error) {
+          console.error("Error fetching default values:", error);
+        } finally {
+          setLoading(false); // Terminamos de cargar los datos
+        }
+      };
+
+      fetchDefaults();
     }
-  })
+  }, [session?.user?.rol, reset]);
 
   const frecuencia = watch('frecuencia')
   const modalidad = watch('modalidad')
   const horaIni = watch("horaIni");
   const horaFin = watch("horaFin");
+  const profesionalSeleccionado = watch("nombre")
 
   // Validación personalizada para horaFin
   const validateHoraFin = (value) => {
@@ -135,7 +190,10 @@ const AddSchedule = ({ params }) => {
     const fechas = []
     const newData = {
       ...data,
-      id_user: params.id,
+      nombre: session?.user?.rol === 'profesional' ? data.nombre : data.nombre.label,
+      id_user: session?.user?.rol === 'profesional' ? session?.user?.id : data.nombre.id,
+      email: session?.user?.rol === 'profesional' ? session?.user?.email : data.nombre.email,
+      especialidad: session?.user?.rol === 'profesional' ? data.especialidad : data.especialidad,
       duracionServicio: parseInt(data.duracion.label),
       fechaInicio: startDay,
       mensual: {
@@ -145,6 +203,7 @@ const AddSchedule = ({ params }) => {
       dias: data.frecuencia === "semanal" ? data.semanal.dia : semana,
       fecha_inicio: data.fecha_inicio,
     }
+    console.log('newData', newData)
 
     const dates = getDates(newData, fechas)
     let esValido = []
@@ -155,7 +214,7 @@ const AddSchedule = ({ params }) => {
 
     const promesas = []
     dates.forEach(date => {
-      return promesas.push(validateDates(date, data.horaIni, data.horaFin, params.id))
+      return promesas.push(validateDates(date, data.horaIni, data.horaFin, session?.user?.rol === 'profesional' ? session?.user?.id : data.nombre.id))
     })
     Promise.all(promesas)
       .then(async (values) => {
@@ -173,7 +232,7 @@ const AddSchedule = ({ params }) => {
             } else {
               setSuccess('success')
               // console.log('Success')
-              fetchData()
+              session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
               setIsLoading(true)
             }
           } catch (error) {
@@ -214,13 +273,33 @@ const AddSchedule = ({ params }) => {
 
   const handleOnClose = () => {
     setSuccess('initial')
-    fetchData()
+    session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
+  }
 
+  const handleEdit = () => {
+    console.log('profesional.id', profesional)
+    if (pathname.includes('agregarhorario')) {
+      if (session?.user?.rol === 'profesional') {
+        router.push(`/horarios/${session?.user?.id}`)
+      } else {
+        router.push(`/horarios/${profesional.id}`)
+      }
+    }
+  }
+
+  const handleDelete = async (data) => {
+    console.log('handleDelete', data)
+    try {
+      const response = await deleteDisponibilidad(data)
+      console.log('response', response)
+    } catch (error) {
+      console.log('error', error)
+    }
   }
 
   return (
     < >
-      {/* <Sidebar id='menu-item5' id1='menu-items5' activeClassName='add-shedule' /> */}
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
@@ -261,21 +340,75 @@ const AddSchedule = ({ params }) => {
                             <label>
                               Nombre profesional <span className="login-danger">*</span>
                             </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              disabled
-                              {...register('nombre', {
-                                required: {
-                                  value: true,
-                                  message: 'Nombre es requerido'
-                                },
-                                minLength: {
-                                  value: 2,
-                                  message: 'Nombre debe tener al menos 2 caracteres'
-                                }
-                              })}
-                            />
+                            {
+                              session?.user?.rol === 'profesional'
+                                ?
+
+                                <input
+                                  className="form-control"
+                                  type="text"
+                                  disabled
+                                  {...register('nombre', {
+                                    required: {
+                                      value: true,
+                                      message: 'Nombre es requerido'
+                                    },
+                                    minLength: {
+                                      value: 2,
+                                      message: 'Nombre debe tener al menos 2 caracteres'
+                                    }
+                                  })}
+                                />
+                                :
+                                <Controller
+                                  control={control}
+                                  name="nombre"
+                                  {...register('nombre')}
+                                  ref={null}
+                                  render={({ field: { onChange, onBlur, value, name, ref } }) => {
+                                    return (<Select
+                                      placeholder={profesional.length === 0 ? 'Cargando...' : 'Seleccione...'}
+                                      instanceId="nombre"
+                                      defaultValue={selectedOption}
+                                      onChange={(e) => {
+                                        onChange(e)
+                                        setValue('especialidad', e.especialidad);
+                                        fetchData(e.id)
+                                      }}
+                                      getOptionLabel={e => e.label}
+                                      options={profesional}
+                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                      id="nombre"
+                                      components={{
+                                        IndicatorSeparator: () => null
+                                      }}
+
+                                      styles={{
+                                        control: (baseStyles, state) => ({
+                                          ...baseStyles,
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                          '&:hover': {
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                          },
+                                          borderRadius: '10px',
+                                          fontSize: "14px",
+                                          minHeight: "45px",
+                                        }),
+                                        dropdownIndicator: (base, state) => ({
+                                          ...base,
+                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                          transition: '250ms',
+                                          width: '35px',
+                                          height: '35px',
+                                        }),
+                                      }}
+                                    />)
+                                  }}
+                                />
+                            }
+
+
                           </div>
                         </div>
                         {/* Especialidad */}
@@ -297,12 +430,13 @@ const AddSchedule = ({ params }) => {
                           </div>
                         </div>
 
-                        {/* Nombre profesional */}
+                        {/* DETALLES DEL SERVICIO */}
                         <div className="col-12">
                           <div className="form-heading">
                             <h4>Detalles del servicio</h4>
                           </div>
                         </div>
+                        {/* Nombre servicio o evento */}
                         <div className="col-12 col-md-12 col-xl-12">
                           <div className="form-group local-forms">
                             <CustomizedTooltips text={(
@@ -320,6 +454,7 @@ const AddSchedule = ({ params }) => {
                             {/* </Tooltip> */}
                           </div>
                         </div>
+                        {/* Duración servicio */}
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group local-forms">
                             <CustomizedTooltips text={(
@@ -383,7 +518,7 @@ const AddSchedule = ({ params }) => {
                         </div>
 
 
-                        {/* TIPO DE CITA */}
+                        {/* Tipo de disponibilidad */}
                         <div className="col-12 col-lg-12" >
                           <div className="col-12">
                             <div className="form-heading">
@@ -1084,7 +1219,12 @@ const AddSchedule = ({ params }) => {
             {isLoading ?
               <SimpleBackdrop />
               :
-              <Calender id={params.id} /* calendarRef={calendarRef}  */ calendario={calendario} />
+              <Calender
+                profesional_id={session?.user?.id}
+                calendario={calendario}
+                editBloque={handleEdit}
+                deleteBloque={handleDelete}
+              />
             }
           </div>
         </div>

@@ -2,11 +2,13 @@
 /* eslint-disable no-const-assign */
 /* eslint-disable no-unused-vars */
 import { useEffect, useState, forwardRef } from "react";
+import Link from "next/link";
 
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
+import { TextField, Alert } from '@mui/material';
 
 import { DatePicker } from "antd";
 import esLocale from '@fullcalendar/core/locales/es'
@@ -16,12 +18,16 @@ import {
 import CalendarSkeleton from "@/components/skeletons/CalendarSkeleton";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
+import { Modal, Button } from 'react-bootstrap'
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const cacheHandler = new CacheHandler();
 
-const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
-  console.log('calendario', calendario)
+const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBloque }, calendarRef) => {
+  // console.log('calendario', calendario)
   const [menu, setMenu] = useState(false);
+  const [success, setSuccess] = useState('initial')
+  const [message, setMessage] = useState('')
 
   const [startDate, setDate] = useState(new Date()),
     [showCategory, setshowCategory] = useState(false),
@@ -43,6 +49,11 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
         className: "bg-purple",
       },
     ];
+  const [showModal, setShowModal] = useState(false)
+  const [eventDetails, setEventDetails] = useState('');
+  const mobile = useMediaQuery('(min-width:600px)');
+
+  const handleShow = () => setShowModal(true);
 
   const datesToTimestamp = (fecha, hora) => {
     // Combinar fecha y hora en un formato ISO 8601 compatible con `Date`
@@ -79,21 +90,78 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
     setshowCategory(false);
     setshowEvents(false);
     setshowmodel(false);
+    setShowModal(false)
     console.log('HANDLE CLOSE')
   };
 
-  const handleEventClick = (clickInfo) => {
+  const handleEventClick = async (clickInfo) => {
     setiseditdelete(true);
     setevent_title(clickInfo.event.title);
     setcalenderevent(clickInfo.event);
-    console.log('HANDLE EVENT CLICK', clickInfo);
+    console.log('HANDLE EVENT CLICK', clickInfo.event);
+    setShowModal(true);
+
   };
+
+  const handleEdit = async () => {
+    const data = calenderevent.extendedProps
+    const obj = {
+      "id": data.id_disponibilidad,
+      "id_bloque": data.id_bloque,
+      "tipo": data.tipo,
+      "día": data.dia,
+      "fechaInicio": data.fechaInicio,
+      "fechaFin": data.fechaFin,
+      "repeticiones": data.repeticiones,
+      "horaIni": data.horaInicio,
+      "horaFin": data.horaFin,
+      "modalidad": data.modalidad,
+      "frecuencia": data.frecuencia,
+      "id_user": data.id_user,
+      "detalleServicio": data.detalleServicio,
+      "duracionServicio": data.duracionServicio,
+      "tipoServicio": data.tipoServicio,
+      "campus": data.campus
+    }
+
+    console.log('obj', obj)
+
+    if (typeof editBloque === "function") {
+      try {
+        console.log("Enviando datos al padre...");
+        await editBloque(obj); // Aquí se envía 'obj' al padre
+        console.log("Datos enviados correctamente.");
+      } catch (error) {
+        console.error("Error al enviar datos al padre:", error);
+      }
+    } else {
+      console.error("editBloque no es una función");
+    }
+  }
+
+  const handleDelete = async () => {
+    try {
+      const response = await deleteBloque(calenderevent.extendedProps.id_disponibilidad)
+      console.log('response', response)
+      if (response.validacion === true) {
+        setSuccess('success')
+        setMessage(`Disponibilidad eliminada exitosamente.`)
+      } else {
+        setSuccess('fail')
+        setMessage(`Ha ocurrido un problema ${response.detalle}`)
+      }
+    } catch (error) {
+      setSuccess('fail')
+      setMessage(`Ha ocurrido un problema ${error}`)
+    } 
+  }
 
   const handleDateSelect = (selectInfo) => {
     setisnewevent(true);
     setaddneweventobj(selectInfo);
     console.log('HANDLE DATE SELECT', selectInfo);
   };
+
   const addnewevent = () => {
     let calendarApi = addneweventobj.view.calendar;
 
@@ -145,10 +213,38 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
   };
   // console.log("showmodel", showmodel);
 
+  const formatToBullets = tipoServicio => {
+    if (!tipoServicio) return null;
+
+    // Convertir el string a un array
+    let array;
+    try {
+      array = JSON.parse(tipoServicio.replace(/'/g, '"')); // Reemplazar comillas simples por dobles para JSON válido
+    } catch (error) {
+      console.error("Error al convertir el string en array:", error);
+      return tipoServicio; // Si falla, retorna el string original
+    }
+
+    // Convertir el array en una lista con bullets
+    return (
+      <ul>
+        {array.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  const openWarning = () => {
+    setSuccess('warning')
+    setMessage('¿Desea confirmar la eliminación del servicio seleccionado?')
+  }
+
   return (
     <>
       <div className="main-wrapper">
         {/* <div className="page-wrapper"> */}
+
         <div className="content container-fluid">
 
           <div className="page-header">
@@ -180,7 +276,7 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
                             right: "dayGridMonth,timeGridWeek,timeGridDay",
                           }}
                           initialView="dayGridMonth"
-                          editable={true}
+                          editable={false}
                           selectable={true}
                           selectMirror={true}
                           dayMaxEvents={true}
@@ -205,7 +301,7 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
                             right: "dayGridMonth,timeGridWeek,timeGridDay",
                           }}
                           initialView="dayGridMonth"
-                          editable={true}
+                          editable={false}
                           selectable={true}
                           selectMirror={true}
                           dayMaxEvents={true}
@@ -213,15 +309,35 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
                           // initialEvents={calendario?.length > 0 ? calendario : []} // alternatively, use the `events` setting to fetch from a feed
                           select={handleDateSelect}
                           eventClick={(clickInfo) => handleEventClick(clickInfo)}
-                          events={calendario} 
+                          events={calendario}
                         />
 
                     }
-
+                    <Modal
+                      show={showModal}
+                      onHide={handleClose}
+                      style={{ alignContent: 'center' }}
+                    >
+                      <Modal.Header closeButton>
+                        <Modal.Title>{event_title}</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        <p>Modalidad: {calenderevent && calenderevent?.extendedProps?.modalidad}</p>
+                        <p>Tipo de servicio:  </p> {calenderevent && formatToBullets(calenderevent?.extendedProps?.tipoServicio)}
+                      </Modal.Body>
+                      <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}> Cerrar </Button>
+                        <Button variant="secondary" onClick={handleEdit}> Editar </Button>
+                        <Button variant="secondary" onClick={openWarning}> Eliminar </Button>
+                      </Modal.Footer>
+                    </Modal>
                   </div>
                 </div>
+
               </div>
+
             </div>
+
           </div>
           {/* Add Event Modal */}
           <div className="modal fade none-border" id="my_event">
@@ -242,7 +358,8 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
               </div>
             </div>
           </div>
-          {/* /Add Event Modal */}
+
+
         </div>
 
         {/* Footer */}
@@ -258,7 +375,7 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
                 data-bs-dismiss="modal"
                 aria-label="Close"
               >
-                <span aria-hidden="true"></span>
+                <span aria-hidden="true" ></span>
               </button>
             </div>
             <div className="modal-body">
@@ -291,6 +408,99 @@ const Calender = forwardRef(({ id, calendario }, calendarRef)  => {
         </div>
       </div>
       {/* /Main Wrapper */}
+      <div style={{ marginLeft: mobile ? '-285px' : 0 }}>
+        {
+          success === 'success'
+            ?
+            <div style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '105%',
+              zIndex: 99999,
+              background: '#00000080',
+              marginLeft: "-12px", 
+            }}>
+              {/* <div className="col-sm-12 col-lg-6"> */}
+              <Alert
+                severity="success"
+                onClose={() => {setSuccess('initial')}}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+                // spacing={2}
+              >
+                {message}
+              </Alert>
+              {/* </div> */}
+            </div>
+
+            : success === 'fail'
+              ?
+              <div className="row" style={{
+                height: '100%',
+                position: 'fixed',
+                top: '0',
+                width: '100%',
+                zIndex: 99999,
+                background: '#00000080'
+              }}>
+                <div className="col-sm-12 col-lg-6">
+                  <Alert
+                    severity="error"
+                    onClose={() => { setSuccess('initial') }}
+                    sx={{
+                      zIndex: 'tooltip',
+                      position: 'absolute',
+                      left: '30%',
+                      width: '50%',
+                      padding: '50px',
+                      bottom: '50vh'
+                    }}
+                    // spacing={2}
+                  >
+                    {message}
+                  </Alert>
+                </div>
+              </div>
+              : success === 'warning'
+                ?
+                <div className="row" style={{
+                  height: '100%',
+                  position: 'fixed',
+                  top: '0',
+                  width: '100%',
+                  zIndex: 99999,
+                  background: '#00000080'
+                }}>
+                  <div className="col-sm-12 col-lg-6">
+                    <Alert
+                      severity="warning"
+                      onClose={() => { setSuccess('initial') }}
+                      sx={{
+                        zIndex: 'tooltip',
+                        position: 'absolute',
+                        left: '30%',
+                        width: '50%',
+                        padding: '50px',
+                        bottom: '50vh'
+                      }}
+                      // spacing={2}
+                    >
+                      <h4>{message}</h4>
+                      <Button variant="primary" onClick={handleDelete}> Confirmar </Button>
+                    </Alert>
+                  </div>
+                </div>
+                : ""
+        }
+      </div>
+
     </>
   )
 });
