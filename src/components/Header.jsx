@@ -14,6 +14,10 @@ import MenuIcon from '@mui/icons-material/Menu';
 // import { IoMdLogIn } from "react-icons/io";
 import { FaUserCircle } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa";
+import {
+  baricon,
+  baricon1,
+} from "@/components/imagepath";
 
 const URL = 'https://sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net/'
 
@@ -92,7 +96,15 @@ const Header = () => {
       }
     };
   }, []);
+  const handlesidebar = () => {
+    document.body.classList.toggle("mini-sidebar");
+  };
 
+  const handlesidebarmobilemenu = () => {
+    document.body.classList.toggle("slide-nav");
+    document.getElementsByTagName("html")[0].classList.toggle('menu-opened');
+    document.getElementsByClassName("sidebar-overlay")[0].classList.toggle("opened");
+  };
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   }
@@ -149,7 +161,14 @@ const Header = () => {
               alt="Logo"
             />{" "}
           </Typography>
-
+          {session?.user && <>
+            <Link id="toggle_btn" href="#" onClick={handlesidebar}>
+              <img src={baricon} alt="" />
+            </Link>
+            <Link id="mobile_btn" className="mobile_btn float-start" href="#" onClick={handlesidebarmobilemenu}>
+              <img src={baricon1} alt="" />
+            </Link>
+          </>}
           {/*  MENU MOBILE */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
@@ -179,6 +198,7 @@ const Header = () => {
               sx={{
                 display: { xs: 'block', lg: 'none' },
               }}
+              disableEnforceFocus
             >
               {
                 pages.map((page) => (
@@ -213,6 +233,7 @@ const Header = () => {
                   }}
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
+                  disableEnforceFocus
                 >
                   {settings.map((setting) => (
                     <MenuItem key={setting.url} onClick={handleCloseUserMenu}>
@@ -259,7 +280,7 @@ const Header = () => {
                         ? 'active-header'
                         : ''
                         }`}
-                      onMouseOver={handleOpenUserMenu} 
+                        onMouseEnter={handleOpenUserMenu}
                       sx={{ ...style, p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' }}>
                       {page.title}
                     </Button>
@@ -281,18 +302,9 @@ const Header = () => {
               )
             }
             )}
-            {/* <Tooltip title="Como trabajamos">
-              <Button
-                className={`sailec ${activeSection === 'como_trabajamos'
-                  ? 'active-header'
-                  : ''
-                  }`}
-                onClick={handleOpenUserMenu} sx={{ ...style, p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' }}>
-                CÓMO TRABAJAMOS
-              </Button>
-            </Tooltip> */}
+     
 
-            <Box sx={{ flexGrow: 0 }} className={`sailec `}>
+            <Box sx={{ flexGrow: 0 }} className={`sailec `} >
               <Menu
                 sx={{ mt: '45px' }}
                 id="menu-appbar"
@@ -308,9 +320,10 @@ const Header = () => {
                 }}
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
+                disableEnforceFocus
               >
                 {settings.map((setting) => (
-                  <MenuItem key={setting.url} onClick={handleCloseUserMenu} onMouseLeave={handleCloseUserMenu}>
+                  <MenuItem key={setting.url} onClick={handleCloseUserMenu} >
                     <Typography textAlign="center" className="sailec">
                       <a href={setting.url} style={{ color: 'black', fontFamily: 'sailec', textDecoration: 'none' }}>
                         {setting.title}
