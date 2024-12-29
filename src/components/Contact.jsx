@@ -44,7 +44,7 @@ const Contact = forwardRef(({ index, deleteContact }, ref) => {
           <input
             className="form-control" type="text"
             defaultValue={""}
-            {...register('name_contact')} />
+            {...register('nombre_contacto_emergencia2')} />
         </div>
       </div>
       <div className="col-12 col-sm-6">
@@ -55,7 +55,7 @@ const Contact = forwardRef(({ index, deleteContact }, ref) => {
           <input
             className="form-control" type="text"
             defaultValue={""}
-            {...register('relationship_contact')} />
+            {...register('parentesco_contacto_emergencia2')} />
         </div>
       </div>
       <div className="col-12 col-sm-6">
@@ -70,7 +70,7 @@ const Contact = forwardRef(({ index, deleteContact }, ref) => {
             <input
               className="form-control" type="tel"
               defaultValue={""}
-              {...register('mobile_contact', {
+              {...register('celular_contacto_emergencia2', {
                 validate: (value) =>
                   value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
               })}
