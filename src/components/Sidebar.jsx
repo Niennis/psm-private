@@ -13,7 +13,6 @@ import ProtectedPage from './ProtectedRoutes';
 import { useSession } from 'next-auth/react';
 import { useSidebar } from '@/context/SidebarContext';
 import SimpleBackdrop from './Backdrop';
-
 const Sidebar = () => {
   const { data: session, status } = useSession()
   const { props } = useSidebar();
@@ -55,7 +54,7 @@ const Sidebar = () => {
   }
 
   useEffect(() => {
-    if(session?.user?.rol === 'alumno'){
+    if (session?.user?.rol === 'alumno') {
       patientLoggedIn()
     }
   })
@@ -71,6 +70,7 @@ const Sidebar = () => {
   const expandMenuOpen = () => {
     document.body.classList.add("expand-menu");
   };
+
   return (
     <ProtectedPage level={ROL}>
 
@@ -87,7 +87,6 @@ const Sidebar = () => {
           hideTracksWhenNotNeeded={true}
         > */}
 
-
         <div className="sidebar-inner slimscroll overflow-scroll">
           <div id="sidebar-menu" className="sidebar-menu"
             onMouseLeave={expandMenu}
@@ -95,11 +94,6 @@ const Sidebar = () => {
           >
             {
               <ul>
-
-                {/* {
-                  !session?.user?.rol && <SidebarSkeleton />
-                } */}
-
                 {
                   session.user?.rol && session.user?.rol === "alumno" &&
                   <>
@@ -117,7 +111,7 @@ const Sidebar = () => {
                     {/* <li>
                           <Link className={props?.activeClassName === 'add-appoinment' ? 'active' : ''} href="/citas/agendarcita">Agendar Cita</Link>
                         </li> */}
-                   { alumno?.aplica_despeje === 1 && <li>
+                    {alumno?.aplica_despeje === 1 && <li>
                       <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
                     </li>}
                     {/* <li>
@@ -214,7 +208,7 @@ const Sidebar = () => {
                     <Link className={props?.activeClassName === 'shedule-list' ? 'active' : ''} href="/horarios">Lista de Horarios</Link>
                   </li> */}
                       {/* <li> */}
-                      <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario/${session.user?.sub}`} >
+                      <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario`} >
                         <span className="menu-side">
                           <img src={doctorschedule.src} alt="" />
                         </span>{" "}
@@ -226,7 +220,14 @@ const Sidebar = () => {
                     </li> */}
                       {/* </ul> */}
                     </li>
-
+                    {/* <li>
+                      <Link className={props?.activeClassName === 'activity' ? 'active' : ''} href={`/fichas/`}>
+                        <span className="menu-side">
+                          <img src={menuicon14} alt="" />
+                        </span>{" "}
+                        <span>Activities</span>
+                      </Link>
+                    </li> */}
                   </>
                 }
 
@@ -309,18 +310,32 @@ const Sidebar = () => {
                   </span>{" "}
                   <span> Horario Profesionales </span> <span className="menu-arrow" />
                 </Link> */}
-                      <ul style={{ display: "none" }} className="menu-items5">
-                        {/* <li>
+                      {/* <ul style={{ display: "none" }} className="menu-items5"> */}
+                      <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario`} >
+                        <span className="menu-side">
+                          <img src={doctorschedule.src} alt="" />
+                        </span>{" "}
+                        <span> Agregar Horario</span> <span className="menu-arrow" />
+                      </Link>
+                      {/* <li>
                     <Link className={props?.activeClassName === 'shedule-list' ? 'active' : ''} href="/horarios">Lista de Horarios</Link>
                   </li> */}
-                        {/* <li>
+                      {/* <li>
                     <Link className={props?.activeClassName === 'add-shedule' ? 'active' : ''} href="/addschedule">Agregar Horarios</Link>
                   </li> */}
-                        {/* <li>
+                      {/* <li>
                       <Link className={props?.activeClassName === 'edit-shedule' ? 'active' : ''} href="/editschedule">Editar Horario</Link>
                     </li> */}
-                      </ul>
+                      {/* </ul> */}
                     </li>
+                    {/* <li>
+                      <Link className={props?.activeClassName === 'activity' ? 'active' : ''} href={`/fichas/`}>
+                        <span className="menu-side">
+                          <img src={menuicon14} alt="" />
+                        </span>{" "}
+                        <span>Activities</span>
+                      </Link>
+                    </li> */}
                     <li className="submenu">
                       <Link className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`} href={`/admin-dashboard`} >
                         <span className="menu-side">
@@ -380,6 +395,7 @@ const Sidebar = () => {
 
         {/* </Scrollbars> */}
       </div>
+
     </ProtectedPage>
   )
 }
