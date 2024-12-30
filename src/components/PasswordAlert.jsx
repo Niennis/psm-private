@@ -16,7 +16,6 @@ export default function PasswordAlert() {
       const { users: profile } = await fetchProfessionalById(session.user.id)
       if (profile[0].mustChangePassword === 1 && !localStorage.getItem('passwordAlertShown')) {
         setShowAlert(true);
-        console.log('entró al TRUE')
       }
     }
   }

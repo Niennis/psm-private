@@ -47,7 +47,6 @@ const FooterDae = () => {
 
       // get the DOM element
       var element = document.elementFromPoint(touch.clientX, touch.clientY);
-      console.log('element', element);
 
       // make sure an element was found and it is a link
       if (element && element.tagName === 'A') {

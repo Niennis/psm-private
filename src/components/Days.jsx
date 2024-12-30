@@ -68,7 +68,6 @@ const Days = ({ day, startTime, setStartTime, endTime, setEndTime }) => {
   }
 
   const handleDeleteHour = (indexToRemove) => {
-    console.log('indexToRemove', indexToRemove);
     const updatedItems = hours.filter((_, index) => index !== indexToRemove);
     setHours(updatedItems);
     // console.log('key', key)

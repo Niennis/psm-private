@@ -29,7 +29,6 @@ const Sidebar = () => {
   }
 
   const handleSignOut = () => {
-    console.log('session', session)
     signOut({
       callbackUrl: '/'
     })

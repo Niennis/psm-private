@@ -33,20 +33,17 @@ const ProtectedPage = ({ children, level }) => {
   useEffect(() => {
     switch (level) {
       case level.includes('administrador'):
-        console.log('ENTRÓ COMO administrador')
         if ((!session && protectedToRoutes.includes(pathname)) || session.user?.rol !== "administrador") {
           router.push('/');
         }
         break;
       case level.includes('profesional'):
-        console.log('ENTRÓ COMO PROFESIONAL')
         if ((!session && protectedToRoutes.includes(pathname))
           || (session.user?.rol !== "administrador"&& session.user?.rol !== "profesional")) {
           router.push('/');
         }
         break;
       case level.includes('alumno'):
-        console.log('ENTRÓ COMO ALUMNO')
         if ((!session && protectedToRoutes.includes(pathname))) {
           router.push('/');
         }
