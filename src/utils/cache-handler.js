@@ -21,7 +21,6 @@ module.exports = class CacheHandler {
         lastModified: Date.now(),
         tags: ctx && Array.isArray(ctx.tags) ? ctx.tags : [], // Asegurar que tags sea un arreglo
       });
-      console.log(`Clave ${key} almacenada en caché.`);
     } catch (error) {
       console.error(`Error al guardar la clave ${key} en el caché:`, error);
       throw error;
@@ -32,7 +31,6 @@ module.exports = class CacheHandler {
     try {
       for (let [key, value] of cache) {
         if (Array.isArray(value.tags) && value.tags.includes(tag)) {
-          console.log(`Revalidando clave ${key} con etiqueta ${tag}.`);
           cache.delete(key); // Elimina entradas asociadas a la etiqueta
         }
       }

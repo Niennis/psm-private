@@ -1,5 +1,4 @@
 const formatDate = (date) => {
-  console.log(date);
   const day = date.getDate()
   const month = date.getMonth() + 1
   const year = date.getFullYear()
@@ -116,7 +115,6 @@ export const addProfessional = async (user) => {
     "region": "no informado",
     "comuna": "no informado",
   }
-  console.log('body', body);
 
   try {
     const data = await fetch(USERS_API, {
@@ -200,7 +198,6 @@ export const updateProfesional = async (user) => {
   const body = {
     ...user
   }
-  console.log('user', user)
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -221,7 +218,6 @@ export const changePassword = async (user) => {
   const body = {
     ...user,
   }
-  console.log('body', body)
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -244,7 +240,6 @@ export const changeEspecialidad = async (user) => {
   const body = {
     ...user,
   }
-  console.log('body', body)
   try {
     const data = await fetch(USERS_API, {
       method: "POST",

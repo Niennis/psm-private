@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 import axios from 'axios';
 
 export const sendEmail = async (email, typeUser) => {
-  console.log('el body', email, typeUser);
   const SEND_EMAIL = process.env.NEXT_PUBLIC_SEND_EMAIL;
   const body = {
     'nombre': 'Prueba',
@@ -100,7 +99,6 @@ export const createAppointment = async (appointment) => {
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
   }
-  console.log('BODY', body);
 
   try {
     const data = await fetch(APPOINTMENT_API, {
@@ -112,7 +110,6 @@ export const createAppointment = async (appointment) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    console.log('response', response.detalle);
 
     // ENVÍO DE MAIL
     // if (response.detalle === 'success!!') {
@@ -129,7 +126,6 @@ export const createAppointment = async (appointment) => {
 
 export const updateAppointment = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_EDIT_CITA
-  console.log(appointment.appointment_date);
   const body = {
     "profesional_id": appointment.selected_doctor.id,
     "alumno_id": appointment.patient_id,

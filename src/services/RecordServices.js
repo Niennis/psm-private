@@ -1,6 +1,5 @@
 export const createInterviewRecord = async (input) => {
   const RECORD_URL = `${process.env.NEXT_PUBLIC_RECORD}/createentrevista`
-  console.log('input createInterviewRecord', input)
 
   const body = {
     ...input,
@@ -12,7 +11,6 @@ export const createInterviewRecord = async (input) => {
     "prevision_salud_fonasa": "",
     "prevision_salud_otro": "",
   }
-  console.log('body createInterviewRecord', body)
 
   const data = await fetch(RECORD_URL, {
     method: "POST",
@@ -63,8 +61,6 @@ export const reportes = async (tabla) => {
 
 export const showRecordById = async id_cita => {
   const record_url = `${process.env.NEXT_PUBLIC_RECORD}/showentrevista`
-
-  console.log('id cita', id_cita)
 
   const body = { "id_entrevista": id_cita }
 

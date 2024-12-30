@@ -95,7 +95,6 @@ export const fetchUserMailAndPass = async (user) => {
 }
 
 export const addUsers = async (user) => {
-  console.log('USR', user);
   const body = {
     "nombre": user.name,
     "apellido": user.lastName,
@@ -112,7 +111,6 @@ export const addUsers = async (user) => {
     "comuna": "asdasd",
     "status": "activo"
   }
-  console.log('body', body);
   const USERS_API = process.env.NEXT_PUBLIC_CREATE_PATIENTS
   const data = await fetch(USERS_API, {
     method: "POST",
@@ -135,9 +133,8 @@ export const updateUser = async (user) => {
   const USERS_API = process.env.NEXT_PUBLIC_EDIT_USER
   const body = {
     ...user,
-    nombre_social: user.nombre_social || ' '
+    nombre_social: user.nombre_social || ''
   }
-  console.log('body', body)
   try {
     const data = await fetch(USERS_API, {
       method: "POST",

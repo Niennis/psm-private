@@ -162,10 +162,8 @@ export const generarHorasMedicas = async (id) => {
       tiempoActual += duracion; // Avanza al siguiente bloque de tiempo
     }
   });
-  // console.log('horasMedicas', horasMedicas)
   return horasMedicas;
 };
-
 
 
 
@@ -197,26 +195,20 @@ const sumarDiasAFecha = (fechaOriginal, diasASumar) => {
 
 const obtenerFechasSemana = (objeto, fechas) => {
   const { dias, fecha_inicio, fechaFin } = objeto;
-  console.log('obtenerFechasSemana', dias)
   // const fechas = [];
   const semana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 
   // Función para verificar si una fecha corresponde a un día de la semana
   const esDiaDeLaSemana = (fecha, dia) => {
-    console.log('bleh', fecha.getDay(), semana.indexOf(dia), dia);
     return fecha.getDay() === semana.indexOf(dia);
   }
 
   dias.forEach(dia => {
-    console.log('fecha_inicio', fecha_inicio)
     let fechaActual = new Date(fecha_inicio + 'T00:00:00');
-    console.log('fechaActual', fechaActual)
     while (fechaActual <= new Date(fechaFin + 'T00:00:00')) {
 
       const esDiaValido = esDiaDeLaSemana(fechaActual, dia) &&
         fechaActual.getDay() !== 0 && fechaActual.getDay() !== 6;
-
-      console.log('esvalido', esDiaValido)
 
       if (esDiaValido) {
         fechas.push(fechaActual.toISOString().split('T')[0]);
@@ -224,7 +216,6 @@ const obtenerFechasSemana = (objeto, fechas) => {
       fechaActual = new Date(fechaActual.setDate(fechaActual.getDate() + 1))
     }
   })
-  console.log('obtenerFechasSemana', 'fechas', fechas)
   return fechas;
 }
 
@@ -234,7 +225,6 @@ const obtenerFechasMensualesDia = (objeto, fechas) => {
   // Convertir la fecha de inicio y fin a objetos Date
   let fechaActual = new Date(fecha_inicio + 'T00:00:00');
   const fechaFinal = new Date(fechaFin + 'T00:00:00');
-  console.log('fechaActual', fechaActual);
   // Extraer la frecuencia mensual y el día especificado
   const frecuenciaMensual = parseInt(mensual['cardinal-frecuencia']);
   const diaMensual = parseInt(mensual['cardinal-numero']);
@@ -244,8 +234,6 @@ const obtenerFechasMensualesDia = (objeto, fechas) => {
   let año = fechaActual.getFullYear();
 
   // Si el día es menor al día mensual, ir al siguiente mes
-  console.log('FECHA actual', fechaActual.getDate(), diaMensual);
-  console.log('mes actual', mes);
   if (fechaActual.getDate() < diaMensual) {
     mes++;
     if (mes > 12) {
@@ -253,11 +241,9 @@ const obtenerFechasMensualesDia = (objeto, fechas) => {
       año++;
     }
   }
-  console.log('MES', mes)
   // Establecer la fecha actual al día 5 del mes siguiente al `fechaInicio`
   fechaActual = new Date(año, mes - 1, diaMensual);
   // Mientras la fecha actual sea menor o igual a la fecha final
-  console.log('fechaActual <= fechaFinal', fechaActual, fechaFinal);
   while (fechaActual <= fechaFinal) {
     // Agregar la fecha actual al array de fechas
     fechas.push(fechaActual.toISOString().split('T')[0]);
@@ -265,7 +251,6 @@ const obtenerFechasMensualesDia = (objeto, fechas) => {
     // Incrementar la fecha actual según la frecuencia mensual
     fechaActual.setMonth(fechaActual.getMonth() + frecuenciaMensual);
   }
-  console.log('obtenerFechasMensualesDia', fechas)
   return fechas;
 }
 
@@ -287,7 +272,6 @@ const obtenerFechasMensuales = (objeto, fechas) => {
     let diaActual = new Date(añoActual, mesActual - 1, i); // dia de semana, del 0 al 6
 
     if (semana[diaSemana] === diaActual.getDay()) {
-      console.log('contador', contador, ordenDia[tipo]);
       contador++;
       if (contador === ordenDia[tipo]) {
         if ((diaInicio > i + ordenDia[tipo]) && ((((ordenDia[tipo] - 1) * 7) < i && i <= ordenDia[tipo] * 7))) {
@@ -300,7 +284,6 @@ const obtenerFechasMensuales = (objeto, fechas) => {
   for (let año = añoActual; año <= añoFin; año++) {
     const mesInicial = año === añoActual ? mesActual : 1;
     const mesFinal = año === añoFin ? mesFin : 12;
-    console.log('EN EL FOR', mesInicial)
 
     for (let mes = mesInicial; mes <= mesFinal; mes++) {
       if ((mes - mesInicial) % parseInt(frecuencia) === 0) {
@@ -332,7 +315,6 @@ const obtenerFechasMensuales = (objeto, fechas) => {
 
 // Calcula las fechas pedidas, entra un objeto, debe retornar un array con fechas
 export const getDates = (body) => {
-  // console.log(body)
   const fechas = []
   if (body.frecuencia === 'diaria') {
     let fechaActual = new Date(`${body.fecha_inicio}T14:00:00`)
@@ -389,7 +371,6 @@ export const createSchedule = async (schedule) => {
     body.diaNumero = schedule.mensual["cardinal-numero"]
   }
 
-  // console.log('BODY', body)
 
   // getDates(body)
   const data = await fetch(SCHEDULES_URL, {
@@ -458,7 +439,6 @@ const hayChoqueHorario = (inicioMayor, finMayor, bloquesMenores) => {
     // Comprobar si hay solapamiento de horarios
     if ((inicioMayorDate < finMenorDate && finMayorDate > inicioMenorDate) ||
       (inicioMenorDate < finMayorDate && finMenorDate > inicioMayorDate)) {
-      console.log('HAY CHOQUE')
       return true; // Hay choque de horario
     }
   }
@@ -498,7 +478,6 @@ export const getSpecialities = async () => {
 }
 
 export const tomarHoraDisponible = (bloques, hora, disponibilidades, fecha) => {
-  console.log(bloques, hora, disponibilidades, fecha)
   let duracion;
   let idBloque;
   const bloquesCambiarEstado = []
@@ -514,7 +493,6 @@ export const tomarHoraDisponible = (bloques, hora, disponibilidades, fecha) => {
       bloquesCambiarEstado.push(bloques[bloqueIndex + i])
     }
   }
-  console.log('bloquesCambiarEstado', bloquesCambiarEstado)
   return bloquesCambiarEstado
 }
 
@@ -581,8 +559,7 @@ const cambiarMes = (direccion) => {
 }
 
 export const editDisponibilidad = async (body) => {
-  const url = 'https://showdisponibilidad-bjffenhjdyabcgh2.eastus-01.azurewebsites.net/editdisponibilidad'
-  console.log('body', body)
+  const url = `${NEXT_PUBLIC_EDIT_DISPONIBILIDAD}/editdisponibilidad`
   try {
     const data = await fetch(url, {
       method: "POST",
@@ -597,13 +574,11 @@ export const editDisponibilidad = async (body) => {
 
     return response
   } catch (error) {
-    console.log('Error', error)
   }
 }
 
 export const deleteDisponibilidad = async (id) => {
-  const url = 'https://showdisponibilidad-bjffenhjdyabcgh2.eastus-01.azurewebsites.net/deletedisponibilidad'
-  console.log('id', id)
+  const url = `${NEXT_PUBLIC_EDIT_DISPONIBILIDAD}/deletedisponibilidad`
   const body = {
     "id_disponibilidad": id
   }
