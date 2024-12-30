@@ -12,7 +12,6 @@ export async function logInAction(token, formData) {
 
   // verificar el token
   const captchaData = await verifyCaptchaToken(token)
-console.log('CAPTCHA', captchaData);
 
   if (!captchaData) {
     return {

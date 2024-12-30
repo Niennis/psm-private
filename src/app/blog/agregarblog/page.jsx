@@ -67,12 +67,12 @@ const Addblog = () => {
 
 
   const handleText = (data) => {
-    console.log('data en componente padre', data)
+    // console.log('data en componente padre', data)
     setValue('content', data)
   }
 
   const onSubmit = handleSubmit(async data => {
-    console.log(data)
+    // console.log(data)
   })
 
   return (

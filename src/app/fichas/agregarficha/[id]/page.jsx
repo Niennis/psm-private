@@ -83,8 +83,6 @@ const AddInterviewRecord = ({ params }) => {
       const responsePatient = await fetchUserByEmail(date[0].email_estudiante)
       const { users: response } = await fetchUser(responsePatient.id)
 
-      console.log('fetchUserByEmail', responsePatient)
-      console.log('fetchUser', response)
       const obj = {
         id_alumno: date[0].id_paciente,
         ano_ingreso: response[0].anoIngresoCarrera || '',
@@ -169,7 +167,6 @@ const AddInterviewRecord = ({ params }) => {
     setSuccess('initial')
     const patientName = watch("name")
     const patientLastname = watch("lastName")
-    console.log(watch('tipos_apoyo_actual'))
     const body = {
       ...data,
       id_profesional: session?.user?.id,
@@ -226,11 +223,9 @@ const AddInterviewRecord = ({ params }) => {
 
     }
 
-    console.log('boyd', body)
-
     try {
       const appointment = await createInterviewRecord(body)
-      console.log('appointment', appointment)
+      // console.log('appointment', appointment)
       if (appointment.estado === false) {
         setSuccess('fail')
       } else {
@@ -327,7 +322,6 @@ const AddInterviewRecord = ({ params }) => {
   const handleInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
-    console.log('patient', patient)
     const body = {
       ...data,
       id_profesional: session?.user?.id,
@@ -370,9 +364,6 @@ const AddInterviewRecord = ({ params }) => {
         changeStatusAppointment(params.id, 'realizada'),
         updateUser(bodyUpdate)
       ]);
-      console.log('createInterviewRecord', resp)
-      console.log('changeStatus', changeStatus)
-      console.log('updateUser', response)
       if (resp.estado === true && changeStatus.detalle === 'success!!!' && response.validacion === true) {
         setSuccess('success')
       } else if (resp.estado === true && changeStatus.detalle === 'success!!!') {

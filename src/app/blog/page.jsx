@@ -47,7 +47,7 @@ const BlogView = () => {
   const data = async () => {
     try {
       const response = await fetchBlogs()
-      console.log('response', response.slice(0, 5));
+      // console.log('response', response.slice(0, 5));
       setBlogs(response.slice(0, 5))
     } catch (error) {
       console.log('error', error)

@@ -56,7 +56,7 @@ const AppoinmentList = () => {
         const response = await fetchAppointments();
         const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
 
-console.log('citas', response)
+// console.log('citas', response)
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
 

@@ -62,7 +62,6 @@ const EditPatients = ({ params }) => {
         id_emergencia: user[0].id_emergencia,
       }
       setInitial(obj)
-      console.log(user[0])
 
       return obj
     } catch (error) {

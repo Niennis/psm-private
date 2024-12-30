@@ -63,7 +63,6 @@ const ScheduleByProfessional = ({ params }) => {
   useEffect(() => {
     const fetchProfesional = async () => {
       const { especialidades: user } = await fetchSpecialityById(params.id)
-      console.log('especialidad', user[0])
       setProfesional(user[0])
     }
     fetchProfesional()
@@ -73,9 +72,7 @@ const ScheduleByProfessional = ({ params }) => {
     formState: { errors }
   } = useForm({
     defaultValues: async () => {
-      console.log('Params en add schedule', params.id);
       const { especialidades: user } = await fetchSpecialityById(params.id)
-      console.log('user', user);
       const obj = {
         nombre: `${user[0].nombre} ${user[0].apellido}`,
         especialidad: user[0].especialidad,
@@ -121,7 +118,6 @@ const ScheduleByProfessional = ({ params }) => {
   }
 
   useEffect(() => {
-    console.log('session', session)
     session?.user?.rol === 'administrador'
       ?
       getProfessionals()
@@ -161,7 +157,6 @@ const ScheduleByProfessional = ({ params }) => {
 
   const handleEdit = (data) => {
     setDisponibilidad(data)
-    console.log("PADRE", data);
     setInfoDelHijo(data);
 
     setValue("title", data.detalleServicio);
@@ -209,9 +204,7 @@ const ScheduleByProfessional = ({ params }) => {
   };
 
   const onSubmit = handleSubmit(async data => {
-    console.log('data', data)
-    console.log('disponibilidad', disponibilidad)
-
+    
     const body = {
       "id_user": disponibilidad.id_user,
       "id": disponibilidad.id,
@@ -233,14 +226,12 @@ const ScheduleByProfessional = ({ params }) => {
 
     try {
       const response = await editDisponibilidad(body)
-      console.log('response', response)
     } catch (error) {
 
     }
   })
 
   const handleDelete = async (data) => {
-    console.log('handleDelete', data)
     try {
       const response = await deleteDisponibilidad(data)
 

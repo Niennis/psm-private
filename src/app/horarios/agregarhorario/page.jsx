@@ -47,7 +47,6 @@ const AddSchedule = () => {
   const { setProps } = useSidebar();
 
   const onChange = (date, dateString) => {
-    console.log('onChange', date, dateString);
   };
   const [selectedOption, setSelectedOption] = useState(null);
   const styleInput = {
@@ -133,7 +132,6 @@ const AddSchedule = () => {
   }
 
   useEffect(() => {
-    console.log('session', session)
     session?.user?.rol === 'administrador'
       ?
       getProfessionals()
@@ -203,7 +201,6 @@ const AddSchedule = () => {
       dias: data.frecuencia === "semanal" ? data.semanal.dia : semana,
       fecha_inicio: data.fecha_inicio,
     }
-    console.log('newData', newData)
 
     const dates = getDates(newData, fechas)
     let esValido = []
@@ -219,8 +216,6 @@ const AddSchedule = () => {
     Promise.all(promesas)
       .then(async (values) => {
         if (values.includes(true)) {
-          console.log('Hay choque de horario')
-
           setSuccess('fail')
           setError('Hay choque de horario.')
         } else {
@@ -277,7 +272,6 @@ const AddSchedule = () => {
   }
 
   const handleEdit = () => {
-    console.log('profesional.id', profesional)
     if (pathname.includes('agregarhorario')) {
       if (session?.user?.rol === 'profesional') {
         router.push(`/horarios/${session?.user?.id}`)
@@ -288,10 +282,8 @@ const AddSchedule = () => {
   }
 
   const handleDelete = async (data) => {
-    console.log('handleDelete', data)
     try {
       const response = await deleteDisponibilidad(data)
-      console.log('response', response)
     } catch (error) {
       console.log('error', error)
     }

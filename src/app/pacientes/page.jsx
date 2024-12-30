@@ -70,7 +70,6 @@ const PatientsList = () => {
       if (session.user?.rol === 'profesional') {
         const dataFiltered = citasConStatus.filter(item => item.id_profesional == parseInt(session.user?.id));
         const resp = uniqueByEmail(dataFiltered)
-        console.log('resp', resp)
         setUsers(resp);
         setResults(resp);
         // setIsValidated(false)
@@ -93,7 +92,6 @@ const PatientsList = () => {
   };
 
   const onSelectChange = (newSelectedRowKeys) => {
-    console.log("selectedRowKeys changed: ", selectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
@@ -104,8 +102,8 @@ const PatientsList = () => {
 
 
   const handleSearch = (e) => {
-    const bleh = search(users, e)
-    setResults(bleh)
+    const user = search(users, e)
+    setResults(user)
   }
 
   const handleRefresh = () => {

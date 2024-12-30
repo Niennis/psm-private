@@ -1,6 +1,6 @@
 import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google"
-import { fetchUsers, fetchUserByEmail } from "@/services/UsersServices";
+import { fetchUser, fetchUsers, fetchUserByEmail } from "@/services/UsersServices";
 import { redirect } from "next/dist/server/api-utils";
 import bcrypt from "bcryptjs"
 import { fetchUserMailAndPass } from "@/services/UsersServices";
@@ -133,9 +133,9 @@ const authOptions = {
       return false;
     },
     async jwt({ token, user }) {
-
       const profile = await searchUser(token.email)
-      console.log('jwt - profile', profile)
+      // const {users: alumno} = await fetchUser(token.id)
+      // console.log('alumno', alumno)
       if (profile.validacion === false) {
         throw new Error("Usuario no encontrado.");
       } else {

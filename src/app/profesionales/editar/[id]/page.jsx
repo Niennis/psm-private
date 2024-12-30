@@ -76,7 +76,6 @@ const EditDoctor = ({ params }) => {
     try {
       let user;
       const { especialidades } = await fetchSpecialityById(params.id);
-      console.log('especialidades', especialidades)
       if (params.id == session?.user?.id) {
         user = await fetchUserByEmail(session?.user?.email)
       } else {

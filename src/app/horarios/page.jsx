@@ -82,7 +82,7 @@ const ScheduleList = () => {
   }
 
   const onSelectChange = (newSelectedRowKeys) => {
-    console.log("selectedRowKeys changed: ", selectedRowKeys);
+    // console.log("selectedRowKeys changed: ", selectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
   const rowSelection = {
@@ -91,7 +91,7 @@ const ScheduleList = () => {
   };
 
   const handleCancel = () => {
-    console.log('ID', id, idSchedule)
+    // console.log('ID', id, idSchedule)
     changeStatusAppointment(id, 'cancelada')
   }
 
@@ -297,7 +297,7 @@ const ScheduleList = () => {
         <>
           <div className="text-end">
             <div className="dropdown dropdown-action">
-              {console.log(record)}
+              {/* {console.log(record)} */}
               <Link
                 href="#"
                 className="action-icon dropdown-toggle"

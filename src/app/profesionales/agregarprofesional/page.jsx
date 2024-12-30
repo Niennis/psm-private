@@ -94,7 +94,6 @@ const AddProfessional = () => {
     const saltRound = 10;
     const hashedPassword = await bcrypt.hash(data.password, saltRound)
     const dataWithHashPass = { ...data, password: hashedPassword }
-    console.log('data', data)
 
     // const bodyEspecialidad = {
     //   id_user: params.id,
@@ -127,7 +126,6 @@ const AddProfessional = () => {
 
   const onConfirm = async () => {
     const response = await addProfessional(dataDoctor)
-    console.log(response)
   }
 
   const togglePasswordVisibility = () => {
