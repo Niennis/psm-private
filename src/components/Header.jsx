@@ -5,6 +5,7 @@ import { useSection } from "@/context/SectionContext";
 import ReserveBtn from "./ReserveBtn";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { logo } from "./imagepath";
 import { useMediaQuery } from "@mui/material";
 import { Tooltip, Avatar } from '@mui/material';
@@ -154,8 +155,8 @@ const Header = () => {
               fontFamily: 'sailec'
             }}
           >
-            <img
-              src={logo.src}
+            <Image
+              src={logo}
               width={263}
               height={70}
               alt="Logo"
@@ -163,10 +164,10 @@ const Header = () => {
           </Typography>
           {session?.user && <>
             <Link id="toggle_btn" href="#" onClick={handlesidebar}>
-              <img src={baricon} alt="" />
+              <Image src={baricon} alt="" />
             </Link>
             <Link id="mobile_btn" className="mobile_btn float-start" href="#" onClick={handlesidebarmobilemenu}>
-              <img src={baricon1} alt="" />
+              <Image src={baricon1} alt="" />
             </Link>
           </>}
           {/*  MENU MOBILE */}
@@ -265,7 +266,7 @@ const Header = () => {
               fontFamily: 'sailec',
             }}
           >
-            <img src={'https://github.com/Niennis/imagesudp/blob/main/UDP_Logo_small.png?raw=true'} width={100} alt="" />{" "}
+            <Image src={'https://github.com/Niennis/imagesudp/blob/main/UDP_Logo_small.png?raw=true'} width={100} height={100} alt="logo udp" />{" "}
           </Typography>
 
           {/* MENU DASHBOARD */}
@@ -347,11 +348,12 @@ const Header = () => {
                 : session.user?.picture ?
                   <button className="btn">
                     <Link href={`/citas`} style={{ textDecoration: 'none' }}>
-                      <img
+                      <Image
                         className="avatar-img rounded-circle"
                         src={session?.user?.picture}
                         alt="avatar"
                         height={40}
+                        width={40}
                       />
                     </Link>
                     <small style={{ display: 'block', textAlign: 'right', width: 'min-content' }}>

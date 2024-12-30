@@ -3,6 +3,7 @@
 "use client"
 import React, { useEffect, useState, useContext } from 'react'
 import Link from "next/link";
+import Image from 'next/image';
 import { blog, doctor, doctorschedule, logout, menuicon04, patients, dashboard } from './imagepath';
 import { signOut } from "next-auth/react";
 
@@ -100,7 +101,7 @@ const Sidebar = () => {
                     {/* <li className="submenu"> */}
                     {/* <Link href="#" id="menu-item4" onClick={(e) => handleClick(e, "menu-item4", "menu-items4")}>
                         <span className="menu-side">
-                          <img src={menuicon04.src} alt="" />
+                          <Image src={menuicon04} alt="" />
                         </span>{" "}
                         <span> Citas </span> <span className="menu-arrow" />
                       </Link> */}
@@ -132,7 +133,7 @@ const Sidebar = () => {
                         handleClick(e, "menu-item1", "menu-items1")
                       }}>
                         <span className="menu-side">
-                          <img src={doctor.src} alt="" />
+                          <Image src={doctor} alt="" />
                         </span>{" "}
                         <span> Profesionales </span> <span className="menu-arrow" />
                       </Link>
@@ -155,7 +156,7 @@ const Sidebar = () => {
                     <li className="submenu">
                       <Link href="#" id="menu-item2" onClick={(e) => handleClick(e, "menu-item2", "menu-items2")}>
                         <span className="menu-side">
-                          <img src={patients.src} alt="" />
+                          <Image src={patients} alt="" />
                         </span>{" "}
                         <span>Pacientes </span> <span className="menu-arrow" />
                       </Link>
@@ -177,7 +178,7 @@ const Sidebar = () => {
                     <li className="submenu">
                       <Link href="#" id="menu-item4" onClick={(e) => handleClick(e, "menu-item4", "menu-items4")}>
                         <span className="menu-side">
-                          <img src={menuicon04.src} alt="" />
+                          <Image src={menuicon04} alt="" />
                         </span>{" "}
                         <span> Citas </span> <span className="menu-arrow" />
                       </Link>
@@ -199,7 +200,7 @@ const Sidebar = () => {
                     <li className="submenu">
                       {/*  <Link href="#" id="menu-item5" onClick={(e) => handleClick(e, "menu-item5", "menu-items5")}>
                   <span className="menu-side">
-                    <img src={doctorschedule.src} alt="" />
+                    <Image src={doctorschedule} alt="" />
                   </span>{" "}
                   <span> Horario Profesionales </span> <span className="menu-arrow" />
                 </Link> */}
@@ -210,7 +211,7 @@ const Sidebar = () => {
                       {/* <li> */}
                       <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario`} >
                         <span className="menu-side">
-                          <img src={doctorschedule.src} alt="" />
+                          <Image src={doctorschedule} alt="" />
                         </span>{" "}
                         <span> Agregar Horario</span> <span className="menu-arrow" />
                       </Link>
@@ -223,7 +224,7 @@ const Sidebar = () => {
                     {/* <li>
                       <Link className={props?.activeClassName === 'activity' ? 'active' : ''} href={`/fichas/`}>
                         <span className="menu-side">
-                          <img src={menuicon14} alt="" />
+                          <Image src={menuicon14} alt="" />
                         </span>{" "}
                         <span>Activities</span>
                       </Link>
@@ -240,7 +241,7 @@ const Sidebar = () => {
                         handleClick(e, "menu-item1", "menu-items1")
                       }}>
                         <span className="menu-side">
-                          <img src={doctor.src} alt="" />
+                          <Image src={doctor} alt="" />
                         </span>{" "}
                         <span> Profesionales </span> <span className="menu-arrow" />
                       </Link>
@@ -262,7 +263,7 @@ const Sidebar = () => {
                     <li className="submenu">
                       <Link href="#" id="menu-item2" onClick={(e) => handleClick(e, "menu-item2", "menu-items2")}>
                         <span className="menu-side">
-                          <img src={patients.src} alt="" />
+                          <Image src={patients} alt="" />
                         </span>{" "}
                         <span>Pacientes </span> {/* <span className="menu-arrow" /> */}
                       </Link>
@@ -284,7 +285,7 @@ const Sidebar = () => {
                     <li className="submenu">
                       <Link href="#" id="menu-item4" onClick={(e) => handleClick(e, "menu-item4", "menu-items4")}>
                         <span className="menu-side">
-                          <img src={menuicon04.src} alt="" />
+                          <Image src={menuicon04} alt="" />
                         </span>{" "}
                         <span> Citas </span> <span className="menu-arrow" />
                       </Link>
@@ -306,14 +307,14 @@ const Sidebar = () => {
                     <li className="submenu">
                       {/*  <Link href="#" id="menu-item5" onClick={(e) => handleClick(e, "menu-item5", "menu-items5")}>
                   <span className="menu-side">
-                    <img src={doctorschedule.src} alt="" />
+                    <Image src={doctorschedule} alt="" />
                   </span>{" "}
                   <span> Horario Profesionales </span> <span className="menu-arrow" />
                 </Link> */}
                       {/* <ul style={{ display: "none" }} className="menu-items5"> */}
                       <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario`} >
                         <span className="menu-side">
-                          <img src={doctorschedule.src} alt="" />
+                          <Image src={doctorschedule} alt="" />
                         </span>{" "}
                         <span> Agregar Horario</span> <span className="menu-arrow" />
                       </Link>
@@ -331,7 +332,7 @@ const Sidebar = () => {
                     {/* <li>
                       <Link className={props?.activeClassName === 'activity' ? 'active' : ''} href={`/fichas/`}>
                         <span className="menu-side">
-                          <img src={menuicon14} alt="" />
+                          <Image src={menuicon14} alt="" />
                         </span>{" "}
                         <span>Activities</span>
                       </Link>
@@ -339,7 +340,7 @@ const Sidebar = () => {
                     <li className="submenu">
                       <Link className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`} href={`/admin-dashboard`} >
                         <span className="menu-side">
-                          <img src={dashboard.src} alt="" />
+                          <Image src={dashboard} alt="" />
                         </span>{" "}
                         <span>Dashboard</span> <span className="menu-arrow" />
                       </Link>
@@ -347,7 +348,7 @@ const Sidebar = () => {
                     {/*    <li className="submenu">
                       <Link href="#" id="menu-item11" onClick={(e) => handleClick(e, "menu-item11", "menu-items11")}>
                         <span className="menu-side">
-                          <img src={blog.src} alt="" />
+                          <Image src={blog} alt="" />
                         </span>{" "}
                         <span> Blog</span> <span className="menu-arrow" />
                       </Link>
@@ -373,7 +374,7 @@ const Sidebar = () => {
                 <li>
                   <Link href="/" onClick={handleSignOut}>
                     <span className="menu-side">
-                      <img src={logout.src} alt="" />
+                      <Image src={logout} alt="" />
                     </span>{" "}
                     <span>Logout</span>
                   </Link>
@@ -384,7 +385,7 @@ const Sidebar = () => {
             {/* <div className="logout-btn">
               <Link href="/" onClick={handleSignOut}>
                 <span className="menu-side">
-                  <img src={logout.src} alt="" />
+                  <Image src={logout} alt="" />
                 </span>{" "}
                 <span>Logout</span>
               </Link>

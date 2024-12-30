@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react'
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import { Form, Switch, Table } from 'antd';
@@ -51,19 +52,11 @@ const AppoinmentList = () => {
       setLoading(true);
 
       try {
-        // let cachedData = await cacheHandler.get(cacheKey);
-
-        // if (cachedData) {
-        //   setAppointments(cachedData)
-        //   setResults(cachedData);
-        //   setLoading(false);
-        //   return; 
-        // }
 
         const response = await fetchAppointments();
         const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
 
-
+console.log('citas', response)
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
 
@@ -125,7 +118,7 @@ const AppoinmentList = () => {
         <>
           <h2 className="profile-image">
             {/* <Link href="#" className="avatar avatar-sm me-2">
-              <img
+              <Image
                 className="avatar-img rounded-circle"
                 src={record.Img}
                 alt="User Image"
@@ -329,8 +322,8 @@ const AppoinmentList = () => {
                                   onChange={(e) => { handleSearch(e.target.value) }}
                                 />
                                 <Link className="btn" href="#">
-                                  <img
-                                    src={searchnormal.src}
+                                  <Image
+                                    src={searchnormal}
                                     alt="#"
                                   />
                                 </Link>
@@ -341,29 +334,29 @@ const AppoinmentList = () => {
                             {session?.user?.rol !== "alumno" && <Link href="/citas/agendarcita"
                               className="btn btn-primary add-pluss ms-2"
                             >
-                              <img src={plusicon.src} alt="#" />
+                              <Image src={plusicon} alt="#" />
                             </Link>}
                             <Link
                               href="#"
                               onClick={handleRefresh}
                               className="btn btn-primary doctor-refresh ms-2"
                             >
-                              <img src={refreshicon.src} alt="#" />
+                              <Image src={refreshicon} alt="#" />
                             </Link>
                           </div>
                         </div>
                       </div>
                       {/* <div className="col-auto text-end float-end ms-auto download-grp">
                           <Link href="#" className=" me-2">
-                            <img src={pdficon.src} alt="#" />
+                            <Image src={pdficon} alt="#" />
                           </Link>
                           <Link href="#" className=" me-2">
                           </Link>
                           <Link href="#" className=" me-2">
-                            <img src={pdficon3.src} alt="#" />
+                            <Image src={pdficon3} alt="#" />
                           </Link>
                           <Link href="#">
-                            <img src={pdficon4.src} alt="#" />
+                            <Image src={pdficon4} alt="#" />
                           </Link>
                         </div> */}
                     </div>
@@ -402,7 +395,7 @@ const AppoinmentList = () => {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-body text-center">
-              <img src={imagesend.src} alt="#" width={50} height={46} />
+              <Image src={imagesend} alt="#" width={50} height={46} />
               <h3>¿Está seguro que desea cancelar la cita?</h3>
               <div className="m-t-20">
                 {" "}
@@ -425,7 +418,7 @@ const AppoinmentList = () => {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-body text-center">
-              <img src={imagesend.src} alt="#" width={50} height={46} />
+              <Image src={imagesend} alt="#" width={50} height={46} />
               <h3>Antes de continuar, cambia tu contraseña</h3>
               <div className="m-t-20">
                 {" "}
