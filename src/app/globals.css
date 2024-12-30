@@ -26,13 +26,12 @@ body {
   font-family: "Poppins", sans-serif;
   font-size: 16px;
   color: #333448;
-  /* background: linear-gradient(
+  background: linear-gradient(
       0deg,
       rgba(51, 53, 72, 0.05),
       rgba(51, 53, 72, 0.05)
     ),
-    #ffffff; */
-  background: white;
+    #ffffff;
   overflow-x: hidden;
   height: 100%;
   padding: 0 !important;
@@ -13675,4 +13674,9 @@ td:has(div.text-end) {
 
 span small{
   color: var(--main-light-red)
+}
+
+
+.comman-activitys table {
+  margin-bottom: 30px;
 }
