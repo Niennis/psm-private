@@ -13,11 +13,13 @@ import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/mater
 
 import { fetchUserByEmail, fetchUsers, fetchUser, updateUser } from "@/services/UsersServices";
 import { fetchAppointments } from "@/services/AppointmentsServices"
-import { createInterviewRecord } from "@/services/RecordServices";
+import { createInterviewRecord, showRecords } from "@/services/RecordServices";
 import { changeStatusAppointment } from "@/services/AppointmentsServices";
 
 import Contact from "@/components/Contact"
 import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc'; // Importa el plugin de UTC
+import timezone from 'dayjs/plugin/timezone';
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SimpleBackdrop from "@/components/Backdrop";
@@ -51,6 +53,9 @@ const AddInterviewRecord = ({ params }) => {
   const [open, setOpen] = useState(false);
   const { setProps } = useSidebar();
 
+  dayjs.extend(utc);
+  dayjs.extend(timezone)
+
   useEffect(() => {
     setProps({
       id: "menu-item4",
@@ -77,11 +82,12 @@ const AddInterviewRecord = ({ params }) => {
       const date = responseAppointment.filter(item => item.id_cita == params.id)
       const responsePatient = await fetchUserByEmail(date[0].email_estudiante)
       const { users: response } = await fetchUser(responsePatient.id)
-      console.log('date', date)
-      console.log('responsePatient', responsePatient)
-      console.log('response', response)
+
+      console.log('fetchUserByEmail', responsePatient)
+      console.log('fetchUser', response)
       const obj = {
         id_alumno: date[0].id_paciente,
+        ano_ingreso: response[0].anoIngresoCarrera || '',
         apellido: response[0].apellido,
         aplica_despeje: responsePatient.aplica_despeje,
         carrera: response[0].carrera,
@@ -89,8 +95,8 @@ const AddInterviewRecord = ({ params }) => {
         comuna: response[0].comuna,
         correo: date[0].email_estudiante,
         direccion: response[0].direccion,
-        edad: calcularEdad(responsePatient.fecha_nacimiento),
-        fecha_nacimiento: dayjs(responsePatient.fecha_nacimiento).format('DD-MM-YYYY'),
+        edad: dayjs().diff(dayjs.utc(responsePatient.fecha_nacimiento), 'year'),
+        fecha_nacimiento: dayjs.utc(responsePatient.fecha_nacimiento).format('DD-MM-YYYY'),
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         nombre_social: response[0].nombre_social,
@@ -105,7 +111,11 @@ const AddInterviewRecord = ({ params }) => {
         tipo_usuario: responsePatient.tipo_usuario,
         validacion: date[0].validacion,
       }
-      console.log('obj', obj)
+
+      const { entrevista: records } = await showRecords(date[0].id_paciente)
+      const ultimoNumeroFicha = records.length > 0 ? records[records.length - 1].numero_ficha : null;
+      setValue('numero_ficha', parseInt(ultimoNumeroFicha) + 1)
+
       setPatient(obj)
       setIsLoading(false)
       return obj
@@ -114,7 +124,7 @@ const AddInterviewRecord = ({ params }) => {
     }
   }
 
-  const { register, handleSubmit, watch, control,
+  const { register, handleSubmit, watch, control, setValue,
     formState: { errors }
   } = useForm({
     defaultValues: async () => {
@@ -159,27 +169,68 @@ const AddInterviewRecord = ({ params }) => {
     setSuccess('initial')
     const patientName = watch("name")
     const patientLastname = watch("lastName")
-    // const {users: patients} = await fetchUsers()
-    
-    // const patiente = patients.filter(user =>
-    //   user.nombre === patientName
-    //   & user.apellido === patientLastname
-    //   & user.tipo_usuario === 'alumno'
-    // )
-
-    console.log('patient', patient)
-    console.log('data', data)
-
+    console.log(watch('tipos_apoyo_actual'))
     const body = {
       ...data,
+      id_profesional: session?.user?.id,
       nombre_social: patient.nombre_social,
-      patient_id: patient.id_alumno
+      patient_id: patient.id_alumno,
+      fecha: formatDate(data.fecha),
+      fecha_nacimiento: formatDate(data.fecha_nacimiento),
+      tipos_apoyo_actual: data.tipos_apoyo_actual && data.tipos_apoyo_actual.length > 0 ? (data.tipos_apoyo_actual.map(item => item.label)).toString() : '',
+      nombre_contacto_emergencia2: '',
+      parentesco_contacto_emergencia2: '',
+      celular_contacto_emergencia2: '',
+      financiamiento_carrera: '',
+      vivienda_situacion_actual: '',
+      labores_cuidador: '',
+      financiamiento_gastos_personales: '',
+      financiamiento_carrera: '',
+      apoyo_economico_tratamiento: '',
+      pago_tratamiento_semanal: '',
+      chequeos_salud_ultimo_ano: '',
+      motivo_chequeos_salud: '',
+      enfermedad_salud_fisica: '',
+      medicacion_permanente: '',
+      atenciones_previas_salud_mental: '',
+      tratamientos_previos_salud_mental: '',
+      tratamiento_actual_salud_mental: '',
+      consume_alcohol: '',
+      tipo_alcohol_consumido: '',
+      frecuencia_consumo_alcohol: '',
+      consume_drogas: '',
+      tipo_drogas_consumidas: '',
+      frecuencia_consumo_drogas: '',
+      riesgo_suicida_escala: '',
+      sintomatologia_motivo_consulta: '',
+      expectativas_departamento: '',
+      area_atencion_preferencia: '',
+      primera_carrera: '',
+      satisfecho_decision_carrera: '',
+      desempeno_academico: '',
+      desafio_enfrentado_universidad: '',
+      redes_apoyo_personas_significativas: '',
+      tipos_apoyo_actual: '',
+      actividades_gustan_realizar: '',
+      espacios_autocuidado: '',
+      tiempo_descanso_horas_sueno: '',
+      alimentacion_diaria_habitual: '',
+      modalidad_atencion_evaluacion: '',
+      estado_animo_afectividad: '',
+      tipo_pensamiento_observado: '',
+      deteccion_condiciones_deficit_cognitivo: '',
+      consciencia_realidad: '',
+      autoconcepto_autoestima: '',
+      situaciones_riesgo_relacional: '',
+      situaciones_riesgo_personal: '',
+
     }
 
     console.log('boyd', body)
 
     try {
       const appointment = await createInterviewRecord(body)
+      console.log('appointment', appointment)
       if (appointment.estado === false) {
         setSuccess('fail')
       } else {
@@ -189,7 +240,7 @@ const AddInterviewRecord = ({ params }) => {
     } catch (err) {
       setSuccess('fail')
       console.log('ERRRR', err.message)
-      if (err.message === "Cannot read properties of undefined (reading 'id')") {
+      if (err.message.includes("Cannot read properties of undefined")) {
         setError(`No se encontró al paciente`);
       }
     }
@@ -283,7 +334,7 @@ const AddInterviewRecord = ({ params }) => {
       id_alumno: patient.id_alumno,
       fecha: formatDate(data.fecha),
       fecha_nacimiento: formatDate(data.fecha_nacimiento),
-      modalidad_atencion_evaluacion: data.modalidad_atencion_evaluacion[0].label  || '',
+      modalidad_atencion_evaluacion: data.modalidad_atencion_evaluacion[0]?.label ? data.modalidad_atencion_evaluacion[0]?.label : '',
 
     }
     const bodyUpdate = {
@@ -326,9 +377,9 @@ const AddInterviewRecord = ({ params }) => {
         setSuccess('success')
       } else if (resp.estado === true && changeStatus.detalle === 'success!!!') {
         setSuccess('success')
-      }  else {
+      } else {
         setSuccess('fail')
-      } 
+      }
 
     } catch (error) {
       console.log('Error: ', error);
@@ -374,7 +425,6 @@ const AddInterviewRecord = ({ params }) => {
               <div className="row">
                 <div className="col-sm-12">
                   <div className="card">
-                    {console.log('patient?.aplica_despeje', patient?.aplica_despeje)}
                     {patient?.aplica_despeje != 1 ?
 
                       <div className="card-body">
@@ -464,16 +514,7 @@ const AddInterviewRecord = ({ params }) => {
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <div className="form-group local-forms">
                                     <label>Nombre completo</label>
-                                    {/* <select className="select form-control" name="cars" id="cars">
-                          {
-                            patients.map(patient => (
-                              <option
-                                value={`${patient.nombre} ${patient.apellido}`}
-                                key={patient.id}>{patient.nombre} {patient.apellido}
-                              </option>
-                            ))
-                          }
-                        </select> */}
+                           
                                     <input
                                       className="form-control" type="text"
                                       defaultValue={""}
@@ -681,7 +722,7 @@ const AddInterviewRecord = ({ params }) => {
                                       cols={30}
                                       defaultValue={""}
                                       style={{ resize: 'none' }}
-                                      {...register('desafio_enfrentado_universidad')}
+                                      {...register('observaciones')}
                                     />
                                   </div>
                                 </div>
@@ -715,7 +756,7 @@ const AddInterviewRecord = ({ params }) => {
                                       cols={30}
                                       defaultValue={""}
                                       style={{ resize: 'none' }}
-                                      {...register('observaciones')}
+                                      {...register('acuerdos')}
                                     />
                                   </div>
                                 </div>
@@ -1110,47 +1151,7 @@ const AddInterviewRecord = ({ params }) => {
                               </div>
                             </AccordionSummary>
                             <AccordionDetails>
-                              {/* <div className="col-12 col-md-12 col-xl-12">
-                          <div className="form-group select-gender">
-                            <label>Previsión de salud </label>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  type="radio"
-                                  name="prevision"
-                                  value="prevision_salud_isapre"
-                                  className="form-check-input"
-                                  {...register('prevision')}
-                                />
-                                Isapre
-                              </label>
-                            </div>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  type="radio"
-                                  name="prevision"
-                                  value="prevision_salud_fonasa"
-                                  className="form-check-input"
-                                  {...register('prevision')}
-                                />
-                                Fonasa
-                              </label>
-                            </div>
-                            <div className="form-check-inline">
-                              <label className="form-check-label">
-                                <input
-                                  type="radio"
-                                  name="prevision"
-                                  value="prevision_salud_otro"
-                                  className="form-check-input"
-                                  {...register('prevision')}
-                                />
-                                Otro
-                              </label>
-                            </div>
-                          </div>
-                        </div> */}
+                          
                               <div className="row">
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <div className="form-group select-gender">
@@ -1656,7 +1657,7 @@ const AddInterviewRecord = ({ params }) => {
                                           name="alcohol"
                                           value="ocasional"
                                           className="form-check-input"
-                                          {...register('alcohol_ocasional')}
+                                          {...register('consume_alcohol')}
                                         />
                                         Ocasional
                                       </label>
@@ -1771,83 +1772,6 @@ const AddInterviewRecord = ({ params }) => {
                                   </div>
                                 </div>
 
-
-                                {/*  <div className="col-12 col-md-4 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Nombre y apellido
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              {...register('contacto_uno_nombre')}
-                            />
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-4 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Parentesco o relación
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              {...register('contacto_uno_relacion')}
-                            />
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-4 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Teléfono
-                            </label>
-                            <input
-                              className="form-control"
-                              // value={rut}
-                              type="text"
-                              {...register('contacto_uno_telefono')}
-                            />
-                          </div>
-                        </div>
-
-
-                        <div className="col-12 col-md-4 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Nombre y apellido
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              {...register('contacto_dos_nombre')}
-                            />
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-4 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Parentesco o relación
-                            </label>
-                            <input
-                              className="form-control"
-                              type="text"
-                              {...register('contacto_dos_relacion')}
-                            />
-                          </div>
-                        </div>
-                        <div className="col-12 col-md-4 col-xl-4">
-                          <div className="form-group local-forms">
-                            <label>
-                              Teléfono
-                            </label>
-                            <input
-                              className="form-control"
-                              // value={rut}
-                              type="text"
-                              {...register('contacto_dos_telefono')}
-                            />
-                          </div>
-                        </div> */}
                               </div>
                             </AccordionDetails>
                           </Accordion>
@@ -1907,13 +1831,13 @@ const AddInterviewRecord = ({ params }) => {
                                       </label>
                                       <Controller
                                         control={control}
+                                        defaultValue={''}
+                                        rules={{ required: false }}
                                         name="area_atencion_preferencia"
-                                        {...register('area_atencion_preferencia')}
-                                        ref={null}
                                         render={({ field: { onChange, onBlur, value } }) => (
                                           <Select
                                             instanceId="area_atencion_preferencia"
-                                            defaultValue={selectedOption}
+                                            value={value}
                                             onChange={onChange}
                                             options={area_atencion}
                                             // menuPortalTarget={document.body}
@@ -2145,14 +2069,14 @@ const AddInterviewRecord = ({ params }) => {
                                     </label>
                                     <Controller
                                       control={control}
+                                      defaultValue={''}
                                       name="tipos_apoyo_actual"
-                                      {...register('tipos_apoyo_actual')}
-                                      ref={null}
+                                      rules={{ required: false }}
                                       render={({ field: { onChange, onBlur, value } }) => (
                                         <Select
                                           isMulti
                                           instanceId="tipos_apoyo_actual"
-                                          defaultValue={selectedOption}
+                                          value={value}
                                           onChange={onChange}
                                           options={tipo_apoyo}
                                           // menuPortalTarget={document.body}
@@ -2292,14 +2216,14 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <Controller
                                       control={control}
+                                      defaultValue={''}
+                                      rules={{ required: false }}
                                       name="modalidad_atencion_evaluacion"
-                                      {...register('modalidad_atencion_evaluacion')}
-                                      ref={null}
                                       render={({ field: { onChange, onBlur, value } }) => (
                                         <Select
                                           isMulti
                                           instanceId="modalidad_atencion_evaluacion"
-                                          defaultValue={selectedOption}
+                                          value={value}
                                           onChange={onChange}
                                           options={modalidad}
                                           // menuPortalTarget={document.body}

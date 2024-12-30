@@ -1,19 +1,18 @@
 export const createInterviewRecord = async (input) => {
-  const RECORD_URL = process.env.NEXT_PUBLIC_RECORD
-  console.log('input', input)
+  const RECORD_URL = `${process.env.NEXT_PUBLIC_RECORD}/createentrevista`
+  console.log('input createInterviewRecord', input)
 
   const body = {
     ...input,
-    area_atencion_preferencia: input.area_atencion_preferencia.label,
+    area_atencion_preferencia: input.area_atencion_preferencia?.label || input.area_atencion_preferencia ,
     diagnostico_salud_mental: 'no recuerda',
     diagnostico_salud_fisica: 'no recuerda',
     modalidad_atencion_evaluacion: input.modalidad_atencion_evaluacion,
-    tipos_apoyo_actual: (input.tipos_apoyo_actual.map(item => item.label)).toString(),
     "prevision_salud_isapre": "Fonasa",
     "prevision_salud_fonasa": "",
     "prevision_salud_otro": "",
   }
-  console.log('body', body)
+  console.log('body createInterviewRecord', body)
 
   const data = await fetch(RECORD_URL, {
     method: "POST",
@@ -27,9 +26,8 @@ export const createInterviewRecord = async (input) => {
   return data.json()
 }
 
-// https://calculatetestpoints-fpdthpb8d3fqh2a4.eastus-01.azurewebsites.net/generate_excel
 export const reportes = async (tabla) => {
-  const REPORTES_URL = "https://calculatetestpoints-fpdthpb8d3fqh2a4.eastus-01.azurewebsites.net/generate_excel"
+  const REPORTES_URL = process.env.NEXT_PUBLIC_GENERAR_REPORTE
 
   const body = {
     "nombre_tabla": tabla
@@ -61,4 +59,40 @@ export const reportes = async (tabla) => {
   } catch (error) {
     console.error("Error al descargar el archivo:", error);
   }
+}
+
+export const showRecordById = async id_cita => {
+  const record_url = `${process.env.NEXT_PUBLIC_RECORD}/showentrevista`
+
+  console.log('id cita', id_cita)
+
+  const body = { "id_entrevista": id_cita }
+
+  const data = await fetch(record_url, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body)
+  })
+
+  return data.json()
+}
+
+export const showRecords = async id_alumno => {
+  const record_url = `${process.env.NEXT_PUBLIC_RECORD}/showentrevistabyidalumno`
+  const body = {
+    "id_alumno": id_alumno
+  }
+
+  const data = await fetch(record_url, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body)
+  })
+
+  const response = await data.json()
+  return response
 }
