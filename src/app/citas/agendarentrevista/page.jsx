@@ -52,7 +52,6 @@ const obtenerFechasUnicas = array => {
   let arrayDeComprobacion = []
 
   array.forEach(objeto => {
-    // console.log('OBJETO', objeto);
     let { fechaInicio, id_user } = objeto;
     if (!arrayDeComprobacion.includes(fechaInicio)) {
       fechasUnicas.push({ fechaInicio, id_user });
@@ -319,9 +318,7 @@ const AddFirstAppoinments = () => {
       selectedDays.forEach(item => {
         newBloques.push(calcularHoraInicioDeBloques(item))
       })
-      // console.log('newbloques', selectedDays)
       const flatted = newBloques.flat()
-      // console.log('FLATTED', flatted)
 
       const arrayOrdenado = flatted.sort((a, b) => { const horaA = new Date(`1970-01-01T${a.horaIni}:00`).getTime(); const horaB = new Date(`1970-01-01T${b.horaIni}:00`).getTime(); return horaA - horaB; });
       setHours(arrayOrdenado.reverse())
@@ -334,14 +331,6 @@ const AddFirstAppoinments = () => {
     setTime(hour)
     setValue('selectedHour', hour)
   }
-
-  // const handleBloques = async (id, hora) => {
-  //   const { bloques } = await fetchScheduleByDate(id, date)
-  //   const getDuracionServicio = hours.find(item1 => bloques.some(item2 => item2.hora_inicio >= item1.horaIni && item2.hora_inicio <= item1.horaFin))
-
-  //   return agregarBloques(bloques, hora, getDuracionServicio.duracionServicio);
-  // }
-
 
   // Función para convertir la hora en formato HH:mm:ss a segundos
   const convertirAHoras = (hora) => {
@@ -402,7 +391,6 @@ const AddFirstAppoinments = () => {
     { value: "Mujer trans", label: "Mujer trans" },
     { value: "No binarie", label: "No binarie" }
   ]
-
   // Función para validar el formato y largo del RUT
   const validateRUT = (rut) => {
     const cleanRUT = rut.replace(/[.-]/g, "");
@@ -419,11 +407,9 @@ const AddFirstAppoinments = () => {
   };
 
   const handleFirstInterview = handleSubmit(async (data, e) => {
-    console.log('childFormRef.current', childFormRef)
     let childFormData;
     if (childFormRef.current) {
       childFormData = await childFormRef.current.submitForm();
-      console.log('childFormData', childFormData)
     }
 
     e.preventDefault()
@@ -470,14 +456,12 @@ const AddFirstAppoinments = () => {
     }
     // tomarHoraDisponible(bloques, time, hours, date)
     const professional = watch('professional')
-    console.log('bodyInterview', bodyInterview)
     try {
 
       const [appointment, update] = await Promise.all([
         createInterview(bodyInterview),
         updateUser(bodyUpdate)
       ]);
-      console.log('appointment', appointment)
       if (appointment.estado === false && update.estado === false) {
         setSuccess('fail')
       } else if (appointment.estado === true && update.estado === false) {
