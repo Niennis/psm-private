@@ -181,32 +181,32 @@ const PatientsList = () => {
                 className="action-icon dropdown-toggle"
                 // data-bs-toggle="dropdown"
                 // aria-expanded="false"
-                onClick={() => { setShow({ ...show, state: !show.state, id: record.id }) }}
+                onClick={() => { setShow({ ...show, state: !show.state, id: record.id_paciente }) }}
               >
                 <i className="fas fa-ellipsis-v" />
               </Link>
               <div
                 style={{ right: '35px', top: 0 }}
                 className=
-                {show.state === true && show.id === record.id
+                {show.state === true && show.id === record.id_paciente
                   ? "dropdown-menu dropdown-menu-end dropdown-extra show"
                   : "dropdown-menu dropdown-menu-end dropdown-extra"
                 }
               >
-                <Link className="dropdown-item" href={`/pacientes/${record.id}`}
+                <Link className="dropdown-item" href={`/pacientes/${record.id_paciente}`}
                 // data-bs-toggle="modal" 
                 // data-bs-target="#delete_patient"
                 >
                   <i className="far fa-edit me-2" />
                   Editar
                 </Link>
-                <Link className="dropdown-item" href="#"
+                {/* <Link className="dropdown-item" href="#"
                 // data-bs-toggle="modal" 
                 // data-bs-target="#delete_patient"
                 >
                   <i className="fa fa-trash-alt m-r-5"></i>
                   Eliminar
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>
