@@ -56,7 +56,6 @@ const AppoinmentList = () => {
         const response = await fetchAppointments();
         const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
 
-// console.log('citas', response)
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
 
@@ -180,6 +179,25 @@ const AppoinmentList = () => {
       sorter: (a, b) => a.estado.localeCompare(b.estado),
       key: 'estado',
       responsive: ['lg'],
+      render: (text, record) => (
+        <div>
+          {record.estado === "pendiente" && (
+            <span className="custom-badge status-green">
+              {record.estado}
+            </span>
+          )}
+          {record.estado === "realizada" && (
+            <span className="custom-badge status-blue">
+              {record.estado}
+            </span>
+          )}
+          {record.estado.includes("cancelada") && (
+            <span className="custom-badge status-pink">
+              {record.estado}
+            </span>
+          )}
+        </div>
+      )
     }, {
       title: "",
       dataIndex: "field",
