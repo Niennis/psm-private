@@ -22,7 +22,7 @@ import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { fetchUserByEmail, updateUser, fetchUser, fetchUsers } from "@/services/UsersServices";
-import { createInterview, sendEmail } from "@/services/AppointmentsServices"
+import { createInterview, createContact } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 import { fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
@@ -112,7 +112,6 @@ const AddFirstAppoinments = () => {
   const fetchInitialData = async (id) => {
     try {
       const { users: response } = await fetchUser(id);
-
       const patient = {
         name: response[0].nombre,
         lastName: response[0].apellido,
@@ -302,7 +301,6 @@ const AddFirstAppoinments = () => {
     const minutosRestantes = minutos % 60;
     return `${String(horas).padStart(2, "0")}:${String(minutosRestantes).padStart(2, "0")}:00`;
   }
-
   const handleDays = async (e, fecha, id) => {
     e.preventDefault()
     setHours('')
@@ -416,6 +414,22 @@ const AddFirstAppoinments = () => {
     setSuccess('initial')
     const { users: patient } = await fetchUser(session.user?.id)
 
+    const bodyContactOne = {
+      "nombre": data?.nombre_contacto_emergencia1 || '',
+      "relacion": data?.parentesco_contacto_emergencia1 || '',
+      "numero": data?.celular_contacto_emergencia1 || '',
+      "mail": data?.email_contact || '',
+      "parentesco": data?.parentesco_contacto_emergencia1 || '',
+    }
+
+    const bodyContactTwo = {
+      "nombre": childFormData?.nombre_contacto_emergencia2 || '',
+      "relacion": childFormData?.parentesco_contacto_emergencia2 || '',
+      "numero": childFormData?.celular_contacto_emergencia2 || '',
+      "mail": childFormData?.email_contact || '',
+      "parentesco": childFormData?.parentesco_contacto_emergencia2 || '',
+    }
+
     const bodyInterview = {
       ...data,
       "nombre_contacto_emergencia2": childFormData?.nombre_contacto_emergencia2 || '',
@@ -455,30 +469,44 @@ const AddFirstAppoinments = () => {
       "id_emergencia_2": patient[0].id_emergencia_2 || 0,
     }
     // tomarHoraDisponible(bloques, time, hours, date)
-    const professional = watch('professional')
+
+    let id_contact_1;
+    let id_contact_2;
+
     try {
+      const response1 = await createContact(bodyContactOne)
+      const response2 = await createContact(bodyContactTwo)
+      id_contact_1 = response1.id
+      id_contact_2 = response2.id
+    } catch (error) {
+      console.log(error)
+    }
 
-      const [appointment, update] = await Promise.all([
-        createInterview(bodyInterview),
-        updateUser(bodyUpdate)
-      ]);
-      if (appointment.estado === false && update.estado === false) {
+    if (id_contact_1 || id_contact_2) {
+      try {
+
+        const [appointment, update] = await Promise.all([
+          createInterview(bodyInterview),
+          updateUser({ ...bodyUpdate, "id_emergencia": id_contact_1, "id_emergencia_2": id_contact_2 })
+        ]);
+        if (appointment.estado === false && update.estado === false) {
+          setSuccess('fail')
+        } else if (appointment.estado === true && update.estado === false) {
+          setSuccess('success')
+          setError('Se creó la cita, pero no se logró actualizar la información. Revisa la información en Lista de citas.')
+        } else {
+          setSuccess('success')
+        }
+        setOpenBackdrop(true)
+        // await sendEmail()
+
+      } catch (err) {
         setSuccess('fail')
-      } else if (appointment.estado === true && update.estado === false) {
-        setSuccess('success')
-        setError('Se creó la cita, pero no se logró actualizar la información. Revisa la información en Lista de citas.')
-      } else {
-        setSuccess('success')
+        console.error('Algo falló', err)
+        setError(`Algo falló: ${err.message}`);
+      } finally {
+        setOpen(false)
       }
-      setOpenBackdrop(true)
-      // await sendEmail()
-
-    } catch (err) {
-      setSuccess('fail')
-      console.error('Algo falló', err)
-      setError(`Algo falló: ${err.message}`);
-    } finally {
-      setOpen(false)
     }
   })
 
@@ -972,17 +1000,20 @@ const AddFirstAppoinments = () => {
                                       .normalize("NFD") // Descompone caracteres con acentos
                                       .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
                                       .replace(/\s+/g, "_"); // Reemplaza espacios por "_"
-                                    const opcionesComunas = regionKey ? comunas[regionKey] : []; // Busca las comunas según la región
+                                    const opcionesComunas = regionKey ? comunas[regionKey] : [];
+
+                                    const selectedComuna = typeof value === 'string'
+                                      ? opcionesComunas.find(comuna => comuna.label === value) || null 
+                                      : opcionesComunas.find(comuna => comuna.label === value?.label) || null; 
+
                                     return (
                                       <Select
                                         instanceId="select-region"
                                         defaultValue={selectedOption}
-                                        value={
-                                          opcionesComunas.find((comuna) => comuna.label === value) || null
-                                        }
+                                        value={selectedComuna}
 
                                         onChange={onChange}
-                                        options={comunas[selectedRegion?.value]}
+                                        options={comunas[selectedRegion?.value] || comunas[selectedRegion]}
                                         menuPortalTarget={menuPortalTarget}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         id="select-region"

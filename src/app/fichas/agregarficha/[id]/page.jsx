@@ -82,7 +82,9 @@ const AddInterviewRecord = ({ params }) => {
       const date = responseAppointment.filter(item => item.id_cita == params.id)
       const responsePatient = await fetchUserByEmail(date[0].email_estudiante)
       const { users: response } = await fetchUser(responsePatient.id)
-
+      console.log(response)
+      console.log(responsePatient)
+      console.log('date', date)
       const obj = {
         id_alumno: date[0].id_paciente,
         ano_ingreso: response[0].anoIngresoCarrera || '',
@@ -98,6 +100,7 @@ const AddInterviewRecord = ({ params }) => {
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         nombre_social: response[0].nombre_social,
+        nombre: responsePatient.nombre,
         nombre_completo: date[0].nombre_alumno,
         nombre_contacto_emergencia1: response[0].contacto_nombre,
         parentesco_contacto_emergencia1: response[0].contacto_relacion,
@@ -108,6 +111,16 @@ const AddInterviewRecord = ({ params }) => {
         telefono: date[0].telefono_estudiante,
         tipo_usuario: responsePatient.tipo_usuario,
         validacion: date[0].validacion,
+        mail_contacto_emergencia1: response[0].contacto1_email,
+        id_contacto_emergencia1: response[0].contacto1_id,
+        nombre_contacto_emergencia1: response[0].contacto1_nombre,
+        celular_contacto_emergencia1: response[0].contacto1_numero,
+        parentesco_contacto_emergencia1: response[0].contacto1_relacion,
+        mail_contacto_emergencia2: response[0].contacto2_email,
+        id_contacto_emergencia2: response[0].contacto2_id,
+        nombre_contacto_emergencia2: response[0].contacto2_nombre,
+        celular_contacto_emergencia2: response[0].contacto2_numero,
+        parentesco_contacto_emergencia2: response[0].contacto2_relacion,
       }
 
       const { entrevista: records } = await showRecords(date[0].id_paciente)
@@ -331,6 +344,7 @@ const AddInterviewRecord = ({ params }) => {
       modalidad_atencion_evaluacion: data.modalidad_atencion_evaluacion[0]?.label ? data.modalidad_atencion_evaluacion[0]?.label : '',
 
     }
+
     const bodyUpdate = {
       "apellido": data.lastName || patient.apellido,
       "aplica_despeje": 0,  // el único q debiera cambiar
@@ -347,7 +361,7 @@ const AddInterviewRecord = ({ params }) => {
       "id": parseInt(patient.id_alumno),
       "jornada": 'NA',
       "mustChangePassword": 0,
-      "nombre": data.nombre_completo || patient.nombre_completo,
+      "nombre": patient.nombre,
       "region": data.region || patient.region,
       "rut": data.rut || patient.rut || ' ',
       "status": patient.status,
@@ -357,7 +371,7 @@ const AddInterviewRecord = ({ params }) => {
       "id_emergencia": patient.id_emergencia || 0,
       "id_emergencia_2": patient.id_emergencia_2 || 0,
     }
-
+console.log(bodyUpdate)
     try {
       const [resp, changeStatus, response] = await Promise.all([
         createInterviewRecord(body),
@@ -505,8 +519,9 @@ const AddInterviewRecord = ({ params }) => {
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <div className="form-group local-forms">
                                     <label>Nombre completo</label>
-                           
+
                                     <input
+                                      disabled
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('nombre_completo')} />
@@ -607,6 +622,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Correo electrónico</label>
                                     <input
+                                      disabled
                                       className="form-control" type="email"
                                       defaultValue={""}
                                       {...register('correo', {
@@ -868,6 +884,7 @@ const AddInterviewRecord = ({ params }) => {
                               }
                             </select> */}
                                     <input
+                                      disabled
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('nombre_completo')} />
@@ -959,6 +976,8 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Correo electrónico</label>
                                     <input
+                                      disabled
+
                                       className="form-control" type="email"
                                       defaultValue={""}
                                       {...register('correo', {
@@ -1142,7 +1161,7 @@ const AddInterviewRecord = ({ params }) => {
                               </div>
                             </AccordionSummary>
                             <AccordionDetails>
-                          
+
                               <div className="row">
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <div className="form-group select-gender">
@@ -2286,10 +2305,10 @@ const AddInterviewRecord = ({ params }) => {
 
 
                                 <div className="col-12 col-md-12 col-xl-12">
+                                  <label>
+                                    Detección de posibles condiciones asociadas a déficit cognitivo (TEA, TDHA)
+                                  </label>
                                   <div className="form-group local-forms">
-                                    <label>
-                                      Detección de posibles condiciones asociadas a déficit cognitivo (TEA, TDHA)
-                                    </label>
                                     <textarea
                                       className="form-control"
                                       rows={2}
@@ -2303,10 +2322,10 @@ const AddInterviewRecord = ({ params }) => {
 
 
                                 <div className="col-12 col-md-12 col-xl-12">
+                                  <label>
+                                    Consciencia de realidad (presencia de delirios, percepción alterada)
+                                  </label>
                                   <div className="form-group local-forms">
-                                    <label>
-                                      Consciencia de realidad (presencia de delirios, percepción alterada)
-                                    </label>
                                     <textarea
                                       className="form-control"
                                       rows={2}
@@ -2320,10 +2339,10 @@ const AddInterviewRecord = ({ params }) => {
 
 
                                 <div className="col-12 col-md-12 col-xl-12">
+                                  <label>
+                                    Autoconcepto y autoestima
+                                  </label>
                                   <div className="form-group local-forms">
-                                    <label>
-                                      Autoconcepto y autoestima
-                                    </label>
                                     <textarea
                                       className="form-control"
                                       rows={2}
@@ -2337,10 +2356,10 @@ const AddInterviewRecord = ({ params }) => {
 
 
                                 <div className="col-12 col-md-12 col-xl-12">
+                                  <label>
+                                    Situaciones de riesgo a nivel relacional
+                                  </label>
                                   <div className="form-group local-forms">
-                                    <label>
-                                      Situaciones de riesgo a nivel relacional
-                                    </label>
                                     <textarea
                                       className="form-control"
                                       rows={2}
@@ -2353,10 +2372,10 @@ const AddInterviewRecord = ({ params }) => {
                                 </div>
 
                                 <div className="col-12 col-md-12 col-xl-12">
+                                  <label>
+                                    Situaciones de riesgo a nivel personal
+                                  </label>
                                   <div className="form-group local-forms">
-                                    <label>
-                                      Situaciones de riesgo a nivel personal
-                                    </label>
                                     <textarea
                                       className="form-control"
                                       rows={2}
@@ -2369,10 +2388,10 @@ const AddInterviewRecord = ({ params }) => {
                                 </div>
 
                                 <div className="col-12 col-md-12 col-xl-12">
+                                  <label>
+                                    Observaciones
+                                  </label>
                                   <div className="form-group local-forms">
-                                    <label>
-                                      Observaciones
-                                    </label>
                                     <textarea
                                       className="form-control"
                                       rows={4}

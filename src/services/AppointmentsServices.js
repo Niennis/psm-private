@@ -218,3 +218,76 @@ export const search = (data, query) => {
 
   return response
 }
+
+export const createContact = async (input) => {
+  const URL = `https://showpatients-fge8btdrhdbzhagw.eastus-01.azurewebsites.net/emergencia_create`
+
+  const body = {
+    nombre: input.nombre,
+    relacion: input.relacion,
+    numero: input.numero,
+    mail: input.mail,
+    parentesco: input.parentesco
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body)
+    })
+    const response = await data.json()
+    return response
+  } catch (err) {
+    console.log(err)
+  }
+
+}
+
+export const showContact = async (id) => {
+  const URL = `https://showpatients-fge8btdrhdbzhagw.eastus-01.azurewebsites.net/emergencia_read`
+  const body = {
+    id 
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body)
+    });
+
+    const response = await data.json();
+    return response;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
+
+export const editContact = async (id) => {
+  const URL = `https://showpatients-fge8btdrhdbzhagw.eastus-01.azurewebsites.net/emergencia_update`
+  const body = {
+    id 
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body)
+    });
+
+    const response = await data.json();
+    return response;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}

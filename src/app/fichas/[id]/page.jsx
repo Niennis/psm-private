@@ -50,7 +50,7 @@ const FichaAlumno = ({ params }) => {
   const getStudent = async () => {
     try {
       const { users: student } = await fetchUser(params.id)
-      // console.log('student', student)
+      console.log('student', student)
       setPatient(student[0])
     } catch (error) {
       console.log(error)
@@ -280,7 +280,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto_emergencia1?.nombre || ""}
+                                    value={patient?.contacto1_nombre || ""}
                                     readOnly
                                   />
                                 </div>
@@ -291,7 +291,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto_emergencia1?.parentesco || ""}
+                                    value={patient?.contacto1_relacion || ""}
                                     readOnly
                                   />
                                 </div>
@@ -306,7 +306,7 @@ const FichaAlumno = ({ params }) => {
                                     <input
                                       className="form-control"
                                       type="tel"
-                                      value={patient?.contacto_emergencia1?.telefono || ""}
+                                      value={patient?.contacto1_numero|| ""}
                                       readOnly
                                     />
                                   </div>
@@ -319,7 +319,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto_emergencia2?.nombre || ""}
+                                    value={patient?.contacto2_nombre || ""}
                                     readOnly
                                   />
                                 </div>
@@ -330,7 +330,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto_emergencia2?.parentesco || ""}
+                                    value={patient?.contacto2_relacion || ""}
                                     readOnly
                                   />
                                 </div>
@@ -345,7 +345,7 @@ const FichaAlumno = ({ params }) => {
                                     <input
                                       className="form-control"
                                       type="tel"
-                                      value={patient?.contacto_emergencia2?.telefono || ""}
+                                      value={patient?.contacto2_numero || ""}
                                       readOnly
                                     />
                                   </div>
