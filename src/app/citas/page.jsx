@@ -55,7 +55,7 @@ const AppoinmentList = () => {
 
         const response = await fetchAppointments();
         const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
-
+        console.log('data', data)
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
 
@@ -106,6 +106,12 @@ const AppoinmentList = () => {
   const handleRefresh = () => {
     setResults(appointments)
   }
+
+
+  const handleNavigate = (fecha, hora) => {
+    localStorage.setItem('fechaCita', JSON.stringify({ fecha, hora }));
+  };
+
 
   const allColumns = [
     {
@@ -226,7 +232,11 @@ const AppoinmentList = () => {
               >
                 {session.user?.rol === ('profesional' || 'administrador') ?
                   (<>
-                    <Link className="dropdown-item" href={`/fichas/agregarficha/${record.id_cita}`}>
+                    <Link
+                      className="dropdown-item"
+                      href={`/fichas/agregarficha/${record.id_cita}`}
+                      onClick={() => {handleNavigate(record.fecha, record.hora)}}
+                    >
                       <i className="far fa-edit me-2" />
                       Registrar atención
                     </Link>
@@ -283,7 +293,7 @@ const AppoinmentList = () => {
 
   return (
     <>
-      <div className="sidebar-overlay" data-reff="" style={{zIndex: 98}}/>
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       {/* {
         loading && <SimpleBackdrop />
           }

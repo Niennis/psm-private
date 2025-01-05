@@ -17,16 +17,24 @@ const formatDate = (date) => {
 export const fetchUsers = async () => {
   const USERS_API = process.env.NEXT_PUBLIC_SHOW_PATIENTS
 
-  const data = await fetch(USERS_API, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'access-control-allow-origin': '*',
-    }
-  })
+  try {
+    const response = await fetch(USERS_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  const response = await data.json()
-  return response
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching users:', error.message);
+    throw error;
+  }
 }
 
 export const fetchUserByEmail = async (email) => {
@@ -118,7 +126,6 @@ export const addUsers = async (user) => {
     headers: {
       'content-type': 'application/json',
       'access-control-allow-origin': '*',
-      'ngrok-skip-browser-warning': 'any'
     },
     body: JSON.stringify(body)
   })
@@ -144,7 +151,7 @@ export const updateUser = async (user) => {
       },
       body: JSON.stringify(body)
     })
-    
+
     return data.json()
   } catch (error) {
     return error
@@ -159,7 +166,6 @@ export const deleteUser = async (id) => {
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
-        'ngrok-skip-browser-warning': 'any'
       }
     })
   } catch (err) {
@@ -167,3 +173,22 @@ export const deleteUser = async (id) => {
   }
 }
 
+export const darAlta = async (body) => {
+  const URL = "https://showpatients-fge8btdrhdbzhagw.eastus-01.azurewebsites.net/alta_patient"
+  
+  console.log('DATA', body)
+  console.log('URL', URL)
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body)
+    })
+
+    return data.json()
+  } catch (error) {
+    return error
+  }
+}

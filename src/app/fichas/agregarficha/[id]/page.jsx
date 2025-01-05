@@ -10,15 +10,15 @@ import Sidebar from "@/components/Sidebar";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/material";
+import { Modal, Button } from 'react-bootstrap'
 
-import { fetchUserByEmail, fetchUsers, fetchUser, updateUser } from "@/services/UsersServices";
-import { fetchAppointments } from "@/services/AppointmentsServices"
+import { fetchUserByEmail, fetchUsers, fetchUser, updateUser, darAlta } from "@/services/UsersServices";
+import { fetchAppointments, changeStatusAppointment } from "@/services/AppointmentsServices"
 import { createInterviewRecord, showRecords } from "@/services/RecordServices";
-import { changeStatusAppointment } from "@/services/AppointmentsServices";
+import { fetchScheduleByAvailability, fetchBlocksAvailables } from "@/services/SchedulesServices";
 
-import Contact from "@/components/Contact"
 import dayjs from "dayjs";
-import utc from 'dayjs/plugin/utc'; // Importa el plugin de UTC
+import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -46,9 +46,11 @@ const AddInterviewRecord = ({ params }) => {
   const [patient, setPatient] = useState([])
   const [contacts, setContacts] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [data, setData] = useState(null);
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
 
   const [open, setOpen] = useState(false);
   const { setProps } = useSidebar();
@@ -63,17 +65,6 @@ const AddInterviewRecord = ({ params }) => {
       activeClassName: "add-medical-record",
     });
   }, [setProps]);
-
-  const calcularEdad = (fechaNacimiento) => {
-    const hoy = new Date();
-    const cumpleanos = new Date(fechaNacimiento);
-    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
-    const mes = hoy.getMonth() - cumpleanos.getMonth();
-    if (mes < 0 || (mes === 0 && hoy.getDate())) {
-      edad--;
-    }
-    return edad;
-  }
 
   const getData = async () => {
     setIsLoading(true)
@@ -149,6 +140,15 @@ const AddInterviewRecord = ({ params }) => {
     }
   })
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem('fechaCita');
+      if (savedData) {
+        setData(JSON.parse(savedData));
+      }
+    }
+  }, []);
+
   const validateRUT = (rut) => {
     const cleanRUT = rut.replace(/[.-]/g, "");
 
@@ -163,19 +163,7 @@ const AddInterviewRecord = ({ params }) => {
     return true; // RUT válido
   };
 
-  const handleOpen = (e) => {
-    e.preventDefault()
-    setOpen(true)
-  };
-  const handleClose = () => setOpen(false);
-
-  const onChange = (date, dateString) => {
-    setIsClicked(true);
-  };
-  const loadFile = (event) => {
-    // Handle file loading logic here
-  };
-
+  /* CITA NORMAL servicio es el mismo que el de despeje, pero se omiten los campos que no se necesitan */
   const handleAppointment = handleSubmit(async data => {
     setSuccess('initial')
     const patientName = watch("name")
@@ -302,26 +290,6 @@ const AddInterviewRecord = ({ params }) => {
     { value: 4, label: "Trabajo Social" }
   ];
 
-  const handleAddContact = () => {
-    const newContact = [
-      ...contacts,
-      <Contact
-        key={contacts.length}
-        index={contacts.length}
-        deleteContact={() => handleDeleteContact(contacts.length)}
-      />
-    ];
-    setContacts(newContact);
-  }
-
-
-  const handleDeleteContact = (key) => {
-    const newArray = contacts.filter((_, i) => i !== key);
-    setContacts(newArray)
-  }
-
-  const handleFormat = rut => rut.replace(/[^\dkK]/g, '').replace(/^(\d{1,2})(\d{3})(\d{3})([0-9kK]{1})$/, '$1.$2.$3-$4')
-
   const formatDate = (dateString) => {
     const [day, month, year] = dateString.split("-");
     return `${year}-${day}-${month}`;
@@ -332,6 +300,7 @@ const AddInterviewRecord = ({ params }) => {
     return `${year}-${month}-${day}`;
   }
 
+  /* ENTREVISTA DE DESPEJE */
   const handleInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
@@ -371,7 +340,7 @@ const AddInterviewRecord = ({ params }) => {
       "id_emergencia": patient.id_emergencia || 0,
       "id_emergencia_2": patient.id_emergencia_2 || 0,
     }
-console.log(bodyUpdate)
+    console.log(bodyUpdate)
     try {
       const [resp, changeStatus, response] = await Promise.all([
         createInterviewRecord(body),
@@ -384,6 +353,7 @@ console.log(bodyUpdate)
         setSuccess('success')
       } else {
         setSuccess('fail')
+        setError(resp?.detalle || changeStatus?.detalle || response?.detalle)
       }
 
     } catch (error) {
@@ -392,13 +362,39 @@ console.log(bodyUpdate)
     }
   })
 
+
+  /*  --- DAR ALTA  ----- */
+  const handleAlta = async (e) => {
+    e.preventDefault()
+    // const { users: disponibilidades } = await fetchScheduleByAvailability(session?.user?.id)
+    console.log('data', data)
+
+    // const selectedHour = disponibilidades.find(item => (item.fechaInicio === convertDateFormat(patient.fecha))
+    //   && item.horaIni <= data.hora)
+    const body = {
+      profesional_id: session?.user?.id,
+      alumno_id: patient.id_alumno,
+      fecha: data.fecha,
+      hora: data.hora
+    }
+    console.log('body', body)
+    try {
+      const response = await darAlta(body)
+      console.log('response', response)
+    } catch (error) {
+      console.log('error', error)
+      setSuccess('fail')
+    }
+  }
+
+  const openWarning = (e) => {
+    e.preventDefault()
+    console.log('data', data)
+    setSuccess('warning')
+    setMessage('¿Desea confirmar la alta del servicio?')
+  }
+
   return (
-    // < >
-    //   <Sidebar
-    //     id="menu-item4"
-    //     id1="menu-items4"
-    //     activeClassName="add-medical-record"
-    //   />
     <>
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       {isLoading
@@ -432,6 +428,7 @@ console.log(bodyUpdate)
                   <div className="card">
                     {patient?.aplica_despeje != 1 ?
 
+                      /* ----- FORMULARIO CITA NORMAL ------ */
                       <div className="card-body">
                         <h4>Registrar atención</h4>
                         <form>
@@ -673,8 +670,6 @@ console.log(bodyUpdate)
                             </AccordionDetails>
                           </Accordion>
 
-
-
                           {/* 2. Motivo de consulta */}
                           <Accordion>
                             <AccordionSummary
@@ -706,6 +701,7 @@ console.log(bodyUpdate)
                               </div>
                             </AccordionDetails>
                           </Accordion>
+
                           {/* 3. Antecedentes generales */}
                           <Accordion>
                             <AccordionSummary
@@ -737,7 +733,6 @@ console.log(bodyUpdate)
                               </div>
                             </AccordionDetails>
                           </Accordion>
-
 
                           {/* 4. Acuerdos */}
                           <Accordion>
@@ -771,8 +766,16 @@ console.log(bodyUpdate)
                               </div>
                             </AccordionDetails>
                           </Accordion>
+
                           <div className="col-12">
                             <div className="doctor-submit text-end mt-3">
+                              <button
+                                // type="submit"
+                                className="btn btn-primary btn-success submit-form me-2"
+                                onClick={openWarning}
+                              >
+                                Dar de alta
+                              </button>
                               <button
                                 // type="submit"
                                 className="btn btn-primary submit-form me-2"
@@ -794,7 +797,7 @@ console.log(bodyUpdate)
                         </form>
                       </div>
                       :
-
+                      /* ----- FORMULARIO ENTREVISTA DE DESPEJE ------ */
                       <div className="card-body">
                         <h4>Entrevista de evaluación</h4>
                         <form>
@@ -2489,12 +2492,42 @@ console.log(bodyUpdate)
                     }}
                     spacing={2}
                   >
-                    Ha ocurrido un problema.
+                    Ha ocurrido un problema. {error}
                   </Alert>
                 </div>
               </div>
-              : ''
-          }</>
+              : success === 'warning'
+                ?
+                <div className="row" style={{
+                  height: '100%',
+                  position: 'fixed',
+                  top: '0',
+                  width: '100%',
+                  zIndex: 99999,
+                  background: '#00000080'
+                }}>
+                  <div className="col-sm-12 col-lg-6">
+                    <Alert
+                      severity="warning"
+                      onClose={() => { setSuccess('initial') }}
+                      sx={{
+                        zIndex: 'tooltip',
+                        position: 'absolute',
+                        left: '30%',
+                        width: '50%',
+                        padding: '50px',
+                        bottom: '50vh'
+                      }}
+                    // spacing={2}
+                    >
+                      <h4>{message}</h4>
+                      <Button variant="primary" onClick={handleAlta}> Confirmar </Button>
+                    </Alert>
+                  </div>
+                </div>
+                : ""
+          }
+        </>
       }
     </>
   );
