@@ -87,7 +87,7 @@ const EditDoctor = ({ params }) => {
         ...user,
         name: user.nombre,
         lastName: user.apellido,
-        mobile: user.telefono,
+        mobile: user.telefono || "",
         email: user.email,
         dateOfBirth: user.fecha_nacimiento,
         genero: user.genero,
@@ -104,7 +104,7 @@ const EditDoctor = ({ params }) => {
     }
   };
 
-  const { register, handleSubmit, watch, control, getValues,
+  const { register, handleSubmit, watch, control, getValues, setValue,
     formState: { errors, dirtyFields }, reset
   } = useForm({
     defaultValues: async () => await fetchInitialData()
@@ -132,8 +132,10 @@ const EditDoctor = ({ params }) => {
     }
   }
 
-
-  const valores = getValues()
+  const mobileValue = watch('mobile'); // Observar cambios en el valor de 'mobile' 
+  useEffect(() => {
+    setValue('mobile', mobileValue);
+  }, [mobileValue, setValue]);
 
   // FUNCIÓN UPDATE
   const handleEdit = handleSubmit(async (data, e) => {
@@ -166,9 +168,10 @@ const EditDoctor = ({ params }) => {
       region: 'santiago',
       rut: '12345678-9',
       status: data.status || initial.status,
-      telefono: data.mobile || initial.telefono,
+      telefono: data.mobile,
       tipo_usuario: initial.tipo_usuario,
     };
+    console.log('BODY', body);
 
     const editPass = {
       contrasena: data.password,
@@ -352,10 +355,15 @@ const EditDoctor = ({ params }) => {
                               </div>
                               <input
                                 className="form-control"
+                                // onChange={handleTelefonoChange}
                                 type="tel"
                                 {...register('mobile', {
-                                  validate: (value) =>
-                                    value.length === 9 || value.length === 0 || "Cantidad de caracteres debe ser igual a 9",
+                                  validate: (value) => {
+                                    if (value.length === 0) {
+                                      return true; // Permitir valores vacíos
+                                    }
+                                    return value.length === 9 || "Cantidad de caracteres debe ser igual a 9"; // Validar longitud
+                                  },
                                 })}
                                 maxLength={9}
                                 minLength={0}
