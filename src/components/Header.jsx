@@ -144,7 +144,7 @@ const Header = () => {
             variant="h6"
             noWrap
             component="a"
-            href="sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net"
+            href="https://sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net/"
             sx={{
               mr: 2,
               display: { xs: 'none', lg: 'flex' },
@@ -253,7 +253,7 @@ const Header = () => {
             variant="h5"
             noWrap
             component="a"
-            href="sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net"
+            href="https://sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net/"
             sx={{
               mr: { xs: 0, lg: 2 },
               display: { xs: 'flex', lg: 'none' },
