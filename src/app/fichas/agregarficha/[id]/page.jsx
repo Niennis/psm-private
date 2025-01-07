@@ -221,12 +221,15 @@ const AddInterviewRecord = ({ params }) => {
       autoconcepto_autoestima: '',
       situaciones_riesgo_relacional: '',
       situaciones_riesgo_personal: '',
-
+      "prevision_salud_isapre": "Fonasa",
+      "prevision_salud_fonasa": "",
+      "prevision_salud_otro": "",
     }
-
+console.log(data.acuerdos)
+console.log(body)
     try {
       const appointment = await createInterviewRecord(body)
-      // console.log('appointment', appointment)
+      console.log('appointment', appointment)
       if (appointment.estado === false) {
         setSuccess('fail')
       } else {
@@ -311,7 +314,7 @@ const AddInterviewRecord = ({ params }) => {
       fecha: formatDate(data.fecha),
       fecha_nacimiento: formatDate(data.fecha_nacimiento),
       modalidad_atencion_evaluacion: data.modalidad_atencion_evaluacion[0]?.label ? data.modalidad_atencion_evaluacion[0]?.label : '',
-
+      acuerdos: ''
     }
 
     const bodyUpdate = {
@@ -340,7 +343,7 @@ const AddInterviewRecord = ({ params }) => {
       "id_emergencia": patient.id_emergencia || 0,
       "id_emergencia_2": patient.id_emergencia_2 || 0,
     }
-    console.log(bodyUpdate)
+
     try {
       const [resp, changeStatus, response] = await Promise.all([
         createInterviewRecord(body),
@@ -2521,7 +2524,7 @@ const AddInterviewRecord = ({ params }) => {
                     // spacing={2}
                     >
                       <h4>{message}</h4>
-                      <Button variant="primary" onClick={handleAlta}> Confirmar </Button>
+                      <Button variant="primary" onClick={(e) => {handleAlta(e);  handleAppointment(e) }}> Confirmar </Button>
                     </Alert>
                   </div>
                 </div>

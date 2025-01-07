@@ -9,6 +9,7 @@ import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/mater
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'; // Importa el plugin de UTC
 import timezone from 'dayjs/plugin/timezone';
+import 'dayjs/locale/es'
 
 import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
@@ -40,7 +41,7 @@ const FichaAlumno = ({ params }) => {
   const getRecords = async () => {
     try {
       const { entrevista: response } = await showRecords(params.id)
-      // console.log('response', response)
+      console.log('response', response)
       setRecords(response)
     } catch (error) {
       console.log(error)
@@ -69,9 +70,15 @@ const FichaAlumno = ({ params }) => {
 
 
   const FormatearFecha = (fechaOriginal) => {
-    const fecha = new Date(fechaOriginal);
-    const opciones = { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' };
-    return fecha.toLocaleDateString('es-ES', opciones).replace(',', ''); // 'Lun, 15/04/2024'
+    const fecha = dayjs(fechaOriginal).locale('es').utc();
+
+    // Usamos el formato 'ddd, DD-MM-YYYY' para incluir el día de la semana
+    const fechaFormateada = fecha.format('ddd, DD-MM-YYYY'); // 'lun., 15-04-2024'
+
+    // Corregimos el punto y ponemos solo la primera letra en mayúscula
+    const fechaFinal = fechaFormateada.replace('.', '').replace(/^\w/, (match) => match.toUpperCase());
+
+    return fechaFinal; // 'Lun, 15-04-2024'
   }
 
   function toTitleCase(str) {
@@ -306,7 +313,7 @@ const FichaAlumno = ({ params }) => {
                                     <input
                                       className="form-control"
                                       type="tel"
-                                      value={patient?.contacto1_numero|| ""}
+                                      value={patient?.contacto1_numero || ""}
                                       readOnly
                                     />
                                   </div>
