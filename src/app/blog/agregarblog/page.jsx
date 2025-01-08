@@ -1,41 +1,44 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react'
-import Link from 'next/link';
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 
-// import TextEditor from '../../../components/TextEditor';
-// import Sidebar from '../../../components/Sidebar';
-import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
-import Select from "react-select";
-import { useForm, Controller } from 'react-hook-form';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import { useForm } from 'react-hook-form';
+
+import '../styles/styles.css'
 
 import { useSidebar } from "@/context/SidebarContext";
-import { useSession } from "next-auth/react";
-import { useRouter } from 'next/navigation';
-import ProtectedPage from '@/components/ProtectedRoutes';
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
 
-const cacheHandler = new CacheHandler();
+import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
+import { PlusCircle, MinusCircle } from "feather-icons-react/build/IconComponents";
 
-const DynamicSidebar = dynamic(() => import('../../../components/Sidebar'), {
-  loading: () => <p>Loading...</p>,
-})
+import { createBlog, uploadFile, createDownload } from '@/services/BlogServices';
+import DownloadSection from '@/components/DownloadsSection';
+import { Alert } from '@mui/material';
+import { Modal, Button } from 'react-bootstrap'
 
-const DynamicTextEditor = dynamic(() => import('../../../components/TextEditor'), {
-  loading: () => <p>Loading...</p>,
-})
+const TextEditor = dynamic(
+  () => import('@/components/TextEditor'),
+  {
+    ssr: false,
+    loading: () => <p>Loading...</p> // Esto puede ayudar a depurar el proceso de carga
+  });
+// import TextEditor from '@/components/TextEditor';
 
 const Addblog = () => {
-  const ROL = ["administrador"]
-  const { data: session } = useSession()
-  const router = useRouter();
   const { setProps } = useSidebar();
   const [texto, setTexto] = useState('')
+  const [disabled, setDisabled] = useState(false)
+  const [downloads, setDownloads] = useState([{ id: 1 }]);
+  const editorContainerRef = useRef(null);
+  const editorRef = useRef(null);
+  const [editorData, setEditorData] = useState('');
+  const [success, setSuccess] = useState('initial')
+  const [message, setMessage] = useState('')
 
+  const [editorLoaded, setEditorLoaded] = useState(false);
   useEffect(() => {
     setProps({
       id: "menu-item11",
@@ -44,42 +47,185 @@ const Addblog = () => {
     });
   }, [setProps]);
 
-  const loadFile = (event) => {
-    // Handle file loading logic here
-  };
 
-  const [selectedOption, setSelectedOption] = useState(null);
-  // eslint-disable-next-line no-unused-vars
-  const blog = [
-    { value: 1, label: "Psicología" },
-    { value: 2, label: "Psicopedagogía" },
-    { value: 3, label: "Psiquiatría" }
-  ];
-  const category = [
-    { value: 1, label: "Estrés" },
-    { value: 2, label: "Concentración" },
-    { value: 3, label: "Estudios" },
-  ];
 
   const { register, handleSubmit, watch, control, setValue,
     formState: { errors }
   } = useForm()
 
-
-  const handleText = (data) => {
-    // console.log('data en componente padre', data)
-    setValue('content', data)
+  const formatText = (input) => {
+    return input
+      .toLowerCase() // Convertir a minúsculas
+      .normalize("NFD") // Descomponer caracteres con acentos
+      .replace(/[\u0300-\u036f]/g, "") // Eliminar marcas de acentos
+      .replace(/ñ/g, "n") // Eliminar la letra "ñ"
+      .replace(/[^a-z0-9\s_]/g, "") // Eliminar caracteres especiales, conservando letras, números, espacios y "_"
+      .replace(/\s+/g, "-"); // Reemplazar espacios por ""
   }
 
-  const onSubmit = handleSubmit(async data => {
-    // console.log(data)
-  })
+
+  const generateDirectDownloadLink = (driveUrl) => {
+    try {
+      // Verificar si la URL es válida
+      const match = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (!match || match.length < 2) {
+        throw new Error("URL inválida. Asegúrate de proporcionar una URL de Google Drive válida.");
+      }
+
+      // Extraer el FILE_ID de la URL
+      const fileId = match[1];
+
+      // Construir el enlace directo
+      const directDownloadLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      return directDownloadLink;
+    } catch (error) {
+      console.error(error.message);
+      return null;
+    }
+  }
+
+
+  const handleAddDownload = () => {
+    setDownloads((prev) => [...prev, { id: prev.length + 1 }]);
+  };
+
+  const handleRemoveDownload = (id) => {
+    setDownloads((prev) => prev.filter((download) => download.id !== id));
+  };
+
+  const handleEditorChange = (data) => {
+    setEditorData(data);  // Actualizamos el estado con el contenido del editor
+  };
+
+  const handleFiles = async (file, name, id) => {
+    const fileName = formatText(`${name}-${id}`)
+    console.log('fileName 01', fileName)
+    const body = {
+      "image": file,
+      "file_name": fileName
+    }
+    console.log('HANDLEFILES', body)
+    try {
+      const response = await uploadFile(body)
+      console.log('response handleFiles', response)
+      return response;
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
+
+  const processInlineImages = async (content) => {
+    const data = watch()
+    const imgTagRegex = /<img[^>]*src=['"]([^'"]+)['"][^>]*>/g;
+    let match;
+    let index = 1;
+    imgTagRegex.lastIndex = 0
+
+    while ((match = imgTagRegex.exec(content)) !== null) {
+      index++
+      const imageUrl = match[1];
+      const file = await fetch(imageUrl).then((res) => res.blob());
+
+      const uploadedUrl = await handleFiles(imageUrl, data.blog_titulo, index);
+      console.log('UPLOADEDURL', uploadedUrl)
+      content = content.replace(imageUrl, uploadedUrl.blob_url);
+    }
+    console.log('CONTENT', content)
+    return content;
+  };
+
+  const onSubmit = handleSubmit(async (data) => {
+    console.log('DATA', data)
+    try {
+      // 1. Subir imagen de cabecera
+      const headerImageFile = data.blog_imagen;
+      const headerImageUrl = await handleFiles(headerImageFile, data.blog_titulo, 0);
+
+      // console.log('headerImageUrl', headerImageUrl)
+
+      // 2. Procesar imágenes en línea en el texto del blog
+      let blogContent = editorData;
+      blogContent = await processInlineImages(blogContent);
+      console.log('blogContent', blogContent)
+      if(blogContent.error) {
+        setMessage(`Ha ocurrido un error. Revisa el contenido del texto e intenta de nuevo. ${blogContent.error}`)
+        setSuccess('fail')
+        return;
+      }
+
+      // 3. Crear el blog
+      const blogData = {
+        titulo: data.blog_titulo,
+        bajada: data.blog_bajada,
+        imagen: headerImageUrl.blob_url,
+        texto: blogContent,
+        destacado: data.blog_destacado,
+        video: '',
+      };
+
+
+      const blogResponse = await createBlog(blogData)
+      if(blogResponse.error){
+        setMessage(`Ha ocurrido un error. Revisa el contenido del texto e intenta de nuevo. ${blogResponse.error}`)
+        setSuccess('fail')
+        return;
+      }
+
+
+      let count = 0
+      // console.log('BLOG', blogResponse)
+      // 4. Subir archivos de descargas y crear entradas de descargas
+      // console.log('DATA', data)
+      const responses = []
+      for (const download of downloads) {
+        // console.log('DOWNLOAD', download, data[`descarga_url_${download.id}`])
+        const file = data[`descarga_url_${download.id}`];
+        const fileName = formatText(data[`descarga_titulo_${download.id}`])
+        // console.log('fileName 02', fileName)
+        const bodyDownload = {
+          "image": generateDirectDownloadLink(file),
+          "file_name": fileName
+        }
+
+        // console.log('BODYDOWNLOAD', bodyDownload)
+        const fileUrl = await uploadFile(bodyDownload);
+
+        const downloadData = {
+          blog_id: blogResponse.blog_id,
+          url: fileUrl.blob_url,
+          titulo: data[`descarga_titulo_${download.id}`],
+          bajada: data[`descarga_bajada_${download.id}`]
+        };
+        // console.log('downloadData', downloadData)
+
+        const downloadResponse = await createDownload(downloadData)
+        responses.push(downloadResponse)
+        if(downloadResponse.message == "Registro insertado correctamente."){
+          count = count +1
+        }
+      }
+
+      // console.log("Blog creado exitosamente");
+      if (blogResponse.message == "Registro añadido exitosamente." && responses.length === count){
+        setSuccess('success')
+        setMessage('Blog agregado correctamente')
+      } else {
+        setSuccess('fail')
+        const objetosConError = arrayDeObjetos.filter(obj => obj.error); 
+        const mensajesError = objetosConError.map(obj => obj.error).join('\n'); 
+        const combinedErrors = [blogResponse.error, mensajesError].filter(Boolean).join('\n'); 
+        
+        setMessage(combinedErrors);
+      }
+
+    } catch (error) {
+      console.error("Error al procesar:", error);
+    }
+  });
 
   return (
     <div>
       <div className="main-wrapper">
-        {/* <DynamicSidebar id='menu-item11' id1='menu-items11' activeClassName='add-blog' /> */}
-        {/* page-wrapper-start  */}
         <>
           <div className="page-wrapper mt-5 pt-5">
 
@@ -90,7 +236,7 @@ const Addblog = () => {
                   <div className="col-sm-12">
                     <ul className="breadcrumb">
                       <li className="breadcrumb-item">
-                        <Link href="#">Blog </Link>
+                        {/* <Link href="#">Blog </Link> */}
                       </li>
                       <li className="breadcrumb-item">
                         <i className="feather-chevron-right">
@@ -123,17 +269,21 @@ const Addblog = () => {
                                 className="form-control"
                                 type="text"
                                 placeholder=""
-                                {...register('title', {
+                                {...register('blog_titulo', {
                                   required: {
                                     value: true,
                                     message: 'Título es requerido',
+                                    maxLength: {
+                                      value: 50,
+                                      message: 'El título no puede tener más de 50 caracteres',
+                                    }
                                   }
                                 })}
                               />
                               {
-                                errors.title
+                                errors.blog_titulo
                                 && <span className="login-danger">
-                                  <small>{errors.title.message}</small>
+                                  <small>{errors.blog_titulo.message}</small>
                                 </span>
                               }
                             </div>
@@ -147,241 +297,40 @@ const Addblog = () => {
                                 className="form-control"
                                 type="text"
                                 placeholder=""
-                                {...register('author_name', {
+                                {...register('blog_bajada', {
                                   required: {
                                     value: true,
                                     message: 'Nombre de autor es requerido',
+                                    maxLength: {
+                                      value: 50,
+                                      message: 'El título no puede tener más de 50 caracteres',
+                                    }
                                   }
                                 })}
                               />
                               {
-                                errors.author_name
+                                errors.blog_bajada
                                 && <span className="login-danger">
-                                  <small>{errors.author_name.message}</small>
+                                  <small>{errors.blog_bajada.message}</small>
                                 </span>
                               }
                             </div>
                           </div>
-                          {/* <div className="col-12 col-md-6 col-xl-6">
+
+                          <div className="col-12 col-md-12 col-xl-12">
                             <div className="form-group local-forms">
                               <label>
-                                Profesión autor <span className="login-danger">*</span>
-                              </label>
-                              <input
-                                className="form-control"
-                                type="text"
-                                placeholder=""
-                                {...register('profession', {
-                                  required: {
-                                    value: true,
-                                    message: 'Profesión del autor es requerida',
-                                  }
-                                })}
-                              />
-                              {
-                                errors.profession
-                                && <span className="login-danger">
-                                  <small>{errors.profession.message}</small>
-                                </span>
-                              }
-                            </div>
-                          </div> */}
-                          {/* <div className="col-12 col-md-6 col-xl-6">
-                            <div className="form-group local-forms">
-                              <label>
-                                Categorías <span className="login-danger">*</span>
-                              </label> <Controller
-                                control={control}
-                                name="category"
-                                {...register('category', {
-                                  required: {
-                                    value: true,
-                                    message: 'Categoría es requerida',
-                                  }
-                                })}
-                                ref={null}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                  <Select
-                                    className="custom-react-select"
-                                    defaultValue={selectedOption}
-                                    onChange={setSelectedOption}
-                                    menuPortalTarget={document.body}
-                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                    options={blog}
-                                    id="search-commodity"
-                                    components={{
-                                      IndicatorSeparator: () => null
-                                    }}
-                                    styles={{
-                                      control: (baseStyles, state) => ({
-                                        ...baseStyles,
-                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                        boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                        '&:hover': {
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                        },
-                                        borderRadius: '10px',
-                                        fontSize: "14px",
-                                        minHeight: "45px",
-                                      }),
-                                      dropdownIndicator: (base, state) => ({
-                                        ...base,
-                                        transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                        transition: '250ms',
-                                        width: '35px',
-                                        height: '35px',
-                                      }),
-                                    }}
-                                  />
-                                )}
-                              />
-                              {
-                                errors.category
-                                && <span className="login-danger">
-                                  <small>{errors.category.message}</small>
-                                </span>
-                              }
-                            </div>
-                          </div>
-                          <div className="col-12 col-md-6 col-xl-6">
-                            <div className="form-group local-forms">
-                              <label>
-                                Subcategorías{" "}
-                                <span className="login-danger">*</span>
-                              </label>
-                              <Controller
-                                control={control}
-                                name="subcategory"
-                                {...register('subcategory')}
-                                ref={null}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                  <Select
-                                    className="custom-react-select"
-                                    defaultValue={selectedOption}
-                                    onChange={setSelectedOption}
-                                    menuPortalTarget={document.body}
-                                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                    options={category}
-                                    id="search-commodity"
-                                    components={{
-                                      IndicatorSeparator: () => null
-                                    }}
-                                    styles={{
-                                      control: (baseStyles, state) => ({
-                                        ...baseStyles,
-                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                        boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                        '&:hover': {
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                        },
-                                        borderRadius: '10px',
-                                        fontSize: "14px",
-                                        minHeight: "45px",
-                                      }),
-                                      dropdownIndicator: (base, state) => ({
-                                        ...base,
-                                        transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                        transition: '250ms',
-                                        width: '35px',
-                                        height: '35px',
-                                      }),
-                                    }}
-                                  />
-                                )}
-                              />
-                            </div>
-                          </div> */}
-                          {/* <div className="col-12 col-md-6 col-xl-6">
-                            <div className="form-group local-forms">
-                              <label>
-                                Tags <small>(separadas con una coma)</small>{" "}
+                                Agregar url imagen cabecera
                                 <span className="login-danger">*</span>
                               </label>
                               <input
                                 type="text"
-                                data-role="tagsinput"
-                                className="form-control"
-                                {...register('tags')}
-                              />
-                            </div>
-                          </div> */}
-                          {/* <div className="col-12 col-md-6 col-xl-6">
-                            <div className="form-group local-forms">
-                              <label>
-                                Agregar imágenes
-                                <span className="login-danger">*</span>
-                              </label>
-                              <input
-                                type="file"
                                 data-role="files"
                                 className="form-control"
-                                accept="image/*,.pdf"
+                                accept="image/*"
                                 multiple
-                                {...register('tags')}
+                                {...register('blog_imagen')}
                               />
-                            </div>
-                          </div> */}
-                          <div className="col-12 col-md-6 col-xl-6">
-                            <div className="form-group local-forms">
-                              <label>
-                                Agregar archivos descargables
-                                <span className="login-danger">*</span>
-                              </label>
-                              <input
-                                type="file"
-                                data-role="files"
-                                className="form-control"
-                                accept="image/*,.pdf"
-                                multiple
-                                {...register('tags')}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-12">
-                            <div className="form-group select-gender">
-                              <label className="gen-label">
-                                Estado <span className="login-danger">*</span>
-                              </label>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="radio"
-                                    name="estado"
-                                    value="activo"
-                                    className="form-check-input"
-                                    {...register('estado', {
-                                      required: {
-                                        value: true,
-                                        message: 'Estado es requerido',
-                                      }
-                                    })}
-                                  />
-                                  Activo
-                                </label>
-                              </div>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="radio"
-                                    name="estado"
-                                    value="inactivo"
-                                    className="form-check-input"
-                                    {...register('estado', {
-                                      required: {
-                                        value: true,
-                                        message: 'Estado es requerido',
-                                      }
-                                    })}
-                                  />
-                                  Inactivo
-                                </label>
-                              </div>
-                              {
-                                errors.estado
-                                && <span className="login-danger">
-                                  <small>{errors.estado.message}</small>
-                                </span>
-                              }
                             </div>
                           </div>
                           <div className="col-12 col-md-6 col-xl-6">
@@ -393,67 +342,69 @@ const Addblog = () => {
                                 <label className="form-check-label">
                                   <input
                                     type="checkbox"
-                                    name="estado"
+                                    name="blog_destacado"
                                     value="activo"
                                     className="form-check-input"
-                                    {...register('destacar', {
-                                      required: {
-                                        value: true,
-                                        message: 'Estado es requerido',
-                                      }
-                                    })}
+                                    {...register('blog_destacado')}
                                   />
                                   Sí
                                 </label>
                               </div>
-                             
+
                               {
-                                errors.estado
+                                errors.blog_destacado
                                 && <span className="login-danger">
-                                  <small>{errors.estado.message}</small>
+                                  <small>{errors.blog_destacado.message}</small>
                                 </span>
                               }
                             </div>
                           </div>
                           <div className="col-12 col-md-6 col-xl-12">
                             <div className="form-group summer-mail">
-                              <Controller
-                                control={control}
-                                name="content"
-                                {...register('content')}
-                                ref={null}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                  <DynamicTextEditor handleText={handleText} />
-                                )}
-                              />
-                              {/* {
-                                errors.content
+                              <div className="main-container">
+                                <div
+                                  className="editor-container editor-container_classic-editor"
+                                  ref={editorContainerRef}
+                                >
+                                  <div className="editor-container__editor">
+                                    <div ref={editorRef}>
+                                      <TextEditor onEditorChange={handleEditorChange} />
+
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              {
+                                errors.blog_texto
                                 && <span className="login-danger">
-                                  <small>{errors.content.message}</small>
+                                  <small>{errors.blog_texto.message}</small>
                                 </span>
-                              } */}
+                              }
                             </div>
                           </div>
-                          {/* <div className="col-12 col-md-6 col-xl-12">
-                            <div className="form-group local-top-form">
-                              <label className="local-top">
-                                Avatar <span className="login-danger">*</span>
-                              </label>
-                              <div className="settings-btn upload-files-avator">
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  name="image"
-                                  id="file"
-                                  onChange={loadFile}
-                                  className="hide-input"
-                                />
-                                <label htmlFor="file" className="upload">
-                                  Escoge un archivo
-                                </label>
-                              </div>
+
+
+                          <div className="col-12">
+                            <div className="form-heading">
+                              <h4>Agregar material descargable {disabled ? '' : <PlusCircle
+                                onClick={() => { handleAddDownload() }} disabled={downloads.length >= 3}
+                              />}</h4>
+                              {downloads.length >= 3 && (
+                                <p style={{ color: "red" }}>Has alcanzado el límite de 3 descargas.</p>
+                              )}
                             </div>
-                          </div> */}
+                          </div>
+
+                          {downloads.map((download) => (
+                            <DownloadSection
+                              key={download.id}
+                              id={download.id}
+                              register={register}
+                              errors={errors}
+                              handleDeleteDownload={() => handleRemoveDownload(download.id)}
+                            />
+                          ))}
+
                           <div className="col-12">
                             <div className="doctor-submit text-end">
                               <button
@@ -479,26 +430,101 @@ const Addblog = () => {
               </div>
             </div>
 
-            {/* <div id="delete_patient" className="modal fade delete-modal" role="dialog">
-              <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                  <div className="modal-body text-center">
-                    <img src="assets/img/sent.png" alt="" width={50} height={46} />
-                    <h3>¿Estás seguro que deseas cancelar</h3>
-                    <div className="m-t-20">
-                      {" "}
-                      <Link href="#" className="btn btn-white" data-bs-dismiss="modal">
-                        Cerrar
-                      </Link>
-                      <button type="submit" className="btn btn-danger">
-                        Delete
-                      </button>
-                    </div>
+          </div>
+
+          {
+            success === 'success'
+              ?
+              <div style={{
+                height: '100%',
+                position: 'fixed',
+                top: '0',
+                width: '105%',
+                zIndex: 99999,
+                background: '#00000080',
+                marginLeft: "-12px",
+              }}>
+                {/* <div className="col-sm-12 col-lg-6"> */}
+                <Alert
+                  severity="success"
+                  onClose={() => { setSuccess('initial') }}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                // spacing={2}
+                >
+                  {message}
+                </Alert>
+                {/* </div> */}
+              </div>
+
+              : success === 'fail'
+                ?
+                <div className="row" style={{
+                  height: '100%',
+                  position: 'fixed',
+                  top: '0',
+                  width: '100%',
+                  zIndex: 99999,
+                  background: '#00000080'
+                }}>
+                  <div className="col-sm-12 col-lg-6">
+                    <Alert
+                      severity="error"
+                      onClose={() => { setSuccess('initial') }}
+                      sx={{
+                        zIndex: 'tooltip',
+                        position: 'absolute',
+                        left: '30%',
+                        width: '50%',
+                        padding: '50px',
+                        bottom: '50vh'
+                      }}
+                    // spacing={2}
+                    >
+                      {message}
+                    </Alert>
                   </div>
                 </div>
-              </div>
-            </div> */}
-          </div>
+                : success === 'warning'
+                  ?
+                  <div className="row" style={{
+                    height: '100%',
+                    position: 'fixed',
+                    top: '0',
+                    width: '100%',
+                    zIndex: 99999,
+                    background: '#00000080'
+                  }}>
+                    <div className="col-sm-12 col-lg-6">
+                      <Alert
+                        severity="warning"
+                        onClose={() => { setSuccess('initial') }}
+                        sx={{
+                          zIndex: 'tooltip',
+                          position: 'absolute',
+                          left: '30%',
+                          width: '50%',
+                          padding: '50px',
+                          bottom: '50vh'
+                        }}
+                      // spacing={2}
+                      >
+                        <h4>{message}</h4>
+                        <Button variant="primary" onClick={handleDelete}> Confirmar </Button>
+                      </Alert>
+                    </div>
+                  </div>
+                  : ""
+          }
+
+
+
         </>
         {/* page-wrapper-end */}
       </div>
@@ -507,103 +533,4 @@ const Addblog = () => {
   )
 }
 
-// export default Addblog
-export default withAuth(Addblog, ['administrador']);
-/* 
-  < div >
-  <>
-    <article>
-
-      <h1>Técnicas de Respiración para el Control de la Ansiedad</h1>
-
-      <p>La ansiedad es una respuesta natural del cuerpo ante situaciones percibidas como amenazantes. Sin embargo, cuando se vuelve crónica, puede interferir significativamente en nuestras vidas. Afortunadamente, existen técnicas de respiración que pueden ayudarnos a gestionar y reducir la ansiedad de manera efectiva. A continuación, se presenta una tabla con un resumen de diferentes técnicas de respiración que pueden ser especialmente útiles.</p>
-
-
-
-      <table border="1">
-
-        <thead>
-
-          <tr>
-
-            <th>Técnica</th>
-
-            <th>Descripción</th>
-
-            <th>Beneficios</th>
-
-          </tr>
-
-        </thead>
-
-        <tbody>
-
-          <tr>
-
-            <td>Respiración Profunda</td>
-
-            <td>Consiste en inhalar profundamente por la nariz, llenando los pulmones y el abdomen, seguido de una exhalación lenta y completa por la boca.</td>
-
-            <td>Reduce la respuesta de estrés, mejora la oxigenación y promueve la calma.</td>
-
-          </tr>
-
-          <tr>
-
-            <td>Respiración 4-7-8</td>
-
-            <td>Inhalar por la nariz contando hasta 4, mantener la respiración durante 7 segundos, y exhalar completamente por la boca contando hasta 8.</td>
-
-            <td>Ayuda a controlar la ansiedad, mejora el sueño y la concentración.</td>
-
-          </tr>
-
-          <tr>
-
-            <td>Respiración de Caja</td>
-
-            <td>Se inhala durante 4 segundos, se retiene la respiración durante 4 segundos, se exhala durante 4 segundos, y se mantiene sin respirar otros 4 segundos.</td>
-
-            <td>Induce la relajación, reduce el estrés y mejora el control emocional.</td>
-
-          </tr>
-
-          <tr>
-
-            <td>Respiración Diafragmática</td>
-
-            <td>Enfocarse en expandir el diafragma al inhalar, promoviendo una respiración más profunda y eficiente.</td>
-
-            <td>Mejora la capacidad pulmonar, reduce la ansiedad y aumenta la sensación de tranquilidad.</td>
-
-          </tr>
-
-        </tbody>
-
-      </table>
-
-
-
-      <h2>Resumen General</h2>
-
-      <ul>
-
-        <li><strong>Respiración Profunda:</strong> Una técnica simple pero poderosa para promover la calma y reducir la tensión.</li>
-
-        <li><strong>Respiración 4-7-8:</strong> Ideal para momentos de alta ansiedad y para mejorar el sueño.</li>
-
-        <li><strong>Respiración de Caja:</strong> Útil para gestionar momentos de estrés agudo y mejorar la concentración.</li>
-
-        <li><strong>Respiración Diafragmática:</strong> Favorece una respiración más eficiente y un estado de relajación profunda.</li>
-
-      </ul>
-
-
-
-      <p>Estas técnicas de respiración, al practicarse regularmente, pueden ser una herramienta valiosa para el manejo de la ansiedad. Integra estas prácticas en tu rutina diaria y observa cómo mejora tu capacidad para gestionar el estrés y la ansiedad.</p>
-
-    </article>
-  </>
-
-</div >
- */
+export default withAuth(Addblog, ['administrador', 'profesional']);

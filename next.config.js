@@ -1,3 +1,5 @@
+const path = require("path");
+
 module.exports = {
   cacheHandler: require.resolve('./src/utils/cache-handler.js'),
   // distDir: '.next', // Mantener el estándar.
@@ -10,6 +12,25 @@ module.exports = {
         port: '',
       },
     ],
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@ckeditor/ckeditor5-react': path.resolve(__dirname, 'node_modules/@ckeditor/ckeditor5-react'),
+      '@ckeditor': path.resolve(__dirname, 'node_modules/@ckeditor'),
+      'ckeditor5': path.resolve(__dirname, 'node_modules/ckeditor5'),
+    };
+
+    config.module.rules.push({
+      test: /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+      use: ['raw-loader'],
+    });
+    
+    config.module.rules.push({
+      test: /ckeditor\.css$/,
+      use: ["style-loader", "css-loader"],
+    });
+    return config;
   },
   async headers() {
     return [
