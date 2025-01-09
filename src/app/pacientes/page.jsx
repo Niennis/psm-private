@@ -200,13 +200,13 @@ const PatientsList = () => {
                   <i className="far fa-edit me-2" />
                   Editar
                 </Link>
-                {/* <Link className="dropdown-item" href="#"
+                <Link className="dropdown-item" href={`/fichas/${record.id_paciente}`}
                 // data-bs-toggle="modal" 
                 // data-bs-target="#delete_patient"
                 >
-                  <i className="fa fa-trash-alt m-r-5"></i>
-                  Eliminar
-                </Link> */}
+                  <i className="fas fa-folder-open me-2" />
+                  Ver ficha
+                </Link>
               </div>
             </div>
           </div>
