@@ -337,11 +337,11 @@ const Sidebar = () => {
                       </Link>
                     </li> */}
                     <li className="submenu">
-                      <Link className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`} href={`/admin-dashboard`} >
+                      <Link className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`} href={`/reportes`} >
                         <span className="menu-side">
                           <Image src={dashboard} alt="" />
                         </span>{" "}
-                        <span>Dashboard</span> <span className="menu-arrow" />
+                        <span>Reportes</span> <span className="menu-arrow" />
                       </Link>
                     </li>
                     {/*    <li className="submenu">

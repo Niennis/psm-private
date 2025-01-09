@@ -79,7 +79,7 @@ const Admin_Dashboard = () => {
                         <FeatherIcon icon="chevron-right" />
                       </i>
                     </li>
-                    <li className="breadcrumb-item active">Admin Dashboard</li>
+                    <li className="breadcrumb-item active">Reportes</li>
                   </ul>
                 </div>
               </div>
