@@ -220,7 +220,7 @@ export const search = (data, query) => {
 }
 
 export const createContact = async (input) => {
-  const URL = `https://showpatients-fge8btdrhdbzhagw.eastus-01.azurewebsites.net/emergencia_create`
+  const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/emergencia_create`
 
   const body = {
     nombre: input.nombre,
@@ -247,7 +247,7 @@ export const createContact = async (input) => {
 }
 
 export const showContact = async (id) => {
-  const URL = `https://showpatients-fge8btdrhdbzhagw.eastus-01.azurewebsites.net/emergencia_read`
+  const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/emergencia_read`
   const body = {
     id 
   }
@@ -270,7 +270,7 @@ export const showContact = async (id) => {
 }
 
 export const editContact = async (id) => {
-  const URL = `https://showpatients-fge8btdrhdbzhagw.eastus-01.azurewebsites.net/emergencia_update`
+  const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/emergencia_update`
   const body = {
     id 
   }

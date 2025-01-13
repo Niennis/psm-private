@@ -174,7 +174,7 @@ export const deleteUser = async (id) => {
 }
 
 export const darAlta = async (body) => {
-  const URL = "https://showpatients-fge8btdrhdbzhagw.eastus-01.azurewebsites.net/alta_patient"
+  const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/alta_patient`
   
   console.log('DATA', body)
   console.log('URL', URL)
