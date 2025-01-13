@@ -126,7 +126,7 @@ const PatientsList = () => {
                 alt="profile image"
               />
             </Link> */}
-            <Link href="#">{record.nombre_alumno}</Link>
+            <Link href={`/fichas/${record.id_paciente}`}>{record.nombre_alumno}</Link>
           </h2>
 
         </>
