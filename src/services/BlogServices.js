@@ -69,20 +69,21 @@ export const createBlog = async (blog) => {
 }
 
 export const updateBlog = async (blog, id) => {
-  const BLOGS_API = process.env.NEXT_PUBLIC_EDIT_BLOG
-  const { title, author_name, category, subcategory, status_blog, content, image } = blog;
+  const BLOGS_API = `${process.env.NEXT_PUBLIC_BLOGS}/edit_blog`
+  // const { title, author_name, category, subcategory, status_blog, content, image } = blog;
 
-  const body = {
-    title, author_name, category, subcategory, status_blog, content, image
-  }
+  // const body = {
+  //   title, author_name, category, subcategory, status_blog, content, image
+  // }
 
+  console.log('BLOG', blog)
   try {
     const data = await fetch(BLOGS_API, {
-      method: "POST",
+      method: "PUT",
       headers: {
         'content-type': 'application/json',
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(blog)
     })
 
     return data
