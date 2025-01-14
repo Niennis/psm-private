@@ -124,8 +124,6 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
       "campus": data.campus
     }
 
-    console.log('obj', obj)
-
     if (typeof editBloque === "function") {
       try {
         console.log("Enviando datos al padre...");

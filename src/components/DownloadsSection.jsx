@@ -1,7 +1,20 @@
+import { useEffect } from 'react'; 
+import { useFormContext } from 'react-hook-form';
 import { PlusCircle, MinusCircle } from "feather-icons-react/build/IconComponents";
 
 
-const DownloadSection = ({ id, register, errors, handleDeleteDownload }) => {
+const DownloadSection = ({ id, register, errors, handleDeleteDownload, initialData }) => {
+  const { setValue } = useFormContext();
+
+  useEffect(() => { 
+    if (initialData) { 
+      console.log('INITIAL DATA', id, initialData)
+      setValue(`descarga_titulo_${id}.`, initialData.descarga_titulo); 
+      setValue(`descarga_bajada_${id}.`, initialData.descarga_bajada); 
+      setValue(`descarga_url_${id}.`, initialData.descarga_url); 
+    } 
+  }, [initialData, id, setValue]);
+
   return (
     <div>
       <div className="col-12 col-sm-12">
@@ -27,6 +40,7 @@ const DownloadSection = ({ id, register, errors, handleDeleteDownload }) => {
                 },
               },
             })}
+            defaultValue={initialData?.descarga_titulo}
           />
           {errors[`descarga_titulo_${id}`] && (
             <span className="login-danger">
@@ -53,6 +67,7 @@ const DownloadSection = ({ id, register, errors, handleDeleteDownload }) => {
                 },
               },
             })}
+            defaultValue={initialData?.descarga_bajada}
           />
           {errors[`descarga_bajada_${id}`] && (
             <span className="login-danger">
@@ -75,6 +90,7 @@ const DownloadSection = ({ id, register, errors, handleDeleteDownload }) => {
             accept=".pdf"
             multiple
             {...register(`descarga_url_${id}`)}
+            defaultValue={initialData?.descarga_url}
           />
         </div>
       </div>

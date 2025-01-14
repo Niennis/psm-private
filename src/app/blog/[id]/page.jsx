@@ -4,7 +4,6 @@
 import { useEffect, useState, Fragment } from 'react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-// import TextEditor from '../../../components/TextEditor';
 import Sidebar from '../../../components/Sidebar';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import Select from "react-select";
@@ -79,6 +78,7 @@ const Blogdetails = ({ params }) => {
   // const [blog, setBlog] = useState({})
   const matches = useMediaQuery('(min-width:600px)');
   const router = useRouter()
+console.log(blog)
 
   useEffect(() => {
     // const fetchData = async() => {
@@ -102,7 +102,7 @@ const Blogdetails = ({ params }) => {
           }}>
             <img
               alt="#"
-              src={blog.imagen}
+              // src={blog.imagen}
               width={'100%'}
               style={{
                 backgroundPosition: 'center',
@@ -222,5 +222,5 @@ const Blogdetails = ({ params }) => {
 }
 
 // export default Blogdetails;
-export default withAuth(Blogdetails, ['administrador']);
+export default withAuth(Blogdetails, ['administrador', 'profesional']);
 

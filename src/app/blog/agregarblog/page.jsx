@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 
 import '../styles/styles.css'
 
@@ -17,7 +17,7 @@ import { PlusCircle, MinusCircle } from "feather-icons-react/build/IconComponent
 import { createBlog, uploadFile, createDownload } from '@/services/BlogServices';
 import DownloadSection from '@/components/DownloadsSection';
 import { Alert } from '@mui/material';
-import { Modal, Button } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
 
 const TextEditor = dynamic(
   () => import('@/components/TextEditor'),
@@ -37,6 +37,7 @@ const Addblog = () => {
   const [editorData, setEditorData] = useState('');
   const [success, setSuccess] = useState('initial')
   const [message, setMessage] = useState('')
+    const methods = useForm()
 
   const [editorLoaded, setEditorLoaded] = useState(false);
   useEffect(() => {
@@ -46,8 +47,6 @@ const Addblog = () => {
       activeClassName: "add-blog",
     });
   }, [setProps]);
-
-
 
   const { register, handleSubmit, watch, control, setValue,
     formState: { errors }
@@ -62,7 +61,6 @@ const Addblog = () => {
       .replace(/[^a-z0-9\s_]/g, "") // Eliminar caracteres especiales, conservando letras, números, espacios y "_"
       .replace(/\s+/g, "-"); // Reemplazar espacios por ""
   }
-
 
   const generateDirectDownloadLink = (driveUrl) => {
     try {
@@ -99,20 +97,21 @@ const Addblog = () => {
 
   const handleFiles = async (file, name, id) => {
     const fileName = formatText(`${name}-${id}`)
-    console.log('fileName 01', fileName)
+    const ext = extension(file)
+
     const body = {
       "image": file,
-      "file_name": fileName
+      "file_name": `${fileName}.${ext}`
     }
-    console.log('HANDLEFILES', body)
     try {
       const response = await uploadFile(body)
-      console.log('response handleFiles', response)
       return response;
     } catch (error) {
       console.log('error', error)
     }
   }
+
+  const extension = url => url.split('.').pop();
 
   const processInlineImages = async (content) => {
     const data = watch()
@@ -127,15 +126,12 @@ const Addblog = () => {
       const file = await fetch(imageUrl).then((res) => res.blob());
 
       const uploadedUrl = await handleFiles(imageUrl, data.blog_titulo, index);
-      console.log('UPLOADEDURL', uploadedUrl)
       content = content.replace(imageUrl, uploadedUrl.blob_url);
     }
-    console.log('CONTENT', content)
     return content;
   };
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log('DATA', data)
     try {
       // 1. Subir imagen de cabecera
       const headerImageFile = data.blog_imagen;
@@ -146,8 +142,7 @@ const Addblog = () => {
       // 2. Procesar imágenes en línea en el texto del blog
       let blogContent = editorData;
       blogContent = await processInlineImages(blogContent);
-      console.log('blogContent', blogContent)
-      if(blogContent.error) {
+      if (blogContent.error) {
         setMessage(`Ha ocurrido un error. Revisa el contenido del texto e intenta de nuevo. ${blogContent.error}`)
         setSuccess('fail')
         return;
@@ -163,14 +158,12 @@ const Addblog = () => {
         video: '',
       };
 
-
       const blogResponse = await createBlog(blogData)
-      if(blogResponse.error){
+      if (blogResponse.error) {
         setMessage(`Ha ocurrido un error. Revisa el contenido del texto e intenta de nuevo. ${blogResponse.error}`)
         setSuccess('fail')
         return;
       }
-
 
       let count = 0
       // console.log('BLOG', blogResponse)
@@ -182,9 +175,10 @@ const Addblog = () => {
         const file = data[`descarga_url_${download.id}`];
         const fileName = formatText(data[`descarga_titulo_${download.id}`])
         // console.log('fileName 02', fileName)
+        const ext = extension(data[`descarga_url_${download.id}`])
         const bodyDownload = {
-          "image": generateDirectDownloadLink(file),
-          "file_name": fileName
+          "image": file,
+          "file_name": `${fileName}.${ext}`
         }
 
         // console.log('BODYDOWNLOAD', bodyDownload)
@@ -200,21 +194,21 @@ const Addblog = () => {
 
         const downloadResponse = await createDownload(downloadData)
         responses.push(downloadResponse)
-        if(downloadResponse.message == "Registro insertado correctamente."){
-          count = count +1
+        if (downloadResponse.message == "Registro insertado correctamente.") {
+          count = count + 1
         }
       }
 
       // console.log("Blog creado exitosamente");
-      if (blogResponse.message == "Registro añadido exitosamente." && responses.length === count){
+      if (blogResponse.message == "Registro añadido exitosamente." && responses.length === count) {
         setSuccess('success')
         setMessage('Blog agregado correctamente')
       } else {
         setSuccess('fail')
-        const objetosConError = arrayDeObjetos.filter(obj => obj.error); 
-        const mensajesError = objetosConError.map(obj => obj.error).join('\n'); 
-        const combinedErrors = [blogResponse.error, mensajesError].filter(Boolean).join('\n'); 
-        
+        const objetosConError = arrayDeObjetos.filter(obj => obj.error);
+        const mensajesError = objetosConError.map(obj => obj.error).join('\n');
+        const combinedErrors = [blogResponse.error, mensajesError].filter(Boolean).join('\n');
+
         setMessage(combinedErrors);
       }
 
@@ -253,6 +247,8 @@ const Addblog = () => {
                 <div className="col-sm-12">
                   <div className="card">
                     <div className="card-body">
+                                            <FormProvider {...methods}>
+                      
                       <form>
                         <div className="row">
                           <div className="col-12">
@@ -424,6 +420,7 @@ const Addblog = () => {
                           </div>
                         </div>
                       </form>
+                      </ FormProvider>
                     </div>
                   </div>
                 </div>

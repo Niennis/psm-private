@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
 
-import Sidebar from '@/components/Sidebar'
 import FeatherIcon from "feather-icons-react";
 import {
   blogimg1, blogimg10, blogimg11, blogimg12, blogimg2, blogimg3, blogimg4, blogimg5,
@@ -29,6 +28,25 @@ const truncarPalabras = (texto, num) => {
   }
 }
 
+const extractTextFromHTML = (htmlString) => {
+  // Crear un contenedor temporal para procesar el HTML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+
+  // Seleccionar solo las etiquetas permitidas (p, h1, h2, etc.)
+  const allowedTags = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+  let extractedText = '';
+
+  allowedTags.forEach(tag => {
+    const elements = doc.querySelectorAll(tag);
+    elements.forEach(element => {
+      extractedText += element.textContent.trim() + '\n'; // Agregar texto con un salto de línea
+    });
+  });
+
+  return extractedText.trim(); // Eliminar espacios en blanco al inicio y al final
+}
+
 const BlogView = () => {
   const ROL = ["administrador"]
   const { data: session } = useSession()
@@ -47,8 +65,41 @@ const BlogView = () => {
   const data = async () => {
     try {
       const response = await fetchBlogs()
-      // console.log('response', response.slice(0, 5));
-      setBlogs(response.slice(0, 5))
+      const result = response.reduce((acc, curr) => {
+        // Verificar si el blog ya está agregado
+        const existingBlog = acc.find(item => item.blog_id === curr.blog_id);
+
+        if (existingBlog) {
+          // Si ya existe, agregar el objeto de descarga al array "descargas"
+          existingBlog.descargas.push({
+            descarga_bajada: curr.descarga_bajada,
+            descarga_titulo: curr.descarga_titulo,
+            descarga_url: curr.descarga_url
+          });
+        } else {
+          // Si no existe, agregar un nuevo blog con el array "descargas"
+          acc.push({
+            blog_id: curr.blog_id,
+            blog_titulo: curr.blog_titulo,
+            blog_bajada: curr.blog_bajada,
+            blog_texto: curr.blog_texto,
+            blog_imagen: curr.blog_imagen,
+            blog_video: curr.blog_video,
+            descargas: [
+              {
+                descarga_bajada: curr.descarga_bajada,
+                descarga_titulo: curr.descarga_titulo,
+                descarga_url: curr.descarga_url
+              }
+            ]
+          });
+        }
+
+        return acc;
+      }, []);
+
+      console.log('result', result)
+      setBlogs(result)
     } catch (error) {
       console.log('error', error)
     }
@@ -61,14 +112,8 @@ const BlogView = () => {
   return (
     <div>
       <div className="main-wrapper">
-        {/* Header */}
-        {/* <Header /> */}
-        {/* <Sidebar id='menu-item11' id1='menu-items11' activeClassName='blog-grid' /> */}
-        {/* Sidebar */}
-        {/* Page Wrapper */}
 
-
-        <div className="page-wrapper">
+        <div className="page-wrapper mt-5 pt-5">
           <div className="content">
             {/* Page Header */}
             <div className="page-header">
@@ -93,19 +138,19 @@ const BlogView = () => {
 
               {
                 blogs.map((blog) => (
-                  <div className="col-sm-6 col-md-6 col-xl-4" key={`blog${blog.id}`}>
+                  <div className="col-sm-6 col-md-6 col-xl-4 mb-4" key={`blog${blog.blog_id}`}>
                     <div className="blog grid-blog">
                       <div className="blog-image">
                         <Link href="/blog">
                           <img
                             className="img-fluid"
-                            src={blog.imagen}
+                            width={313}
+                            height={173}
+                            src={blog.blog_imagen.includes(process.env.NEXT_PUBLIC_KEY_IMG) ? `${blog.blog_imagen}` :  `${blog.blog_imagen}${process.env.NEXT_PUBLIC_KEY_IMG}`}
                             alt="#"
                           />
                         </Link>
-                        <div className="blog-views">
-                          <h5>Psicología</h5>
-                        </div>
+                       
                         {/* <ul className="nav view-blog-list blog-views">
                           <li>
                             <i className="feather-message-square me-1" />
@@ -120,15 +165,15 @@ const BlogView = () => {
                         </ul> */}
                       </div>
                       <div className="blog-content">
-                        <div className="blog-grp-blk">
+                       {/*  <div className="blog-grp-blk">
                           <div className="blog-img-blk">
-                            {/* <Link href="/blog">
+                            <Link href="/blog">
                               <img
                                 className="img-fluid"
                                 src={blogimg2.src}
                                 alt="#"
                               />
-                            </Link> */}
+                            </Link>
                             <div className="content-blk-blog ms-2">
                               <h4>
                                 <Link href="profile.html">{blog.autor}</Link>
@@ -140,14 +185,14 @@ const BlogView = () => {
                             <i className="feather-calendar me-1" />
                             {blog.fecha_publicacion}
                           </span>
-                        </div>
+                        </div> */}
                         <h3 className="blog-title">
                           <Link href="/blog">
-                            {blog.titulo}
+                            {blog.blog_titulo}
                           </Link>
                         </h3>
                         <p>
-                          {truncarPalabras(blog.texto, 20)}
+                          {truncarPalabras(extractTextFromHTML(blog.blog_texto), 20)}
                         </p>
                         <Link href="/blog" className="read-more d-flex">
                           {" "}
@@ -159,405 +204,7 @@ const BlogView = () => {
                   </div>
                 ))
               }
-              <div className="col-sm-6 col-md-6 col-xl-4">
-                <div className="blog grid-blog">
-                  <div className="blog-image">
-                    <Link href="/blog">
-                      <img
-                        className="img-fluid"
-                        src={blogimg1.src}
-                        alt="#"
-                      />
-                    </Link>
-                    <div className="blog-views">
-                      <h5>Diabetes</h5>
-                    </div>
-                    <ul className="nav view-blog-list blog-views">
-                      <li>
-                        <i className="feather-message-square me-1" />
-                        <FeatherIcon icon="message-square" />
-                        58
-                      </li>
-                      <li>
-                        <i className="feather-eye me-1" />
-                        <FeatherIcon icon="eye" />
-                        500
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="blog-content">
-                    <div className="blog-grp-blk">
-                      <div className="blog-img-blk">
-                        <Link href="/blog">
-                          <img
-                            className="img-fluid"
-                            src={blogimg2.src}
-                            alt="#"
-                          />
-                        </Link>
-                        <div className="content-blk-blog ms-2">
-                          <h4>
-                            <Link href="profile.html">Jenifer Robinson</Link>
-                          </h4>
-                          <h5>M.B.B.S, Diabetologist</h5>
-                        </div>
-                      </div>
-                      <span>
-                        <i className="feather-calendar me-1" />
-                        05 Sep 2022
-                      </span>
-                    </div>
-                    <h3 className="blog-title">
-                      <Link href="/blog">
-                        Simple Changes That Lowered My Moms Blood Pressure
-                      </Link>
-                    </h3>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                      eiusmod tempor incididunt ut labore et dolore magna aliqua...
-                    </p>
-                    <Link href="/blog" className="read-more d-flex">
-                      {" "}
-                      Read more in 8 Minutes
-                      <i className="fa fa-long-arrow-right ms-2" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <div className="col-sm-6 col-md-6 col-xl-4">
-                <div className="blog grid-blog">
-                  <div className="blog-image">
-                    <Link href="/blog">
-                      <img
-                        className="img-fluid"
-                        src={blogimg3.src}
-                        alt="#"
-                      />
-                    </Link>
-                    <div className="blog-views">
-                      <h5>Safety</h5>
-                    </div>
-                    <ul className="nav view-blog-list blog-views">
-                      <li>
-                        <i className="feather-message-square me-1" />
-                        <FeatherIcon icon="message-square" />
-                        18
-                      </li>
-                      <li>
-                        <i className="feather-eye me-1" />
-                        <FeatherIcon icon="eye" />
-
-                        5k
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="blog-content">
-                    <div className="blog-grp-blk">
-                      <div className="blog-img-blk">
-                        <Link href="profile.html">
-                          <img
-                            className="img-fluid"
-                            src={blogimg4.src}
-                            alt="#"
-                          />
-                        </Link>
-                        <div className="content-blk-blog ms-2">
-                          <h4>
-                            <Link href="profile.html">Mark hay smith</Link>
-                          </h4>
-                          <h5>M.B.B.S, Neurologist</h5>
-                        </div>
-                      </div>
-                      <span>
-                        <i className="feather-calendar me-1" />
-                        05 Sep 2022
-                      </span>
-                    </div>
-                    <h3 className="blog-title">
-                      <Link href="/blog">
-                        Vaccines Are Close - But Right Now We Need to Hunker Down
-                      </Link>
-                    </h3>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                      eiusmod tempor incididunt ut labore et dolore magna aliqua...
-                    </p>
-                    <Link href="/blog" className="read-more d-flex">
-                      {" "}
-                      Read more in 2 Minutes
-                      <i className="fa fa-long-arrow-right ms-2" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <div className="col-sm-6 col-md-6 col-xl-4">
-                <div className="blog grid-blog">
-                  <div className="blog-image">
-                    <Link href="/blog">
-                      <img
-                        className="img-fluid"
-                        src={blogimg5.src}
-                        alt="#"
-                      />
-                    </Link>
-                    <div className="blog-views">
-                      <h5>Dermotology</h5>
-                    </div>
-                    <ul className="nav view-blog-list blog-views">
-                      <li>
-                        <i className="feather-message-square me-1" />
-                        <FeatherIcon icon="message-square" />
-
-                        28
-                      </li>
-                      <li>
-                        <i className="feather-eye me-1" />
-                        <FeatherIcon icon="eye" />
-
-                        2.5k
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="blog-content">
-                    <div className="blog-grp-blk">
-                      <div className="blog-img-blk">
-                        <Link href="profile.html">
-                          <img
-                            className="img-fluid"
-                            src={blogimg6.src}
-                            alt="#"
-                          />
-                        </Link>
-                        <div className="content-blk-blog ms-2">
-                          <h4>
-                            <Link href="profile.html">Denise Stevens</Link>
-                          </h4>
-                          <h5>M.B.B.S, Dermotologist</h5>
-                        </div>
-                      </div>
-                      <span>
-                        <i className="feather-calendar me-1" />
-                        05 Sep 2022
-                      </span>
-                    </div>
-                    <h3 className="blog-title">
-                      <Link href="/blog">
-                        Hair Loss On One Side of Head – Causes &amp; Treatments
-                      </Link>
-                    </h3>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                      eiusmod tempor incididunt ut labore et dolore magna aliqua...
-                    </p>
-                    <Link href="/blog" className="read-more d-flex">
-                      {" "}
-                      Read more in 3 Minutes
-                      <i className="fa fa-long-arrow-right ms-2" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <div className="col-sm-6 col-md-6 col-xl-4">
-                <div className="blog grid-blog">
-                  <div className="blog-image">
-                    <Link href="/blog">
-                      <img
-                        className="img-fluid"
-                        src={blogimg7.src}
-                        alt="#"
-                      />
-                    </Link>
-                    <div className="blog-views">
-                      <h5>Ophthalmology</h5>
-                    </div>
-                    <ul className="nav view-blog-list blog-views">
-                      <li>
-                        <i className="feather-message-square me-1" />
-                        <FeatherIcon icon="message-square" />
-
-                        48
-                      </li>
-                      <li>
-                        <i className="feather-eye me-1" />
-                        <FeatherIcon icon="eye" />
-
-                        600
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="blog-content">
-                    <div className="blog-grp-blk">
-                      <div className="blog-img-blk">
-                        <Link href="profile.html">
-                          <img
-                            className="img-fluid"
-                            src={blogimg8.src}
-                            alt="#"
-                          />
-                        </Link>
-                        <div className="content-blk-blog ms-2">
-                          <h4>
-                            <Link href="profile.html">Laura Williams</Link>
-                          </h4>
-                          <h5>M.B.B.S, Ophthalmologist</h5>
-                        </div>
-                      </div>
-                      <span>
-                        <i className="feather-calendar me-1" />
-                        05 Sep 2022
-                      </span>
-                    </div>
-                    <h3 className="blog-title">
-                      <Link href="/blog">
-                        Eye Care Routine To Get Rid Of Under Eye Circles And Puffiness
-                      </Link>
-                    </h3>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                      eiusmod tempor incididunt ut labore et dolore magna aliqua...
-                    </p>
-                    <Link href="/blog" className="read-more d-flex">
-                      {" "}
-                      Read more in 5 Minutes
-                      <i className="fa fa-long-arrow-right ms-2" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <div className="col-sm-6 col-md-6 col-xl-4">
-                <div className="blog grid-blog">
-                  <div className="blog-image">
-                    <Link href="/blog">
-                      <img
-                        className="img-fluid"
-                        src={blogimg9.src}
-                        alt="#"
-                      />
-                    </Link>
-                    <div className="blog-views">
-                      <h5>Dentist</h5>
-                    </div>
-                    <ul className="nav view-blog-list blog-views">
-                      <li>
-                        <i className="feather-message-square me-1" />
-                        <FeatherIcon icon="message-square" />
-
-                        48
-                      </li>
-                      <li>
-                        <i className="feather-eye me-1" />
-                        <FeatherIcon icon="eye" />
-
-                        600
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="blog-content">
-                    <div className="blog-grp-blk">
-                      <div className="blog-img-blk">
-                        <Link href="profile.html">
-                          <img
-                            className="img-fluid"
-                            src={blogimg10.src}
-                            alt="#"
-                          />
-                        </Link>
-                        <div className="content-blk-blog ms-2">
-                          <h4>
-                            <Link href="profile.html">Linda Carpenter </Link>
-                          </h4>
-                          <h5>M.B.B.S, Dentist</h5>
-                        </div>
-                      </div>
-                      <span>
-                        <i className="feather-calendar me-1" />
-                        05 Sep 2022
-                      </span>
-                    </div>
-                    <h3 className="blog-title">
-                      <Link href="/blog">
-                        5 Facts About Teeth Whitening You Should Know
-                      </Link>
-                    </h3>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                      eiusmod tempor incididunt ut labore et dolore magna aliqua...
-                    </p>
-                    <Link href="/blog" className="read-more d-flex">
-                      {" "}
-                      Read more in 3 Minutes
-                      <i className="fa fa-long-arrow-right ms-2" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <div className="col-sm-6 col-md-6 col-xl-4">
-                <div className="blog grid-blog">
-                  <div className="blog-image">
-                    <Link href="/blog">
-                      <img
-                        className="img-fluid"
-                        src={blogimg11.src}
-                        alt="#"
-                      />
-                    </Link>
-                    <div className="blog-views">
-                      <h5>Gynecologist</h5>
-                    </div>
-                    <ul className="nav view-blog-list blog-views">
-                      <li>
-                        <i className="feather-message-square me-1" />
-                        <FeatherIcon icon="message-square" />
-
-                        18
-                      </li>
-                      <li>
-                        <i className="feather-eye me-1" />
-                        <FeatherIcon icon="eye" />
-
-                        300
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="blog-content">
-                    <div className="blog-grp-blk">
-                      <div className="blog-img-blk">
-                        <Link href="profile.html">
-                          <img
-                            className="img-fluid"
-                            src={blogimg12.src}
-                            alt="#"
-                          />
-                        </Link>
-                        <div className="content-blk-blog ms-2">
-                          <h4>
-                            <Link href="profile.html">Mark hay smith</Link>
-                          </h4>
-                          <h5>M.B.B.S, Gynecologist</h5>
-                        </div>
-                      </div>
-                      <span>
-                        <i className="feather-calendar me-1" />
-                        05 Sep 2022
-                      </span>
-                    </div>
-                    <h3 className="blog-title">
-                      <Link href="/blog">
-                        Sciatica: Symptoms, Causes &amp; Treatments
-                      </Link>
-                    </h3>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                      eiusmod tempor incididunt ut labore et dolore magna aliqua...
-                    </p>
-                    <Link href="/blog" className="read-more d-flex">
-                      {" "}
-                      Read more in 10 Minutes
-                      <i className="fa fa-long-arrow-right ms-2" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
+            
             </div>
           </div>
           <div className="notification-box">
@@ -803,4 +450,4 @@ const BlogView = () => {
 }
 
 // export default BlogView;
-export default withAuth(BlogView, ['administrador']);
+export default withAuth(BlogView, ['administrador', 'profesional']);

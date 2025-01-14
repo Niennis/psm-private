@@ -43,7 +43,7 @@ import {
   Underline,
 } from 'ckeditor5';
 
-const TextEditor = ({ onEditorChange }) => {
+const TextEditor = ({ onEditorChange, texto }) => {
   // const [textoHtml, setTextoHtml] = useState('')
   const editorContainerRef = useRef(null);
   const editorRef = useRef(null);
@@ -189,7 +189,7 @@ const TextEditor = ({ onEditorChange }) => {
         image: {
           toolbar: ['imageTextAlternative']
         },
-        initialData: '.-.',
+        initialData: texto,
         licenseKey: LICENSE_KEY,
         link: {
           addTargetToExternalLinks: true,
@@ -227,7 +227,7 @@ const TextEditor = ({ onEditorChange }) => {
     <div>
       <CKEditorNoSSR
         editor={ClassicEditor}
-        data="<p>Escribe algo aquí...</p>"
+        // data="<p>Escribe algo aquí...</p>"
         config={editorConfig}
         onReady={(editor) => {
           // You can store the "editor" and use when it is needed.
