@@ -138,7 +138,7 @@ const Editblog = ({ params }) => {
         setTexto(processedText)
         setDownloads(processedArray.descargas)
         console.log('INICIAL processedText', processedText)
-        console.log('DATA INICIAl',obj )
+        console.log('DATA INICIAl', obj)
         // Actualiza los valores iniciales del formulario
         reset(obj);
       } catch (error) {
@@ -146,6 +146,7 @@ const Editblog = ({ params }) => {
       }
     };
 
+    // https://reposaludmental.blob.core.windows.net/publicsite/prueba-pa-editar2.jpg?sp=rl&st=2024-10-02T00:13:39Z&se=2099-10-02T08:13:39Z&spr=https&sv=2022-11-02&sr=c&sig=GotHrZkZjeRQpnGTT1OxRvuCvwqj%2BJSQkS7Tn5yz8qk%3D
     fetchData();
   }, [reset]);
 
@@ -159,31 +160,52 @@ const Editblog = ({ params }) => {
     setValue('downloads', prev => prev.filter((_, index) => index !== id));
   };
 
+  const getFileNameWithoutExtensionAndPattern = (str, pattern = '?sp') => {
+    // Encuentra la posición del último punto (.) en el string
+    const dotIndex = str.lastIndexOf('.');
+
+    // Si encuentra un punto en la cadena
+    if (dotIndex !== -1) {
+      // Busca el patrón a partir del punto
+      const patternIndex = str.indexOf(pattern, dotIndex);
+
+      // Si el patrón se encuentra después del punto, corta todo después del patrón
+      if (patternIndex !== -1) {
+        return str.substring(0, patternIndex); // Devuelve el texto hasta el patrón, incluyendo la extensión
+      }
+    }
+
+    // Si no se encuentra el patrón, devuelve la cadena original
+    return str;
+  };
+
 
   const removeFromText = (str, matchText) => {
     // Encuentra la posición donde empieza el texto que hace match
     const matchIndex = str.indexOf(matchText);
-    
+
     // Si el texto se encuentra
     if (matchIndex !== -1) {
-        // Devuelve el substring hasta antes del texto que hace match
-        return str.substring(0, matchIndex);
+      // Devuelve el substring hasta antes del texto que hace match
+      return str.substring(0, matchIndex);
     } else {
-        // Si el texto no se encuentra, devuelve el string original
-        return str;
+      // Si el texto no se encuentra, devuelve el string original
+      return str;
     }
-}
+  }
 
   const handleFiles = async (file, name, id) => {
     const fileName = formatText(`${name}-${id}`)
     const ext = extension(file)
     const pattern = "?sp"
+    console.log('FILE', file)
     const updateExt = removeFromText(ext, pattern)
     console.log('EXT 00', ext)
     console.log('updateExt 01', updateExt)
+    const extractFileName = getFileNameWithoutExtensionAndPattern(file)
 
     const body = {
-      "image": removeFromText(file),
+      "image": file.includes(pattern) ? `${extractFileName}${process.env.NEXT_PUBLIC_KEY_IMG}` : file,
       "file_name": `${fileName}.${updateExt}`
     }
     console.log('HANDLEFILES', body)
@@ -251,7 +273,7 @@ const Editblog = ({ params }) => {
 
       const updateResponse = await updateBlog(blogData)
       console.log('UPDATEREPSONSE', updateResponse)
-      if (updateResponse.message == "Registro añadido exitosamente.") {
+      if (updateResponse.ok ) {
         setSuccess('success')
         setMessage('Datos actualizados exitosamente.')
       } else if (updateResponse.error) {
@@ -608,12 +630,72 @@ const Editblog = ({ params }) => {
               </div>
             </div> */}
           </div>
+          {
+            success === 'success'
+              ?
+              <div style={{
+                height: '100%',
+                position: 'fixed',
+                top: '0',
+                width: '105%',
+                zIndex: 99999,
+                background: '#00000080',
+                marginLeft: "-12px",
+              }}>
+                {/* <div className="col-sm-12 col-lg-6"> */}
+                <Alert
+                  severity="success"
+                  onClose={() => { setSuccess('initial') }}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                // spacing={2}
+                >
+                  {message}
+                </Alert>
+                {/* </div> */}
+              </div>
+
+              : success === 'fail'
+                ?
+                <div className="row" style={{
+                  height: '100%',
+                  position: 'fixed',
+                  top: '0',
+                  width: '100%',
+                  zIndex: 99999,
+                  background: '#00000080'
+                }}>
+                  <div className="col-sm-12 col-lg-6">
+                    <Alert
+                      severity="error"
+                      onClose={() => { setSuccess('initial') }}
+                      sx={{
+                        zIndex: 'tooltip',
+                        position: 'absolute',
+                        left: '30%',
+                        width: '50%',
+                        padding: '50px',
+                        bottom: '50vh'
+                      }}
+                    // spacing={2}
+                    >
+                      {message}
+                    </Alert>
+                  </div>
+                </div>
+                : ""
+          }
         </>
         {/* page-wrapper-end */}
       </div>
       <div className="sidebar-overlay" data-reff="" />
     </div>
-
   )
 }
 
