@@ -60,7 +60,7 @@ const Admin_Dashboard = () => {
 
   return (
     <>
-      <div className="sidebar-overlay" data-reff="" style={{zIndex: 98}}/>
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
 
       <>
         {loading && <SimpleBackdrop />}
@@ -95,7 +95,7 @@ const Admin_Dashboard = () => {
                     <p>Ten un buen día en el trabajo</p>
                   </div>
                 </div>
-                <div className="col-md-6 position-blk" style={{overflow:'hidden'}}>
+                <div className="col-md-6 position-blk" style={{ overflow: 'hidden' }}>
                   <div className="morning-img">
                     <Image
                       src={morning_img_01}
@@ -870,6 +870,32 @@ const Admin_Dashboard = () => {
                                 </div>
                               </div>
                             </td> */}
+                          </tr>
+                          <tr>
+                            <td>
+                              <div className="form-check check-tables">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  defaultValue="something"
+                                />
+                              </div>
+                            </td>
+
+                            <td className="table-image">
+
+                              <h2>Tests</h2>
+                            </td>
+                            {/* <td>23</td> */}
+                            {/* <td>06 January 2002</td> */}
+                            {/* <td>Jaundice</td> */}
+                            <td>
+                              <button className="custom-badge status-green"
+                                onClick={() => { handleReportes('tests') }}
+                              >
+                                Descargar
+                              </button>
+                            </td>
                           </tr>
                           {/* <tr>
                             <td>
