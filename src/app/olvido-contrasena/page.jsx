@@ -27,22 +27,28 @@ const ForgotPassword = () => {
     // VALIDAR usuario como profesional
     const user = await fetchUserByEmail(email)
 
-    const res = await fetch('/api/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, email }),
-    });
+    if (user.tipo_usuario === 'profesional' || user.tipo_usuario === 'administrador') {
+      console.log('POR QUÉEEE')
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, email }),
+      });
 
-    if (res.ok) {
-      setSuccess('success')
-      setMessage('Correo de recuperación enviado. Revisa tu bandeja de entrada');
-      // router.push('/'); // Redirige al inicio de sesión
-    } else {
-      setSuccess('fail')
-      setMessage(data.message || 'Algo salió mal.');
+      if (res.ok) {
+        setSuccess('success')
+        setMessage('Correo de recuperación enviado. Revisa tu bandeja de entrada');
+        // router.push('/'); // Redirige al inicio de sesión
+      } else {
+        setSuccess('fail')
+        setMessage(data.message || 'Algo salió mal.');
+      }
     }
-  };
-
+    else {
+      setSuccess('fail')
+      setMessage('No se reconoce el correo electrónico indicado.')
+    }
+  }
   const handleClose = () => {
     setSuccess('initial')
   }
