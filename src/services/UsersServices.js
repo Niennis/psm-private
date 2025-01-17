@@ -175,9 +175,7 @@ export const deleteUser = async (id) => {
 
 export const darAlta = async (body) => {
   const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/alta_patient`
-  
-  console.log('DATA', body)
-  console.log('URL', URL)
+
   try {
     const data = await fetch(URL, {
       method: "POST",
@@ -191,4 +189,33 @@ export const darAlta = async (body) => {
   } catch (error) {
     return error
   }
+}
+
+export const sendRecoveryEmail = async (email, url) => {
+  const URL = "https://validateuser-haebdbb4fucebucz.eastus-01.azurewebsites.net/recuperapass"
+
+  const body = {
+    "mail": email,
+    "link": url,
+  }
+
+  try {
+    const response = await fetch(URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body)
+    });
+
+    
+    const data = await response.json();
+    console.log('RESPONSE', data)
+    return data;
+  } catch (error) {
+    console.error('Error fetching users:', error.message);
+    throw error;
+  }
+
+
 }

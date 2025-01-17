@@ -31,6 +31,7 @@ import {
   IndentBlock,
   Italic,
   Link,
+  List,
   Paragraph,
   RemoveFormat,
   Strikethrough,
@@ -87,6 +88,7 @@ const TextEditor = ({ onEditorChange, texto }) => {
       IndentBlock,
       Italic,
       Link,
+      List,
       Paragraph,
       RemoveFormat,
       Strikethrough,
@@ -110,6 +112,7 @@ const TextEditor = ({ onEditorChange, texto }) => {
         toolbar: {
           items: [
             'heading',
+            'paragraph',
             '|',
             'fontSize',
             '|',
@@ -117,8 +120,7 @@ const TextEditor = ({ onEditorChange, texto }) => {
             'italic',
             'underline',
             'strikethrough',
-            'code',
-            'removeFormat',
+            'bulletedList', 'numberedList',
             '|',
             'horizontalLine',
             'link',
@@ -224,7 +226,7 @@ const TextEditor = ({ onEditorChange, texto }) => {
   };
 
   return (
-    <div>
+    <div className='col-12'>
       <CKEditorNoSSR
         editor={ClassicEditor}
         // data="<p>Escribe algo aquí...</p>"

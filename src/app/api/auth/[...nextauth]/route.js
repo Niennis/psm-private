@@ -40,7 +40,10 @@ const searchUser = async (email) => {
 const cacheHandler = new CacheHandler();
 
 const authOptions = {
-  session: { strategy: "jwt" },
+  session: { 
+    strategy: "jwt",
+    maxAge: 4 * 60 * 60,
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -134,6 +137,7 @@ const authOptions = {
     },
     async jwt({ token, user }) {
       const profile = await searchUser(token.email)
+      console.log('JWT Token:', token);
       // const {users: alumno} = await fetchUser(token.id)
       // console.log('alumno', alumno)
       if (profile.validacion === false) {

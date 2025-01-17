@@ -355,7 +355,7 @@ const Addblog = () => {
                                 }
                               </div>
                             </div>
-                            <div className="col-12 col-md-6 col-xl-12">
+                            <div className="col-12 col-md-12 col-xl-12">
                               <div className="form-group summer-mail">
                                 <div className="main-container">
                                   <div

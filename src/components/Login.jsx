@@ -51,7 +51,7 @@ const Login = () => {
   const handleOnSubmit = handleSubmit(async (data) => {
     setIsLoading(true)
     setSubmit('')
-  // if (status === 'unauthenticated') /* <SimpleBackdrop /> */ <h1>CARGANDO...</h1>
+    // if (status === 'unauthenticated') /* <SimpleBackdrop /> */ <h1>CARGANDO...</h1>
 
     const token = await getCaptchaToken()
     const response = await logInAction(token, data)
@@ -74,11 +74,11 @@ const Login = () => {
       } catch (err) {
         setIsLoading(true)
         console.log('Hubo un error:', err)
-        if(err.message == `Failed to execute 'json' on 'Response': Unexpected end of JSON input`){
+        if (err.message == `Failed to execute 'json' on 'Response': Unexpected end of JSON input`) {
           setError('El mail y la contraseña no coinciden')
         }
       }
-    finally {
+      finally {
         setTimeout(() => setIsLoading(false), 5000); // Asegurarte de ocultar el loading después de un tiempo
       }
     } else {
@@ -114,7 +114,7 @@ const Login = () => {
 
   return (
     <>
-    {isLoading && <SimpleBackdrop text={'el login'}/> }
+      {isLoading && <SimpleBackdrop text={'el login'} />}
       <div className="main-wrapper login-body sailec">
         <div className="container-fluid px-0">
 
@@ -140,9 +140,9 @@ const Login = () => {
                     }}>
                     <div className="login-right mx-2 p-0">
                       <div className="login-right-wrap">
-                        <div className="account-logo">
+                        <div className="account-logo pt-5">
                           <Link href="#">
-                            <img src={logo.src} width="100%" alt="logo udp" style={{ maxWidth: '-webkit-fill-available', display: !matches && 'none' }} />
+                            <img src={logo.src} width="100%" alt="logo udp" style={{ maxWidth: '400px ', display: !matches && 'none' }} />
                           </Link>
                         </div>
 
@@ -278,15 +278,15 @@ const Login = () => {
                                         reCaptchaKey={siteKey} /> */}
 
                                         <div className="forgotpass">
-                                          {/* <div className="remember-me">
-                            <label className="custom_check mr-2 mb-0 d-inline-flex remember-me">
-                              {" "}
-                              Remember me
-                              <input type="checkbox" name="radio" />
-                              <span className="checkmark" />
-                            </label>
-                          </div>
-                          <Link href="/forgotpassword">¿Olvidaste la contraseña?</Link> */}
+                                          <div className="remember-me">
+                                            {/* <label className="custom_check mr-2 mb-0 d-inline-flex remember-me">
+                                              {" "}
+                                              Remember me
+                                              <input type="checkbox" name="radio" />
+                                              <span className="checkmark" />
+                                            </label> */}
+                                          </div>
+                                          <Link href="/olvido-contrasena">¿Olvidaste la contraseña?</Link>
                                         </div>
 
                                         <div className="form-group login-btn">
