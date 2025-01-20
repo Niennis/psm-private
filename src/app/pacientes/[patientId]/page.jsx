@@ -69,7 +69,7 @@ const EditPatients = ({ params }) => {
     }
   }
 
-  const { register, handleSubmit, watch, control,
+  const { register, handleSubmit, watch, control, setValue,
     formState: { errors }
   } = useForm({
     defaultValues: async () => await fetchInitialData()
@@ -102,9 +102,14 @@ const EditPatients = ({ params }) => {
     setMenuPortalTarget(document.body);
   }, [])
 
-  const selectedRegion = watch('region')
+  const selectedRegion = watch('region');
+  const selectedComuna = watch('comuna');
 
-  const loadFile = (event) => { };
+  // Actualizar initial.region cuando la región cambia 
+  const handleRegionChange = (selectedOption) => {
+    setInitial((prev) => ({ ...prev, region: selectedOption.label }));
+    setValue('region', selectedOption.label);
+  };
 
   const onSubmit = handleSubmit(async (data, e) => {
     e.preventDefault()
@@ -114,7 +119,7 @@ const EditPatients = ({ params }) => {
       "anoIngresoCarrera": 'NA',
       "campus": data.campus || 'NA',
       "comuna": data.comuna.label || initial.comuna,
-      "carrera": data.carrera.label || initial.career,
+      "carrera": data.carrera.label || initial.carrera,
       "contrasena": 'NA',
       "direccion": data.address || initial.address,
       "email": data.email,
@@ -132,6 +137,7 @@ const EditPatients = ({ params }) => {
       "tipo_usuario": initial.tipo_usuario,
       "nombre_social": initial.nombre_social,
       "id_emergencia": initial.id_emergencia || 0,
+      "id_emergencia_2": initial.id_emergencia || 0,
     }
     try {
       const response = await updateUser(bodyUpdate)
@@ -402,7 +408,6 @@ const EditPatients = ({ params }) => {
                               {...register('carrera')}
                               ref={null}
                               render={({ field: { onChange, onBlur, value } }) => {
-                                console.log(value)
                                 return (
                                   <Select
                                     instanceId="select-career"
@@ -523,7 +528,10 @@ const EditPatients = ({ params }) => {
                                 <Select
                                   instanceId="select-region"
                                   // defaultValue={{ value: 13, label: "Región Metropolitana", name: "metropolitana" }}
-                                  onChange={onChange}
+                                  onChange={(option) => {
+                                    handleRegionChange(option)
+                                    onChange(option)
+                                  }}
                                   options={regiones}
                                   value={regiones.find(option => option.label === value) || value}
                                   // isDisabled={true}
@@ -571,19 +579,23 @@ const EditPatients = ({ params }) => {
                               name="comuna"
                               {...register('comuna')}
                               ref={null}
-                              render={({ field: { onChange, onBlur, value } }) => {
-                                const regionKey = initial?.region?.toLowerCase()
-                                  .normalize("NFD") // Descompone caracteres con acentos
-                                  .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
-                                  .replace(/\s+/g, "_"); // Reemplaza espacios por "_"
+                              render={({ field: { onChange, onBlur, value, name, ref } }) => {
+
+                                // Validar si initial.region es undefined o 'n/a' 
+                                const isValidRegion = initial?.region && initial?.region.toLowerCase() !== 'n/a';
+
+                                const regionKey = isValidRegion
+                                  ? initial.region.toLowerCase()
+                                    .normalize("NFD") // Descompone caracteres con acentos
+                                    .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
+                                    .replace(/\s+/g, "_") // Reemplaza espacios por "_"
+                                  : null
                                 const opcionesComunas = regionKey ? comunas[regionKey] : []; // Busca las comunas según la región
                                 return (
                                   <Select
                                     instanceId="select-region"
                                     defaultValue={selectedOption}
-                                    value={
-                                      opcionesComunas.find((comuna) => comuna.label === value) || null
-                                    }
+                                    value={opcionesComunas.find((comuna) => comuna.label === value)}
 
                                     onChange={onChange}
                                     options={comunas[selectedRegion?.value]}
