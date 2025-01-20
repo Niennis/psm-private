@@ -73,9 +73,7 @@ const AddInterviewRecord = ({ params }) => {
       const date = responseAppointment.filter(item => item.id_cita == params.id)
       const responsePatient = await fetchUserByEmail(date[0].email_estudiante)
       const { users: response } = await fetchUser(responsePatient.id)
-      console.log(response)
-      console.log(responsePatient)
-      console.log('date', date)
+      
       const obj = {
         id_alumno: date[0].id_paciente,
         ano_ingreso: response[0].anoIngresoCarrera || '',
@@ -225,11 +223,8 @@ const AddInterviewRecord = ({ params }) => {
       "prevision_salud_fonasa": "",
       "prevision_salud_otro": "",
     }
-console.log(data.acuerdos)
-console.log(body)
     try {
       const appointment = await createInterviewRecord(body)
-      console.log('appointment', appointment)
       if (appointment.estado === false) {
         setSuccess('fail')
       } else {
@@ -238,7 +233,6 @@ console.log(body)
 
     } catch (err) {
       setSuccess('fail')
-      console.log('ERRRR', err.message)
       if (err.message.includes("Cannot read properties of undefined")) {
         setError(`No se encontró al paciente`);
       }
@@ -370,7 +364,6 @@ console.log(body)
   const handleAlta = async (e) => {
     e.preventDefault()
     // const { users: disponibilidades } = await fetchScheduleByAvailability(session?.user?.id)
-    console.log('data', data)
 
     // const selectedHour = disponibilidades.find(item => (item.fechaInicio === convertDateFormat(patient.fecha))
     //   && item.horaIni <= data.hora)
@@ -380,7 +373,6 @@ console.log(body)
       fecha: data.fecha,
       hora: data.hora
     }
-    console.log('body', body)
     try {
       const response = await darAlta(body)
       console.log('response', response)
@@ -392,7 +384,6 @@ console.log(body)
 
   const openWarning = (e) => {
     e.preventDefault()
-    console.log('data', data)
     setSuccess('warning')
     setMessage('¿Desea confirmar la alta del servicio?')
   }
