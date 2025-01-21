@@ -20,6 +20,7 @@ import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 import { Modal, Button } from 'react-bootstrap'
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { useDisponibilidadContext } from "@/context/DisponibilidadContext";
 
 const cacheHandler = new CacheHandler();
 
@@ -28,6 +29,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
   const [menu, setMenu] = useState(false);
   const [success, setSuccess] = useState('initial')
   const [message, setMessage] = useState('')
+  const { data, setData } = useDisponibilidadContext()
 
   const [startDate, setDate] = useState(new Date()),
     [showCategory, setshowCategory] = useState(false),
@@ -123,7 +125,8 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
       "tipoServicio": data.tipoServicio,
       "campus": data.campus
     }
-
+    console.log('obj', obj)
+    setData(obj)
     if (typeof editBloque === "function") {
       try {
         console.log("Enviando datos al padre...");
@@ -151,7 +154,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
     } catch (error) {
       setSuccess('fail')
       setMessage(`Ha ocurrido un problema ${error}`)
-    } 
+    }
   }
 
   const handleDateSelect = (selectInfo) => {
@@ -417,12 +420,12 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
               width: '105%',
               zIndex: 99999,
               background: '#00000080',
-              marginLeft: "-12px", 
+              marginLeft: "-12px",
             }}>
               {/* <div className="col-sm-12 col-lg-6"> */}
               <Alert
                 severity="success"
-                onClose={() => {setSuccess('initial')}}
+                onClose={() => { setSuccess('initial') }}
                 sx={{
                   zIndex: 'tooltip',
                   position: 'absolute',
@@ -431,7 +434,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                   padding: '50px',
                   bottom: '50vh'
                 }}
-                // spacing={2}
+              // spacing={2}
               >
                 {message}
               </Alert>
@@ -460,7 +463,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                       padding: '50px',
                       bottom: '50vh'
                     }}
-                    // spacing={2}
+                  // spacing={2}
                   >
                     {message}
                   </Alert>
@@ -488,7 +491,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                         padding: '50px',
                         bottom: '50vh'
                       }}
-                      // spacing={2}
+                    // spacing={2}
                     >
                       <h4>{message}</h4>
                       <Button variant="primary" onClick={handleDelete}> Confirmar </Button>

@@ -7,9 +7,8 @@ import AuthProvider from "@/providers/AuthProvider";
 import { getServerSession } from "next-auth";
 import { SectionProvider } from "@/context/SectionContext";
 import { SidebarProvider } from '@/context/SidebarContext';
-import { LoadingProvider } from "@/context/LoadingContext";
+import { DisponibilidadProvider } from "@/context/DisponibilidadContext";
 
-import { redirect } from 'next/navigation';
 // import Hotjar from '@hotjar/browser';
 
 const siteId = 3920275;
@@ -53,11 +52,13 @@ export default async function RootLayout({ children, props }) {
 
           <SectionProvider>
             <SidebarProvider>
-              {/* <LoadingProvider> */}
+              <DisponibilidadProvider>
+                {/* <LoadingProvider> */}
                 <Header />
                 {session && <Sidebar />}
                 {children}
-              {/* </LoadingProvider> */}
+                {/* </LoadingProvider> */}
+              </DisponibilidadProvider>
             </SidebarProvider>
           </SectionProvider>
           {/* <Script src="./bot.js" data-args="Salud mental, #FFFFFF, #AA3C80FF, ./bot_salud_mental.png" id="bot"></Script> */}

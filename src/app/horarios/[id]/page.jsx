@@ -22,6 +22,7 @@ import CacheHandler from "@/utils/cache-handler";
 import CustomizedTooltips from '@/components/Tooltip';
 import { FaInfoCircle } from "react-icons/fa";
 import SimpleBackdrop from '@/components/Backdrop';
+import { useDisponibilidadContext } from '@/context/DisponibilidadContext';
 
 const cacheHandler = new CacheHandler();
 
@@ -29,7 +30,7 @@ const ScheduleByProfessional = ({ params }) => {
   const ROL = ["profesional"]
   const { data: session } = useSession()
   // useAuthorization(['alumno'])
-
+  const { data: dataInicial } = useDisponibilidadContext();
   const [startTime, setStartTime] = useState();
   const [endTime, setEndTime] = useState();
   const [profesional, setProfesional] = useState({})
@@ -68,28 +69,44 @@ const ScheduleByProfessional = ({ params }) => {
     fetchProfesional()
   }, [])
 
+  const duracion = [
+    { label: '30', value: 1 },
+    { label: '45', value: 2 },
+    { label: '60', value: 3 },
+    { label: '75', value: 4 },]
+
   const { register, handleSubmit, watch, control, setValue, reset, getValues,
     formState: { errors }
   } = useForm({
     defaultValues: async () => {
+      setIsLoading(true)
+      const duracionData = duracion.find(item => item.label == dataInicial.duracionServicio)
       const { especialidades: user } = await fetchSpecialityById(params.id)
       const obj = {
         nombre: `${user[0].nombre} ${user[0].apellido}`,
         especialidad: user[0].especialidad,
         id: user[0].usuario_id,
-        horaIni: '00:00:00',
-        semanal: { dia: [] }
+        horaIni: dataInicial.horaIni,
+        horaFin: dataInicial.horaFin,
+        semanal: { dia: [] },
+        fecha_inicio: dataInicial.fechaInicio,
+        modalidad: dataInicial.modalidad,
+        campus: dataInicial?.campus,
+        title: dataInicial?.detalleServicio,
+        duracion: duracionData.label,
+        tipo_cita: dataInicial.tipoServicio,
       }
       setProfesional(obj)
+      
       return obj
     }
   })
-
 
   const modalidad = watch('modalidad')
   const horaIni = watch("horaIni");
 
   const fetchData = async (id) => {
+    setIsLoading(true)
     try {
       const response = await generarHorasMedicas(id)
       const processed = response.map(item => {
@@ -114,6 +131,8 @@ const ScheduleByProfessional = ({ params }) => {
     } catch (error) {
       console.log(error)
       setError('No hay conexión con el servidor')
+    } finally{
+      setIsLoading(false)
     }
   }
 
@@ -125,11 +144,6 @@ const ScheduleByProfessional = ({ params }) => {
       fetchData(session?.user?.id)
   }, [])
 
-  const duracion = [
-    { label: '30', value: 1 },
-    { label: '45', value: 2 },
-    { label: '60', value: 3 },
-    { label: '75', value: 4 },]
 
 
   const datesToTimestamp = (fecha, hora) => {
@@ -204,7 +218,7 @@ const ScheduleByProfessional = ({ params }) => {
   };
 
   const onSubmit = handleSubmit(async data => {
-    
+
     const body = {
       "id_user": disponibilidad.id_user,
       "id": disponibilidad.id,
