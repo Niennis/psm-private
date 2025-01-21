@@ -229,7 +229,7 @@ const AddAppoinments = () => {
         hora: data.selectedHour,
         fecha: data.selectedDay,
         motivo: data.motivo === 'Otro' ? data.otro : data.motivo,
-        campus: data.campus || 'NA'
+        campus: data.campus || 'No aplica'
       })
 
 
