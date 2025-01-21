@@ -42,13 +42,11 @@ const Admin_Dashboard = () => {
     });
   }, [setProps]);
 
-
   const handleReportes = async (tabla) => {
+    console.log(tabla)
     setLoading(true)
-    console.log('Cargando...')
     try {
       const response = await reportes(tabla)
-      console.log('response', response)
 
     } catch (error) {
       console.log('Error: ', error)
@@ -56,7 +54,6 @@ const Admin_Dashboard = () => {
       setLoading(false)
     }
   }
-
 
   return (
     <>
