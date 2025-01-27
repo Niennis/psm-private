@@ -154,15 +154,15 @@ const DoctorList = () => {
         <>
           <div className="text-end">
             <div className="dropdown dropdown-action">
-              <Link
-                href="#"
+              <button
+                style={{border: 'none'}}
                 className="action-icon dropdown-toggle"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
                 onClick={() => { setShow({ ...show, state: !show.state, id: record.id }) }}
               >
                 <i className="fas fa-ellipsis-v" />
-              </Link>
+              </button>
               <div
                 style={{ right: '35px', top: 0 }}
                 className=

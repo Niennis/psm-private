@@ -54,7 +54,7 @@ const AppoinmentList = () => {
       try {
 
         const response = await fetchAppointments();
-        const data = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
+        const data = response.filter(item => (!item["estado"].includes('realizada')))
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
 
@@ -212,15 +212,15 @@ const AppoinmentList = () => {
         <>
           <div className="text-end">
             <div className="dropdown dropdown-action">
-              <Link
-                href="#"
+              <button
+                style={{border: 'none'}}
                 className="action-icon dropdown-toggle"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
                 onClick={() => { setShow({ ...show, state: !show.state, id: record.id_cita }) }}
               >
                 <i className="fas fa-ellipsis-v" />
-              </Link>
+              </button>
               <div
                 style={{ right: '35px', top: 0 }}
                 className=

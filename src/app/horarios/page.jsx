@@ -42,7 +42,7 @@ const ScheduleList = () => {
     formState: { errors }
   } = useForm()
 
-  
+
   useEffect(() => {
     setProps({
       id: "menu-item5",
@@ -72,7 +72,7 @@ const ScheduleList = () => {
     fetchData()
   }, [])
 
-  
+
   if (!session && !session?.user?.rol === "administrador"
     // || !session?.user?.rol === "profesional"
   ) {
@@ -298,15 +298,15 @@ const ScheduleList = () => {
           <div className="text-end">
             <div className="dropdown dropdown-action">
               {/* {console.log(record)} */}
-              <Link
-                href="#"
+              <button
+                style={{ border: 'none' }}
                 className="action-icon dropdown-toggle"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
                 onClick={() => { setShow({ ...show, state: !show.state, id: record.id }) }}
               >
                 <i className="fas fa-ellipsis-v" />
-              </Link>
+              </button>
               <div
                 style={{ right: '30px' }}
                 className=
@@ -319,15 +319,15 @@ const ScheduleList = () => {
                   <i className="far fa-edit me-2" />
                   Editar
                 </Link>
-                <Link
-                  href="#"
+                <button
+                  style={{ border: 'none' }}
                   className="dropdown-item"
                   data-bs-toggle="modal"
                   data-bs-target="#delete_appointment"
                   onClick={() => setIdSchedule(record.id)}>
                   <i className="fa fa-trash-alt m-r-5"></i>
                   Eliminar
-                </Link>
+                </button>
               </div>
             </div>
           </div>
