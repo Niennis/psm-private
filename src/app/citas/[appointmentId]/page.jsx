@@ -305,10 +305,9 @@ const EditAppoinments = ({ params }) => {
                                 type="tel"
                                 {...register('mobile', {
                                   validate: (value) =>
-                                    value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                    value.length === 0 || value.length === 9 || "La cantidad de caracteres debe ser igual a 0 o 9.",
                                 })}
                                 maxLength={9}
-                                minLength={9}
                               />
                               {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
                             </div>
