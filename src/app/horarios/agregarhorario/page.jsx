@@ -815,6 +815,10 @@ const AddSchedule = () => {
                                     onChange(e);
                                     setValue("horaFin", e.target.value); // Ajusta automáticamente horaFin si es menor
                                   }}
+                                  inputProps={{
+                                    min: '08:00',
+                                    max: '17:00',
+                                  }}
                                   value={value}
                                   InputLabelProps={{ shrink: true }}
                                   fullWidth
@@ -851,6 +855,7 @@ const AddSchedule = () => {
                                     InputProps={{
                                       inputProps: {
                                         min: horaIni, // Configura el mínimo como la hora de inicio seleccionada
+                                        max: '17:00',
                                       },
                                     }}
                                     InputLabelProps={{ shrink: true }}
