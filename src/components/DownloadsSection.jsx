@@ -1,3 +1,4 @@
+'use client'
 import { useEffect } from 'react'; 
 import { useFormContext } from 'react-hook-form';
 import { PlusCircle, MinusCircle } from "feather-icons-react/build/IconComponents";
@@ -8,7 +9,6 @@ const DownloadSection = ({ id, register, errors, handleDeleteDownload, initialDa
 
   useEffect(() => { 
     if (initialData) { 
-      console.log('INITIAL DATA', id, initialData)
       setValue(`descarga_titulo_${id}.`, initialData.descarga_titulo); 
       setValue(`descarga_bajada_${id}.`, initialData.descarga_bajada); 
       setValue(`descarga_url_${id}.`, initialData.descarga_url); 

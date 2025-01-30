@@ -24,7 +24,6 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import PasswordAlert from '@/components/PasswordAlert';
 const cacheHandler = new CacheHandler();
 
-
 const AppoinmentList = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -47,6 +46,23 @@ const AppoinmentList = () => {
     });
   }, [setProps]);
 
+  const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
+    const hoy = new Date(); 
+    hoy.setHours(0, 0, 0, 0); // Normaliza la fecha (elimina horas, minutos, segundos y milisegundos)
+
+    return arrayDeObjetos.map(async (item) => {
+      const fechaItem = new Date(item[claveFecha]); 
+      fechaItem.setHours(0, 0, 0, 0); 
+      if ( fechaItem < hoy && item["estado"].includes('pendiente')) {
+        const res = await changeStatusAppointment(item.id_cita, 'perdida')
+        console.log('RES', res)
+        return {...item, estado :'perdida'}
+      } else {
+        return item
+      }
+    });
+  }
+
   useEffect(() => {
     const loadAppointments = async () => {
       setLoading(true);
@@ -54,10 +70,14 @@ const AppoinmentList = () => {
       try {
 
         const response = await fetchAppointments();
-        const data = response.filter(item => (!item["estado"].includes('realizada')))
+        const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')))
+        
+        const promises= filtrarFechasAnteriores(dataChangeStatus, "fecha")
+        const data = await Promise.all(promises)
+        console.log('DATA', data)
+
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
-
           setAppointments(dataFiltered);
           setResults(dataFiltered);
           // setIsValidated(false)
@@ -197,6 +217,11 @@ const AppoinmentList = () => {
             </span>
           )}
           {record.estado.includes("cancelada") && (
+            <span className="custom-badge status-pink">
+              {record.estado}
+            </span>
+          )}
+          {record.estado.includes("perdida") && (
             <span className="custom-badge status-pink">
               {record.estado}
             </span>
