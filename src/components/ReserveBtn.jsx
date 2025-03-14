@@ -13,10 +13,11 @@ const ReserveBtn = ({ text, bgColor, color }) => {
   // const handleClose = () => setOpen(false);
   const matches = useMediaQuery('(min-width:600px)');
 
+  const URL_RESERVAR = process.env.NEXT_PUBLIC_URL_RESERVAR
 
   return (
     <>
-      <Link href="/#estudiantes" className="sailec-medium" >
+      <Link href={URL_RESERVAR} className="sailec-medium" >
       <button
         className='btn btn-rounded btn-reservar'
         style={{
