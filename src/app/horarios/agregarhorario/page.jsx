@@ -92,7 +92,7 @@ const AddSchedule = () => {
       setCalendario([...processed])
 
     } catch (error) {
-      console.log(error)
+      console.log('Error:', error)
       setError('No hay conexión con el servidor')
     }
   }
@@ -226,12 +226,10 @@ const AddSchedule = () => {
               setError(`Hubo un problema. Intenta más tarde. ${req.detalle}}`)
             } else {
               setSuccess('success')
-              // console.log('Success')
               session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
               setIsLoading(true)
             }
           } catch (error) {
-            console.log('error =>', error)
             setSuccess('fail')
             setError(`Hubo un problema. Intenta más tarde. ${error}`)
           } finally {
@@ -285,7 +283,7 @@ const AddSchedule = () => {
     try {
       const response = await deleteDisponibilidad(data)
     } catch (error) {
-      console.log('error', error)
+      console.log('Error:', error)
     }
   }
 

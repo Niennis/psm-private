@@ -9,8 +9,8 @@ export const fetchBlogs = async () => {
     })
     const { blogs } = await data.json()
     return blogs
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -29,8 +29,8 @@ export const fetchBlog = async (id) => {
       body: JSON.stringify(body)
     })
     return data.json()
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -47,7 +47,6 @@ export const createBlog = async (blog) => {
     destacado: blog_destacado
   }
 
-  console.log('BODY', blog)
   try {
     const data = await fetch(BLOGS_API, {
       method: "POST",
@@ -59,12 +58,11 @@ export const createBlog = async (blog) => {
 
     const response = await data.json()
     // debe responder la id de blog
-    console.log('add blog response', response)
     if (!data.ok && response.message.includes('Duplicate entry')) return { err: 'Usuario duplicado' }
 
     return response
-  } catch (err) {
-    console.log('ERROR', err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -76,7 +74,6 @@ export const updateBlog = async (blog, id) => {
   //   title, author_name, category, subcategory, status_blog, content, image
   // }
 
-  console.log('BLOG', blog)
   try {
     const data = await fetch(BLOGS_API, {
       method: "PUT",
@@ -87,8 +84,8 @@ export const updateBlog = async (blog, id) => {
     })
 
     return data
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -103,15 +100,14 @@ export const changeStatus = async (id, status) => {
       body: JSON.stringify({ status })
     })
     return data
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
 export const uploadFile = async (body) => {
   const URL = `${process.env.NEXT_PUBLIC_BLOGS}/upload`;
 
-  console.log('UPLOADFILE BODY', body)
 
   try {
     const data = await fetch(URL, {
@@ -123,16 +119,14 @@ export const uploadFile = async (body) => {
     })
 
     const response = await data.json()
-    console.log('RESPONSE', response)
     return response
 
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
 export const createDownload = async (download) => {
-  console.log('download', download)
   const BLOGS_API = `${process.env.NEXT_PUBLIC_BLOGS}/add_descarga`;
   const { blog_id, blog_bajada, blog_imagen, blog_texto, blog_destacado } = download;
 
@@ -155,7 +149,7 @@ export const createDownload = async (download) => {
     const response = await data.json()
 
     return response
-  } catch (err) {
-    console.log('ERROR', err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }

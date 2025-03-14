@@ -77,7 +77,6 @@ const authOptions = {
           contrasena: pwHash
         }
 
-        // console.log('body en credentials', body)
         try {
           const user = await fetchUserMailAndPass(body)
           if (!user) {
@@ -94,7 +93,7 @@ const authOptions = {
           //   return user
           // }
         } catch (error) {
-          console.log('Ocurrió un problema: ', error)
+          // console.log('Ocurrió un problema: ', error)
           throw new Error(`ocurrió un problema: ${error}`)
         }
       },
@@ -124,7 +123,6 @@ const authOptions = {
       if (account.provider === "credentials") {
         const body = { email: credentials.email, contrasena: credentials.password };
         const user = await fetchUserMailAndPass(body);
-        // console.log('user', user)
         if (user) {
           return true;
         } else {
@@ -137,9 +135,6 @@ const authOptions = {
     },
     async jwt({ token, user }) {
       const profile = await searchUser(token.email)
-      console.log('JWT Token:', token);
-      // const {users: alumno} = await fetchUser(token.id)
-      // console.log('alumno', alumno)
       if (profile.validacion === false) {
         throw new Error("Usuario no encontrado.");
       } else {
@@ -155,7 +150,6 @@ const authOptions = {
       // const cacheKey = `session-${session.user.email}`;
       // const cachedSession = await cacheHandler.get(cacheKey);
       // if (cachedSession) return cachedSession;
-      // console.log('cached', cachedSession)
       session.user = token;
       session.user.id = token.id;
       session.user.name = token.name

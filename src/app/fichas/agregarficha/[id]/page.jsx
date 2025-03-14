@@ -120,7 +120,7 @@ const AddInterviewRecord = ({ params }) => {
       setIsLoading(false)
       return obj
     } catch (error) {
-      console.log('error', error)
+      console.log('Error', error)
     }
   }
 
@@ -375,9 +375,8 @@ const AddInterviewRecord = ({ params }) => {
     }
     try {
       const response = await darAlta(body)
-      console.log('response', response)
     } catch (error) {
-      console.log('error', error)
+      console.log('Error', error)
       setSuccess('fail')
     }
   }

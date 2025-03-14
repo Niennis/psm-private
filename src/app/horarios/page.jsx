@@ -82,7 +82,6 @@ const ScheduleList = () => {
   }
 
   const onSelectChange = (newSelectedRowKeys) => {
-    // console.log("selectedRowKeys changed: ", selectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
   const rowSelection = {
@@ -91,7 +90,6 @@ const ScheduleList = () => {
   };
 
   const handleCancel = () => {
-    // console.log('ID', id, idSchedule)
     changeStatusAppointment(id, 'cancelada')
   }
 
@@ -297,7 +295,6 @@ const ScheduleList = () => {
         <>
           <div className="text-end">
             <div className="dropdown dropdown-action">
-              {/* {console.log(record)} */}
               <button
                 style={{ border: 'none' }}
                 className="action-icon dropdown-toggle"

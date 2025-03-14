@@ -25,7 +25,7 @@ export const sendEmail = async (email, typeUser) => {
     const resp = await data.json()
     return resp
   } catch (error) {
-    console.log('ERROR', error)
+    console.log('Error:', error)
   }
 }
 
@@ -60,7 +60,6 @@ export const createInterview = async (appointment) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    // console.log('response', response);
 
  /*    // ENVÍO DE MAIL
     if (response.estado === true) {
@@ -68,16 +67,14 @@ export const createInterview = async (appointment) => {
       try {
         const data = await sendEmail()
         // const response = await data.json()
-        console.log('RESPONSE', data)
 
       } catch (error) {
-        console.log('ERROR SEND MAIL: ', error)
       }
     } */
 
     return response
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -118,8 +115,8 @@ export const createAppointment = async (appointment) => {
     // }
 
     return response
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -144,8 +141,8 @@ export const updateAppointment = async (appointment) => {
       body: JSON.stringify(body)
     })
     return data
-  } catch (err) {
-    console.log('ERROR', err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -169,8 +166,8 @@ export const changeStatusAppointment = async (id, status) => {
       )
     })
     return data.json()
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -206,8 +203,8 @@ export const fetchAppointment = async (id) => {
       telefono_alumno: fetchPatient.telefono,
       mail_alumno: fetchPatient.email,
     }
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -240,8 +237,8 @@ export const createContact = async (input) => {
     })
     const response = await data.json()
     return response
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 
 }

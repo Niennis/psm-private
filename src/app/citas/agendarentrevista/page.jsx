@@ -373,7 +373,6 @@ const AddFirstAppoinments = () => {
   }
 
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
     setIsClicked(true);
   };
   const loadFile = (event) => {
@@ -484,7 +483,6 @@ const AddFirstAppoinments = () => {
 
     if (id_contact_1 || id_contact_2) {
       try {
-
         const [appointment, update] = await Promise.all([
           createInterview(bodyInterview),
           updateUser({ ...bodyUpdate, "id_emergencia": id_contact_1, "id_emergencia_2": id_contact_2 })

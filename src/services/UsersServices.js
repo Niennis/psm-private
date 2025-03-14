@@ -168,8 +168,8 @@ export const deleteUser = async (id) => {
         'access-control-allow-origin': '*',
       }
     })
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -210,7 +210,6 @@ export const sendRecoveryEmail = async (email, url) => {
 
     
     const data = await response.json();
-    console.log('RESPONSE', data)
     return data;
   } catch (error) {
     console.error('Error fetching users:', error.message);

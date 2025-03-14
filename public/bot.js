@@ -794,7 +794,6 @@ function bot_response(txt) {
   const chatLogs = document.querySelector('.bot-chat-logs');
   chatLogs.appendChild(stringToHTML(pre));
 
-  console.log(txt);
   var selection = document.getElementById("bot-chat-survey").getAttribute("selection");
   var usercomments = document.getElementById("bot-chat-comment").value;
 
@@ -821,12 +820,10 @@ function bot_response(txt) {
       return response.json();
     })
     .then(function (response) {
-      console.log(response);
       SESSION = response.session;
 
       if (selection == "0") {
         response.answers.forEach(function (element) {
-          console.log(element);
           if (element.type == "TEXT") {
             buttons = element.buttons;
             generate_message(element.content, 'user', buttons, 'TEXT', element.technicalText);
@@ -1249,7 +1246,6 @@ document.querySelector(".bot-chat-bubble-msg").addEventListener('click', functio
 })
 
 document.querySelector("#bot-chat-circle").addEventListener('click', function (event) {
-  console.log('ABRIENDO')
   var currentTargetStyle = event.currentTarget.style;
 
   if (document.querySelector('.bot-chat-logs').children.length === 0) {

@@ -113,7 +113,7 @@ const AddAppoinments = () => {
       })
       setPatients(alumnosProcessed)
     } catch (error) {
-      console.error("Error fetching initial data:", error);
+      console.error("Error al traer data inicial:", error);
       return {};
     }
   };

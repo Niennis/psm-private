@@ -41,7 +41,6 @@ const FichaAlumno = ({ params }) => {
   const getRecords = async () => {
     try {
       const { entrevista: response } = await showRecords(params.id)
-      console.log('response', response)
       setRecords(response)
     } catch (error) {
       console.log(error)
@@ -51,7 +50,6 @@ const FichaAlumno = ({ params }) => {
   const getStudent = async () => {
     try {
       const { users: student } = await fetchUser(params.id)
-      console.log('student', student)
       setPatient(student[0])
     } catch (error) {
       console.log(error)

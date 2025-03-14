@@ -55,7 +55,6 @@ const AppoinmentList = () => {
       fechaItem.setHours(0, 0, 0, 0); 
       if ( fechaItem < hoy && item["estado"].includes('pendiente')) {
         const res = await changeStatusAppointment(item.id_cita, 'perdida')
-        console.log('RES', res)
         return {...item, estado :'perdida'}
       } else {
         return item
@@ -74,7 +73,6 @@ const AppoinmentList = () => {
         
         const promises= filtrarFechasAnteriores(dataChangeStatus, "fecha")
         const data = await Promise.all(promises)
-        console.log('DATA', data)
 
         if (session.user?.rol === 'profesional') {
           const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);

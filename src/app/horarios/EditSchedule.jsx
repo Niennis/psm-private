@@ -22,7 +22,6 @@ const EditSchedule = () => {
 
   //const[show,setShow]=useState(false)
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
   };
   return (
     <div>

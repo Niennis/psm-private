@@ -221,7 +221,6 @@ const TextEditor = ({ onEditorChange, texto }) => {
 
   const handleEditorChange = (event, editor) => {
     const data = editor.getData();
-    console.log('DATA ', data)
     onEditorChange(data);  // Llamamos a la función pasada desde el componente padre
   };
 
@@ -233,14 +232,11 @@ const TextEditor = ({ onEditorChange, texto }) => {
         config={editorConfig}
         onReady={(editor) => {
           // You can store the "editor" and use when it is needed.
-          console.log('editor', editor)
         }}
         onChange={handleEditorChange}
         onBlur={(event, editor) => {
-          console.log("Blur.", editor);
         }}
         onFocus={(event, editor) => {
-          console.log("Focus.", editor);
         }}
       />
     </div>

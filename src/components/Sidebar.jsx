@@ -49,7 +49,7 @@ const Sidebar = () => {
       const { users: response } = await fetchUser(session?.user?.id)
       setAlumno(response[0])
     } catch (error) {
-      console.log('error', error)
+      console.log('Error:', error)
     }
   }
 

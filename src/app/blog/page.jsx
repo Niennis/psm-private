@@ -98,7 +98,6 @@ const BlogView = () => {
         return acc;
       }, []);
 
-      console.log('result', result)
       setBlogs(result)
     } catch (error) {
       console.log('error', error)

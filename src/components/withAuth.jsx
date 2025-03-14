@@ -40,18 +40,15 @@ const withAuth = (WrappedComponent, allowedRoles) => {
       if (status === 'loading') return; // Espera a que la sesión esté cargada
 
       if (session && session.user?.rol) {
-        // console.log('Client - session:', session);
 
         // Si la sesión y el rol están presentes, verifica el rol del usuario
         if (allowedRoles.includes(session.user?.rol)) {
           setIsReady(true);
         } else {
-          console.log('Rol no permitido:', session.user?.rol);
           router.push('/citas');
         }
       } else if (!session) {
         // Si no hay sesión, redirige al usuario
-        console.log('No hay sesión, redirigiendo...');
         router.push('/');
       }
     }, [session, status, router, allowedRoles]);

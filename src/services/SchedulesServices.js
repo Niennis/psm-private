@@ -383,11 +383,9 @@ export const createSchedule = async (schedule) => {
     body: JSON.stringify(body)
   })
   const response = await data.json()
-  // console.log('RESPONSE', response)
   return response
 }
 
-// https://us-central1-mkt-003001-00813.cloudfunctions.net/ZRZ-updateBloque
 // EDIT BLOQUES DISPONIBLES
 export const editBloqueDisponible = async (id_bloque, id_user) => {
   const EDIT_BLOQUE_URL = process.env.NEXT_PUBLIC_EDIT_BLOQUE_DISPONIBLE;
@@ -397,7 +395,6 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
     comentario: 'cambio'
   }
 
-  // console.log('update', body)
   try {
     const data = await fetch(EDIT_BLOQUE_URL, {
       method: "POST",
@@ -411,24 +408,20 @@ export const editBloqueDisponible = async (id_bloque, id_user) => {
 
     const response = await data.json()
 
-    // console.log('RESPONSE de editBloqueDisponibles', response)
     return response
   } catch (error) {
-    console.log('Error', error)
+    console.log('Error:', error)
   }
 }
 
 // Retorna true si hay choque de horario
 const hayChoqueHorario = (inicioMayor, finMayor, bloquesMenores) => {
-  // console.log('inicio', inicioMayor, finMayor, bloquesMenores)
   for (const bloqueMenor of bloquesMenores) {
     const { hora_inicio, hora_fin } = bloqueMenor;
 
     const inicioMenor = hora_inicio.length < 8 ? (`0${hora_inicio}`).slice(0, 5) : hora_inicio.slice(0, 5)
-    // console.log('iniciomenor', inicioMenor);
 
     const finMenor = hora_fin.length < 8 ? (`0${hora_fin}`).slice(0, 5) : hora_fin.slice(0, 5)
-    // console.log('finMenor', finMenor);
 
     // Convertir las horas a objetos Date para facilitar la comparación
     const inicioMayorDate = new Date(`1970-01-01T${inicioMayor}`);
@@ -447,15 +440,11 @@ const hayChoqueHorario = (inicioMayor, finMayor, bloquesMenores) => {
 }
 
 export const validateDates = async (fecha, horaInicio, horaFin, id) => {
-  // console.log('VALIDA', fecha, horaInicio, horaFin, id)
   const { bloques: bloquesMenores } = await fetchScheduleByDate(id, fecha)
-  // console.log('BLOQUESMENORES', bloquesMenores)
 
   if (bloquesMenores.length === 0) {
-    // console.log('TAMBIÉN ENTRA AQUÍ');
     return false
   } else {
-    // console.log('HAY CHOQUE', hayChoqueHorario(horaInicio, horaFin, bloquesMenores))
     return hayChoqueHorario(horaInicio, horaFin, bloquesMenores)
   }
 
@@ -468,12 +457,11 @@ export const getSpecialities = async () => {
       headers: {
         'content-type': 'application/json',
         'access-control-allow-origin': '*',
-        'ngrok-skip-browser-warning': 'any'
       }
     })
     return data.json()
   } catch (error) {
-    console.log('Error: ', error)
+    console.log('Error:', error)
   }
 }
 
@@ -495,13 +483,6 @@ export const tomarHoraDisponible = (bloques, hora, disponibilidades, fecha) => {
   }
   return bloquesCambiarEstado
 }
-
-
-
-
-
-
-
 
 // Utilidades para manejar horas como objetos Date
 const parseTime = (time) => {
@@ -597,6 +578,6 @@ export const deleteDisponibilidad = async (id) => {
 
 
   } catch (error) {
-    console.log('Error', error)
+    console.log('Error:', error)
   }
 }

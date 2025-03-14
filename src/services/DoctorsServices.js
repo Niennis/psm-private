@@ -17,8 +17,8 @@ export const fetchProfessionals = async () => {
     })
     const { users: response } = await data.json()
     return response
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -38,8 +38,8 @@ export const fetchSpecialityById = async (usuario_id) => {
 
     const response = await data.json()
     return response;
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -55,8 +55,8 @@ export const fetchSpecialities = async () => {
     })
     const { especialidades } = await data.json()
     return especialidades;
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -88,8 +88,8 @@ export const fetchProfessionalById = async (id) => {
     })
     const response = await data.json()
     return response
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -128,8 +128,8 @@ export const addProfessional = async (user) => {
     })
     const response = data.json()
     return response
-  } catch (err) {
-    console.log('ERROR', err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -152,8 +152,8 @@ export const addEspecialidad = async (data)=> {
     })
     const response = data.json()
     return response
-  } catch (err) {
-    console.log('ERROR', err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -186,8 +186,8 @@ export const updateDoctor = async (user, id) => {
     // })
 
     return data
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 
@@ -271,8 +271,8 @@ export const changeStatus = async (id, status) => {
       })
     })
     return data
-  } catch (err) {
-    console.log(err)
+  } catch (error) {
+    console.log('Error:', error)
   }
 }
 

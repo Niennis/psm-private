@@ -25,7 +25,6 @@ import { useDisponibilidadContext } from "@/context/DisponibilidadContext";
 const cacheHandler = new CacheHandler();
 
 const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBloque }, calendarRef) => {
-  // console.log('calendario', calendario)
   const [menu, setMenu] = useState(false);
   const [success, setSuccess] = useState('initial')
   const [message, setMessage] = useState('')
@@ -65,24 +64,19 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
   };
 
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
   };
-  // console.log('ID in calender', id);
   const toggleMobileMenu = () => {
     setMenu(!menu);
   };
 
   const handleChange = (date) => {
     setDate(date);
-    console.log('HANDLECHANGE', date);
   };
   const addEvent = () => {
     setshowEvents(true);
-    console.log('ADD EVENT')
   };
   const categoryHandler = () => {
     setshowCategory(true);
-    console.log('CATEGORY HANDLER');
   };
 
   const handleClose = () => {
@@ -93,14 +87,12 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
     setshowEvents(false);
     setshowmodel(false);
     setShowModal(false)
-    console.log('HANDLE CLOSE')
   };
 
   const handleEventClick = async (clickInfo) => {
     setiseditdelete(true);
     setevent_title(clickInfo.event.title);
     setcalenderevent(clickInfo.event);
-    console.log('HANDLE EVENT CLICK', clickInfo.event);
     setShowModal(true);
 
   };
@@ -125,13 +117,10 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
       "tipoServicio": data.tipoServicio,
       "campus": data.campus
     }
-    console.log('obj', obj)
     setData(obj)
     if (typeof editBloque === "function") {
       try {
-        console.log("Enviando datos al padre...");
         await editBloque(obj); // Aquí se envía 'obj' al padre
-        console.log("Datos enviados correctamente.");
       } catch (error) {
         console.error("Error al enviar datos al padre:", error);
       }
@@ -143,7 +132,6 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
   const handleDelete = async () => {
     try {
       const response = await deleteBloque(calenderevent.extendedProps.id_disponibilidad)
-      console.log('response', response)
       if (response.validacion === true) {
         setSuccess('success')
         setMessage(`Disponibilidad eliminada exitosamente.`)
@@ -160,7 +148,6 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
   const handleDateSelect = (selectInfo) => {
     setisnewevent(true);
     setaddneweventobj(selectInfo);
-    console.log('HANDLE DATE SELECT', selectInfo);
   };
 
   const addnewevent = () => {
@@ -184,17 +171,14 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
   const onupdateModalClose = () => {
     setiseditdelete(false);
     setevent_title("");
-    console.log('ON UPDATE MODAL CLOSE');
   };
   const oncreateeventModalClose = () => {
     setevent_title("");
     setisnewevent(false);
-    console.log('ON CREATE EVENT MODAL CLOSE');
   };
   const removeevent = () => {
     calenderevent.remove();
     setiseditdelete(false);
-    console.log('REMOVE EVENT');
   };
   const clickupdateevent = () => {
     const newArray = calendario;
@@ -205,14 +189,11 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
     }
     // setCalendario(newArray);
     setiseditdelete(false);
-    console.log('CLICK UPDATE EVENT');
   };
 
   const handleClick = () => {
     setshow(true);
-    console.log('HANDLE CLICK');
   };
-  // console.log("showmodel", showmodel);
 
   const formatToBullets = tipoServicio => {
     if (!tipoServicio) return null;

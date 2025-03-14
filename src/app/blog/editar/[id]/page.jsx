@@ -83,12 +83,10 @@ const Editblog = ({ params }) => {
     while ((match = imgTagRegex.exec(content)) !== null) {
       index++
       const imageUrl = match[1];
-      console.log('IMAGEURL', imageUrl)
       // si tiene la key, devolver la imagen original, si no, agregar la key
       const newUrl = imageUrl.includes(process.env.NEXT_PUBLIC_KEY_IMG) ? imageUrl : `${imageUrl}${process.env.NEXT_PUBLIC_KEY_IMG}`
       content = content.replace(imageUrl, newUrl);
     }
-    console.log('CONTENT', content)
     return content;
   };
 
@@ -137,8 +135,6 @@ const Editblog = ({ params }) => {
 
         setTexto(processedText)
         setDownloads(processedArray.descargas)
-        console.log('INICIAL processedText', processedText)
-        console.log('DATA INICIAl', obj)
         // Actualiza los valores iniciales del formulario
         reset(obj);
       } catch (error) {
@@ -198,23 +194,19 @@ const Editblog = ({ params }) => {
     const fileName = formatText(`${name}-${id}`)
     const ext = extension(file)
     const pattern = "?sp"
-    console.log('FILE', file)
     const updateExt = removeFromText(ext, pattern)
-    console.log('EXT 00', ext)
-    console.log('updateExt 01', updateExt)
     const extractFileName = getFileNameWithoutExtensionAndPattern(file)
 
     const body = {
       "image": file.includes(pattern) ? `${extractFileName}${process.env.NEXT_PUBLIC_KEY_IMG}` : file,
       "file_name": `${fileName}.${updateExt}`
     }
-    console.log('HANDLEFILES', body)
     try {
       const response = await uploadFile(body)
-      console.log('response handleFiles', response)
       return response;
     } catch (error) {
       console.log('error', error)
+      setMessage(`Ocurrió un error: ${error}`)
     }
   }
 
@@ -230,30 +222,24 @@ const Editblog = ({ params }) => {
     while ((match = imgTagRegex.exec(content)) !== null) {
       index++
       const imageUrl = match[1];
-      console.log('imageUrl', imageUrl)
       // const file = await fetch(imageUrl).then((res) => res.blob());
 
       const uploadedUrl = await handleFiles(imageUrl, data.blog_titulo, index);
-      console.log('UPLOADEDURL', uploadedUrl)
       content = content.replace(imageUrl, uploadedUrl.blob_url);
     }
-    console.log('CONTENT', content)
     return content;
   };
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log('DATA', data)
     try {
       // 1. Subir imagen de cabecera
       const headerImageFile = `${data.blog_imagen}${process.env.NEXT_PUBLIC_KEY_IMG}`;
       const headerImageUrl = await handleFiles(headerImageFile, data.blog_titulo, 0);
 
-      // console.log('headerImageUrl', headerImageUrl)
 
       // 2. Procesar imágenes en línea en el texto del blog
       let blogContent = editorData;
       blogContent = await processInlineImages(blogContent);
-      console.log('blogContent', blogContent)
       if (blogContent.error) {
         setMessage(`Ha ocurrido un error. Revisa el contenido del texto e intenta de nuevo. ${blogContent.error}`)
         setSuccess('fail')
@@ -272,7 +258,6 @@ const Editblog = ({ params }) => {
       };
 
       const updateResponse = await updateBlog(blogData)
-      console.log('UPDATEREPSONSE', updateResponse)
       if (updateResponse.ok ) {
         setSuccess('success')
         setMessage('Datos actualizados exitosamente.')
@@ -287,18 +272,15 @@ const Editblog = ({ params }) => {
       // let count = 0
       // const responses = []
       // for (const download of downloads) {
-      //   // console.log('DOWNLOAD', download, data[`descarga_url_${download.id}`])
       //   const file = data[`descarga_url_${download.id}`];
       //   const fileName = formatText(data[`descarga_titulo_${download.id}`])
-      //   // console.log('fileName 02', fileName)
       //   const ext = extension(data[`descarga_url_${download.id}`])
-      //   console.log('EXT 02', ext)
+      //   ('EXT 02', ext)
       //   const bodyDownload = {
       //     "image": file,
       //     "file_name": `${fileName}.${ext}`
       //   }
 
-      //   // console.log('BODYDOWNLOAD', bodyDownload)
       //   const fileUrl = await uploadFile(bodyDownload);
 
       //   const downloadData = {
@@ -307,7 +289,6 @@ const Editblog = ({ params }) => {
       //     titulo: data[`descarga_titulo_${download.id}`],
       //     bajada: data[`descarga_bajada_${download.id}`]
       //   };
-      //   // console.log('downloadData', downloadData)
 
       //   const downloadResponse = await createDownload(downloadData)
       //   responses.push(downloadResponse)
@@ -316,7 +297,6 @@ const Editblog = ({ params }) => {
       //   }
       // }
 
-      // // console.log("Blog creado exitosamente");
       // if (blogResponse.message == "Registro añadido exitosamente." && responses.length === count) {
       //   setSuccess('success')
       //   setMessage('Blog agregado correctamente')

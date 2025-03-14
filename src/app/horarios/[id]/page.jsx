@@ -45,7 +45,6 @@ const ScheduleByProfessional = ({ params }) => {
   const [disponibilidad, setDisponibilidad] = useState()
 
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
   };
   const [selectedOption, setSelectedOption] = useState(null);
   const styleInput = {
@@ -129,7 +128,7 @@ const ScheduleByProfessional = ({ params }) => {
       setCalendario([...processed])
 
     } catch (error) {
-      console.log(error)
+      console.log('Error:', error)
       setError('No hay conexión con el servidor')
     } finally{
       setIsLoading(false)
@@ -251,7 +250,7 @@ const ScheduleByProfessional = ({ params }) => {
 
       return response
     } catch (error) {
-      console.log('error', error)
+      console.log('Error:', error)
     }
   }
 

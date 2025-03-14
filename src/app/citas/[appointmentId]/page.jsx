@@ -91,7 +91,6 @@ const EditAppoinments = ({ params }) => {
     try {
       const response = await fetchAppointments()
       const filteredResponse = response.filter(item => (item.id_cita == params.appointmentId) /* && (item.id_profesional == session.user?.id) */)
-      // console.log(filteredResponse)
       const obj = {
         speciality: filteredResponse[0].especialidad_profesional,
         appointment_date: dayjs(filteredResponse[0]['fecha']).format('YYYY-MM-DD'),
@@ -160,7 +159,6 @@ const EditAppoinments = ({ params }) => {
   // const { field } = useController({ name: 'especialidad', control })
 
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
   };
   const loadFile = (event) => {
     // Handle file loading logic here
@@ -179,7 +177,6 @@ const EditAppoinments = ({ params }) => {
       if (data.status === "status") {
         try {
           const response = await changeStatusAppointment(data.id, status)
-          // console.log('response', response)
           if (response.estado === false) {
             setSuccess('fail')
           } else {

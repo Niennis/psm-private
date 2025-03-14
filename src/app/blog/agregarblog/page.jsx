@@ -137,8 +137,6 @@ const Addblog = () => {
       const headerImageFile = data.blog_imagen;
       const headerImageUrl = await handleFiles(headerImageFile, data.blog_titulo, 0);
 
-      // console.log('headerImageUrl', headerImageUrl)
-
       // 2. Procesar imágenes en línea en el texto del blog
       let blogContent = editorData;
       blogContent = await processInlineImages(blogContent);
@@ -166,22 +164,17 @@ const Addblog = () => {
       }
 
       let count = 0
-      // console.log('BLOG', blogResponse)
       // 4. Subir archivos de descargas y crear entradas de descargas
-      // console.log('DATA', data)
       const responses = []
       for (const download of downloads) {
-        // console.log('DOWNLOAD', download, data[`descarga_url_${download.id}`])
         const file = data[`descarga_url_${download.id}`];
         const fileName = formatText(data[`descarga_titulo_${download.id}`])
-        // console.log('fileName 02', fileName)
         const ext = extension(data[`descarga_url_${download.id}`])
         const bodyDownload = {
           "image": file,
           "file_name": `${fileName}.${ext}`
         }
 
-        // console.log('BODYDOWNLOAD', bodyDownload)
         const fileUrl = await uploadFile(bodyDownload);
 
         const downloadData = {
@@ -190,7 +183,6 @@ const Addblog = () => {
           titulo: data[`descarga_titulo_${download.id}`],
           bajada: data[`descarga_bajada_${download.id}`]
         };
-        // console.log('downloadData', downloadData)
 
         const downloadResponse = await createDownload(downloadData)
         responses.push(downloadResponse)
@@ -199,7 +191,6 @@ const Addblog = () => {
         }
       }
 
-      // console.log("Blog creado exitosamente");
       if (blogResponse.message == "Registro añadido exitosamente." && responses.length === count) {
         setSuccess('success')
         setMessage('Blog agregado correctamente')

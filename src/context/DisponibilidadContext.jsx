@@ -8,7 +8,6 @@ const DisponibilidadContext = createContext();
 // Proveedor de contexto
 const DisponibilidadProvider = ({ children }) => {
   const [data, setData] = useState('');
-  console.log('provider', data)
   return (
     <DisponibilidadContext.Provider value={{ data, setData }}>
       {children}

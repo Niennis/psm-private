@@ -83,7 +83,6 @@ const AddProfessional = () => {
   }, [isSubmitSuccessful, reset])
 
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
     setIsClicked(true);
   };
 
@@ -105,7 +104,6 @@ const AddProfessional = () => {
         const response = await addProfessional(data)
         // const response = await addProfessional(dataWithHashPass)
         // const responseEspecialidad = await addEspecialidad(bodyEspecialidad)
-        // console.log(responseEspecialidad)
         if (response.validacion === false) {
           setSuccess('fail')
           setErrorMessage('Revisa los datos')
@@ -113,14 +111,14 @@ const AddProfessional = () => {
           setSuccess('success')
           reset()
         }
-      } catch (err) {
-        console.log('ERR', err)
+      } catch (error) {
+        console.log('Error:', error)
         setSuccess('fail')
         setErrorMessage('El servicio no está disponible')
       }
 
     } else {
-      console.log('FAIL')
+      setErrorMessage('El servicio no está disponible')
     }
   })
 

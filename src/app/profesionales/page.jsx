@@ -65,7 +65,6 @@ const DoctorList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const onSelectChange = (newSelectedRowKeys) => {
-    // console.log("selectedRowKeys changed: ", selectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
@@ -74,7 +73,6 @@ const DoctorList = () => {
     onChange: onSelectChange,
   };
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
   };
 
   const handleSearch = (e) => {

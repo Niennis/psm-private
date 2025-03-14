@@ -78,7 +78,6 @@ const Blogdetails = ({ params }) => {
   // const [blog, setBlog] = useState({})
   const matches = useMediaQuery('(min-width:600px)');
   const router = useRouter()
-console.log(blog)
 
   useEffect(() => {
     // const fetchData = async() => {
@@ -193,7 +192,6 @@ console.log(blog)
                     </article>
 
                     <div className="row d-flex my-4" style={{ padding: '0', marginLeft: '0px', marginRight: '96px', borderTop: '1px solid grey', textAlign: 'center' }} >
-                      {/* {console.log('leblog', blog.downloads)} */}
                       <div className="col-12">
                         <h3 className='sailec-medium' style={{ fontWeight: 700, fontSize: '32px', lineHeight: '40px' }}>Contenido descargable</h3>
                       </div>

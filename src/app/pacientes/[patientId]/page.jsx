@@ -65,7 +65,7 @@ const EditPatients = ({ params }) => {
 
       return obj
     } catch (error) {
-      console.log('error', error)
+      console.log('Error:', error)
     }
   }
 
@@ -80,7 +80,6 @@ const EditPatients = ({ params }) => {
   const [show, setShow] = useState(false);
 
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
   };
 
 

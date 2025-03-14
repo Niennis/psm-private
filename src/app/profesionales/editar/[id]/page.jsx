@@ -65,7 +65,6 @@ const EditDoctor = ({ params }) => {
 
   const [show, setShow] = useState(false);
   const onChange = (date, dateString) => {
-    // console.log(date, dateString);
   };
   const loadFile = (event) => {
     // Handle file loading logic here
@@ -139,9 +138,7 @@ const EditDoctor = ({ params }) => {
 
   // FUNCIÓN UPDATE
   const handleEdit = handleSubmit(async (data, e) => {
-    // console.log('data', data)
     e.preventDefault()
-    // console.log('Formulario enviado con datos:', data, initial);
 
     const match = data.password === data.confirmPassword;
 
@@ -171,7 +168,6 @@ const EditDoctor = ({ params }) => {
       telefono: data.mobile,
       tipo_usuario: initial.tipo_usuario,
     };
-    console.log('BODY', body);
 
     const editPass = {
       contrasena: data.password,
@@ -205,7 +201,6 @@ const EditDoctor = ({ params }) => {
              `)
         }
       } catch (error) {
-        console.log('error todo', error)
         setSuccess('fail')
         setError(`Problema con el servicio: ${error.message}. Vuelve a intentar más tarde.`)
       }
@@ -222,7 +217,6 @@ const EditDoctor = ({ params }) => {
           setError(`Ocurrió un problema: ${response.detalle}`)
         }
       } catch (error) {
-        console.log('error pass', error)
         setSuccess('fail')
         setError(`Ocurrió un problema: ${error.message}. Intenta más tarde`)
       }
@@ -245,7 +239,6 @@ const EditDoctor = ({ params }) => {
             `)
         }
       } catch (error) {
-        console.log('error todo', error)
         setSuccess('fail')
         setError(`Problema con el servicio: ${error.message}. Vuelve a intentar más tarde.`)
       }

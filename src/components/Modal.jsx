@@ -24,7 +24,6 @@ const ModalConsent = ({ open, handleClose, onClick, errors }) => {
   // const [open, setOpen] = useState(false);
   // const handleOpen = () => setOpen(true);
   // const handleClose = () => setOpen(false);
-  // console.log('errors', errors)
 
   return (
     <div>

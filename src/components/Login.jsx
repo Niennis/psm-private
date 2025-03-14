@@ -98,7 +98,7 @@ const Login = () => {
       // setIsLoading(true);
 
     } catch (error) {
-      console.log('ERRRR', error);
+      console.log('Error:', error)
       if (error.message === 'No se pudo acceder. Correo no autorizado.') {
         setError('No tienes acceso. Tu correo no está autorizado.');
       } else {

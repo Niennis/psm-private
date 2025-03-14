@@ -43,7 +43,6 @@ const Admin_Dashboard = () => {
   }, [setProps]);
 
   const handleReportes = async (tabla) => {
-    console.log(tabla)
     setLoading(true)
     try {
       const response = await reportes(tabla)
