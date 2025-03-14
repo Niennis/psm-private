@@ -10,7 +10,7 @@ import { useForm, Controller } from 'react-hook-form'
 
 import Select from "react-select";
 
-import { fetchSpecialityById } from '@/services/DoctorsServices';
+import { fetchSpecialityById, fetchProfessionals } from '@/services/DoctorsServices';
 import { createSchedule, getDates, fetchScheduleByDate, validateDates, generarHorasMedicas, fetchBlocksAvailables, editDisponibilidad, deleteDisponibilidad } from '@/services/SchedulesServices';
 import Calender from '../../calender/page';
 
@@ -78,7 +78,7 @@ const ScheduleByProfessional = ({ params }) => {
     formState: { errors }
   } = useForm({
     defaultValues: async () => {
-      setIsLoading(true)
+      // setIsLoading(true)
       const duracionData = duracion.find(item => item.label == dataInicial.duracionServicio)
       const { especialidades: user } = await fetchSpecialityById(params.id)
       const obj = {
@@ -96,7 +96,6 @@ const ScheduleByProfessional = ({ params }) => {
         tipo_cita: dataInicial.tipoServicio,
       }
       setProfesional(obj)
-      
       return obj
     }
   })
@@ -130,15 +129,51 @@ const ScheduleByProfessional = ({ params }) => {
     } catch (error) {
       console.log('Error:', error)
       setError('No hay conexión con el servidor')
-    } finally{
+    } finally {
       setIsLoading(false)
     }
   }
 
+
+  const getProfessionals = async () => {
+    try {
+      const response = await fetchProfessionals()
+
+      const responseWithSpeciality = response.map(async item => {
+        const { especialidades } = await fetchSpecialityById(item.id)
+        return ({
+          ...item,
+          especialidad: especialidades[0]?.especialidad || 'No informada',
+        })
+      })
+      const promises = await Promise.all(responseWithSpeciality)
+
+      const docs = promises.map((doc, i) => {
+        return {
+          value: i + 2,
+          label: doc.nombre + ' ' + doc.apellido,
+          id: doc.id,
+          email: doc.email,
+          name: doc.nombre,
+          especialidad: doc.especialidad
+        }
+      })
+
+      if (docs.length > 0) {
+        setProfesional(docs)
+      }
+
+      return promises
+    } catch (error) {
+      console.log('Error', error)
+    }
+  }
+
+
   useEffect(() => {
     session?.user?.rol === 'administrador'
       ?
-      getProfessionals()
+      fetchData(params.id)
       :
       fetchData(session?.user?.id)
   }, [])
