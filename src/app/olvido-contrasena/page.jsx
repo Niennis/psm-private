@@ -28,20 +28,21 @@ const ForgotPassword = () => {
     const user = await fetchUserByEmail(email)
 
     if (user.tipo_usuario === 'profesional' || user.tipo_usuario === 'administrador') {
-      console.log('POR QUÉEEE')
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, email }),
       });
-
+      const data = await res.json()
+console.log('res', res)
+console.log('data', data)
       if (res.ok) {
         setSuccess('success')
-        setMessage('Correo de recuperación enviado. Revisa tu bandeja de entrada');
+        setMessage(data?.message || 'Correo de recuperación enviado. Revisa tu bandeja de entrada');
         // router.push('/'); // Redirige al inicio de sesión
       } else {
         setSuccess('fail')
-        setMessage(data.message || 'Algo salió mal.');
+        setMessage(data?.message || 'Algo salió mal.');
       }
     }
     else {
