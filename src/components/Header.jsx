@@ -347,7 +347,7 @@ const Header = () => {
                 </>
                 : session.user?.picture ?
                   <button className="btn">
-                    <Link href={`/citas`} style={{ textDecoration: 'none' }}>
+                    <Link href={"/citas"} style={{ textDecoration: 'none' }}>
                       <Image
                         className="avatar-img rounded-circle"
                         src={session?.user?.picture}
@@ -362,7 +362,7 @@ const Header = () => {
                     </small>
                   </button>
                   :
-                  <Link href={`/profesionales/editar/${session?.user?.id}`} style={{ padding: 0, margin: 0, textAlign: 'right' }}>
+                  <Link href={`/citas`} style={{ padding: 0, margin: 0, textAlign: 'right' }}>
                     <FaUserCircle style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} />
                     <small style={{ display: 'block', textAlign: 'right', width: 'min-content' }}>
                       {`Bienvenido, 
