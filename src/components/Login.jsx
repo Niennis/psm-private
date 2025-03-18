@@ -36,6 +36,12 @@ const Login = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if(session?.user?.rol === 'profesional') {
+      router.push('/citas')
+    }
+  })
+
   const { register, handleSubmit, watch,
     formState: { errors }
   } = useForm()
@@ -45,7 +51,6 @@ const Login = () => {
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
-
 
   /* LOGIN CON CREDENCIALES */
   const handleOnSubmit = handleSubmit(async (data) => {
@@ -64,6 +69,7 @@ const Login = () => {
           email: data.email,
           password: data.password
         })
+
         if (res.validacion === false) {
           setIsInvalid(true)
         } else {
@@ -155,7 +161,7 @@ const Login = () => {
                                   <h3 className="section-title">Login</h3>
 
                                   <ul className="nav nav-tabs underline">
-                                    {!URL_RESERVAR.includes('agendaelectronica') && <li className="nav-item ">
+                                    {URL_RESERVAR.includes('agendaelectronica') && <li className="nav-item ">
                                       <a
 
                                         className={`sailec-medium nav-link ${hash === 'estudiantes' ? 'active' : hash === '' ? 'active' : ''}`}
@@ -190,7 +196,7 @@ const Login = () => {
 
                                     {/* LOGIN ESTUDIANTES */}
                                     {
-                                      !URL_RESERVAR.includes('agendaelectronica') && <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', }}>
+                                      URL_RESERVAR.includes('agendaelectronica') && <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', }}>
                                         <p>Ingresa con tu mail UDP para poder realizar una reserva.</p>
                                         <div>
                                           <button className="gsi-material-button btn btn-primary btn-block"
