@@ -23,8 +23,56 @@ import { FaArrowLeft } from "react-icons/fa";
 import { FaDownload } from 'react-icons/fa';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
+import ParserImgToImage from '@/components/Parser';
 
 const cacheHandler = new CacheHandler();
+
+const normalizarTexto = (texto) =>{
+  // Expresiones regulares dinámicas para base y key
+  const baseRegex = new RegExp(`(${process.env.NEXT_PUBLIC_BASE_IMG})`, "i");
+  const keyRegex = new RegExp(`(${process.env.NEXT_PUBLIC_KEY_IMG})`, "i");
+
+  // Expresión regular para la URL (nombre de archivo de imagen con extensión)
+  const urlRegex = /(\b\w+\.(jpg|png|gif|jpeg|webp)\b)/i;
+
+  // Extraer las partes
+  const baseMatch = texto.match(baseRegex);
+  const urlMatch = texto.match(urlRegex);
+  const keyMatch = texto.match(keyRegex);
+
+  // Verificar que cada parte esté presente
+  if (!baseMatch || !urlMatch || !keyMatch) {
+    throw new Error("El texto no contiene base, url o key válidos.");
+  }
+
+  // Obtener los valores únicos (en caso de que haya duplicados)
+  const base = baseMatch[1];
+  const url = urlMatch[1];
+  const key = keyMatch[1];
+
+  // Reconstruir el texto en el orden correcto
+  return `${base} ${url} ${key}`;
+}
+const prepareImg = (src) => {
+  const match_base = src.match(new RegExp(process.env.NEXT_PUBLIC_BASE_IMG)) || [];
+  const match_key = src.match(new RegExp(/(process.env.NEXT_PUBLIC_KEY_IMG)/i)) || []
+
+  if (match_base.length > 1 || match_key.length > 1) {
+    normalizarTexto(src)
+  } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+
+    return src
+  } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+
+    return `${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+  } else if (src.includes(process.env.NEXT_PUBLIC_KEY_IMG) && !src.includes(process.env.NEXT_PUBLIC_BASE_IMG)) {
+
+    return `${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
+  } else if (!src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+
+    return `${process.env.NEXT_PUBLIC_BASE_IMG}${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+  }
+}
 
 const card = (item) => (
   <Fragment>
@@ -36,7 +84,7 @@ const card = (item) => (
           padding: '16px 24px 16px 24px'
         }}
       >
-        {item.titulo}
+        {item.descarga_titulo}
       </Typography>
       <Typography variant="body2" className='lato'
         sx={{
@@ -45,11 +93,11 @@ const card = (item) => (
           lineHeight: '28px',
           fontWeight: 400
         }}>
-        {item.bajada}
+        {item.descarga_bajada}
       </Typography>
     </CardContent>
     <CardActions sx={{ backgroundColor: "#F1F1F1", justifyContent: 'flex-end' }}>
-      <a href={`/downloads/${item.url}`}  >
+      <a href={item.descarga_url}  >
 
         <button
           className='btn btn-0'
@@ -74,17 +122,25 @@ const card = (item) => (
 );
 
 const Blogdetails = ({ params }) => {
-  const [blog, setBlog] = useState(blogs[params.id])
+  const [blog, setBlog] = useState()
+  const [descargas, setDescargas] = useState()
   // const [blog, setBlog] = useState({})
   const matches = useMediaQuery('(min-width:600px)');
   const router = useRouter()
 
   useEffect(() => {
-    // const fetchData = async() => {
-    //   const {bloques} = await fetchBlog(params.id);
-    //   setBlog(bloques[0])
-    // }
-    // fetchData()
+    const fetchData = async () => {
+      const { blogs } = await fetchBlog(params.id);
+      setBlog(blogs[0])
+      const newArray = blogs.map(item => ({
+        descarga_bajada: item.descarga_bajada,
+        descarga_titulo: item.descarga_titulo,
+        descarga_url: item.descarga_url
+      }));
+
+      setDescargas(newArray)
+    }
+    fetchData()
     // setBlog(blogs[params.id])
   }, [])
 
@@ -99,31 +155,57 @@ const Blogdetails = ({ params }) => {
             // display: 'flex',
             // alignItems: 'center',
           }}>
-            <img
-              alt="#"
-              // src={blog.imagen}
-              width={'100%'}
-              style={{
-                backgroundPosition: 'center',
-                // height: 'fit-content'
-              }}
-            />
+            {blog?.blog_imagen &&
+              <>
+                <img
+                  alt="#"
+                  // src={`${process.env.NEXT_PUBLIC_BASE_IMG}${blog?.blog_imagen}${process.env.NEXT_PUBLIC_KEY_IMG}`}
+                  // src={blog?.blog_imagen.includes(process.env.NEXT_PUBLIC_KEY_IMG) ? `${blog?.blog_imagen}` : `${blog?.blog_imagen}${process.env.NEXT_PUBLIC_KEY_IMG}`}
+                  src={prepareImg(blog?.blog_imagen)}
+                  width={'100%'}
+                  style={{
+                    backgroundPosition: 'center',
+                    // height: 'fit-content'
+                  }}
+                />
+              </>
+            }
 
           </div>}
           {matches &&
-            <button className='btn mt-4 mb-5'
-              style={{
-                border: '1px solid #A6A6A6',
-                height: '56px',
-                width: '163px',
-                padding: '0px 24px',
-                borderRadius: '100px',
-                marginLeft: '76px'
-              }}
-              onClick={() => router.back()}
-            >
-              <FaArrowLeft /> Volver
-            </button>}
+            <>
+              <button className='btn mt-4 mb-5'
+                style={{
+                  border: '1px solid #A6A6A6',
+                  height: '56px',
+                  width: '163px',
+                  padding: '0px 24px',
+                  borderRadius: '100px',
+                  marginLeft: '76px'
+                }}
+                onClick={() => router.back()}
+              >
+                <FaArrowLeft /> Volver
+              </button>
+
+              <button className='btn mt-4 mb-5'
+                style={{
+                  border: '1px solid #A6A6A6',
+                  height: '56px',
+                  width: '163px',
+                  padding: '0px 24px',
+                  borderRadius: '100px',
+                  marginLeft: '76px',
+                }}
+
+              >
+                <a href={`/blog/editar/${params.id}`} style={{ color: 'black' }}>
+
+                  Editar
+                </a>
+              </button>
+            </>
+          }
           <div className="page-wrapper" style={{ marginLeft: 'unset' }}>
             <div className="content" style={{ padding: 0 }}>
 
@@ -135,7 +217,7 @@ const Blogdetails = ({ params }) => {
                   <div className="blog-view" style={{ paddingLeft: matches && '96px' }}>
                     <div className="col-lg-12" style={{ padding: matches ? 0 : '32px 0 0 0', margin: matches ? '0' : '80px 0 0 0' }}>
                       <h3 className={matches ? "blog-title" : "blog-title-sm"} style={{ marginLeft: '0px', fontSize: '48px', lineHeight: '60px', fontWeight: 700, textWrap: 'balance' }}>
-                        {blog && blog.titulo}
+                        {blog && blog.blog_titulo}
                       </h3>
                     </div>
                     <article className="blog blog-single-post d-flex justify-content-between flex-wrap" >
@@ -174,28 +256,28 @@ const Blogdetails = ({ params }) => {
                       </div> */}
                       {/* TEXTO */}
 
-                      <div className="sailec col-lg-10 col-12" style={{ marginLeft: '0px' }}>
-                        <div className={matches ? "blog-content" : "blog-content-sm"} dangerouslySetInnerHTML={blog && { __html: blog.texto }}>
-                          {/* {blog.texto} */}
-                        </div>
-                      </div>
-
-                      {blog && blog?.video ? <div className="col-lg-12 col-12 d-flex flex-wrap" style={{ marginLeft: '0px', marginTop: matches ? '3rem' : 0, border: '1px solid red' }}>
-                        {/* <div className="blog-content" style={{ marginBottom: matches ? 'auto' : '20px' }} >
-                          <img src={blog.imagenes[1]} alt="" style={{ width: '600px' }} />
+                      <div className="sailec col-lg-10 col-12 p-2" style={{ marginLeft: '0px', fontSize: '24px', fontWeight: 400, lineHeight: '32px', letterSpacing: '0em' }}>
+                        {/* <div className={matches ? "blog-content" : "blog-content-sm"} dangerouslySetInnerHTML={blog && { __html: blog?.blog_texto }}>
                         </div> */}
 
+                        {blog && <ParserImgToImage classType={matches ? "blog-content" : "blog-content-sm"} htmlContent={blog?.blog_texto} />}
+
+
+                      </div>
+
+                      {/* {blog && blog?.video ? <div className="col-lg-12 col-12 d-flex flex-wrap" style={{ marginLeft: '0px', marginTop: matches ? '3rem' : 0, border: '1px solid red' }}>
+                       
                         <iframe width={matches ? "60%" : "100%"} height="615" src={blog.video} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
                       </div>
                         : <></>
-                      }
+                      } */}
                     </article>
 
                     <div className="row d-flex my-4" style={{ padding: '0', marginLeft: '0px', marginRight: '96px', borderTop: '1px solid grey', textAlign: 'center' }} >
                       <div className="col-12">
                         <h3 className='sailec-medium' style={{ fontWeight: 700, fontSize: '32px', lineHeight: '40px' }}>Contenido descargable</h3>
                       </div>
-                      {blog?.downloads && blog['downloads'].map((item, index) => (
+                      {descargas && descargas?.map((item, index) => (
 
                         <div className="col-12 col-lg-4 col-md-8 mb-3 mt-3 mt-md-5" key={index} style={{ margin: 'auto' }}>
                           <Box sx={{ minWidth: 275, width: '100%', textAlign: 'left' }}>

@@ -47,6 +47,55 @@ const extractTextFromHTML = (htmlString) => {
   return extractedText.trim(); // Eliminar espacios en blanco al inicio y al final
 }
 
+const normalizarTexto = (texto) => {
+  // Expresiones regulares dinámicas para base y key
+  const baseRegex = new RegExp(`(${process.env.NEXT_PUBLIC_BASE_IMG})`, "i");
+  const keyRegex = new RegExp(`(${process.env.NEXT_PUBLIC_KEY_IMG})`, "i");
+
+  // Expresión regular para la URL (nombre de archivo de imagen con extensión)
+  const urlRegex = /(\b\w+\.(jpg|png|gif|jpeg|webp)\b)/i;
+
+  // Extraer las partes
+  const baseMatch = texto.match(baseRegex);
+  const urlMatch = texto.match(urlRegex);
+  const keyMatch = texto.match(keyRegex);
+
+  // Verificar que cada parte esté presente
+  if (!baseMatch || !urlMatch || !keyMatch) {
+    throw new Error("El texto no contiene base, url o key válidos.");
+  }
+
+  // Obtener los valores únicos (en caso de que haya duplicados)
+  const base = baseMatch[1];
+  const url = urlMatch[1];
+  const key = keyMatch[1];
+
+  // Reconstruir el texto en el orden correcto
+  return `${base} ${url} ${key}`;
+}
+const prepareImg = (src) => {
+  const match_base = src.match(new RegExp(process.env.NEXT_PUBLIC_BASE_IMG)) || [];
+  const match_key = src.match(new RegExp(/(process.env.NEXT_PUBLIC_KEY_IMG)/i)) || []
+
+  if (match_base.length > 1 || match_key.length > 1) {
+    normalizarTexto(src)
+  } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes('https://reposaludmental.blob.core.windows.net/test/') && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+
+    return `${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+  } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+
+    return src
+  } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+
+    return `${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+  } else if (src.includes(process.env.NEXT_PUBLIC_KEY_IMG) && !src.includes(process.env.NEXT_PUBLIC_BASE_IMG)) {
+
+    return `${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
+  } else if (!src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+    return `${process.env.NEXT_PUBLIC_BASE_IMG}${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+  }
+}
+
 const BlogView = () => {
   const ROL = ["administrador"]
   const { data: session } = useSession()
@@ -120,7 +169,7 @@ const BlogView = () => {
                 <div className="col-sm-12">
                   <ul className="breadcrumb">
                     <li className="breadcrumb-item">
-                      <Link href="/blogview">Blog </Link>
+                      <Link href="/blog">Blog </Link>
                     </li>
                     <li className="breadcrumb-item">
                       <i className="feather-chevron-right">
@@ -145,11 +194,12 @@ const BlogView = () => {
                             className="img-fluid"
                             width={313}
                             height={173}
-                            src={blog.blog_imagen.includes(process.env.NEXT_PUBLIC_KEY_IMG) ? `${blog.blog_imagen}` :  `${blog.blog_imagen}${process.env.NEXT_PUBLIC_KEY_IMG}`}
+                            // src={blog.blog_imagen.includes(process.env.NEXT_PUBLIC_KEY_IMG) ? `${blog.blog_imagen}` : `${blog.blog_imagen}${process.env.NEXT_PUBLIC_KEY_IMG}`}
+                            src={prepareImg(blog?.blog_imagen)}
                             alt="#"
                           />
                         </Link>
-                       
+
                         {/* <ul className="nav view-blog-list blog-views">
                           <li>
                             <i className="feather-message-square me-1" />
@@ -164,7 +214,7 @@ const BlogView = () => {
                         </ul> */}
                       </div>
                       <div className="blog-content">
-                       {/*  <div className="blog-grp-blk">
+                        {/*  <div className="blog-grp-blk">
                           <div className="blog-img-blk">
                             <Link href="/blog">
                               <img
@@ -186,14 +236,14 @@ const BlogView = () => {
                           </span>
                         </div> */}
                         <h3 className="blog-title">
-                          <Link href="/blog">
+                          <Link href={`/blog/${blog.blog_id}`}>
                             {blog.blog_titulo}
                           </Link>
                         </h3>
                         <p>
                           {truncarPalabras(extractTextFromHTML(blog.blog_texto), 20)}
                         </p>
-                        <Link href="/blog" className="read-more d-flex">
+                        <Link href={`/blog/${blog.blog_id}`} className="read-more d-flex">
                           {" "}
                           Leer más...
                           <i className="fa fa-long-arrow-right ms-2" />
@@ -203,7 +253,7 @@ const BlogView = () => {
                   </div>
                 ))
               }
-            
+
             </div>
           </div>
           <div className="notification-box">

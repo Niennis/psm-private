@@ -320,7 +320,7 @@ const Addblog = () => {
                                 />
                               </div>
                             </div>
-                            <div className="col-12 col-md-6 col-xl-6">
+                            {/* <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group select-gender">
                                 <label className="gen-label">
                                   ¿Destacar? <span className="login-danger">*</span>
@@ -345,7 +345,7 @@ const Addblog = () => {
                                   </span>
                                 }
                               </div>
-                            </div>
+                            </div> */}
                             <div className="col-12 col-md-12 col-xl-12">
                               <div className="form-group summer-mail">
                                 <div className="main-container">
