@@ -86,10 +86,13 @@ const AddProfessional = () => {
     setIsClicked(true);
   };
 
-  const onSubmit = handleSubmit(async (data,e) => {
+  const deleteSpaces = email => {
+    return email.replace(/\s/g, '')
+  }
+
+  const onSubmit = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
-
     const saltRound = 10;
     const hashedPassword = await bcrypt.hash(data.password, saltRound)
     const dataWithHashPass = { ...data, password: hashedPassword }
@@ -98,6 +101,7 @@ const AddProfessional = () => {
     //   id_user: params.id,
     //   id_especialidad: data.speciality.id
     // }
+    data.email = deleteSpaces(data.email)
 
     if (data) {
       try {
@@ -106,10 +110,14 @@ const AddProfessional = () => {
         // const responseEspecialidad = await addEspecialidad(bodyEspecialidad)
         if (response.validacion === false) {
           setSuccess('fail')
-          setErrorMessage('Revisa los datos')
+          if (response.detalle.includes('Duplicate entry') && response.detalle.includes('email')) {
+            setErrorMessage('Email ya está registrado.')
+          } else {
+            setErrorMessage('Revisa los datos:', response.detalle)
+          }
         } else if (response.estado === true) {
           setSuccess('success')
-          reset()
+          // reset()
         }
       } catch (error) {
         console.log('Error:', error)
@@ -558,6 +566,7 @@ const AddProfessional = () => {
                             <button
                               type="submit"
                               className="btn btn-primary submit-form me-2"
+                              // onClick={onSubmit}
                             >
                               Enviar
                             </button>
