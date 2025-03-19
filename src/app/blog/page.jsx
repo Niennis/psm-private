@@ -81,18 +81,19 @@ const prepareImg = (src) => {
     normalizarTexto(src)
   } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes('https://reposaludmental.blob.core.windows.net/test/') && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
 
-    return `${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+    return `/api/file-proxy?filePath=${src}`
   } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
-
-    return src
+    const removeKey = src.split('?')[0]
+    return `/api/file-proxy?filePath=${removeKey}`
   } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
 
-    return `${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+    return `/api/file-proxy?filePath=${src}`
   } else if (src.includes(process.env.NEXT_PUBLIC_KEY_IMG) && !src.includes(process.env.NEXT_PUBLIC_BASE_IMG)) {
 
-    return `${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
+    return `/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
   } else if (!src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
-    return `${process.env.NEXT_PUBLIC_BASE_IMG}${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+
+    return `/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
   }
 }
 

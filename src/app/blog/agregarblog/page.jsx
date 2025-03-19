@@ -132,6 +132,7 @@ const Addblog = () => {
   };
 
   const onSubmit = handleSubmit(async (data) => {
+    console.log('data', data)
     try {
       // 1. Subir imagen de cabecera
       const headerImageFile = data.blog_imagen;
@@ -196,15 +197,20 @@ const Addblog = () => {
         setMessage('Blog agregado correctamente')
       } else {
         setSuccess('fail')
-        const objetosConError = arrayDeObjetos.filter(obj => obj.error);
-        const mensajesError = objetosConError.map(obj => obj.error).join('\n');
-        const combinedErrors = [blogResponse.error, mensajesError].filter(Boolean).join('\n');
+        // const objetosConError = arrayDeObjetos.filter(obj => obj.error);
+        // const mensajesError = objetosConError.map(obj => obj.error).join('\n');
+        // const combinedErrors = [blogResponse.error, mensajesError].filter(Boolean).join('\n');
 
-        setMessage(combinedErrors);
+        // setMessage(combinedErrors);
+        setMessage('')
       }
 
     } catch (error) {
       console.error("Error al procesar:", error);
+      // if(error.includes('not defined')){
+      //   setMessage(`Elemento no encontrado: ${error}`)
+      // }
+      setMessage(`Hubo un error: ${error}`)
     }
   });
 
@@ -316,11 +322,16 @@ const Addblog = () => {
                                   className="form-control"
                                   accept="image/*"
                                   multiple
-                                  {...register('blog_imagen')}
+                                  {...register('blog_imagen', {
+                                    required: {
+                                      value: true,
+                                    }
+                                  })
+                                  }
                                 />
                               </div>
                             </div>
-                            {/* <div className="col-12 col-md-6 col-xl-6">
+                            <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group select-gender">
                                 <label className="gen-label">
                                   ¿Destacar? <span className="login-danger">*</span>
@@ -345,7 +356,7 @@ const Addblog = () => {
                                   </span>
                                 }
                               </div>
-                            </div> */}
+                            </div>
                             <div className="col-12 col-md-12 col-xl-12">
                               <div className="form-group summer-mail">
                                 <div className="main-container">

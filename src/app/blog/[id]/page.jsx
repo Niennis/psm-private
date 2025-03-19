@@ -27,7 +27,7 @@ import ParserImgToImage from '@/components/Parser';
 
 const cacheHandler = new CacheHandler();
 
-const normalizarTexto = (texto) =>{
+const normalizarTexto = (texto) => {
   // Expresiones regulares dinámicas para base y key
   const baseRegex = new RegExp(`(${process.env.NEXT_PUBLIC_BASE_IMG})`, "i");
   const keyRegex = new RegExp(`(${process.env.NEXT_PUBLIC_KEY_IMG})`, "i");
@@ -59,67 +59,79 @@ const prepareImg = (src) => {
 
   if (match_base.length > 1 || match_key.length > 1) {
     normalizarTexto(src)
-  } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+  } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes('https://reposaludmental.blob.core.windows.net/test/') && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
 
-    return src
+    return `/api/file-proxy?filePath=${src}`
+  } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+    const removeKey = src.split('?')[0]
+    return `/api/file-proxy?filePath=${removeKey}`
   } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
 
-    return `${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+    return `/api/file-proxy?filePath=${src}`
   } else if (src.includes(process.env.NEXT_PUBLIC_KEY_IMG) && !src.includes(process.env.NEXT_PUBLIC_BASE_IMG)) {
 
-    return `${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
+    return `/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
   } else if (!src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
 
-    return `${process.env.NEXT_PUBLIC_BASE_IMG}${src}${process.env.NEXT_PUBLIC_KEY_IMG}`
+    return `/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
   }
 }
 
-const card = (item) => (
-  <Fragment>
-    <CardContent sx={{ padding: 0, bgcolor: '#F1F1F1', height: '17rem' }}>
-      <Typography variant="h5" component="div" className='sailec-medium'
-        sx={{
-          bgcolor: "#FABB00",
-          height: '6rem',
-          padding: '16px 24px 16px 24px'
-        }}
-      >
-        {item.descarga_titulo}
-      </Typography>
-      <Typography variant="body2" className='lato'
-        sx={{
-          padding: '16px 24px 16px 24px',
-          fontSize: '18px',
-          lineHeight: '28px',
-          fontWeight: 400
-        }}>
-        {item.descarga_bajada}
-      </Typography>
-    </CardContent>
-    <CardActions sx={{ backgroundColor: "#F1F1F1", justifyContent: 'flex-end' }}>
-      <a href={item.descarga_url}  >
+const card = (item) => {
 
-        <button
-          className='btn btn-0'
-          style={{
-            backgroundColor: "#3886FF",
-            color: '#FFF',
-            height: '48px',
-            width: '200px',
-            padding: '4px 24px',
-            margin: '8px',
-            borderRadius: '100px',
-            fontSize: '16px',
-            fontWeight: 600,
-            border: '2px solid #A5C8FF'
+  if (item.descarga_url.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+    item.descarga_url = item.descarga_url.split('?')[0]
+  }
+
+  // item.descarga_url = `/api/file-proxy?filePath=${item.descarga_url}`;
+
+  return (
+    <Fragment>
+      <CardContent sx={{ padding: 0, bgcolor: '#F1F1F1', height: '17rem' }}>
+        <Typography variant="h5" component="div" className='sailec-medium'
+          sx={{
+            bgcolor: "#FABB00",
+            height: '6rem',
+            padding: '16px 24px 16px 24px'
+          }}
+        >
+          {item.descarga_titulo}
+        </Typography>
+        <Typography variant="body2" className='lato'
+          sx={{
+            padding: '16px 24px 16px 24px',
+            fontSize: '18px',
+            lineHeight: '28px',
+            fontWeight: 400
           }}>
-          Descargar <FaDownload />
-        </button>
-      </a>
+          {item.descarga_bajada}
+        </Typography>
+      </CardContent>
+      <CardActions sx={{ backgroundColor: "#F1F1F1", justifyContent: 'flex-end' }}>
+        <a href={`/api/file-proxy?filePath=${item.descarga_url}`}  >
 
-    </CardActions>
-  </Fragment>
-);
+          <button
+            className='btn btn-0'
+            style={{
+              backgroundColor: "#3886FF",
+              color: '#FFF',
+              height: '48px',
+              width: '200px',
+              padding: '4px 24px',
+              margin: '8px',
+              borderRadius: '100px',
+              fontSize: '16px',
+              fontWeight: 600,
+              border: '2px solid #A5C8FF'
+            }}>
+            Descargar <FaDownload />
+          </button>
+        </a>
+
+      </CardActions>
+    </Fragment>
+  );
+}
 
 const Blogdetails = ({ params }) => {
   const [blog, setBlog] = useState()
