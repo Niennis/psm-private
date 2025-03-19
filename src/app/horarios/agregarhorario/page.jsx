@@ -270,7 +270,6 @@ const AddSchedule = () => {
   }
 
   const handleEdit = () => {
-    console.log(profesionalSeleccionado)
     if (pathname.includes('agregarhorario')) {
       if (session?.user?.rol === 'profesional') {
         router.push(`/horarios/${session?.user?.id}`)
