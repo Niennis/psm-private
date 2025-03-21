@@ -7,7 +7,8 @@ const ParserImgToImage = ({ htmlContent, classType }) => {
   const normalizarTexto = (texto) => {
     // Expresiones regulares dinámicas para base y key
     const baseRegex = new RegExp(`(${process.env.NEXT_PUBLIC_BASE_IMG})`, "i");
-    const keyRegex = new RegExp(`(/${process.env.NEXT_PUBLIC_KEY_IMG}/i)`, "i");
+    const removeInterrogationMark = process.env.NEXT_PUBLIC_KEY_IMG.split('?')[1]
+    const keyRegex = new RegExp(removeInterrogationMark, "i");
 
     // Expresión regular para la URL (nombre de archivo de imagen con extensión)
     const urlRegex = /(\b\w+\.(jpg|png|gif|jpeg|webp)\b)/i;
@@ -28,7 +29,8 @@ const ParserImgToImage = ({ htmlContent, classType }) => {
 
   const prepareImg = (src) => {
     const match_base = src.match(new RegExp(process.env.NEXT_PUBLIC_BASE_IMG)) || [];
-    const match_key = src.match(new RegExp(/(process.env.NEXT_PUBLIC_KEY_IMG)/i)) || []
+    const removeInterrogationMark = process.env.NEXT_PUBLIC_KEY_IMG.split('?')[1]
+    const match_key = src.match(new RegExp(removeInterrogationMark)) || []
 
     if (match_base.length > 1 || match_key.length > 1) {
       normalizarTexto(src)

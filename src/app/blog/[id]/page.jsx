@@ -55,7 +55,8 @@ const normalizarTexto = (texto) => {
 }
 const prepareImg = (src) => {
   const match_base = src.match(new RegExp(process.env.NEXT_PUBLIC_BASE_IMG)) || [];
-  const match_key = src.match(new RegExp(/(process.env.NEXT_PUBLIC_KEY_IMG)/i)) || []
+  const removeInterrogationMark = process.env.NEXT_PUBLIC_KEY_IMG.split('?')[1]
+  const match_key = src.match(new RegExp(removeInterrogationMark)) || []
 
   if (match_base.length > 1 || match_key.length > 1) {
     normalizarTexto(src)
