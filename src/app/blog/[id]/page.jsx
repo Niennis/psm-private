@@ -30,7 +30,9 @@ const cacheHandler = new CacheHandler();
 const normalizarTexto = (texto) => {
   // Expresiones regulares dinámicas para base y key
   const baseRegex = new RegExp(`(${process.env.NEXT_PUBLIC_BASE_IMG})`, "i");
-  const keyRegex = new RegExp(`(${process.env.NEXT_PUBLIC_KEY_IMG})`, "i");
+  const removeInterrogationMark = process.env.NEXT_PUBLIC_KEY_IMG.split('?')[1]
+
+  const keyRegex = new RegExp(removeInterrogationMark, "i");
 
   // Expresión regular para la URL (nombre de archivo de imagen con extensión)
   const urlRegex = /(\b\w+\.(jpg|png|gif|jpeg|webp)\b)/i;
