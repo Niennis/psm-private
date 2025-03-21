@@ -132,7 +132,6 @@ const Addblog = () => {
   };
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log('data', data)
     try {
       // 1. Subir imagen de cabecera
       const headerImageFile = data.blog_imagen;
