@@ -20,7 +20,7 @@ import {
   baricon1,
 } from "@/components/imagepath";
 
-const URL = 'https://sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net/'
+const URL = "https://saludmental.udp.cl"
 
 const pagesWithEvents = [
   // { title: 'INICIO', url: '/#inicio', label: 'inicio' },
@@ -144,7 +144,7 @@ const Header = () => {
             variant="h6"
             noWrap
             component="a"
-            href="https://sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net/"
+            href={URL}
             sx={{
               mr: 2,
               display: { xs: 'none', lg: 'flex' },
@@ -162,98 +162,104 @@ const Header = () => {
               alt="Logo"
             />{" "}
           </Typography>
-          {session?.user && <>
-            <Link id="toggle_btn" href="#" onClick={handlesidebar}>
+
+          {session?.user ? <>
+            <Link id="toggle_btn" href="#" onClick={handlesidebar} >
               <Image src={baricon} alt="" />
             </Link>
             <Link id="mobile_btn" className="mobile_btn float-start" href="#" onClick={handlesidebarmobilemenu}>
               <Image src={baricon1} alt="" />
             </Link>
-          </>}
-          {/*  MENU MOBILE */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: 'block', lg: 'none' },
-              }}
-              disableEnforceFocus
-            >
-              {
-                pages.map((page) => (
-                  <MenuItem key={page.title} onClick={page.title === "QUIÉNES SOMOS" ? handleOpenUserMenu : handleCloseNavMenu}>
-                    <Typography textAlign="center" className="sailec">
-                      <a href={page.url} style={{ color: 'black', fontFamily: 'sailec' }}>
-                        {page.title}
-                      </a>
-                    </Typography>
-                  </MenuItem>
-                ))
-              }
-              {/* <MenuItem onClick={handleOpenUserMenu}>
+          </>
+            :
+            <>
+              {/*  MENU MOBILE */}
+              <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleOpenNavMenu}
+                  color="inherit"
+                >
+                  <MenuIcon />
+                </IconButton>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorElNav}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }}
+                  open={Boolean(anchorElNav)}
+                  onClose={handleCloseNavMenu}
+                  sx={{
+                    display: { xs: 'block', lg: 'none' },
+                  }}
+                  disableEnforceFocus
+                >
+                  {
+                    pages.map((page) => (
+                      <MenuItem key={page.title} onClick={page.title === "QUIÉNES SOMOS" ? handleOpenUserMenu : handleCloseNavMenu}>
+                        <Typography textAlign="center" className="sailec">
+                          <a href={page.url} style={{ color: 'black', fontFamily: 'sailec' }}>
+                            {page.title}
+                          </a>
+                        </Typography>
+                      </MenuItem>
+                    ))
+                  }
+                  {/* <MenuItem onClick={handleOpenUserMenu}>
                 <Typography textAlign="center" className="sailec" sx={{ color: '#000000', fontFamily: 'sailec' }}>
                   CÓMO TRABAJAMOS <FaChevronDown />
                 </Typography>
               </MenuItem> */}
 
-              <Box sx={{ flexGrow: 0 }} className={`sailec `}>
-                <Menu
-                  sx={{ mt: '45px' }}
-                  id="menu-appbar"
-                  anchorEl={anchorElUser}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  open={Boolean(anchorElUser)}
-                  onClose={handleCloseUserMenu}
-                  disableEnforceFocus
-                >
-                  {settings.map((setting) => (
-                    <MenuItem key={setting.url} onClick={handleCloseUserMenu}>
-                      <Typography textAlign="center" className="sailec">
-                        <a href={setting.url} style={{ color: 'black', fontFamily: 'sailec', textDecoration: 'none' }}>
-                          {setting.title}
-                        </a>
-                      </Typography>
-                    </MenuItem>
-                  ))}
+                  <Box sx={{ flexGrow: 0 }} className={`sailec `}>
+                    <Menu
+                      sx={{ mt: '45px' }}
+                      id="menu-appbar"
+                      anchorEl={anchorElUser}
+                      anchorOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                      }}
+                      keepMounted
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                      }}
+                      open={Boolean(anchorElUser)}
+                      onClose={handleCloseUserMenu}
+                      disableEnforceFocus
+                    >
+                      {settings.map((setting) => (
+                        <MenuItem key={setting.url} onClick={handleCloseUserMenu}>
+                          <Typography textAlign="center" className="sailec">
+                            <a href={setting.url} style={{ color: 'black', fontFamily: 'sailec', textDecoration: 'none' }}>
+                              {setting.title}
+                            </a>
+                          </Typography>
+                        </MenuItem>
+                      ))}
+                    </Menu>
+                  </Box>
                 </Menu>
               </Box>
-            </Menu>
-          </Box>
+            </>
+          }
+
           <Typography
             variant="h5"
             noWrap
             component="a"
-            href="https://sitiopublico-cwbnh8e8gpbkcndk.eastus-01.azurewebsites.net/"
+            href={URL}
             sx={{
               mr: { xs: 0, lg: 2 },
               display: { xs: 'flex', lg: 'none' },
@@ -266,7 +272,13 @@ const Header = () => {
               fontFamily: 'sailec',
             }}
           >
-            <Image src={'https://github.com/Niennis/imagesudp/blob/main/UDP_Logo_small.png?raw=true'} width={100} height={100} alt="logo udp" />{" "}
+            <Image
+              src={'https://github.com/Niennis/imagesudp/blob/main/UDP_Logo_small.png?raw=true'}
+              width={100}
+              height={100}
+              alt="logo udp"
+              style={{ height: 'auto', justifyContent: 'center' }}
+            />{" "}
           </Typography>
 
           {/* MENU DASHBOARD */}
@@ -281,7 +293,7 @@ const Header = () => {
                         ? 'active-header'
                         : ''
                         }`}
-                        onMouseEnter={handleOpenUserMenu}
+                      onMouseEnter={handleOpenUserMenu}
                       sx={{ ...style, p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' }}>
                       {page.title}
                     </Button>
@@ -303,7 +315,7 @@ const Header = () => {
               )
             }
             )}
-     
+
 
             <Box sx={{ flexGrow: 0 }} className={`sailec `} >
               <Menu
@@ -335,7 +347,7 @@ const Header = () => {
               </Menu>
             </Box>
           </Box>
-
+          {/* USER MENU */}
           <Box sx={{ flexGrow: 0, maxWidth: '200px', wrap: 'balance', textAlign: 'right' }}>
             {
               !session
