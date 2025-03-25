@@ -540,7 +540,7 @@ const cambiarMes = (direccion) => {
 }
 
 export const editDisponibilidad = async (body) => {
-  const url = `${NEXT_PUBLIC_EDIT_DISPONIBILIDAD}/editdisponibilidad`
+  const url = `${process.env.NEXT_PUBLIC_EDIT_DISPONIBILIDAD}/editdisponibilidad`
   try {
     const data = await fetch(url, {
       method: "POST",
