@@ -80,21 +80,29 @@ const ScheduleByProfessional = ({ params }) => {
     defaultValues: async () => {
       // setIsLoading(true)
       const duracionData = duracion.find(item => item.label == dataInicial.duracionServicio)
-      const { especialidades: user } = await fetchSpecialityById(params.id)
+      // const { especialidades: user } = await fetchSpecialityById(params.id)
+
+      const bloque_completo = await fetchScheduleByDate(dataInicial.id_user, dataInicial.fechaInicio)
+
       const obj = {
-        nombre: `${user[0].nombre} ${user[0].apellido}`,
-        especialidad: user[0].especialidad,
-        id: user[0].usuario_id,
+        id: dataInicial.id,
+        id_user: profesional?.usuario_id || dataInicial?.id_user,
+        id_bloque: dataInicial.id_bloque,
+        campus: dataInicial?.campus,
+        duracionServicio: dataInicial.duracionServicio,
+        duracion: duracionData.label,
+        especialidad: profesional?.especialidad || 'No registrada',
+        fecha_inicio: dataInicial.fechaInicio,
+        frecuencia: dataInicial.frecuencia,
         horaIni: dataInicial.horaIni,
         horaFin: dataInicial.horaFin,
-        semanal: { dia: [] },
-        fecha_inicio: dataInicial.fechaInicio,
         modalidad: dataInicial.modalidad,
-        campus: dataInicial?.campus,
-        title: dataInicial?.detalleServicio,
-        duracion: duracionData.label,
+        nombre: `${profesional?.nombre} ${profesional?.apellido}` || session?.user?.name,
+        semanal: { dia: [] },
         tipo_cita: dataInicial.tipoServicio,
+        title: dataInicial?.detalleServicio,
       }
+      setDisponibilidad(obj)
       setProfesional(obj)
       return obj
     }
@@ -252,22 +260,21 @@ const ScheduleByProfessional = ({ params }) => {
   };
 
   const onSubmit = handleSubmit(async data => {
-
     const body = {
       "id_user": disponibilidad.id_user,
       "id": disponibilidad.id,
       "id_bloque": disponibilidad.id_bloque,
-      "tipo": disponibilidad.tipo,
-      "día": disponibilidad.dia,
+      "tipo": 'profesional',
+      "día": disponibilidad.dia || null,
       "fechaInicio": data.fecha_inicio,
       "fechaFin": data.fecha_inicio,
       "repeticiones": 0,
       "horaIni": data.horaIni,
       "horaFin": data.horaFin,
       "modalidad": data.modalidad,
-      "frecuencia": disponibilidad.frecuencia,
-      "detalleServicio": data.title,
-      "duracionServicio": data.duracion.label,
+      "frecuencia": disponibilidad.frecuencia || null,
+      "detalleServicio": data.title || disponibilidad.title,
+      "duracionServicio": data.duracion.label || disponibilidad.duracionServicio,
       "tipoServicio": data.tipo_cita,
       "campus": data.campus,
     }
@@ -275,14 +282,14 @@ const ScheduleByProfessional = ({ params }) => {
     try {
       const response = await editDisponibilidad(body)
     } catch (error) {
-
+console.log('error', error)
     }
   })
 
   const handleDelete = async (data) => {
+    
     try {
       const response = await deleteDisponibilidad(data)
-
       return response
     } catch (error) {
       console.log('Error:', error)

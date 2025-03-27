@@ -102,6 +102,8 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
     const obj = {
       "id": data.id_disponibilidad,
       "id_bloque": data.id_bloque,
+      "id_disponibilidad": data.id_disponibilidad,
+      "id_user": data.id_user,
       "tipo": data.tipo,
       "día": data.dia,
       "fechaInicio": data.fechaInicio,
@@ -111,7 +113,6 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
       "horaFin": data.horaFin,
       "modalidad": data.modalidad,
       "frecuencia": data.frecuencia,
-      "id_user": data.id_user,
       "detalleServicio": data.detalleServicio,
       "duracionServicio": data.duracionServicio,
       "tipoServicio": data.tipoServicio,

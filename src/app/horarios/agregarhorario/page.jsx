@@ -28,6 +28,7 @@ import Tooltip from '@mui/material/Tooltip';
 import CustomizedTooltips from '@/components/Tooltip';
 import { FaInfoCircle } from "react-icons/fa";
 import SimpleBackdrop from '@/components/Backdrop';
+import { getServerData } from '@/app/actions';
 
 const AddSchedule = () => {
   const { data: session, status } = useSession()
@@ -45,6 +46,7 @@ const AddSchedule = () => {
   const [loading, setLoading] = useState(false);
   const pathname = usePathname();
   const { setProps } = useSidebar();
+  const [idProfesional, setIdProfesional] = useState()
 
   const onChange = (date, dateString) => {
   };
@@ -132,11 +134,19 @@ const AddSchedule = () => {
   }
 
   useEffect(() => {
+
+    const getIdProfesional = async () => {
+      const profId = await getServerData()
+      setIdProfesional(profId)
+    }
+    getIdProfesional()
+
+    const id_prof = session?.user?.id || idProfesional
     session?.user?.rol === 'administrador'
       ?
       getProfessionals()
       :
-      fetchData(session?.user?.id)
+      fetchData(id_prof)
   }, [])
 
   const { register, handleSubmit, watch, control, setValue, reset, formState: { errors } } = useForm();
