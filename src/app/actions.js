@@ -34,3 +34,12 @@ export async function logInAction(token, formData) {
     message: "Verificado"
   }
 }
+
+let serverData;
+export const setServerData = data => {
+  serverData = data;
+}
+
+export const getServerData = () => {
+  return serverData;
+}

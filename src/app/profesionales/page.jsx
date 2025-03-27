@@ -18,6 +18,7 @@ import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 import SimpleBackdrop from '@/components/Backdrop';
+import { setServerData } from '../actions';
 
 const cacheHandler = new CacheHandler();
 
@@ -153,7 +154,7 @@ const DoctorList = () => {
           <div className="text-end">
             <div className="dropdown dropdown-action">
               <button
-                style={{border: 'none'}}
+                style={{ border: 'none' }}
                 className="action-icon dropdown-toggle"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
@@ -169,10 +170,20 @@ const DoctorList = () => {
                   : "dropdown-menu dropdown-menu-end dropdown-extra"
                 }
               >
-                <Link className="dropdown-item" href={`/horarios/agregarhorario/${record.id}`}>
-                  <i className="far fa-edit me-2" />
-                  Agregar horario
-                </Link>
+                <form action={async () => {
+                  await setServerData(record.id);
+                  // Redirección después de la acción
+                  router.push('/horarios/agregarhorario');
+                }}>
+                  <button
+                    type="submit"
+                    className="dropdown-item"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    <i className="far fa-edit me-2" />
+                    Agregar horario
+                  </button>
+                </form>
                 <Link className="dropdown-item" href={`/profesionales/editar/${record.id}`}>
                   <i className="far fa-edit me-2" />
                   Editar
@@ -200,102 +211,120 @@ const DoctorList = () => {
   return (
     < >
       {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' /> */}
-        <div className="page-wrapper mt-5 pt-5">
-          <div className="content">
-            {/* Page Header */}
-            <div className="page-header">
-              <div className="row">
-                <div className="col-sm-12">
-                  <ul className="breadcrumb">
-                    <li className="breadcrumb-item">
-                      <Link href="#">Profesionales </Link>
-                    </li>
-                    <li className="breadcrumb-item">
-                      <i className="feather-chevron-right">
-                        <FeatherIcon icon="chevron-right" />
-                      </i>
-                    </li>
-                    <li className="breadcrumb-item active">Lista Profesionales</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            {/* /Page Header */}
+      <div className="page-wrapper mt-5 pt-5">
+        <div className="content">
+          {/* Page Header */}
+          <div className="page-header">
             <div className="row">
               <div className="col-sm-12">
-                <div className="card card-table show-entire">
-                  <div className="card-body">
-                    {/* Table Header */}
-                    <div className="page-table-header mb-2">
-                      <div className="row align-items-center">
-                        <div className="col">
-                          <div className="doctor-table-blk">
-                            <h3>Lista Profesionales</h3>
-                            <div className="doctor-search-blk">
-                              <div className="top-nav-search table-search-blk">
-                                <form>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="Busca aquí"
-                                    onChange={(e) => { handleSearch(e.target.value) }}
+                <ul className="breadcrumb">
+                  <li className="breadcrumb-item">
+                    <Link href="#">Profesionales </Link>
+                  </li>
+                  <li className="breadcrumb-item">
+                    <i className="feather-chevron-right">
+                      <FeatherIcon icon="chevron-right" />
+                    </i>
+                  </li>
+                  <li className="breadcrumb-item active">Lista Profesionales</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          {/* /Page Header */}
+          <div className="row">
+            <div className="col-sm-12">
+              <div className="card card-table show-entire">
+                <div className="card-body">
+                  {/* Table Header */}
+                  <div className="page-table-header mb-2">
+                    <div className="row align-items-center">
+                      <div className="col">
+                        <div className="doctor-table-blk">
+                          <h3>Lista Profesionales</h3>
+                          <div className="doctor-search-blk">
+                            <div className="top-nav-search table-search-blk">
+                              <form>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Busca aquí"
+                                  onChange={(e) => { handleSearch(e.target.value) }}
+                                />
+                                <Link className="btn" href="#">
+                                  <img
+                                    src={searchnormal.src}
+                                    alt="#"
                                   />
-                                  <Link className="btn" href="#">
-                                    <img
-                                      src={searchnormal.src}
-                                      alt="#"
-                                    />
-                                  </Link>
-                                </form>
-                              </div>
-                              <div className="add-group">
-                                <Link
-                                  href="/profesionales/agregarprofesional"
-                                  className="btn btn-primary add-pluss ms-2"
-                                >
-                                  <img src={plusicon.src} alt="#" />
                                 </Link>
-                                <Link
-                                  href="#"
-                                  onClick={handleRefresh}
-                                  className="btn btn-primary doctor-refresh ms-2"
-                                >
-                                  <img src={refreshicon.src} alt="#" />
-                                </Link>
-                              </div>
+                              </form>
+                            </div>
+                            <div className="add-group">
+                              <Link
+                                href="/profesionales/agregarprofesional"
+                                className="btn btn-primary add-pluss ms-2"
+                              >
+                                <img src={plusicon.src} alt="#" />
+                              </Link>
+                              <Link
+                                href="#"
+                                onClick={handleRefresh}
+                                className="btn btn-primary doctor-refresh ms-2"
+                              >
+                                <img src={refreshicon.src} alt="#" />
+                              </Link>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                    {/* /Table Header */}
-                    <div className="table-responsive doctor-list">
-                      {isLoading ? (
-                        <SimpleBackdrop />
-                      ) : (
-                        <Table
+                  </div>
+                  {/* /Table Header */}
+                  <div className="table-responsive doctor-list">
+                    {isLoading ? (
+                      <SimpleBackdrop />
+                    ) : (
+                      <Table
                         {...tableProps}
-                          pagination={{
-                            total: results.length,
-                            showTotal: (total, range) =>
-                              `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
-                            // showSizeChanger: true,
-                            onShowSizeChange: onShowSizeChange,
-                            itemRender: itemRender,
-                          }}
-                          columns={columns}
-                          dataSource={results}
+                        pagination={{
+                          total: results.length,
+                          showTotal: (total, range) =>
+                            `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
+                          // showSizeChanger: true,
+                          onShowSizeChange: onShowSizeChange,
+                          itemRender: itemRender,
+                        }}
+                        columns={columns}
+                        dataSource={results}
 
-                          rowSelection={rowSelection}
-                          rowKey={(record) => record.id}
-                          style={{
-                            backgroundColor: '#f2f2f2',
-                          }}
-                        />)
-                      }
-                    </div>
+                        rowSelection={rowSelection}
+                        rowKey={(record) => record.id}
+                        style={{
+                          backgroundColor: '#f2f2f2',
+                        }}
+                      />)
+                    }
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="delete_patient" className="modal fade delete-modal" role="dialog">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body text-center">
+              <img src={imagesend.src} alt="#" width={50} height={46} />
+              <h3>Are you sure want to delete this ?</h3>
+              <div className="m-t-20">
+                {" "}
+                <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
+                  Cerrar
+                </Link>
+                <button type="submit" className="btn btn-danger">
+                  Cancelar
+                </button>
               </div>
             </div>
           </div>
@@ -309,35 +338,17 @@ const DoctorList = () => {
                 <div className="m-t-20">
                   {" "}
                   <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-                    Cerrar
+                    Close
                   </Link>
                   <button type="submit" className="btn btn-danger">
-                    Cancelar
+                    Delete
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <div id="delete_patient" className="modal fade delete-modal" role="dialog">
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-body text-center">
-                  <img src={imagesend.src} alt="#" width={50} height={46} />
-                  <h3>Are you sure want to delete this ?</h3>
-                  <div className="m-t-20">
-                    {" "}
-                    <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-                      Close
-                    </Link>
-                    <button type="submit" className="btn btn-danger">
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
+      </div>
     </>
   )
 }
