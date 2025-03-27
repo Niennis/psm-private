@@ -186,7 +186,7 @@ const AddFirstAppoinments = () => {
       setHours([])
       setDate('')
       setTime('')
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" && (item.campus === "centro"));
+      uniqueFiltered = uniqueFiltered.filter(item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "centro"));
       setLoadingDays(false)
 
     } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
@@ -196,7 +196,7 @@ const AddFirstAppoinments = () => {
       setTime('')
 
       uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === "huechuraba")
+        item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "huechuraba")
       );
       setLoadingDays(false)
     } else if (modalidad === "videollamada" || modalidad === "ambas") {

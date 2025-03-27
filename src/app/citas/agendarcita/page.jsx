@@ -25,9 +25,6 @@ import { motivo_consulta } from "@/utils/selects";
 
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
-
-const cacheHandler = new CacheHandler();
 
 // Función para obtener fechas únicas
 const obtenerFechasUnicas = array => {
@@ -79,7 +76,7 @@ const AddAppoinments = () => {
     });
   }, [setProps]);
 
-  const { register, handleSubmit, watch, control, setValue,
+  const { register, handleSubmit, watch, control, setValue, resetField,
     formState: { errors }, reset
   } = useForm({
     defaultValues: async () => await getPatients()
@@ -156,7 +153,7 @@ const AddAppoinments = () => {
       setHours([])
       setDate('')
       setTime('')
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" && (item.campus === "centro"));
+      uniqueFiltered = uniqueFiltered.filter(item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "centro"));
       setLoadingDays(false)
 
     } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
@@ -166,7 +163,7 @@ const AddAppoinments = () => {
       setTime('')
 
       uniqueFiltered = uniqueFiltered.filter(
-        item => item.modalidad === "presencial" && (item.campus === "huechuraba")
+        item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "huechuraba")
       );
       setLoadingDays(false)
     } else if (modalidad === "videollamada" || modalidad === "ambas") {
@@ -258,6 +255,11 @@ const AddAppoinments = () => {
 
   const handleSelectedType = async (e) => {
     setDoctor([])
+    setDays([])
+    setHours([])
+    setDate('')
+    setTime('')
+    setLoadingDays(true)
     const professionals = await fetchFilteredProfesssionals(e.value)
     const selectedProfessionals = professionals.map((doc, i) => {
       return {
@@ -278,6 +280,10 @@ const AddAppoinments = () => {
     setDate('')
     setTime('')
     setLoadingDays(true)
+    resetField('modalidad')
+    resetField('campus')
+    resetField('selectedDay')
+    resetField('selecteHour')
     try {
       const horasmedicas = await generarHorasMedicas(e.id)
 
@@ -329,6 +335,9 @@ const AddAppoinments = () => {
     e.preventDefault()
     setHours('')
     setBloques('')
+    resetField('selecteHour')
+    setTime('')
+    resetField('selecteHour')
     setValue('selectedDay', fecha)
 
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
