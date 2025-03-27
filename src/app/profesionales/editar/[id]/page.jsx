@@ -178,7 +178,7 @@ const EditDoctor = ({ params }) => {
 
     const bodyEspecialidad = {
       id_user: initial.id,
-      id_especialidad: newEspecialidad[0].id || prevEspecialidad[0].id
+      id_especialidad: newEspecialidad[0]?.id || prevEspecialidad[0]?.id
     }
 
     // CAMBIA TODOS LOS DATOS Y/O ESPECIALIDAD + CONTRASEÑA
@@ -354,7 +354,7 @@ const EditDoctor = ({ params }) => {
                                     if (value.length === 0) {
                                       return true; // Permitir valores vacíos
                                     }
-                                    return value.length === 9 || "Cantidad de caracteres debe ser igual a 9"; // Validar longitud
+                                    return value.length === 9 || "Cantidad de caracteres debe ser igual a 9, o dejar vacío."; // Validar longitud
                                   },
                                 })}
                                 maxLength={9}
