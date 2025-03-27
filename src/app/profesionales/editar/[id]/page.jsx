@@ -81,7 +81,6 @@ const EditDoctor = ({ params }) => {
         const usersData = await fetchProfessionalById(params.id);
         user = usersData.users[0];
       }
-
       const obj = {
         ...user,
         name: user.nombre,
@@ -90,7 +89,7 @@ const EditDoctor = ({ params }) => {
         email: user.email,
         dateOfBirth: user.fecha_nacimiento,
         genero: user.genero,
-        speciality: especialidades[0].especialidad,
+        speciality: especialidades[0]?.especialidad || 'No informada',
         status: user.status,
         password: '',
         confirmPassword: ''
