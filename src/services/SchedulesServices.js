@@ -559,7 +559,7 @@ export const editDisponibilidad = async (body) => {
 }
 
 export const deleteDisponibilidad = async (id) => {
-  const url = `${NEXT_PUBLIC_EDIT_DISPONIBILIDAD}/deletedisponibilidad`
+  const url = `${process.env.NEXT_PUBLIC_EDIT_DISPONIBILIDAD}/deletedisponibilidad`
   const body = {
     "id_disponibilidad": id
   }
@@ -573,10 +573,7 @@ export const deleteDisponibilidad = async (id) => {
       },
       body: JSON.stringify(body)
     })
-
-    return data.json()
-
-
+    return data;
   } catch (error) {
     console.log('Error:', error)
   }
