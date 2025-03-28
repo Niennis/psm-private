@@ -573,7 +573,8 @@ export const deleteDisponibilidad = async (id) => {
       },
       body: JSON.stringify(body)
     })
-    return data;
+    const response = await data.json()
+    return response;
   } catch (error) {
     console.log('Error:', error)
   }
