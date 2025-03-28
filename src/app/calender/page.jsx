@@ -99,6 +99,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
 
   const handleEdit = async () => {
     const data = calenderevent.extendedProps
+
     const obj = {
       "id": data.id_disponibilidad,
       "id_bloque": data.id_bloque,
@@ -131,19 +132,8 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
   }
 
   const handleDelete = async () => {
-    try {
-      const response = await deleteBloque(calenderevent.extendedProps.id_disponibilidad)
-      if (response.validacion === true) {
-        setSuccess('success')
-        setMessage(`Disponibilidad eliminada exitosamente.`)
-      } else {
-        setSuccess('fail')
-        setMessage(`Ha ocurrido un problema ${response.detalle}`)
-      }
-    } catch (error) {
-      setSuccess('fail')
-      setMessage(`Ha ocurrido un problema ${error}`)
-    }
+    await deleteBloque(calenderevent.extendedProps.id_disponibilidad)
+
   }
 
   const handleDateSelect = (selectInfo) => {

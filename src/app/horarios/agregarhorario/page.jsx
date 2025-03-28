@@ -90,7 +90,6 @@ const AddSchedule = () => {
         )
       })
       const prueba = [...processed]
-
       setCalendario([...processed])
 
     } catch (error) {
@@ -236,6 +235,7 @@ const AddSchedule = () => {
               setError(`Hubo un problema. Intenta más tarde. ${req.detalle}}`)
             } else {
               setSuccess('success')
+              setError('Se ha cargado la disponibilidad correctamente.')
               session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
               setIsLoading(true)
             }
@@ -292,8 +292,16 @@ const AddSchedule = () => {
   const handleDelete = async (data) => {
     try {
       const response = await deleteDisponibilidad(data)
+      if (response.validacion === true) {
+        setSuccess('success')
+        setError(`Disponibilidad eliminada exitosamente.`)
+      } else {
+        setSuccess('fail')
+        setError(`Ha ocurrido un problema ${response.detalle}`)
+      }
     } catch (error) {
       console.log('Error:', error)
+      setError(`Ha ocurrido un problema ${error}`)
     }
   }
 
@@ -1259,7 +1267,7 @@ const AddSchedule = () => {
                 }}
                 spacing={2}
               >
-                Se ha cargado la disponibilidad correctamente.
+                {error}
               </Alert>
               {/* </div> */}
             </div>

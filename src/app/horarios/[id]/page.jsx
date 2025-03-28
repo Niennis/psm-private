@@ -24,7 +24,35 @@ import { FaInfoCircle } from "react-icons/fa";
 import SimpleBackdrop from '@/components/Backdrop';
 import { useDisponibilidadContext } from '@/context/DisponibilidadContext';
 
-const cacheHandler = new CacheHandler();
+const obtenerRangoHorarioOptimizado = bloques => {
+  if (!bloques || bloques.length === 0) return null;
+
+  let horaInicio = bloques[0].hora_inicio;
+  let horaFin = bloques[0].hora_fin;
+
+  // Función para normalizar el formato a HH:mm
+  const normalizarHora = (hora) => {
+    // Primero extraemos solo horas y minutos (ignorando segundos)
+    const [hh, mm] = hora.split(':');
+
+    // Aseguramos 2 dígitos para horas y minutos
+    const horasNormalizadas = hh.padStart(2, '0');
+    const minutosNormalizados = mm.padStart(2, '0');
+
+    return `${horasNormalizadas}:${minutosNormalizados}`;
+  };
+
+  for (const bloque of bloques) {
+    // Comparación directa de strings (funciona con formato 24h)
+    if (bloque.hora_inicio < horaInicio) horaInicio = bloque.hora_inicio;
+    if (bloque.hora_fin > horaFin) horaFin = bloque.hora_fin;
+  }
+
+  return {
+    hora_inicio: normalizarHora(horaInicio),
+    hora_fin: normalizarHora(horaFin)
+  };
+}
 
 const ScheduleByProfessional = ({ params }) => {
   const ROL = ["profesional"]
@@ -63,6 +91,7 @@ const ScheduleByProfessional = ({ params }) => {
   useEffect(() => {
     const fetchProfesional = async () => {
       const { especialidades: user } = await fetchSpecialityById(params.id)
+      
       setProfesional(user[0])
     }
     fetchProfesional()
@@ -82,7 +111,8 @@ const ScheduleByProfessional = ({ params }) => {
       const duracionData = duracion.find(item => item.label == dataInicial.duracionServicio)
       // const { especialidades: user } = await fetchSpecialityById(params.id)
 
-      const bloque_completo = await fetchScheduleByDate(dataInicial.id_user, dataInicial.fechaInicio)
+      const { bloques: bloque_completo } = await fetchScheduleByDate(dataInicial.id_user, dataInicial.fechaInicio)
+      const horaInicioFin = obtenerRangoHorarioOptimizado(bloque_completo)
 
       const obj = {
         id: dataInicial.id,
@@ -94,8 +124,8 @@ const ScheduleByProfessional = ({ params }) => {
         especialidad: profesional?.especialidad || 'No registrada',
         fecha_inicio: dataInicial.fechaInicio,
         frecuencia: dataInicial.frecuencia,
-        horaIni: dataInicial.horaIni,
-        horaFin: dataInicial.horaFin,
+        horaIni: horaInicioFin.hora_inicio,
+        horaFin: horaInicioFin.hora_fin,
         modalidad: dataInicial.modalidad,
         nombre: `${profesional?.nombre} ${profesional?.apellido}` || session?.user?.name,
         semanal: { dia: [] },
@@ -212,6 +242,7 @@ const ScheduleByProfessional = ({ params }) => {
   }
 
   const handleEdit = (data) => {
+
     setDisponibilidad(data)
     setInfoDelHijo(data);
 
@@ -281,19 +312,39 @@ const ScheduleByProfessional = ({ params }) => {
 
     try {
       const response = await editDisponibilidad(body)
+      if (response.detalle.includes('success')) {
+        setSuccess('success')
+        setError('Se ha editado correctamente.')
+      } else {
+        setSuccess('fail')
+        setError(response.detalle)
+      }
+
     } catch (error) {
-console.log('error', error)
+      console.log('error', error)
     }
   })
 
   const handleDelete = async (data) => {
-    
+
     try {
       const response = await deleteDisponibilidad(data)
-      return response
+      if (response.validacion === true) {
+        setSuccess('success')
+        setError(`Disponibilidad eliminada exitosamente.`)
+      } else {
+        setSuccess('fail')
+        setError(`Ha ocurrido un problema ${response.detalle}`)
+      }
     } catch (error) {
       console.log('Error:', error)
+      setError(`Ha ocurrido un problema ${error}`)
+
     }
+  }
+
+  const handleOnClose = () => {
+    setSuccess('initial')
   }
 
   return (
@@ -679,6 +730,7 @@ console.log('error', error)
                               <TextField
                                 // className="form-control"
                                 // id="outlined-controlled"
+                                disabled
                                 type="time"
                                 onBlur={onBlur}
                                 onChange={(e) => {
@@ -692,6 +744,7 @@ console.log('error', error)
                             )}
                             name="horaIni"
                           />
+                          <span><small>* Hora no editable</small></span>
                           {errors.horaIni && <span> <small>{errors.horaIni.message}</small></span>}
                         </div>
                       </div>
@@ -719,6 +772,7 @@ console.log('error', error)
                                   type="time"
                                   onBlur={onBlur}
                                   onChange={onChange}
+                                  disabled
                                   InputProps={{
                                     inputProps: {
                                       min: horaIni, // Configura el mínimo como la hora de inicio seleccionada
@@ -741,10 +795,10 @@ console.log('error', error)
                             <CustomizedTooltips text={(
                               <>
                                 <p>
-                                  El rango de repetición permite identificar un período global en que la agenda tenga horas disponibles, por ejemplo, se puede establecer la fecha de inicio y fin de un año académico completo o de un semestre.
+                                  Fecha no editable.
                                 </p>
                                 <p>
-                                  La disponibilidad de horas, será hasta la fecha de finalización.
+                                  Los cambios realizados afectarán a todos los horarios correspondientes al mismo tipo de cita del mismo día.
                                 </p>
                               </>
                             )}>
@@ -760,7 +814,7 @@ console.log('error', error)
                                 className="form-control datetimepicker"
                                 type="date"
                                 placeholder=""
-
+                                disabled
                                 onChange={handleDate}
                                 // value={startDate}
                                 {...register('fecha_inicio', {
@@ -770,6 +824,7 @@ console.log('error', error)
                                   }
                                 })}
                               />
+                              <span><small>* Fecha no editable</small></span>
                               {errors.fecha_inicio && <span><small>{errors.fecha_inicio.message}</small></span>}
                             </div>
                           </div>
@@ -800,8 +855,6 @@ console.log('error', error)
                       </div>
 
 
-
-
                     </div>
                   </div>
                 </div>
@@ -809,7 +862,66 @@ console.log('error', error)
             </div>
           </div>
         </div >
+        {
+          success === 'success'
+            ?
+            <div style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              {/* <div className="col-sm-12 col-lg-6"> */}
+              <Alert
+                severity="success"
+                onClose={handleOnClose}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+                spacing={2}
+              >
+                {error}
+              </Alert>
+              {/* </div> */}
+            </div>
 
+            : success === 'fail'
+              ?
+              <div className="row" style={{
+                height: '100%',
+                position: 'fixed',
+                top: '0',
+                width: '100%',
+                zIndex: 99999,
+                background: '#00000080'
+              }}>
+                <div className="col-sm-12 col-lg-6">
+                  <Alert
+                    severity="error"
+                    onClose={() => { setSuccess('initial') }}
+                    sx={{
+                      zIndex: 'tooltip',
+                      position: 'absolute',
+                      left: '30%',
+                      width: '50%',
+                      padding: '50px',
+                      bottom: '50vh'
+                    }}
+                    spacing={2}
+                  >
+                    Ha ocurrido un problema. {error}
+                  </Alert>
+                </div>
+              </div>
+              : ''
+        }
       </>
     </>
   )
