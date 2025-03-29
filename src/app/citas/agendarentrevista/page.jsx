@@ -1001,14 +1001,14 @@ const AddFirstAppoinments = () => {
                                     const opcionesComunas = regionKey ? comunas[regionKey] : [];
 
                                     const selectedComuna = typeof value === 'string'
-                                      ? opcionesComunas.find(comuna => comuna.label === value) || null 
-                                      : opcionesComunas.find(comuna => comuna.label === value?.label) || null; 
+                                      ? opcionesComunas?.find(comuna => comuna.label === value) || null 
+                                      : opcionesComunas?.find(comuna => comuna.label === value?.label) || null; 
 
                                     return (
                                       <Select
                                         instanceId="select-region"
                                         defaultValue={selectedOption}
-                                        value={selectedComuna}
+                                        value={selectedComuna?.id}
 
                                         onChange={onChange}
                                         options={comunas[selectedRegion?.value] || comunas[selectedRegion]}
