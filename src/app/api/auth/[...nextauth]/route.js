@@ -9,6 +9,7 @@ import { fetchProfessionals } from "@/services/DoctorsServices";
 import CacheHandler from "@/utils/cache-handler";
 
 const searchUser = async (email) => {
+  
   const cacheKey = `user-${email}`;
   const cachedUser = await cacheHandler.get(cacheKey);
   if (cachedUser) return cachedUser;
@@ -107,7 +108,7 @@ const authOptions = {
   callbacks: {
     async signIn({ account, profile, credentials }) {
       if (account.provider === "google") {
-        if (profile.email_verified && profile.email.endsWith("@gmail.com" || "@mail.udp.cl")) {
+        if (profile.email_verified && ( profile.email.endsWith("@mail.udp.cl") || profile.email.endsWith("@gmail.com"))) {
           const user = await searchUser(profile.email);
           if (user) {
             return true;
