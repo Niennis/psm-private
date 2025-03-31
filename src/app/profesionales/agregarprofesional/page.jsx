@@ -568,7 +568,7 @@ const AddProfessional = () => {
                               className="btn btn-primary submit-form me-2"
                               // onClick={onSubmit}
                             >
-                              Enviar
+                              Agregar profesional
                             </button>
                             {/* } */}
                             <Link href={'/citas'}>

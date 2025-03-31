@@ -1016,7 +1016,7 @@ const AddAppoinments = () => {
                             className="btn btn-primary submit-form me-2"
                             onClick={onSubmit}
                           >
-                            Enviar
+                            Agendar
                           </button>
                           <Link href={'/citas'}>
                             <button

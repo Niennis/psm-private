@@ -1504,7 +1504,7 @@ const AddFirstAppoinments = () => {
                                 className="btn btn-primary submit-form me-2"
                                 onClick={handleFirstInterview}
                               >
-                                Enviar
+                                Agendar entrevista
                               </button>
                               <Link href={'/citas'}>
                                 <button

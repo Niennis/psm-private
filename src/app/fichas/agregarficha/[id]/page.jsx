@@ -774,7 +774,7 @@ const AddInterviewRecord = ({ params }) => {
                                 className="btn btn-primary submit-form me-2"
                                 onClick={(e) => { handleAppointment(e) }}
                               >
-                                Enviar
+                                Registrar cita
                               </button>
                               <Link href={'/citas'}>
                                 <button
@@ -2409,7 +2409,7 @@ const AddInterviewRecord = ({ params }) => {
                                 className="btn btn-primary submit-form me-2"
                                 onClick={(e) => { handleInterview(e) }}
                               >
-                                Enviar
+                                Registrar entrevista
                               </button>
                               <Link href={'/citas'}>
                                 <button

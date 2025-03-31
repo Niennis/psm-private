@@ -577,7 +577,7 @@ const EditAppoinments = ({ params }) => {
                               className="btn btn-primary submit-form me-2"
                               onClick={onSubmit}
                             >
-                              Enviar
+                              Modificar
                             </button>
                             <Link href={'/citas'}>
                               <button
