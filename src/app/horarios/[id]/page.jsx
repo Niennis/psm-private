@@ -71,10 +71,10 @@ const ScheduleByProfessional = ({ params }) => {
   const [calendario, setCalendario] = useState('')
   const [infoDelHijo, setInfoDelHijo] = useState(null);
   const [disponibilidad, setDisponibilidad] = useState()
+  const router = useRouter();
 
-  const onChange = (date, dateString) => {
-  };
-  const [selectedOption, setSelectedOption] = useState(null);
+  
+  // const [selectedOption, setSelectedOption] = useState(null);
   const styleInput = {
     display: 'inline',
     width: '20%'
@@ -91,7 +91,8 @@ const ScheduleByProfessional = ({ params }) => {
   useEffect(() => {
     const fetchProfesional = async () => {
       const { especialidades: user } = await fetchSpecialityById(params.id)
-      
+      console.log('user', user);
+
       setProfesional(user[0])
     }
     fetchProfesional()
@@ -110,6 +111,7 @@ const ScheduleByProfessional = ({ params }) => {
       // setIsLoading(true)
       const duracionData = duracion.find(item => item.label == dataInicial.duracionServicio)
       // const { especialidades: user } = await fetchSpecialityById(params.id)
+      const { especialidades: user } = await fetchSpecialityById(params.id)
 
       const { bloques: bloque_completo } = await fetchScheduleByDate(dataInicial.id_user, dataInicial.fechaInicio)
       const horaInicioFin = obtenerRangoHorarioOptimizado(bloque_completo)
@@ -120,14 +122,14 @@ const ScheduleByProfessional = ({ params }) => {
         id_bloque: dataInicial.id_bloque,
         campus: dataInicial?.campus,
         duracionServicio: dataInicial.duracionServicio,
-        duracion: duracionData.label,
-        especialidad: profesional?.especialidad || 'No registrada',
+        duracion: duracionData?.label || '',
+        especialidad: user[0]?.especialidad || 'No registrada',
         fecha_inicio: dataInicial.fechaInicio,
         frecuencia: dataInicial.frecuencia,
-        horaIni: horaInicioFin.hora_inicio,
-        horaFin: horaInicioFin.hora_fin,
+        horaIni: horaInicioFin?.hora_inicio || '00:00',
+        horaFin: horaInicioFin?.hora_fin || '00:00',
         modalidad: dataInicial.modalidad,
-        nombre: `${profesional?.nombre} ${profesional?.apellido}` || session?.user?.name,
+        nombre: `${user[0]?.nombre} ${user[0]?.apellido}` || session?.user?.name,
         semanal: { dia: [] },
         tipo_cita: dataInicial.tipoServicio,
         title: dataInicial?.detalleServicio,
@@ -340,6 +342,8 @@ const ScheduleByProfessional = ({ params }) => {
       console.log('Error:', error)
       setError(`Ha ocurrido un problema ${error}`)
 
+    } finally {
+      fetchData(session?.user?.id)
     }
   }
 
@@ -432,6 +436,7 @@ const ScheduleByProfessional = ({ params }) => {
                           deleteBloque={handleDelete}
                           editBloque={handleEdit}
                           profesional_id={params.id}
+                          refresh={() => {fetchData(session?.user?.id)}}
                         />
                       }
 

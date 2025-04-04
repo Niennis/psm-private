@@ -302,6 +302,8 @@ const AddSchedule = () => {
     } catch (error) {
       console.log('Error:', error)
       setError(`Ha ocurrido un problema ${error}`)
+    } finally {
+      session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
     }
   }
 
@@ -439,7 +441,7 @@ const AddSchedule = () => {
                         </div>
 
                         {/* DETALLES DEL SERVICIO */}
-                        <div className="col-12">
+                        <div className="col-12" id="detalles">
                           <div className="form-heading">
                             <h4>Detalles del servicio</h4>
                           </div>
@@ -908,7 +910,7 @@ const AddSchedule = () => {
                           <div className="row">
                             <div className="col-12 col-lg-2" >
                               <div className="form-group select-gender">
-                                <div className="form-check-inline">
+                             {/*    <div className="form-check-inline">
                                   <label className="form-check-label">
                                     <input
                                       type="radio"
@@ -919,20 +921,21 @@ const AddSchedule = () => {
                                     />
                                     Diaria
                                   </label>
-                                </div>
+                                </div> */}
                                 <div className="form-check-inline">
                                   <label className="form-check-label">
                                     <input
                                       type="radio"
                                       value="semanal"
                                       name="frecuencia"
+                                      checked
                                       className="form-check-input"
                                       {...register('frecuencia')}
                                     />
                                     Semanal
                                   </label>
                                 </div>
-                                <div className="form-check-inline">
+                            {/*     <div className="form-check-inline">
                                   <label className="form-check-label">
                                     <input
                                       type="radio"
@@ -943,7 +946,7 @@ const AddSchedule = () => {
                                     />
                                     Mensual
                                   </label>
-                                </div>
+                                </div> */}
                               </div>
                             </div>
                             {

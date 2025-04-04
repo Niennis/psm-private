@@ -24,7 +24,7 @@ import { useDisponibilidadContext } from "@/context/DisponibilidadContext";
 
 const cacheHandler = new CacheHandler();
 
-const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBloque }, calendarRef) => {
+const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBloque, refresh }, calendarRef) => {
   const [menu, setMenu] = useState(false);
   const [success, setSuccess] = useState('initial')
   const [message, setMessage] = useState('')
@@ -125,6 +125,8 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
         await editBloque(obj); // Aquí se envía 'obj' al padre
       } catch (error) {
         console.error("Error al enviar datos al padre:", error);
+      } finally {
+        handleClose()
       }
     } else {
       console.error("editBloque no es una función");
@@ -133,7 +135,8 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
 
   const handleDelete = async () => {
     await deleteBloque(calenderevent.extendedProps.id_disponibilidad)
-
+    setSuccess('initial')
+    handleClose()
   }
 
   const handleDateSelect = (selectInfo) => {
@@ -232,11 +235,16 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
               <div className="card">
                 <div className="card-body">
                   <div id="calendar">
-
+                    <button className="btn btn-light m-1" onClick={refresh} style={{ margin: "10px" }}>
+                      🔄 Refrescar
+                    </button>
                     {!calendario ? <CalendarSkeleton />
                       : calendario.length === 0 ?
                         <FullCalendar
-                          windowResize={true}
+                          windowResizeDelay={100}  // Opcional: retraso en ms
+                          windowResize={(view) => {
+                            console.log("");
+                          }}
                           locale={esLocale}
                           plugins={[
                             dayGridPlugin,
@@ -261,7 +269,10 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                         :
                         <FullCalendar
                           ref={calendarRef}
-                          windowResize={true}
+                          windowResizeDelay={100}  // Opcional: retraso en ms
+                          windowResize={(view) => {
+                            console.log("");
+                          }}
                           locale={esLocale}
                           plugins={[
                             dayGridPlugin,
