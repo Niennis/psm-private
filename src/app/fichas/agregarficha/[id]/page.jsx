@@ -1,6 +1,7 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
+// import '@/assets/css/style.css'
 import { useState, useEffect, useId } from "react";
 import Select from "react-select";
 import Link from "next/link";
@@ -15,7 +16,7 @@ import { Modal, Button } from 'react-bootstrap'
 import { fetchUserByEmail, fetchUsers, fetchUser, updateUser, darAlta } from "@/services/UsersServices";
 import { fetchAppointments, changeStatusAppointment } from "@/services/AppointmentsServices"
 import { createInterviewRecord, showRecords } from "@/services/RecordServices";
-import { fetchScheduleByAvailability, fetchBlocksAvailables } from "@/services/SchedulesServices";
+import { fetchProfessionals } from "@/services/DoctorsServices";
 
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
@@ -47,6 +48,7 @@ const AddInterviewRecord = ({ params }) => {
   const [contacts, setContacts] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [data, setData] = useState(null);
+  const [profesionales, setProfesionales] = useState([])
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
@@ -73,21 +75,29 @@ const AddInterviewRecord = ({ params }) => {
       const date = responseAppointment.filter(item => item.id_cita == params.id)
       const responsePatient = await fetchUserByEmail(date[0].email_estudiante)
       const { users: response } = await fetchUser(responsePatient.id)
-      
+      const { entrevista: records } = await showRecords(date[0].id_paciente)
+      // console.log('date', date);
+      // console.log('records', records);
+
       const obj = {
         id_alumno: date[0].id_paciente,
+        id_profesional: date[0].id_profesional,
         ano_ingreso: response[0].anoIngresoCarrera || '',
         apellido: response[0].apellido,
         aplica_despeje: responsePatient.aplica_despeje,
+        campus: date[0].campus,
         carrera: response[0].carrera,
         celular_contacto_emergencia1: response[0].contacto_numero,
         comuna: response[0].comuna,
         correo: date[0].email_estudiante,
         direccion: response[0].direccion,
         edad: dayjs().diff(dayjs.utc(responsePatient.fecha_nacimiento), 'year'),
+        email: date[0].email_estudiante,
         fecha_nacimiento: dayjs.utc(responsePatient.fecha_nacimiento).format('DD-MM-YYYY'),
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
+        hora_cita: date[0].hora,
+        motivo_consulta: records[0].motivo_consulta,
         nombre_social: response[0].nombre_social,
         nombre: responsePatient.nombre,
         nombre_completo: date[0].nombre_alumno,
@@ -112,7 +122,6 @@ const AddInterviewRecord = ({ params }) => {
         parentesco_contacto_emergencia2: response[0].contacto2_relacion,
       }
 
-      const { entrevista: records } = await showRecords(date[0].id_paciente)
       const ultimoNumeroFicha = records.length > 0 ? records[records.length - 1].numero_ficha : null;
       setValue('numero_ficha', parseInt(ultimoNumeroFicha) + 1)
 
@@ -161,13 +170,47 @@ const AddInterviewRecord = ({ params }) => {
     return true; // RUT válido
   };
 
+
+  const getProfessionals = async () => {
+    try {
+      const response = await fetchProfessionals()
+
+      const docs = response.map((doc, i) => {
+        return {
+          value: i + 2,
+          label: doc.nombre + ' ' + doc.apellido,
+          id: doc.id,
+          email: doc.email,
+          name: doc.nombre,
+          // especialidad: doc.especialidad
+        }
+      })
+
+      if (docs.length > 0) {
+        setProfesionales(docs)
+      }
+
+    } catch (error) {
+      console.log('Error', error)
+    }
+  }
+  const isChecked = watch('derivacion_interna')
+  useEffect(() => {
+    if (isChecked) {
+      getProfessionals()
+    }
+  }, [isChecked])
+
   /* CITA NORMAL servicio es el mismo que el de despeje, pero se omiten los campos que no se necesitan */
   const handleAppointment = handleSubmit(async data => {
     setSuccess('initial')
     const patientName = watch("name")
     const patientLastname = watch("lastName")
+    const derivacion_interna = watch("derivacion_interna")
+
     const body = {
       ...data,
+      id_receptor: derivacion_interna ? data.profesional_derivacion.id : '',
       id_profesional: session?.user?.id,
       nombre_social: patient.nombre_social,
       patient_id: patient.id_alumno,
@@ -223,9 +266,30 @@ const AddInterviewRecord = ({ params }) => {
       "prevision_salud_fonasa": "",
       "prevision_salud_otro": "",
     }
+
+    const bodyEstado = {
+      id: parseInt(params.id),
+      status: 'realizada',
+      id_paciente: patient.id_alumno,
+      id_profesional: data.id_profesional,
+      appointment_date: data.fecha,
+      campus: data.campus,
+      carrera: data.carrera,
+      email: data.email,
+      lastName: data.apellido,
+      name: data.nombre,
+      selected_doctor: data.profesional_evaluador,
+      start_time: data.hora_cita,
+      tipo_cita: data.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional',
+    }
+
     try {
       const appointment = await createInterviewRecord(body)
-      if (appointment.estado === false) {
+      const changeStatus = await changeStatusAppointment(bodyEstado)
+      console.log('changeStatus', changeStatus);
+      console.log('appointment', appointment);
+
+      if (appointment.estado === false && changeStatus.validacion === false) {
         setSuccess('fail')
       } else {
         setSuccess('success')
@@ -238,6 +302,7 @@ const AddInterviewRecord = ({ params }) => {
       }
     }
   })
+
   const gender = [
     { value: 1, label: "Hombre" },
     { value: 2, label: "Mujer" },
@@ -284,7 +349,6 @@ const AddInterviewRecord = ({ params }) => {
     { value: 2, label: "Psicológica" },
     { value: 3, label: "Psicopedagógica" },
     { value: 4, label: "Psiquiátrica" },
-    { value: 4, label: "Trabajo Social" }
   ];
 
   const formatDate = (dateString) => {
@@ -301,8 +365,11 @@ const AddInterviewRecord = ({ params }) => {
   const handleInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
+    const derivacion_interna = watch("derivacion_interna")
+
     const body = {
       ...data,
+      id_receptor: derivacion_interna ? data.profesional_derivacion.id : '',
       id_profesional: session?.user?.id,
       id_alumno: patient.id_alumno,
       fecha: formatDate(data.fecha),
@@ -338,12 +405,29 @@ const AddInterviewRecord = ({ params }) => {
       "id_emergencia_2": patient.id_emergencia_2 || 0,
     }
 
+    const bodyEstado = {
+      id: parseInt(params.id),
+      status: 'realizada',
+      id_paciente: patient.id_alumno,
+      id_profesional: data.id_profesional,
+      appointment_date: data.fecha,
+      campus: data.campus,
+      carrera: data.carrera,
+      email: data.email,
+      lastName: data.apellido,
+      name: data.nombre,
+      selected_doctor: data.profesional_evaluador,
+      start_time: data.hora_cita,
+      tipo_cita: data.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional',
+    }
+
     try {
       const [resp, changeStatus, response] = await Promise.all([
         createInterviewRecord(body),
-        changeStatusAppointment(params.id, 'realizada'),
+        changeStatusAppointment(bodyEstado),
         updateUser(bodyUpdate)
       ]);
+
       if (resp.estado === true && changeStatus.detalle === 'success!!!' && response.validacion === true) {
         setSuccess('success')
       } else if (resp.estado === true && changeStatus.detalle === 'success!!!') {
@@ -387,6 +471,11 @@ const AddInterviewRecord = ({ params }) => {
     setMessage('¿Desea confirmar la alta del servicio?')
   }
 
+  const handleClose = () => {
+    setSuccess('initial')
+    router.push('/citas')
+  }
+
   return (
     <>
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
@@ -419,6 +508,7 @@ const AddInterviewRecord = ({ params }) => {
               <div className="row">
                 <div className="col-sm-12">
                   <div className="card">
+
                     {patient?.aplica_despeje != 1 ?
 
                       /* ----- FORMULARIO CITA NORMAL ------ */
@@ -664,7 +754,7 @@ const AddInterviewRecord = ({ params }) => {
                           </Accordion>
 
                           {/* 2. Motivo de consulta */}
-                          <Accordion>
+                          {/* <Accordion>
                             <AccordionSummary
                               expandIcon={<ExpandMoreIcon />}
                               aria-controls="panel1-content"
@@ -693,9 +783,9 @@ const AddInterviewRecord = ({ params }) => {
 
                               </div>
                             </AccordionDetails>
-                          </Accordion>
+                          </Accordion> */}
 
-                          {/* 3. Antecedentes generales */}
+                          {/* 2. Antecedentes generales */}
                           <Accordion>
                             <AccordionSummary
                               expandIcon={<ExpandMoreIcon />}
@@ -703,7 +793,7 @@ const AddInterviewRecord = ({ params }) => {
                               id="panel1-header">
                               <div className="col-12">
                                 <div className="form-heading">
-                                  <h4>3. Antecedentes Generales</h4>
+                                  <h4>2. Antecedentes Generales</h4>
                                 </div>
                               </div>
                             </AccordionSummary>
@@ -727,7 +817,7 @@ const AddInterviewRecord = ({ params }) => {
                             </AccordionDetails>
                           </Accordion>
 
-                          {/* 4. Acuerdos */}
+                          {/* 3. Acuerdos */}
                           <Accordion>
                             <AccordionSummary
                               expandIcon={<ExpandMoreIcon />}
@@ -735,7 +825,7 @@ const AddInterviewRecord = ({ params }) => {
                               id="panel1-header">
                               <div className="col-12">
                                 <div className="form-heading">
-                                  <h4>4. Acuerdos</h4>
+                                  <h4>3. Acuerdos</h4>
                                 </div>
                               </div>
                             </AccordionSummary>
@@ -756,6 +846,93 @@ const AddInterviewRecord = ({ params }) => {
                                   </div>
                                 </div>
 
+                              </div>
+                                 {/* DERIVAR */}
+                                 <div className="row">
+                                <div className="col-12 col-md-6 col-xl-6">
+                                  <div className="form-group select-gender">
+                                    <div className="form-check check-tables">
+                                      <label className="form-check-label">
+                                        <input
+                                          type="checkbox"
+                                          name="derivacion_interna"
+                                          // value="derivacion_interna"
+                                          className="form-check-input"
+                                          {...register('derivacion_interna')}
+                                        // onChange={getProfessionals}
+                                        />
+                                        Derivación interna
+                                      </label>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-12 col-md-6 col-xl-6">
+                                  <div className="form-group select-gender">
+                                    <div className="form-check check-tables">
+                                      <label className="form-check-label">
+                                        <input
+                                          type="checkbox"
+                                          name="derivacion_externa"
+                                          // value="derivacion_externa"
+                                          className="form-check-input"
+                                          {...register('derivacion_externa')}
+                                        />
+                                        Derivación externa
+                                      </label>
+                                    </div>
+                                  </div>
+                                </div>
+                                {
+                                  isChecked &&
+                                  <div className="col-12 col-md-6 col-xl-6">
+
+                                    <Controller
+                                      control={control}
+                                      name="profesional_derivacion"
+                                      ref={null}
+                                      render={({ field: { onChange, onBlur, value, name, ref } }) => {
+                                        return (<Select
+                                          placeholder={profesionales.length === 0 ? 'Cargando...' : 'Seleccione...'}
+                                          instanceId="profesionales"
+                                          defaultValue={selectedOption}
+                                          onChange={(e) => {
+                                            onChange(e)
+                                            console.log(watch('derivacion_externa'))
+                                            console.log(watch('derivacion_interna'))
+                                          }}
+                                          getOptionLabel={e => e.label}
+                                          options={profesionales}
+                                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                          id="profesionales"
+                                          components={{
+                                            IndicatorSeparator: () => null
+                                          }}
+
+                                          styles={{
+                                            control: (baseStyles, state) => ({
+                                              ...baseStyles,
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                              boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                              '&:hover': {
+                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                              },
+                                              borderRadius: '10px',
+                                              fontSize: "14px",
+                                              minHeight: "45px",
+                                            }),
+                                            dropdownIndicator: (base, state) => ({
+                                              ...base,
+                                              transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                              transition: '250ms',
+                                              width: '35px',
+                                              height: '35px',
+                                            }),
+                                          }}
+                                        />)
+                                      }}
+                                    />
+                                  </div>
+                                }
                               </div>
                             </AccordionDetails>
                           </Accordion>
@@ -1144,7 +1321,7 @@ const AddInterviewRecord = ({ params }) => {
                             </AccordionDetails>
                           </Accordion>
 
-                          {/* 3. Antecedentes sociales y familiares */}
+                          {/* 3. Motivo de consulta */}
                           <Accordion>
                             <AccordionSummary
                               expandIcon={<ExpandMoreIcon />}
@@ -1152,7 +1329,112 @@ const AddInterviewRecord = ({ params }) => {
                               id="panel1-header">
                               <div className="col-12">
                                 <div className="form-heading">
-                                  <h4>3. Antecedentes sociales y familiares</h4>
+                                  <h4>3. Motivo de consulta</h4>
+                                </div>
+                              </div>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <div className="row">
+                                <div className="col-12 col-md-12 col-xl-12">
+                                  <div className="form-group local-forms">
+                                    <label>
+                                      Descripción motivo de consulta
+                                    </label>
+                                    <input
+                                      className="form-control"
+                                      type="text"
+                                      {...register('motivo_consulta')}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="col-12 col-md-12 col-xl-12">
+                                  <div className="form-group local-forms">
+                                    <label>
+                                      Sintomatología asociada al motivo de consulta
+                                    </label>
+                                    <input
+                                      className="form-control"
+                                      type="text"
+                                      {...register('sintomatologia_motivo_consulta')}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="col-12 col-md-12 col-xl-12">
+                                  <div className="form-group local-forms">
+                                    <label>
+                                      ¿Cuál es tu expectativa con respecto a la atención en nuestro departamento?
+                                    </label>
+                                    <input
+                                      className="form-control"
+                                      // value={rut}
+                                      type="text"
+                                      {...register('expectativas_departamento')}
+                                    />
+                                  </div>
+                                  <div className="col-12 col-md-12 col-xl-12">
+                                    <div className="form-group local-forms">
+                                      <label>Área de atención de preferencia del/la estudiante<span className="login-danger">*</span>
+                                      </label>
+                                      <Controller
+                                        control={control}
+                                        defaultValue={''}
+                                        rules={{ required: false }}
+                                        name="area_atencion_preferencia"
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                          <Select
+                                            isMulti
+                                            instanceId="area_atencion_preferencia"
+                                            value={value}
+                                            onChange={onChange}
+                                            options={area_atencion}
+                                            // menuPortalTarget={document.body}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                            id="area_atencion_preferencia"
+                                            components={{
+                                              IndicatorSeparator: () => null
+                                            }}
+
+                                            styles={{
+                                              control: (baseStyles, state) => ({
+                                                ...baseStyles,
+                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                                boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                                '&:hover': {
+                                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                                },
+                                                borderRadius: '10px',
+                                                fontSize: "14px",
+                                                minHeight: "45px",
+                                              }),
+                                              dropdownIndicator: (base, state) => ({
+                                                ...base,
+                                                transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                                transition: '250ms',
+                                                width: '35px',
+                                                height: '35px',
+
+                                              }),
+                                            }}
+                                          />
+                                        )}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </AccordionDetails>
+                          </Accordion>
+
+                          {/* 4. Antecedentes sociales y familiares */}
+                          <Accordion>
+                            <AccordionSummary
+                              expandIcon={<ExpandMoreIcon />}
+                              aria-controls="panel1-content"
+                              id="panel1-header">
+                              <div className="col-12">
+                                <div className="form-heading">
+                                  <h4>4. Antecedentes sociales y familiares</h4>
                                 </div>
                               </div>
                             </AccordionSummary>
@@ -1310,7 +1592,7 @@ const AddInterviewRecord = ({ params }) => {
                             </AccordionDetails>
                           </Accordion>
 
-                          {/* 4. Antecedentes de salud */}
+                          {/* 5. Antecedentes de salud */}
                           <Accordion>
                             <AccordionSummary
                               expandIcon={<ExpandMoreIcon />}
@@ -1318,7 +1600,7 @@ const AddInterviewRecord = ({ params }) => {
                               id="panel1-header">
                               <div className="col-12">
                                 <div className="form-heading">
-                                  <h4>4. Antecedentes de salud</h4>
+                                  <h4>5. Antecedentes de salud</h4>
                                 </div>
                               </div>
                             </AccordionSummary>
@@ -1781,109 +2063,7 @@ const AddInterviewRecord = ({ params }) => {
                               </div>
                             </AccordionDetails>
                           </Accordion>
-                          {/* 5. Motivo de consulta */}
-                          <Accordion>
-                            <AccordionSummary
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls="panel1-content"
-                              id="panel1-header">
-                              <div className="col-12">
-                                <div className="form-heading">
-                                  <h4>5. Motivo de consulta</h4>
-                                </div>
-                              </div>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                              <div className="row">
-                                <div className="col-12 col-md-12 col-xl-12">
-                                  <div className="form-group local-forms">
-                                    <label>
-                                      Descripción motivo de consulta
-                                    </label>
-                                    <input
-                                      className="form-control"
-                                      type="text"
-                                      {...register('motivo_consulta')}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="col-12 col-md-12 col-xl-12">
-                                  <div className="form-group local-forms">
-                                    <label>
-                                      Sintomatología asociada al motivo de consulta
-                                    </label>
-                                    <input
-                                      className="form-control"
-                                      type="text"
-                                      {...register('sintomatologia_motivo_consulta')}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="col-12 col-md-12 col-xl-12">
-                                  <div className="form-group local-forms">
-                                    <label>
-                                      ¿Cuál es tu expectativa con respecto a la atención en nuestro departamento?
-                                    </label>
-                                    <input
-                                      className="form-control"
-                                      // value={rut}
-                                      type="text"
-                                      {...register('expectativas_departamento')}
-                                    />
-                                  </div>
-                                  <div className="col-12 col-md-12 col-xl-12">
-                                    <div className="form-group local-forms">
-                                      <label>Área de atención de preferencia del/la estudiante<span className="login-danger">*</span>
-                                      </label>
-                                      <Controller
-                                        control={control}
-                                        defaultValue={''}
-                                        rules={{ required: false }}
-                                        name="area_atencion_preferencia"
-                                        render={({ field: { onChange, onBlur, value } }) => (
-                                          <Select
-                                            instanceId="area_atencion_preferencia"
-                                            value={value}
-                                            onChange={onChange}
-                                            options={area_atencion}
-                                            // menuPortalTarget={document.body}
-                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                            id="area_atencion_preferencia"
-                                            components={{
-                                              IndicatorSeparator: () => null
-                                            }}
 
-                                            styles={{
-                                              control: (baseStyles, state) => ({
-                                                ...baseStyles,
-                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                                boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                                '&:hover': {
-                                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                                },
-                                                borderRadius: '10px',
-                                                fontSize: "14px",
-                                                minHeight: "45px",
-                                              }),
-                                              dropdownIndicator: (base, state) => ({
-                                                ...base,
-                                                transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                                transition: '250ms',
-                                                width: '35px',
-                                                height: '35px',
-
-                                              }),
-                                            }}
-                                          />
-                                        )}
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-
-                              </div>
-                            </AccordionDetails>
-                          </Accordion>
                           {/* 6. Antecedentes académicos */}
                           <Accordion>
                             <AccordionSummary
@@ -2398,7 +2578,94 @@ const AddInterviewRecord = ({ params }) => {
                                     />
                                   </div>
                                 </div>
+                              </div>
 
+                              {/* DERIVAR */}
+                              <div className="row">
+                                <div className="col-12 col-md-6 col-xl-6">
+                                  <div className="form-group select-gender">
+                                    <div className="form-check check-tables">
+                                      <label className="form-check-label">
+                                        <input
+                                          type="checkbox"
+                                          name="derivacion_interna"
+                                          // value="derivacion_interna"
+                                          className="form-check-input"
+                                          {...register('derivacion_interna')}
+                                        // onChange={getProfessionals}
+                                        />
+                                        Derivación interna
+                                      </label>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-12 col-md-6 col-xl-6">
+                                  <div className="form-group select-gender">
+                                    <div className="form-check check-tables">
+                                      <label className="form-check-label">
+                                        <input
+                                          type="checkbox"
+                                          name="derivacion_externa"
+                                          // value="derivacion_externa"
+                                          className="form-check-input"
+                                          {...register('derivacion_externa')}
+                                        />
+                                        Derivación externa
+                                      </label>
+                                    </div>
+                                  </div>
+                                </div>
+                                {
+                                  isChecked &&
+                                  <div className="col-12 col-md-6 col-xl-6">
+
+                                    <Controller
+                                      control={control}
+                                      name="profesionales"
+                                      ref={null}
+                                      render={({ field: { onChange, onBlur, value, name, ref } }) => {
+                                        return (<Select
+                                          placeholder={profesionales.length === 0 ? 'Cargando...' : 'Seleccione...'}
+                                          instanceId="profesionales"
+                                          defaultValue={selectedOption}
+                                          onChange={(e) => {
+                                            onChange(e)
+                                            console.log(watch('derivacion_externa'))
+                                          }}
+                                          getOptionLabel={e => e.label}
+                                          options={profesionales}
+                                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                          id="profesionales"
+                                          components={{
+                                            IndicatorSeparator: () => null
+                                          }}
+
+                                          styles={{
+                                            control: (baseStyles, state) => ({
+                                              ...baseStyles,
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                              boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                              '&:hover': {
+                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                              },
+                                              borderRadius: '10px',
+                                              fontSize: "14px",
+                                              minHeight: "45px",
+                                            }),
+                                            dropdownIndicator: (base, state) => ({
+                                              ...base,
+                                              transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                              transition: '250ms',
+                                              width: '35px',
+                                              height: '35px',
+                                            }),
+                                          }}
+                                        />)
+                                      }}
+                                    />
+                                  </div>
+
+                                }
                               </div>
                             </AccordionDetails>
                           </Accordion>
@@ -2445,7 +2712,7 @@ const AddInterviewRecord = ({ params }) => {
               {/* <div className="col-sm-12 col-lg-6"> */}
               <Alert
                 severity="success"
-                onClose={() => { setSuccess('initial') }}
+                onClose={handleClose}
                 sx={{
                   zIndex: 'tooltip',
                   position: 'absolute',
@@ -2502,7 +2769,7 @@ const AddInterviewRecord = ({ params }) => {
                   <div className="col-sm-12 col-lg-6">
                     <Alert
                       severity="warning"
-                      onClose={() => { setSuccess('initial') }}
+                      onClose={handleClose}
                       sx={{
                         zIndex: 'tooltip',
                         position: 'absolute',
@@ -2514,7 +2781,7 @@ const AddInterviewRecord = ({ params }) => {
                     // spacing={2}
                     >
                       <h4>{message}</h4>
-                      <Button variant="primary" onClick={(e) => {handleAlta(e);  handleAppointment(e) }}> Confirmar </Button>
+                      <Button variant="primary" onClick={(e) => { handleAlta(e); handleAppointment(e) }}> Confirmar </Button>
                     </Alert>
                   </div>
                 </div>
