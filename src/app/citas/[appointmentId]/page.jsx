@@ -15,7 +15,7 @@ import { TextField, Alert } from "@mui/material";
 import { useForm, Controller, useController } from 'react-hook-form';
 import { fetchAppointment, changeStatusAppointment, fetchAppointments } from "@/services/AppointmentsServices";
 import { fetchProfessionals } from "@/services/DoctorsServices";
-import { fetchUsers, fetchUserByEmail } from "@/services/UsersServices";
+import { fetchUser, fetchUserByEmail } from "@/services/UsersServices";
 import SimpleBackdrop from "@/components/Backdrop";
 
 import { useSidebar } from "@/context/SidebarContext";
@@ -35,7 +35,6 @@ const EditAppoinments = ({ params }) => {
 
   const [startTime, setStartTime] = useState();
   const [endTime, setEndTime] = useState();
-  const [show, setShow] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [appointment, setAppointment] = useState('');
   const [dataPatient, setDatapatient] = useState('')
@@ -53,7 +52,6 @@ const EditAppoinments = ({ params }) => {
     setSuccess('initial')
     router.push('/citas')
   };
-  const handleShow = () => setShow(true);
   const [profesional, setProfesional] = useState([]);
 
   useEffect(() => {
@@ -91,12 +89,14 @@ const EditAppoinments = ({ params }) => {
     try {
       const response = await fetchAppointments()
       const filteredResponse = response.filter(item => (item.id_cita == params.appointmentId) /* && (item.id_profesional == session.user?.id) */)
+
       const obj = {
         speciality: filteredResponse[0].especialidad_profesional,
         appointment_date: dayjs(filteredResponse[0]['fecha']).format('YYYY-MM-DD'),
         start_time: formatearHora(filteredResponse[0]['hora']),
-        // end_time: horaFin,
         id: filteredResponse[0].id_cita,
+        id_paciente: filteredResponse[0].id_paciente,
+        id_profesional: filteredResponse[0].id_profesional,
         email: filteredResponse[0].email_estudiante,
         name: filteredResponse[0]['nombre_alumno'].split(' ')[0],
         lastName: filteredResponse[0]['nombre_alumno'].split(' ')[1],
@@ -104,7 +104,8 @@ const EditAppoinments = ({ params }) => {
         female: filteredResponse[0].genero === 'femenino' ? 'on' : null,
         male: filteredResponse[0].genero === 'masculino' ? 'on' : null,
         other: filteredResponse[0].genero === 'otro' ? 'on' : null,
-        mobile: filteredResponse[0].telefono_estudiante
+        mobile: filteredResponse[0].telefono_estudiante,
+        campus: filteredResponse[0].campus
       }
       if (filteredResponse.length === 0) {
       } else {
@@ -120,12 +121,6 @@ const EditAppoinments = ({ params }) => {
     fetchDataProfessionals()
     // getAppointments()
   }, [])
-
-  // const { register, handleSubmit, watch, control,
-  //   formState: { errors }
-  // } = useForm({
-  //   defaultValues: async () => await getAppointments()
-  // })
 
   const {
     register,
@@ -156,27 +151,27 @@ const EditAppoinments = ({ params }) => {
     },
   });
 
-  // const { field } = useController({ name: 'especialidad', control })
-
-  const onChange = (date, dateString) => {
-  };
-  const loadFile = (event) => {
-    // Handle file loading logic here
-  };
-
   const onSubmit = handleSubmit(async data => {
     setLoading(true)
     setSuccess('initial')
     try {
       const patientByEmail = await fetchUserByEmail(data.email)
+      const { users: alumno } = await fetchUser(patientByEmail.id)
 
       data.validacion = patientByEmail.validacion
-      data.alumndo_id = patientByEmail.id
+      data.alumno_id = patientByEmail.id
+      data.name = patientByEmail.nombre_social || patientByEmail.nombre
+      data.campus = data.campus === 'centro'
+        ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
+        : "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
+      data.tipo_cita = patientByEmail.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional'
+      data.carrera = alumno[0]?.carrera || ''
 
-      const status = session.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional'
       if (data.status === "status") {
+        const status = session.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional'
+        data.status = status
         try {
-          const response = await changeStatusAppointment(data.id, status)
+          const response = await changeStatusAppointment(data)
           if (response.estado === false) {
             setSuccess('fail')
           } else {

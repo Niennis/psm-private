@@ -127,6 +127,7 @@ const AddFirstAppoinments = () => {
         region: response[0].region,
         comuna: response[0].comuna,
       };
+console.log('PACIENTE', response);
 
       setDataPatient(patient)
       return patient
@@ -153,6 +154,7 @@ const AddFirstAppoinments = () => {
   }, [session?.user?.rol, reset]);
 
   const selectedRegion = watch('region')
+  const selectedComuna = watch('comuna')
   const profesional = watch('professional')
   const modalidad = watch("modalidad", "videollamada"); // Valor predeterminado: videollamada
   const campus = watch("campus", ""); // Valor predeterminado: ninguno
@@ -353,7 +355,15 @@ const AddFirstAppoinments = () => {
     e.preventDefault()
     setOpen(true)
   };
-  const handleClose = () => setOpen(false);
+
+
+  const handleClose = () => {
+    console.log('ENTRÓ ACÁ')
+    setOpen(false);
+    setSuccess('initial')
+    router.push('/citas')
+  }
+
 
   const fetchData = async () => {
     const users = await fetchFilteredProfesssionals('despeje')
@@ -404,6 +414,7 @@ const AddFirstAppoinments = () => {
   };
 
   const handleFirstInterview = handleSubmit(async (data, e) => {
+    setOpenBackdrop(true)
     let childFormData;
     if (childFormRef.current) {
       childFormData = await childFormRef.current.submitForm();
@@ -504,6 +515,7 @@ const AddFirstAppoinments = () => {
         setError(`Algo falló: ${err.message}`);
       } finally {
         setOpen(false)
+        setOpenBackdrop(false)
       }
     }
   })
@@ -993,25 +1005,29 @@ const AddFirstAppoinments = () => {
                                     }
                                   })}
                                   ref={null}
-                                  render={({ field: { onChange, onBlur, value } }) => {
+                                  render={({ field: { onChange, onBlur, value, ref } }) => {
                                     const regionKey = dataPatient?.region?.toLowerCase()
                                       .normalize("NFD") // Descompone caracteres con acentos
                                       .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
                                       .replace(/\s+/g, "_"); // Reemplaza espacios por "_"
                                     const opcionesComunas = regionKey ? comunas[regionKey] : [];
 
-                                    const selectedComuna = typeof value === 'string'
-                                      ? opcionesComunas?.find(comuna => comuna.label === value) || null 
-                                      : opcionesComunas?.find(comuna => comuna.label === value?.label) || null; 
+                                    const selectedComuna =  opcionesComunas?.find(comuna => comuna.label === value || comuna.label === value?.label) || null;
 
                                     return (
                                       <Select
                                         instanceId="select-region"
-                                        defaultValue={selectedOption}
-                                        value={selectedComuna?.id}
+                                        // defaultValue={selectedOption}
+                                        value={selectedComuna}
 
-                                        onChange={onChange}
-                                        options={comunas[selectedRegion?.value] || comunas[selectedRegion]}
+                                        onChange={(selectedOption) => {
+                                          // Guarda el valor (no el objeto completo) en el formulario
+                                          console.log('selectedOption', selectedOption);
+                                          
+                                          onChange(selectedOption?.value || null);
+                                        }}
+                                        onBlur={onBlur}
+                                        options={opcionesComunas }
                                         menuPortalTarget={menuPortalTarget}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         id="select-region"
@@ -1529,10 +1545,10 @@ const AddFirstAppoinments = () => {
           <Modal open={open} handleClose={handleClose} onClick={handleFirstInterview} errors={errors} />
         </div>
 
-        {/*  <SimpleBackdrop
-          open={openBackdrop}
-          handleClose={handleCloseBackdrop}
-        /> */}
+       { openBackdrop &&  <SimpleBackdrop
+          // open={openBackdrop}
+          // handleClose={handleCloseBackdrop}
+        />}
         {success === 'success'
           ?
           <div style={{
@@ -1546,7 +1562,7 @@ const AddFirstAppoinments = () => {
             {/* <div className="col-sm-12 col-lg-6"> */}
             <Alert
               severity="success"
-              onClose={() => { setSuccess('initial') }}
+              onClose={handleClose}
               sx={{
                 zIndex: 'tooltip',
                 position: 'absolute',

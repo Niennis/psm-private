@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller } from 'react-hook-form';
+import { useRouter } from "next/navigation";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Accordion, AccordionSummary, AccordionDetails, Alert, Box, LinearProgress } from "@mui/material";
@@ -67,6 +68,7 @@ const AddAppoinments = () => {
   const [error, setError] = useState('')
   const [loadingDays, setLoadingDays] = useState(false)
   const { setProps } = useSidebar();
+  const router = useRouter();
 
   useEffect(() => {
     setProps({
@@ -94,7 +96,12 @@ const AddAppoinments = () => {
     setOpen(true)
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    // setOpen(false);
+    setSuccess('initial')
+    router.push('/citas')
+  }
+
   /* FETCH PACIENTES CON DESPEJE */
   const getPatients = async () => {
     try {
@@ -1049,7 +1056,7 @@ const AddAppoinments = () => {
             {/* <div className="col-sm-12 col-lg-6"> */}
             <Alert
               severity="success"
-              onClose={() => { setSuccess('initial') }}
+              onClose={handleClose}
               sx={{
                 zIndex: 'tooltip',
                 position: 'absolute',

@@ -8,7 +8,7 @@ export const sendEmail = async (email, typeUser) => {
   const body = {
     'nombre': 'Prueba',
     'apellido': 'Usuario',
-    'mail':"estefania.osses.v@gmail.com",
+    'mail': "estefania.osses.v@gmail.com",
     'test': 'Don test',
     'puntaje': (25).toString(),
     'resultado': 'el resultado',
@@ -61,16 +61,16 @@ export const createInterview = async (appointment) => {
     })
     const response = await data.json()
 
- /*    // ENVÍO DE MAIL
-    if (response.estado === true) {
-      // pruebaSendMail('estefania.osses.v@gmail.com')
-      try {
-        const data = await sendEmail()
-        // const response = await data.json()
-
-      } catch (error) {
-      }
-    } */
+    /*    // ENVÍO DE MAIL
+       if (response.estado === true) {
+         // pruebaSendMail('estefania.osses.v@gmail.com')
+         try {
+           const data = await sendEmail()
+           // const response = await data.json()
+   
+         } catch (error) {
+         }
+       } */
 
     return response
   } catch (error) {
@@ -146,26 +146,40 @@ export const updateAppointment = async (appointment) => {
   }
 }
 
-export const changeStatusAppointment = async (id, status) => {
+export const changeStatusAppointment = async (data) => {
+  console.log('CHANGE STATUS', data)
   const APPOINMENT_API = process.env.NEXT_PUBLIC_CHANGE_STATUS
 
   const body = {
-    "id": id,
-    "estado": status,
+    id: data.id,
+    id_paciente: data.id_paciente,
+    id_profesional: data.id_profesional,
+    carrera_estudiante: data.carrera || '',
+    correo: data.email || '',
+    dia_cita: data.appointment_date || '',
+    hora_cita: data.start_time || '',
+    lugar_cita: data.campus || '',
+    nombre_estudiante: `${data.name} ${data.lastName}` || '',
+    nombre_profesional: data.selected_doctor || '',
+    quien_cancela: data.status || '',
+    estado: data.status,
+    tipo_cita: data.tipo_cita || '',
   }
+  console.log('BODY', body);
 
   try {
     const data = await fetch(APPOINMENT_API, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'access-control-allow-origin': '*',
       },
       body: JSON.stringify(
         body
       )
     })
-    return data.json()
+    const response = await data.json()
+    return response
+
   } catch (error) {
     console.log('Error:', error)
   }
@@ -246,7 +260,7 @@ export const createContact = async (input) => {
 export const showContact = async (id) => {
   const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/emergencia_read`
   const body = {
-    id 
+    id
   }
 
   try {
@@ -269,7 +283,7 @@ export const showContact = async (id) => {
 export const editContact = async (id) => {
   const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/emergencia_update`
   const body = {
-    id 
+    id
   }
 
   try {
