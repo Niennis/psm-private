@@ -1,6 +1,6 @@
 'use client'
 /* eslint-disable no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSection } from "@/context/SectionContext";
 import ReserveBtn from "./ReserveBtn";
 import { useSession } from "next-auth/react";
@@ -72,6 +72,8 @@ const Header = () => {
   const isExtraLargeDevice = useMediaQuery(
     "only screen and (min-width : 1025px)"
   );
+  const menuTimeoutRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -133,6 +135,26 @@ const Header = () => {
   const handleNavClick = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     setActiveSection(id);
+  };
+
+  const handleOpenUserMenuDesktop = (event) => {
+    clearTimeout(menuTimeoutRef.current);
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenuDesktop = () => {
+    // Agrega un pequeño retraso para permitir el hover entre botón y menú
+    menuTimeoutRef.current = setTimeout(() => {
+      setAnchorElUser(null);
+    }, 200);
+  };
+
+  const handleMenuEnter = () => {
+    clearTimeout(menuTimeoutRef.current);
+  };
+
+  const handleMenuLeave = () => {
+    handleCloseUserMenuDesktop();
   };
 
   return (
@@ -282,73 +304,86 @@ const Header = () => {
           </Typography>
 
           {/* MENU DASHBOARD */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-end' }}>
-            {pages.map((page) => {
-              return (
-                page.title === "CÓMO TRABAJAMOS"
-                  ?
-                  <Tooltip title="Como trabajamos" key={page.title}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: { xs: 'none', md: 'flex' },
+              justifyContent: 'flex-end',
+              alignItems: 'center'
+            }}
+          >
+            {pages.map((page) => (
+              page.title === "CÓMO TRABAJAMOS" ? (
+                <Box
+                  key={page.title}
+                  onMouseEnter={handleOpenUserMenuDesktop}
+                  onMouseLeave={handleCloseUserMenuDesktop}
+                  ref={menuRef}
+                  sx={{ display: 'inline-block' }}
+                >
+                  <Tooltip title="Cómo trabajamos">
                     <Button
-                      className={`sailec ${activeSection === 'como_trabajamos'
-                        ? 'active-header'
-                        : ''
-                        }`}
-                      onMouseEnter={handleOpenUserMenu}
-                      sx={{ ...style, p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' }}>
+                      className={`sailec ${activeSection === 'como_trabajamos' ? 'active-header' : ''}`}
+                      sx={{ p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' , width: 'min-content'}}>
                       {page.title}
                     </Button>
                   </Tooltip>
-                  :
-                  <Link style={{ color: 'black', textDecoration: 'none' }} href={page.url} key={page.title} >
-                    <Button
-                      className={`sailec ${activeSection === page.label
-                        ? 'active-header'
-                        : ''
-                        }`}
 
-                      onClick={() => handleNavClick(page.label)}
-                      sx={{ ...style, fontFamily: 'sailecmedium', my: 2, color: 'black', display: 'block' }}
-                    >
-                      {page.title}
-                    </Button>
-                  </Link>
+                  <Menu
+                    sx={{ mt: '45px' }}
+                    anchorEl={anchorElUser}
+                    open={Boolean(anchorElUser)}
+                    onClose={handleCloseUserMenuDesktop}
+                    MenuListProps={{
+                      onMouseEnter: handleMenuEnter,
+                      onMouseLeave: handleMenuLeave,
+                      style: { pointerEvents: 'auto' }
+                    }}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    disableEnforceFocus
+                  >
+                    {settings.map((setting) => (
+                      <MenuItem
+                        key={setting.url}
+                        onClick={handleCloseUserMenuDesktop}
+                        // sx={{ py: 1 }}
+                      >
+                        <Typography className="sailec">
+                          <a
+                            href={setting.url}
+                            style={{ color: 'black', fontFamily: 'sailec', textDecoration: 'none' }}>
+                            {setting.title}
+                          </a>
+                        </Typography>
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </Box>
+              ) : (
+                <Link
+                  href={page.url}
+                  key={page.title}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Button
+                    className="sailec"
+                    sx={{
+                      fontFamily: 'sailecmedium',
+                      color: 'black',
+                      my: 2,
+                      mx: 1,
+                      width: 'min-content'
+                    }}
+                  >
+                    {page.title}
+                  </Button>
+                </Link>
               )
-            }
-            )}
-
-
-            <Box sx={{ flexGrow: 0 }} className={`sailec `} >
-              <Menu
-                sx={{ mt: '45px' }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-                disableEnforceFocus
-              >
-                {settings.map((setting) => (
-                  <MenuItem key={setting.url} onClick={handleCloseUserMenu} >
-                    <Typography textAlign="center" className="sailec">
-                      <a href={setting.url} style={{ color: 'black', fontFamily: 'sailec', textDecoration: 'none' }}>
-                        {setting.title}
-                      </a>
-                    </Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
+            ))}
           </Box>
           {/* USER MENU */}
-          <Box sx={{ flexGrow: 0, maxWidth: '200px', wrap: 'balance', textAlign: 'right' }}>
+          <Box sx={{ flexGrow: 0, maxWidth: '200px', wrap: 'balance', textAlign: 'right', display: 'flex', alignItems: 'center' }}>
             {
               !session
                 ? <>

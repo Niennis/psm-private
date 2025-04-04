@@ -449,7 +449,8 @@ console.log('PACIENTE', response);
       "hora": data.selectedHour,
       "fecha": data.selectedDay,
       "region": regiones[0].label,
-      "motivo_consulta": motivo_consulta === 'otro' ? data.otro : data.motivo_consulta
+      "motivo_consulta": motivo_consulta === 'otro' ? data.otro : data.motivo_consulta,
+      "comuna": ''
     }
 
     const bodyUpdate = {
@@ -457,7 +458,7 @@ console.log('PACIENTE', response);
       "aplica_despeje": 1,
       "anoIngresoCarrera": 'No aplica',
       "campus": data.campus || 'No aplica',
-      "comuna": data.comuna.label || patient[0].comuna,
+      "comuna": data.comuna.label || patient[0].comuna || '',
       "carrera": data.career.label || patient[0].carrera,
       "contrasena": 'No aplica',
       "direccion": data.address,
@@ -1001,7 +1002,7 @@ console.log('PACIENTE', response);
                                   {...register('comuna', {
                                     required: {
                                       value: true,
-                                      message: 'Comuna es requerida',
+                                      // message: 'Comuna es requerida',
                                     }
                                   })}
                                   ref={null}

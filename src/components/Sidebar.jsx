@@ -182,9 +182,9 @@ const Sidebar = () => {
                         <span> Citas </span> <span className="menu-arrow" />
                       </Link>
                       <ul style={{ display: "none" }} className="menu-items4">
-                        <li>
+                        {/* <li>
                           <Link className={props?.activeClassName === 'appoinment-list' ? 'active' : ''} href="/citas">Lista de Citas</Link>
-                        </li>
+                        </li> */}
                         <li>
                           <Link className={props?.activeClassName === 'add-appoinment' ? 'active' : ''} href="/citas/agendarcita">Agendar Cita</Link>
                         </li>
@@ -317,9 +317,9 @@ const Sidebar = () => {
                         <span> Citas </span> <span className="menu-arrow" />
                       </Link>
                       <ul style={{ display: "none" }} className="menu-items4">
-                        <li>
+                        {/* <li>
                           <Link className={props?.activeClassName === 'appoinment-list' ? 'active' : ''} href="/citas">Lista de Citas</Link>
-                        </li>
+                        </li> */}
                         <li>
                           <Link className={props?.activeClassName === 'add-appoinment' ? 'active' : ''} href="/citas/agendarcita">Agendar Cita</Link>
                         </li>

@@ -19,7 +19,23 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 
-const cacheHandler = new CacheHandler();
+
+const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0); // Normaliza la fecha (elimina horas, minutos, segundos y milisegundos)
+
+  return arrayDeObjetos.map(async (item) => {
+    const fechaItem = new Date(item[claveFecha]);
+    fechaItem.setHours(0, 0, 0, 0);
+    if (fechaItem < hoy && item["estado"].includes('pendiente')) {
+      const res = await changeStatusAppointment(item.id_cita, 'perdida')
+      return { ...item, estado: 'perdida' }
+    } else {
+      return item
+    }
+  });
+}
+
 
 const PatientsList = () => {
   const ROL = ["profesional"]
@@ -30,8 +46,13 @@ const PatientsList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [users, setUsers] = useState([])
   const [results, setResults] = useState([])
+  const [patientResults, setPatientResults] = useState([])
   const [show, setShow] = useState({ state: false, id: '' })
   const [loading, setLoading] = useState(false);
+  const [hash, setHash] = useState('');
+  const [nombreEstudiante, setNombreEstudiante] = useState('')
+  const [appointments, setAppointments] = useState([])
+  const [idAppointment, setIdAppointment] = useState('')
 
   useEffect(() => {
     setProps({
@@ -87,6 +108,43 @@ const PatientsList = () => {
     fetchData()
   }, [])
 
+
+  const loadAppointments = async (record) => {
+    setLoading(true);
+    setHash('basictab2')
+    console.log('record', record);
+
+    try {
+
+      const response = await fetchAppointments();
+      const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')) && item.id_paciente === record.id_paciente)
+
+      const promises = filtrarFechasAnteriores(dataChangeStatus, "fecha")
+      const data = await Promise.all(promises)
+      console.log(patientResults);
+
+      if (session.user?.rol === 'profesional') {
+        const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
+        setAppointments(dataFiltered);
+        setPatientResults(dataFiltered);
+        // setIsValidated(false)
+      } else if (session.user?.rol === 'alumno') {
+        const dataFiltered = data.filter(item => item.id_paciente == session.user?.id);
+
+        setAppointments(dataFiltered);
+        setPatientResults(dataFiltered);
+      } else if (session.user?.rol === 'administrador') {
+        setAppointments(data);
+        setPatientResults(data);
+      }
+    } catch (error) {
+      setError('')
+    } finally {
+      setLoading(false)
+    }
+  };
+
+
   const handleLoadingChange = (enable) => {
     setLoading(enable);
   };
@@ -110,6 +168,19 @@ const PatientsList = () => {
     setResults(users)
   }
 
+
+  const handleName = name => {
+    setHash('basictab2')
+    setNombreEstudiante(name)
+  }
+
+
+  const handleNavigate = (fecha, hora) => {
+    localStorage.setItem('fechaCita', JSON.stringify({ fecha, hora }));
+  };
+
+
+
   const columns = [
     {
       title: "Nombre",
@@ -126,7 +197,8 @@ const PatientsList = () => {
                 alt="profile image"
               />
             </Link> */}
-            <Link href={`/fichas/${record.id_paciente}`}>{record.nombre_alumno}</Link>
+            <a onClick={() => loadAppointments(record)}>{record.nombre_alumno}</a>
+            {/* <Link href={`/fichas/${record.id_paciente}`}>{record.nombre_alumno}</Link> */}
           </h2>
 
         </>
@@ -177,7 +249,7 @@ const PatientsList = () => {
           <div className="text-end">
             <div className="dropdown dropdown-action">
               <button
-                style={{border: 'none'}}
+                style={{ border: 'none' }}
                 className="action-icon dropdown-toggle"
                 // data-bs-toggle="dropdown"
                 // aria-expanded="false"
@@ -192,6 +264,11 @@ const PatientsList = () => {
                   ? "dropdown-menu dropdown-menu-end dropdown-extra show"
                   : "dropdown-menu dropdown-menu-end dropdown-extra"
                 }
+                onMouseLeave={() => {
+                  if (show.state === true && show.id === record.id_paciente) {
+                    setShow({ state: false, id: null })
+                  }
+                }}
               >
                 <Link className="dropdown-item" href={`/pacientes/${record.id_paciente}`}
                 // data-bs-toggle="modal" 
@@ -207,6 +284,13 @@ const PatientsList = () => {
                   <i className="fas fa-folder-open me-2" />
                   Ver ficha
                 </Link>
+                <Link className="dropdown-item" href={`#`} onClick={() => loadAppointments(record)}
+                // data-bs-toggle="modal" 
+                // data-bs-target="#delete_patient"
+                >
+                  <i className="fa-regular fa-calendar-check me-2" />
+                  Ver citas
+                </Link>
               </div>
             </div>
           </div>
@@ -214,6 +298,195 @@ const PatientsList = () => {
       ),
     },
   ]
+
+
+  const patientColumns = [
+    // {
+    //   title: "Estudiante",
+    //   dataIndex: "nombre_alumno",
+    //   sorter: (a, b) => a['nombre_alumno'].localeCompare(b['nombre_alumno']),
+    //   fixed: 'left',
+    //   render: (text, record) => (
+    //     <>
+    //       <h2 className="profile-image">
+    //         <Link href={`/fichas/${record.id_paciente}`}>{record.nombre_alumno}</Link>
+    //       </h2>
+    //     </>
+    //   ),
+    //   key: 'nombre_alumno',
+    // },
+    {
+      title: "Profesional",
+      dataIndex: "nombre_profesional",
+      sorter: (a, b) => a['nombre_profesional'].localeCompare(b['nombre_profesional']),
+      key: 'nombre_profesional',
+      responsive: ['md'],
+    },
+    {
+      title: "Especialidad",
+      dataIndex: "especialidad_profesional",
+      sorter: (a, b) => a.especialidad_profesional.localeCompare(b.especialidad_profesional),
+      key: 'especialidad_profesional',
+      responsive: ['md'],
+    },
+    {
+      title: "Correo electrónico",
+      dataIndex: "email_estudiante",
+      sorter: (a, b) => a['email_estudiante'].localeCompare(b['email_estudiante']),
+      render: (text, record) => (
+        <>
+          <Link href="#">{record.email_estudiante}</Link>
+        </>
+      ),
+      key: 'email_estudiante',
+      responsive: ['md'],
+    }, {
+      title: "Día",
+      dataIndex: "fecha",
+      sorter: (a, b) => a['fecha'].localeCompare(b['fecha']),
+      key: 'fecha',
+      responsive: ['md'],
+    }, {
+      title: "Hora",
+      dataIndex: "hora",
+      sorter: (a, b) => a['hora'].localeCompare(b['hora']),
+      key: 'hora',
+      responsive: ['md'],
+    }, {
+      title: "Estado",
+      dataIndex: "estado",
+      sorter: (a, b) => a.estado.localeCompare(b.estado),
+      key: 'estado',
+      responsive: ['lg'],
+      render: (text, record) => (
+        <div>
+          {record.estado === "pendiente" && (
+            <span className="custom-badge status-green">
+              {record.estado}
+            </span>
+          )}
+          {record.estado === "realizada" && (
+            <span className="custom-badge status-blue">
+              {record.estado}
+            </span>
+          )}
+          {record.estado.includes("cancelada") && (
+            <span className="custom-badge status-pink">
+              {record.estado}
+            </span>
+          )}
+          {record.estado.includes("perdida") && (
+            <span className="custom-badge status-pink">
+              {record.estado}
+            </span>
+          )}
+        </div>
+      )
+    }, {
+      title: "",
+      dataIndex: "field",
+      fixed: 'right',
+      // responsive: ['xs'],
+      render: (text, record) => (
+        <>
+          <div className="text-end">
+            <div className="dropdown dropdown-action">
+              <button
+                style={{ border: 'none' }}
+                className="action-icon dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                onClick={() => { setShow({ ...show, state: !show.state, id: record.id_cita }) }}
+              >
+                <i className="fas fa-ellipsis-v" />
+              </button>
+              <div
+                style={{ right: '35px', top: 0 }}
+                className=
+                {show.state === true && show.id === record.id_cita
+                  ? "dropdown-menu dropdown-menu-end dropdown-extra show"
+                  : "dropdown-menu dropdown-menu-end dropdown-extra"
+                }
+                onMouseLeave={() => {
+                  if (show.state === true && show.id === record.id_cita) {
+                    setShow({ state: false, id: null })
+                  }
+                }}
+              >
+                {session.user?.rol === ('profesional' || 'administrador') ?
+                  (<>
+                    <Link
+                      className="dropdown-item"
+                      href={`/fichas/agregarficha/${record.id_cita}`}
+                      onClick={() => {
+                        const estado = record.estado
+                        if (estado.includes('Cancelada') || estado.includes('cancelada')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }
+                        handleNavigate(record.fecha, record.hora)
+                      }}
+                      style={{
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? "not-allowed" : "pointer",
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? 0.5 : 1,
+                      }}
+                    >
+                      <i className="far fa-edit me-2" />
+                      Registrar atención
+                    </Link>
+                    {/* <Link className="dropdown-item" href={`/citas/${record.id_cita}`}>
+                     <i className="far fa-edit me-2" />
+                     Editar
+                   </Link> */}
+                    <Link
+                      href={`/citas/${record.id_cita}`}
+                      className="dropdown-item"
+                      data-bs-toggle="modal"
+                      data-bs-target="#delete_appointment"
+                      onClick={() => {
+                        const estado = record.estado
+                        if (estado.includes('Cancelada') || estado.includes('cancelada')) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }
+                        setIdAppointment(record.id_cita)
+                      }}
+                      style={{
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? "not-allowed" : "pointer",
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? 0.5 : 1,
+                      }}
+                    >
+                      <i className="fa fa-trash-alt m-r-5"></i>
+                      Cancelar cita
+                    </Link>
+                  </>
+                  ) :
+                  (
+                    <Link
+                      href={`/citas/${record.id_cita}`}
+                      className="dropdown-item"
+                      data-bs-toggle="modal"
+                      data-bs-target="#delete_appointment"
+                      onClick={() => setIdAppointment(record.id_cita)}>
+                      <i className="fa fa-trash-alt m-r-5"></i>
+                      Cancelar cita
+                    </Link>
+                  )
+                }
+              </div>
+            </div>
+          </div>
+        </>
+      ),
+      key: 'field'
+    },
+  ]
+
+
+  const handleTabClick = (tabId) => {
+    setHash(tabId);
+  };
+
 
   const tableProps = {
     loading,
@@ -262,7 +535,27 @@ const PatientsList = () => {
                     <div className="row align-items-center">
                       <div className="col">
                         <div className="doctor-table-blk">
-                          <h3>Lista de Pacientes</h3>
+
+                          <ul className="nav nav-tabs">
+                            <li className="nav-item">
+                              <Link
+                                className={`nav-link ${hash === 'basictab1' ? 'active' : hash === '' ? 'active' : ''}`}
+                                href="#basictab1"
+                                onClick={() => handleTabClick('basictab1')}>
+                                <h3>Lista de Pacientes</h3>
+                              </Link>
+                            </li>
+                            {hash === 'basictab2' &&
+                              <li className="nav-item">
+                                <Link
+                                  className={`nav-link ${hash === 'basictab2' ? 'active' : ''}`}
+                                  href="#basictab2"
+                                  onClick={() => handleTabClick('basictab2')}>
+                                  <h3>{patientResults && patientResults[0]?.nombre_alumno || 'Detalle'} </h3>
+                                </Link>
+                              </li>}
+                          </ul>
+
                           <div className="doctor-search-blk">
                             <div className="top-nav-search table-search-blk">
                               <form>
@@ -299,40 +592,55 @@ const PatientsList = () => {
                           </div>
                         </div>
                       </div>
-                      {/* <div className="col-auto text-end float-end ms-auto download-grp">
-                        <Link href="#" className=" me-2">
-                          <img src={pdficon.src} alt="#" />
-                        </Link>
-                        <Link href="#" className=" me-2">
-                        </Link>
-                        <Link href="#" className=" me-2">
-                          <img src={pdficon3.src} alt="#" />
-                        </Link>
-                        <Link href="#">
-                          <img src={pdficon4.src} alt="#" />
-                        </Link>
-                      </div> */}
                     </div>
                   </div>
                   {/* /Table Header */}
-                  <div className="table-responsive doctor-list">
-                    <Table
-                      {...tableProps}
-                      pagination={{
-                        total: results.length,
-                        showTotal: (total, range) =>
-                          `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
-                        // showSizeChanger: true,
-                        onShowSizeChange: onShowSizeChange,
-                        itemRender: itemRender,
-                      }}
-                      columns={columns}
-                      dataSource={results}
 
-                      rowSelection={rowSelection}
-                      rowKey={(record) => record.id_paciente}
-                    />
+                  <div className="tab-content">
+                    <div
+                      className={`tab-pane ${hash === 'basictab1' || hash === '' ? 'show active' : ''}`}
+                      id="basictab1">
+                      <div className="table-responsive doctor-list" style={{overflowY: 'hidden'}}>
+                        <Table
+                          {...tableProps}
+                          pagination={{
+                            total: results.length,
+                            showTotal: (total, range) =>
+                              `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
+                            // showSizeChanger: true,
+                            onShowSizeChange: onShowSizeChange,
+                            itemRender: itemRender,
+                          }}
+                          columns={columns}
+                          dataSource={results}
+
+                          rowSelection={rowSelection}
+                          rowKey={(record) => record.id_paciente}
+                        />
+                      </div>
+                    </div>
+                    <div
+                      className={`tab-pane ${hash === 'basictab2' ? 'show active' : ''}`} id="basictab2">
+
+                      <Table
+                        {...tableProps}
+                        pagination={{
+                          total: results.length,
+                          showTotal: (total, range) =>
+                            `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
+                          //showSizeChanger: true,
+                          onShowSizeChange: onShowSizeChange,
+                          itemRender: itemRender,
+                        }}
+                        columns={patientColumns}
+                        dataSource={patientResults}
+
+                        rowSelection={rowSelection}
+                        rowKey={(record) => `${record.id_cita}`}
+                      />
+                    </div>
                   </div>
+
                 </div>
               </div>
             </div>

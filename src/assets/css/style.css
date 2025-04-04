@@ -11198,7 +11198,7 @@ tr.ant-table-row.ant-table-row-level-0.ant-table-row-selected,
 }
 
   /* fonts; */
-@font-face {
+/* @font-face {
   font-family: sailec;
   src: url(../../../SailecLight.ttf);
 }
@@ -11214,4 +11214,4 @@ tr.ant-table-row.ant-table-row-level-0.ant-table-row-selected,
 
 .lato {
   font-family: lato;
-}
+} */
