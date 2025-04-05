@@ -122,12 +122,11 @@ const AddFirstAppoinments = () => {
         mobile: response[0].telefono,
         aplica_despeje: response[0].aplica_despeje,
         rut: response[0].rut,
-        career: response[0].carrera,
+        carrera: response[0].carrera,
         address: response[0].direccion,
         region: response[0].region,
         comuna: response[0].comuna,
       };
-console.log('PACIENTE', response);
 
       setDataPatient(patient)
       return patient
@@ -358,7 +357,6 @@ console.log('PACIENTE', response);
 
 
   const handleClose = () => {
-    console.log('ENTRÓ ACÁ')
     setOpen(false);
     setSuccess('initial')
     router.push('/citas')
@@ -389,7 +387,7 @@ console.log('PACIENTE', response);
     // Handle file loading logic here
   };
 
-  const motivo_consulta_seleccionado = watch('motivo_consulta')
+  const motivo_consulta_seleccionado = watch('motivo')
 
   const gender = [
     { value: "Hombre", label: "Hombre" },
@@ -449,7 +447,9 @@ console.log('PACIENTE', response);
       "hora": data.selectedHour,
       "fecha": data.selectedDay,
       "region": regiones[0].label,
-      "motivo_consulta": motivo_consulta === 'otro' ? data.otro : data.motivo_consulta
+      "motivo": motivo_consulta === 'otro' ? data.otro : data.motivo.label,
+      "motivo_consulta": motivo_consulta === 'otro' ? data.otro : data.motivo.label,
+      "derivado_desde": 'no'
     }
 
     const bodyUpdate = {
@@ -458,7 +458,7 @@ console.log('PACIENTE', response);
       "anoIngresoCarrera": 'No aplica',
       "campus": data.campus || 'No aplica',
       "comuna": data.comuna.label || patient[0].comuna,
-      "carrera": data.career.label || patient[0].carrera,
+      "carrera": data.carrera.label || patient[0].carrera,
       "contrasena": 'No aplica',
       "direccion": data.address,
       "email": data.email,
@@ -478,7 +478,6 @@ console.log('PACIENTE', response);
       "id_emergencia": patient[0].id_emergencia || 0,
       "id_emergencia_2": patient[0].id_emergencia_2 || 0,
     }
-    // tomarHoraDisponible(bloques, time, hours, date)
 
     let id_contact_1;
     let id_contact_2;
@@ -498,6 +497,7 @@ console.log('PACIENTE', response);
           createInterview(bodyInterview),
           updateUser({ ...bodyUpdate, "id_emergencia": id_contact_1, "id_emergencia_2": id_contact_2 })
         ]);
+
         if (appointment.estado === false && update.estado === false) {
           setSuccess('fail')
         } else if (appointment.estado === true && update.estado === false) {
@@ -871,8 +871,8 @@ console.log('PACIENTE', response);
                                 </label>
                                 <Controller
                                   control={control}
-                                  name="career"
-                                  {...register('career', {
+                                  name="carrera"
+                                  {...register('carrera', {
                                     required: {
                                       value: true,
                                       message: 'Carrera es requerido',
@@ -881,7 +881,7 @@ console.log('PACIENTE', response);
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value } }) => (
                                     <Select
-                                      instanceId="career"
+                                      instanceId="carrera"
                                       defaultValue={selectedOption}
                                       onChange={onChange}
                                       value={carreras.find(option => option.label === value) || value}
@@ -889,7 +889,7 @@ console.log('PACIENTE', response);
                                       options={carreras}
                                       menuPortalTarget={menuPortalTarget}
                                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                      id="career"
+                                      id="carrera"
                                       components={{
                                         IndicatorSeparator: () => null
                                       }}
@@ -917,7 +917,7 @@ console.log('PACIENTE', response);
                                     />
                                   )}
                                 />
-                                {errors.career && <span><small>{errors.career.message}</small></span>}
+                                {errors.carrera && <span><small>{errors.carrera.message}</small></span>}
                               </div>
                             </div>
 
@@ -1001,18 +1001,19 @@ console.log('PACIENTE', response);
                                   {...register('comuna', {
                                     required: {
                                       value: true,
-                                      // message: 'Comuna es requerida',
+                                      message: 'Comuna es requerida',
                                     }
                                   })}
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value, ref } }) => {
-                                    const regionKey = dataPatient?.region?.toLowerCase()
+                                    const regionKey = watch('region')?.value || dataPatient?.region?.toLowerCase()
                                       .normalize("NFD") // Descompone caracteres con acentos
                                       .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
-                                      .replace(/\s+/g, "_"); // Reemplaza espacios por "_"
+                                      .replace(/\s+/g, "_") // Reemplaza espacios por "_" 
+
                                     const opcionesComunas = regionKey ? comunas[regionKey] : [];
 
-                                    const selectedComuna =  opcionesComunas?.find(comuna => comuna.label === value || comuna.label === value?.label) || null;
+                                    const selectedComuna = opcionesComunas?.find(comuna => comuna.label === value || comuna.label === value?.label) || null;
 
                                     return (
                                       <Select
@@ -1022,12 +1023,11 @@ console.log('PACIENTE', response);
 
                                         onChange={(selectedOption) => {
                                           // Guarda el valor (no el objeto completo) en el formulario
-                                          console.log('selectedOption', selectedOption);
-                                          
-                                          onChange(selectedOption?.value || null);
+
+                                          onChange(selectedOption || null);
                                         }}
                                         onBlur={onBlur}
-                                        options={opcionesComunas }
+                                        options={opcionesComunas}
                                         menuPortalTarget={menuPortalTarget}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         id="select-region"
@@ -1310,6 +1310,20 @@ console.log('PACIENTE', response);
                               {errors.motivo && <span><small>{errors.motivo.message}</small></span>}
                             </div>
                           </div>
+                          {
+                            motivo_consulta_seleccionado?.label == 'Otro' &&
+                            <div className="col-12 col-sm-6">
+                              <div className="form-group local-forms">
+                                <label>
+                                  Escribe el motivo <span className="login-danger">*</span>
+                                </label>
+                                <input
+                                  className="form-control" type="text"
+                                  defaultValue={""}
+                                  {...register('otro')} />
+                              </div>
+                            </div>
+                          }
 
                           <div className="row">
                             <div className="col-12 col-md-6 col-xl-4">
@@ -1385,20 +1399,6 @@ console.log('PACIENTE', response);
 
                           }
 
-                          {
-                            motivo_consulta_seleccionado === 'Otro' &&
-                            <div className="col-12 col-sm-6">
-                              <div className="form-group local-forms">
-                                <label>
-                                  Escribe el motivo <span className="login-danger">*</span>
-                                </label>
-                                <input
-                                  className="form-control" type="text"
-                                  defaultValue={""}
-                                  {...register('otro')} />
-                              </div>
-                            </div>
-                          }
 
                           {profesional &&
 
@@ -1545,9 +1545,9 @@ console.log('PACIENTE', response);
           <Modal open={open} handleClose={handleClose} onClick={handleFirstInterview} errors={errors} />
         </div>
 
-       { openBackdrop &&  <SimpleBackdrop
-          // open={openBackdrop}
-          // handleClose={handleCloseBackdrop}
+        {openBackdrop && <SimpleBackdrop
+        // open={openBackdrop}
+        // handleClose={handleCloseBackdrop}
         />}
         {success === 'success'
           ?

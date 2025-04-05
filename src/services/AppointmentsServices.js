@@ -59,20 +59,9 @@ export const createInterview = async (appointment) => {
       },
       body: JSON.stringify(body)
     })
-    const response = await data.json()
+    // const response = await data.json()
 
-    /*    // ENVÍO DE MAIL
-       if (response.estado === true) {
-         // pruebaSendMail('estefania.osses.v@gmail.com')
-         try {
-           const data = await sendEmail()
-           // const response = await data.json()
-   
-         } catch (error) {
-         }
-       } */
-
-    return response
+    return data
   } catch (error) {
     console.log('Error:', error)
   }
@@ -108,12 +97,6 @@ export const createAppointment = async (appointment) => {
     })
     const response = await data.json()
 
-    // ENVÍO DE MAIL
-    // if (response.detalle === 'success!!') {
-    // pruebaSendMail('estefania.osses.v@gmail.com')
-    // await sendEmail(bodyEmailProfessional)
-    // }
-
     return response
   } catch (error) {
     console.log('Error:', error)
@@ -147,7 +130,6 @@ export const updateAppointment = async (appointment) => {
 }
 
 export const changeStatusAppointment = async (data) => {
-  console.log('CHANGE STATUS', data)
   const APPOINMENT_API = process.env.NEXT_PUBLIC_CHANGE_STATUS
 
   const body = {
@@ -165,7 +147,6 @@ export const changeStatusAppointment = async (data) => {
     estado: data.status,
     tipo_cita: data.tipo_cita || '',
   }
-  console.log('BODY', body);
 
   try {
     const data = await fetch(APPOINMENT_API, {
