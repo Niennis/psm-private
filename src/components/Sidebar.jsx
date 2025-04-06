@@ -144,7 +144,7 @@ const Sidebar = () => {
                           <Link className={props?.activeClassName === 'add-doctor' ? 'active' : ''} href="/profesionales/agregarprofesional">Agregar Profesional</Link>
                         </li> */}
                         <li>
-                          <Link className={props?.activeClassName === 'edit-doctor' ? 'active' : ''} href={`/profesionales/editar/${session.user?.sub}`}>Editar Perfil</Link>
+                          <Link className={props?.activeClassName === 'edit-doctor' ? 'active' : ''} href={`/profesionales/editar/${session.user?.id}`}>Editar Perfil</Link>
                         </li>
                         {/* <li>
                     <Link className={props?.activeClassName === 'doctor-profile' ? 'active' : ''} href="/doctorprofile">Perfil Profesional</Link>
@@ -283,7 +283,7 @@ const Sidebar = () => {
                   </li> */}
 
                         <li>
-                          <Link className={props?.activeClassName === 'edit-doctor' ? 'active' : ''} href={`/profesionales/editar/${session.user?.sub}`}>Editar Perfil</Link>
+                          <Link className={props?.activeClassName === 'edit-doctor' ? 'active' : ''} href={`/profesionales/editar/${session.user?.id}`}>Editar Perfil</Link>
                         </li>
                       </ul>
                     </li>
