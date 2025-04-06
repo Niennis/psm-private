@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 import { regiones, comunas, genero, carreras } from "@/utils/selects";
-import { formatDateToYYYYMMDD } from "@/utils/managedata";
+// import { formatDateToYYYYMMDD } from "@/utils/managedata";
 const cacheHandler = new CacheHandler();
 
 const EditPatients = ({ params }) => {
@@ -40,6 +40,17 @@ const EditPatients = ({ params }) => {
     });
   }, [setProps]);
 
+  const formatoAAAAMMDD = fechaGMT => {
+    const fecha = new Date(fechaGMT);
+    if (isNaN(fecha.getTime())) return "";
+
+    const año = fecha.getUTCFullYear();
+    const mes = String(fecha.getUTCMonth() + 1).padStart(2, "0");
+    const dia = String(fecha.getUTCDate()).padStart(2, "0");
+
+    return `${año}-${mes}-${dia}`;
+  }
+
   const fetchInitialData = async () => {
     try {
       const { users: user } = await fetchUser(params.patientId)
@@ -50,7 +61,7 @@ const EditPatients = ({ params }) => {
         email: user[0].email,
         password: user[0].contrasena,
         confirmPassword: user[0].contrasena,
-        date: formatDateToYYYYMMDD(user[0].fecha_nacimiento),
+        date: formatoAAAAMMDD(user[0].fecha_nacimiento),
         genero: user[0].genero,
         status: user[0].status,
         carrera: user[0].carrera,
@@ -60,8 +71,10 @@ const EditPatients = ({ params }) => {
         tipo_usuario: user[0].tipo_usuario,
         rut: user[0].rut,
         id_emergencia: user[0].id_emergencia,
+        nombre_social: user[0]?.nombre_social || ''
       }
       setInitial(obj)
+      console.log('user', user[0]);
 
       return obj
     } catch (error) {
@@ -123,7 +136,7 @@ const EditPatients = ({ params }) => {
       "direccion": data.address || initial.address,
       "email": data.email,
       "entrevistador": 0,
-      "fecha_nacimiento": data.birthday || initial.date,
+      "fecha_nacimiento": data.date || initial.date,
       "genero": data.genero || initial.genero,
       "id": parseInt(params.patientId),
       "jornada": 'No aplica',
@@ -138,6 +151,8 @@ const EditPatients = ({ params }) => {
       "id_emergencia": initial.id_emergencia || 0,
       "id_emergencia_2": initial.id_emergencia || 0,
     }
+    console.log('date', bodyUpdate);
+
     try {
       const response = await updateUser(bodyUpdate)
       if (response.validacion === true) {
@@ -153,6 +168,11 @@ const EditPatients = ({ params }) => {
       setError(`Algo falló: ${error.message}`);
     }
   })
+
+  const handleClose = () => {
+    setSuccess('initial')
+    router.push('/pacientes')
+  }
 
   return (
     < >
@@ -316,26 +336,21 @@ const EditPatients = ({ params }) => {
                               Fecha de nacimiento{" "}
                               <span className="login-danger">*</span>
                             </label>
-                            <Controller
-                              control={control}
-                              name="date"
-                              {...register('date')}
-                              ref={null}
-                              render={({ field: { onChange, onBlur, value } }) => (
-                                <input
-                                  className="form-control datetimepicker"
-                                  type="date"
-                                  defaultValue={value}
-                                />
-                                // <DatePicker
-                                //   className="form-control datetimepicker"
-                                //   onChange={onChange}
-                                //   suffixIcon={null}
+                            <input
+                              className="form-control datetimepicker"
+                              type="date"
+                              placeholder=""
 
-                                // // value={appoinmentDate['fecha_cita']}
-                                // />
-                              )}
+                              // onChange={handleDate}
+                              // value={startDate}
+                              {...register('date', {
+                                required: {
+                                  value: true,
+                                  message: 'Fecha de inicio es requerida'
+                                }
+                              })}
                             />
+
                             {errors.date && <span><small>{errors.date.message}</small></span>}
                             {/* <input
                         className="form-control datetimepicker"
@@ -765,286 +780,9 @@ const EditPatients = ({ params }) => {
               </div>
             </div>
           </div>
-          <div className="notification-box">
-            <div className="msg-sidebar notifications msg-noti">
-              <div className="topnav-dropdown-header">
-                <span>Messages</span>
-              </div>
-              <div className="drop-scroll msg-list-scroll" id="msg_list">
-                <ul className="list-box">
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">R</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Richard Miles </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item new-message">
-                        <div className="list-left">
-                          <span className="avatar">J</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">John Doe</span>
-                          <span className="message-time">1 Aug</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">T</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Tarah Shropshire{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">M</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Mike Litorus</span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">C</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Catherine Manseau{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">D</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Domenic Houston{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">B</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Buster Wigton{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">R</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            {" "}
-                            Rolland Webber{" "}
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">C</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author"> Claire Mapes </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">M</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Melita Faucher</span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">J</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Jeffery Lalor</span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">L</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">Loren Gatlin</span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="chat.html">
-                      <div className="list-item">
-                        <div className="list-left">
-                          <span className="avatar">T</span>
-                        </div>
-                        <div className="list-body">
-                          <span className="message-author">
-                            Tarah Shropshire
-                          </span>
-                          <span className="message-time">12:28 AM</span>
-                          <div className="clearfix" />
-                          <span className="message-content">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div className="topnav-dropdown-footer">
-                <Link href="chat.html">See all messages</Link>
-              </div>
-            </div>
-          </div>
+
         </div>
-        <div
-          id="delete_patient"
-          className="modal fade delete-modal"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-body text-center">
-                <img src={imagesend} alt="" width={50} height={46} />
-                <h3>Are you sure want to delete this ?</h3>
-                <div className="m-t-20">
-                  {" "}
-                  <Link
-                    href="#"
-                    className="btn btn-white"
-                    data-bs-dismiss="modal"
-                  >
-                    Close
-                  </Link>
-                  <button type="submit" className="btn btn-danger">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+   
         <div className="sidebar-overlay" data-reff="" />
         {/* Datepicker Core JS */}
         {success === 'success'
@@ -1060,7 +798,7 @@ const EditPatients = ({ params }) => {
             {/* <div className="col-sm-12 col-lg-6"> */}
             <Alert
               severity="success"
-              onClose={() => { setSuccess('initial') }}
+              onClose={handleClose}
               sx={{
                 zIndex: 'tooltip',
                 position: 'absolute',
@@ -1071,7 +809,7 @@ const EditPatients = ({ params }) => {
               }}
               spacing={2}
             >
-              La cita se ha creado con éxito. Revisa los detalles en la sección Lista de citas.
+              Los datos se han actualizado exitosamente.
             </Alert>
             {/* </div> */}
           </div>

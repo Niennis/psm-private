@@ -78,6 +78,7 @@ const PatientsList = () => {
     const fetchData = async () => {
       const { users } = await fetchUsers()
       const response = await fetchAppointments();
+console.log('response', response);
 
       const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
       const citasActivas = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
@@ -112,7 +113,6 @@ const PatientsList = () => {
   const loadAppointments = async (record) => {
     setLoading(true);
     setHash('basictab2')
-    console.log('record', record);
 
     try {
 
@@ -121,16 +121,13 @@ const PatientsList = () => {
 
       const promises = filtrarFechasAnteriores(dataChangeStatus, "fecha")
       const data = await Promise.all(promises)
-      console.log(patientResults);
 
       if (session.user?.rol === 'profesional') {
-        const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
+        const dataFiltered = data.filter(item => item.id_profesional == session.user?.id);
         setAppointments(dataFiltered);
         setPatientResults(dataFiltered);
-        // setIsValidated(false)
       } else if (session.user?.rol === 'alumno') {
         const dataFiltered = data.filter(item => item.id_paciente == session.user?.id);
-
         setAppointments(dataFiltered);
         setPatientResults(dataFiltered);
       } else if (session.user?.rol === 'administrador') {
