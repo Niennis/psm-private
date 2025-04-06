@@ -131,6 +131,7 @@ export const updateAppointment = async (appointment) => {
 
 export const changeStatusAppointment = async (data) => {
   const APPOINMENT_API = process.env.NEXT_PUBLIC_CHANGE_STATUS
+  console.log('data', data);
 
   const body = {
     id: data.id,
@@ -158,8 +159,9 @@ export const changeStatusAppointment = async (data) => {
         body
       )
     })
-    const response = await data.json()
-    return response
+    // const response = await data.json()
+
+    return await data.json()
 
   } catch (error) {
     console.log('Error:', error)

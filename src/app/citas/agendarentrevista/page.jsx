@@ -127,6 +127,7 @@ const AddFirstAppoinments = () => {
         region: response[0].region,
         comuna: response[0].comuna,
       };
+      console.log('patient', patient);
 
       setDataPatient(patient)
       return patient
@@ -249,7 +250,6 @@ const AddFirstAppoinments = () => {
   const orderByDate = (arr) => {
     return arr.sort((a, b) => dayjs(a.fechaInicio).isAfter(dayjs(b.fechaInicio)) ? 1 : -1);
   }
-
 
   /* Retorna días disponibles */
   const handleSelectedProfessional = async (e) => {
@@ -463,7 +463,7 @@ const AddFirstAppoinments = () => {
       "direccion": data.address,
       "email": data.email,
       "entrevistador": 0,
-      "fecha_nacimiento": data.birthday || patient[0].fecha_nacimiento,
+      "fecha_nacimiento": data.birthday || patient[0].birthday,
       "genero": data.genero || patient[0].genero,
       "id": patient[0].id,
       "jornada": 'No aplica',
@@ -478,6 +478,7 @@ const AddFirstAppoinments = () => {
       "id_emergencia": patient[0].id_emergencia || 0,
       "id_emergencia_2": patient[0].id_emergencia_2 || 0,
     }
+    console.log('bodyupdate', bodyUpdate);
 
     let id_contact_1;
     let id_contact_2;
@@ -731,26 +732,19 @@ const AddFirstAppoinments = () => {
                                   Fecha de nacimiento {" "}
                                   <span className="login-danger">*</span>
                                 </label>
-                                <Controller
-                                  control={control}
-                                  name="birthday"
+
+                                <input
+                                  className="form-control datetimepicker"
+                                  type="date"
+                                  placeholder=""
                                   {...register('birthday', {
                                     required: {
                                       value: true,
-                                      message: 'Fecha es requerido',
+                                      message: 'Fecha de nacimiento es requerida'
                                     }
                                   })}
-                                  ref={null}
-                                  render={({ field: { onChange, onBlur, value } }) => (
-                                    <input
-                                      className="form-control datetimepicker"
-                                      type="date"
-                                      defaultValue={value}
-                                    />
-                                  )}
                                 />
                                 {errors.birthday && <span><small>{errors.birthday.message}</small></span>}
-
 
                               </div>
                             </div>

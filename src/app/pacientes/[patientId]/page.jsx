@@ -70,11 +70,11 @@ const EditPatients = ({ params }) => {
         comuna: user[0].comuna,
         tipo_usuario: user[0].tipo_usuario,
         rut: user[0].rut,
-        id_emergencia: user[0].id_emergencia,
-        nombre_social: user[0]?.nombre_social || ''
+        nombre_social: user[0]?.nombre_social || '',
+        id_emergencia_1: user[0].contacto1_id,
+        id_emergencia_2: user[0].contacto2_id,
       }
       setInitial(obj)
-      console.log('user', user[0]);
 
       return obj
     } catch (error) {
@@ -114,7 +114,7 @@ const EditPatients = ({ params }) => {
     setMenuPortalTarget(document.body);
   }, [])
 
-  const selectedRegion = watch('region');
+  const selectedRegion = watch('region') || initial?.region;
   const selectedComuna = watch('comuna');
 
   // Actualizar initial.region cuando la región cambia 
@@ -125,6 +125,7 @@ const EditPatients = ({ params }) => {
 
   const onSubmit = handleSubmit(async (data, e) => {
     e.preventDefault()
+
     const bodyUpdate = {
       "apellido": data.lastName || initial.lastName,
       "aplica_despeje": 1,
@@ -148,10 +149,9 @@ const EditPatients = ({ params }) => {
       "telefono": data.mobile || initial.mobile,
       "tipo_usuario": initial.tipo_usuario,
       "nombre_social": initial.nombre_social,
-      "id_emergencia": initial.id_emergencia || 0,
-      "id_emergencia_2": initial.id_emergencia || 0,
+      "id_emergencia": initial.id_emergencia_1 || 0,
+      "id_emergencia_2": initial.id_emergencia_2 || 0,
     }
-    console.log('date', bodyUpdate);
 
     try {
       const response = await updateUser(bodyUpdate)
@@ -601,9 +601,11 @@ const EditPatients = ({ params }) => {
                                 const regionKey = isValidRegion
                                   ? initial.region.toLowerCase()
                                     .normalize("NFD") // Descompone caracteres con acentos
-                                    .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
-                                    .replace(/\s+/g, "_") // Reemplaza espacios por "_"
+                                    .replace(/[\u0300-\u036f]/g, "") // Elimina acentos
+                                    .replace(/[.\s]/g, "_") // Reemplaza puntos y espacios por "_"
+                                    .replace(/_+/g, "_") // Convierte múltiples "_" en uno solo
                                   : null
+
                                 const opcionesComunas = regionKey ? comunas[regionKey] : []; // Busca las comunas según la región
                                 return (
                                   <Select
@@ -612,7 +614,7 @@ const EditPatients = ({ params }) => {
                                     value={opcionesComunas.find((comuna) => comuna.label === value)}
 
                                     onChange={onChange}
-                                    options={comunas[selectedRegion?.value]}
+                                    options={comunas[regionKey]}
                                     menuPortalTarget={menuPortalTarget}
                                     styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                     id="select-region"
@@ -782,7 +784,7 @@ const EditPatients = ({ params }) => {
           </div>
 
         </div>
-   
+
         <div className="sidebar-overlay" data-reff="" />
         {/* Datepicker Core JS */}
         {success === 'success'

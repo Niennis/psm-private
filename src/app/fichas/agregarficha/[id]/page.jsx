@@ -76,8 +76,6 @@ const AddInterviewRecord = ({ params }) => {
       const responsePatient = await fetchUserByEmail(date[0].email_estudiante)
       const { users: response } = await fetchUser(responsePatient.id)
       const { entrevista: records } = await showRecords(date[0].id_paciente)
-      // console.log('date', date);
-      // console.log('records', records);
 
       const obj = {
         id_alumno: date[0].id_paciente,
@@ -97,7 +95,7 @@ const AddInterviewRecord = ({ params }) => {
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         hora_cita: date[0].hora,
-        motivo_consulta: records[0]?.motivo_consulta,
+        motivo_consulta: records[0]?.motivo_consulta || '',
         nombre_social: response[0].nombre_social,
         nombre: responsePatient.nombre,
         nombre_completo: date[0].nombre_alumno,
@@ -283,11 +281,10 @@ const AddInterviewRecord = ({ params }) => {
       tipo_cita: data.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional',
     }
 
+
     try {
       const appointment = await createInterviewRecord(body)
       const changeStatus = await changeStatusAppointment(bodyEstado)
-      console.log('changeStatus', changeStatus);
-      console.log('appointment', appointment);
 
       if (appointment.estado === false && changeStatus.validacion === false) {
         setSuccess('fail')
@@ -374,7 +371,9 @@ const AddInterviewRecord = ({ params }) => {
       id_alumno: patient.id_alumno,
       fecha: formatDate(data.fecha),
       fecha_nacimiento: formatDate(data.fecha_nacimiento),
-      modalidad_atencion_evaluacion: data.modalidad_atencion_evaluacion[0]?.label ? data.modalidad_atencion_evaluacion[0]?.label : '',
+      modalidad_atencion_evaluacion: data?.modalidad_atencion_evaluacion?.map(obj => obj.label).join(', ') || '',
+      area_atencion_preferencia: data?.area_atencion_preferencia?.map(obj => obj.label).join(', ') || '',
+      tipos_apoyo_actual: data?.tipos_apoyo_actual?.map(obj => obj.label).join(', ') || '',
       acuerdos: ''
     }
 
@@ -473,7 +472,7 @@ const AddInterviewRecord = ({ params }) => {
 
   const handleClose = () => {
     setSuccess('initial')
-    router.push('/citas')
+    router.push('/pacientes')
   }
 
   return (
@@ -847,8 +846,8 @@ const AddInterviewRecord = ({ params }) => {
                                 </div>
 
                               </div>
-                                 {/* DERIVAR */}
-                                 <div className="row">
+                              {/* DERIVAR */}
+                              <div className="row">
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group select-gender">
                                     <div className="form-check check-tables">

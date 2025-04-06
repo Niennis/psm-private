@@ -78,7 +78,6 @@ const PatientsList = () => {
     const fetchData = async () => {
       const { users } = await fetchUsers()
       const response = await fetchAppointments();
-console.log('response', response);
 
       const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
       const citasActivas = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
