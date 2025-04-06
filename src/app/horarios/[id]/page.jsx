@@ -73,7 +73,7 @@ const ScheduleByProfessional = ({ params }) => {
   const [disponibilidad, setDisponibilidad] = useState()
   const router = useRouter();
 
-  
+
   // const [selectedOption, setSelectedOption] = useState(null);
   const styleInput = {
     display: 'inline',
@@ -351,6 +351,14 @@ const ScheduleByProfessional = ({ params }) => {
     setSuccess('initial')
   }
 
+  const handleRefresh = () => {
+    setIsLoading(true)
+    fetchData(session?.user?.id)
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 300);
+  }
+
   return (
     < >
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
@@ -436,7 +444,7 @@ const ScheduleByProfessional = ({ params }) => {
                           deleteBloque={handleDelete}
                           editBloque={handleEdit}
                           profesional_id={params.id}
-                          refresh={() => {fetchData(session?.user?.id)}}
+                          refresh={handleRefresh}
                         />
                       }
 

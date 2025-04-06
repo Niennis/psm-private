@@ -307,6 +307,14 @@ const AddSchedule = () => {
     }
   }
 
+  const handleRefresh = () => {
+    setIsLoading(true)
+    fetchData(session?.user?.id)
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 300);
+  }
+
   return (
     < >
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
@@ -1240,6 +1248,7 @@ const AddSchedule = () => {
                 calendario={calendario}
                 editBloque={handleEdit}
                 deleteBloque={handleDelete}
+                refresh={handleRefresh}
               />
             }
           </div>
