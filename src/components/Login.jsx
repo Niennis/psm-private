@@ -4,6 +4,7 @@ import { redirect, useParams, usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react"
 import { useForm } from 'react-hook-form';
+import { signOut } from "next-auth/react";
 
 // import { AuthData } from "@/providers/AuthWrapper";
 
@@ -36,8 +37,20 @@ const Login = () => {
     }
   }, []);
 
+  // useEffect(() => {
+  //   signOut({ redirect: false }).then(() => {
+  //     console.log("Sesión completamente eliminada.");
+  //   });
+
+  //   // Eliminamos cualquier cookie remanente
+  //   document.cookie = "next-auth.session-token=; Max-Age=0; Path=/;";
+  //   document.cookie = "next-auth.csrf-token=; Max-Age=0; Path=/;";
+  //   localStorage.clear();
+  //   sessionStorage.clear();
+  // }, []);
+
   useEffect(() => {
-    if(session?.user?.rol === 'profesional') {
+    if (session?.user?.rol === 'profesional') {
       router.push('/citas')
     }
   })
@@ -85,7 +98,7 @@ const Login = () => {
         }
       }
       finally {
-        setTimeout(() => setIsLoading(false), 5000); // Asegurarte de ocultar el loading después de un tiempo
+        setIsLoading(false)
       }
     } else {
       setError('Ocurrió un problema, intenta más tarde')
@@ -114,7 +127,7 @@ const Login = () => {
       redirect('/')
     }
     finally {
-      setTimeout(() => setIsLoading(false), 3000); // Asegurarte de ocultar el loading después de un tiempo
+      setIsLoading(false)
     }
   }
   const URL_RESERVAR = process.env.NEXT_PUBLIC_URL_RESERVAR
