@@ -97,7 +97,7 @@ const AddInterviewRecord = ({ params }) => {
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         hora_cita: date[0].hora,
-        motivo_consulta: records[0].motivo_consulta,
+        motivo_consulta: records[0]?.motivo_consulta,
         nombre_social: response[0].nombre_social,
         nombre: responsePatient.nombre,
         nombre_completo: date[0].nombre_alumno,
