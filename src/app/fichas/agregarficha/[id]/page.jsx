@@ -208,6 +208,7 @@ const AddInterviewRecord = ({ params }) => {
 
     const body = {
       ...data,
+      anoIngresoCarrera: data.ano_ingreso,
       id_receptor: derivacion_interna ? data.profesional_derivacion.id : '',
       id_profesional: session?.user?.id,
       nombre_social: patient.nombre_social,

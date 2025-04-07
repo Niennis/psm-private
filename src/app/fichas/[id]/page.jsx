@@ -41,7 +41,14 @@ const FichaAlumno = ({ params }) => {
   const getRecords = async () => {
     try {
       const { entrevista: response } = await showRecords(params.id)
-      setRecords(response)
+      const motivo_consulta = response[0].motivo_consulta
+      const recordsProcesados = response.map((record) => {
+        return {
+          ...record,
+          motivo_consulta: motivo_consulta,
+        }
+      })
+      setRecords(recordsProcesados)
     } catch (error) {
       console.log(error)
     }
@@ -124,7 +131,7 @@ const FichaAlumno = ({ params }) => {
                       {/* Nombre profesional */}
                       <div className="col-12 col-md-6 col-xl-6">
                         <div className="form-group local-forms">
-                          <label className="col-md-3 col-form-label">
+                          <label className="col-md-6 col-form-label">
                             Nombre estudiante
                           </label>
                           <div className="col-md-12">
@@ -140,7 +147,7 @@ const FichaAlumno = ({ params }) => {
                       <div className="col-12 col-md-6 col-xl-6">
 
                         <div className="form-group local-forms">
-                          <label className="col-md-3 col-form-label">
+                          <label className="col-md-6 col-form-label">
                             Email estudiante
                           </label>
                           <div className="col-md-12">
@@ -393,14 +400,14 @@ const FichaAlumno = ({ params }) => {
                                   </div>
                                   <div className="comman-activitys flex-grow-1">
                                     <h3>
-                                      {item.numero_ficha} {" "}
-                                      <span>{toTitleCase(item.profesional_evaluador)}</span>
+                                      {item.numero_ficha} {" - "}
+                                      <span>Profesional evaluador: {toTitleCase(item.profesional_evaluador)}</span>
                                     </h3>
                                     <span>
                                       {" "}
-                                      {item.motivo_consulta || 'MOTIVO CONSULTA'}
+                                      Motivo consulta: <strong>{item.motivo_consulta || 'MOTIVO CONSULTA'}</strong>
                                     </span>
-                                    <p>{item.observaciones || 'OBSERVACIONES'}</p>
+                                    <h3>Observaciones: {item.observaciones || 'OBSERVACIONES'}</h3>
                                     <button
                                       className="btn btn-primary"
                                       onClick={() => toggleVisibility(index)}
@@ -559,7 +566,7 @@ const FichaAlumno = ({ params }) => {
                                                 <td style={{ width: '50%' }}>{item.redes_apoyo_personas_significativas || "N/A"}</td>
                                               </tr>
                                               <tr>
-                                                <td><strong>Área de atención de preferencia del/la estudiante:</strong></td>
+                                                <td><strong>Tipos de apoyo:</strong></td>
                                                 <td>{item.tipos_apoyo_actual || "N/A"}</td>
                                               </tr>
                                             </tbody>
