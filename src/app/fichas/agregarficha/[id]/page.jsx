@@ -952,7 +952,7 @@ const AddInterviewRecord = ({ params }) => {
                               >
                                 Registrar cita
                               </button>
-                              <Link href={'/citas'}>
+                              <Link href={'/pacientes'}>
                                 <button
                                   type="reset"
                                   className="btn btn-primary cancel-form"
@@ -2677,7 +2677,7 @@ const AddInterviewRecord = ({ params }) => {
                               >
                                 Registrar entrevista
                               </button>
-                              <Link href={'/citas'}>
+                              <Link href={'/pacientes'}>
                                 <button
                                   type="reset"
                                   className="btn btn-primary cancel-form"
@@ -2793,4 +2793,4 @@ const AddInterviewRecord = ({ params }) => {
 };
 
 // export default AddInterviewRecord;
-export default withAuth(AddInterviewRecord, ['administrador', 'profesional', 'administrador']);
+export default withAuth(AddInterviewRecord, ['administrador', 'profesional']);

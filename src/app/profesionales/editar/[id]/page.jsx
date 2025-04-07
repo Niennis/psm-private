@@ -29,11 +29,11 @@ const EditDoctor = ({ params }) => {
   const { setProps } = useSidebar();
 
   if (!session) {
-    redirect('/citas');
+    redirect('/');
   }
   const userId = params.id;
   if (session.user.id != userId && session?.user?.rol !== "administrador") {
-    redirect('/citas');
+    redirect('/pacientes');
   }
 
   const [success, setSuccess] = useState('initial')
@@ -245,7 +245,7 @@ const EditDoctor = ({ params }) => {
   })
 
   const handleClose = () => {
-    router.push('/citas');
+    router.push('/pacientes');
     setSuccess('initial')
   }
 
@@ -651,7 +651,7 @@ const EditDoctor = ({ params }) => {
                             >
                               Actualizar
                             </button>
-                            <Link href={'/citas'}>
+                            <Link href={'/pacientes'}>
                               <button
                                 type="reset"
                                 className="btn btn-primary cancel-form"

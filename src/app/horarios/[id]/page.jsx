@@ -91,7 +91,6 @@ const ScheduleByProfessional = ({ params }) => {
   useEffect(() => {
     const fetchProfesional = async () => {
       const { especialidades: user } = await fetchSpecialityById(params.id)
-      console.log('user', user);
 
       setProfesional(user[0])
     }
@@ -856,7 +855,7 @@ const ScheduleByProfessional = ({ params }) => {
                             Editar disponibilidad
                           </button>
                           {/* </Link> */}
-                          <Link href={'/citas'}>
+                          <Link href={'/pacientes'}>
                             <button
                               type="reset"
                               className="btn btn-primary cancel-form"

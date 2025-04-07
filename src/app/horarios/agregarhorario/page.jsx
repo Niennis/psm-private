@@ -1219,7 +1219,7 @@ const AddSchedule = () => {
                               Agregar horario
                             </button>
                             {/* </Link> */}
-                            <Link href={'/citas'}>
+                            <Link href={'/pacientes'}>
                               <button
                                 type="reset"
                                 className="btn btn-primary cancel-form"

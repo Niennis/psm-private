@@ -571,7 +571,7 @@ const AddProfessional = () => {
                               Agregar profesional
                             </button>
                             {/* } */}
-                            <Link href={'/citas'}>
+                            <Link href={'/pacientes'}>
                               <button
                                 type="reset"
                                 className="btn btn-primary cancel-form"
