@@ -11,7 +11,7 @@ import { useForm, Controller } from 'react-hook-form'
 import Select from "react-select";
 
 import { fetchSpecialityById, fetchProfessionals } from '@/services/DoctorsServices';
-import { createSchedule, getDates, fetchScheduleByDate, validateDates, generarHorasMedicas, fetchBlocksAvailables, editDisponibilidad, deleteDisponibilidad } from '@/services/SchedulesServices';
+import { fetchScheduleByDate, generarHorasMedicas, editDisponibilidad, deleteDisponibilidad, eliminarDisponibilidadPorId, eliminarDisponibilidadCompleta } from '@/services/SchedulesServices';
 import Calender from '../../calender/page';
 
 import { useSidebar } from "@/context/SidebarContext";
@@ -327,9 +327,8 @@ const ScheduleByProfessional = ({ params }) => {
   })
 
   const handleDelete = async (data) => {
-
     try {
-      const response = await deleteDisponibilidad(data)
+      const response = await eliminarDisponibilidadPorId(data)
       if (response.validacion === true) {
         setSuccess('success')
         setError(`Disponibilidad eliminada exitosamente.`)
@@ -345,6 +344,28 @@ const ScheduleByProfessional = ({ params }) => {
       fetchData(session?.user?.id)
     }
   }
+
+  const handleDeleteDisponibilidad = async (data) => {
+    console.log('data', data);
+    try {
+      const response = await eliminarDisponibilidadCompleta(data)
+      console.log('response', response);
+
+      if (response.estado === true) {
+        setSuccess('success')
+        setError(`Disponibilidad eliminada exitosamente.`)
+      } else {
+        setSuccess('fail')
+        setError(`Ha ocurrido un problema ${response.detalle}`)
+      }
+    } catch (error) {
+      console.log('Error:', error)
+      setError(`Ha ocurrido un problema ${error}`)
+    } finally {
+      session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
+    }
+  }
+
 
   const handleOnClose = () => {
     setSuccess('initial')
@@ -443,6 +464,7 @@ const ScheduleByProfessional = ({ params }) => {
                           deleteBloque={handleDelete}
                           editBloque={handleEdit}
                           profesional_id={params.id}
+                          deleteDisponibilidad={handleDeleteDisponibilidad}
                           refresh={handleRefresh}
                         />
                       }

@@ -24,7 +24,7 @@ import { useDisponibilidadContext } from "@/context/DisponibilidadContext";
 
 const cacheHandler = new CacheHandler();
 
-const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBloque, refresh }, calendarRef) => {
+const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBloque, deleteDisponibilidad, refresh }, calendarRef) => {
   const [menu, setMenu] = useState(false);
   const [success, setSuccess] = useState('initial')
   const [message, setMessage] = useState('')
@@ -139,6 +139,12 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
     handleClose()
   }
 
+  const handleDeleteDisponibilidad = async () => {
+    await deleteDisponibilidad(calenderevent.extendedProps.uuid)
+    setSuccess('initial')
+    handleClose()
+  }
+
   const handleDateSelect = (selectInfo) => {
     setisnewevent(true);
     setaddneweventobj(selectInfo);
@@ -215,6 +221,15 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
     setSuccess('warning')
     setMessage('¿Desea confirmar la eliminación del servicio seleccionado?')
   }
+
+  
+  const openWarningGrupal = () => {
+    console.log(calenderevent.extendedProps);
+    
+    setSuccess('warningGrupal')
+    setMessage('¿Desea confirmar la eliminación de los servicios seleccionados?')
+  }
+
 
   return (
     <>
@@ -313,6 +328,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                         <Button variant="secondary" onClick={handleClose}> Cerrar </Button>
                         <Button variant="secondary" onClick={handleEdit}> Editar </Button>
                         <Button variant="secondary" onClick={openWarning}> Eliminar </Button>
+                        <Button variant="secondary" onClick={openWarningGrupal}> Eliminar disponibilidad agrupada</Button>
                       </Modal.Footer>
                     </Modal>
                   </div>
@@ -478,6 +494,35 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                     >
                       <h4>{message}</h4>
                       <Button variant="primary" onClick={handleDelete}> Confirmar </Button>
+                    </Alert>
+                  </div>
+                </div>
+                : success === 'warningGrupal'
+                ?
+                <div className="row" style={{
+                  height: '100%',
+                  position: 'fixed',
+                  top: '0',
+                  width: '100%',
+                  zIndex: 99999,
+                  background: '#00000080'
+                }}>
+                  <div className="col-sm-12 col-lg-6">
+                    <Alert
+                      severity="warning"
+                      onClose={() => { setSuccess('initial') }}
+                      sx={{
+                        zIndex: 'tooltip',
+                        position: 'absolute',
+                        left: '30%',
+                        width: '50%',
+                        padding: '50px',
+                        bottom: '50vh'
+                      }}
+                    // spacing={2}
+                    >
+                      <h4>{message}</h4>
+                      <Button variant="primary" onClick={handleDeleteDisponibilidad}> Confirmar </Button>
                     </Alert>
                   </div>
                 </div>

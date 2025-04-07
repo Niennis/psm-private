@@ -7,12 +7,12 @@ import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
 import { TextField, Alert } from '@mui/material';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, set } from 'react-hook-form'
 
 import Select from "react-select";
 
 import { fetchSpecialityById, fetchProfessionalById, fetchProfessionals } from '@/services/DoctorsServices';
-import { createSchedule, getDates, fetchScheduleByDate, validateDates, generarHorasMedicas, fetchBlocksAvailables, deleteDisponibilidad } from '@/services/SchedulesServices';
+import { createSchedule, getDates, validateDates, generarHorasMedicas, eliminarDisponibilidadPorId, eliminarDisponibilidadCompleta } from '@/services/SchedulesServices';
 import Calender from '../../calender/page';
 
 import { useSidebar } from "@/context/SidebarContext";
@@ -280,19 +280,47 @@ const AddSchedule = () => {
   }
 
   const handleEdit = () => {
+    setLoading(true)
     if (pathname.includes('agregarhorario')) {
       if (session?.user?.rol === 'profesional') {
         router.push(`/horarios/${session?.user?.id}`)
+        setLoading(false)
       } else {
         router.push(`/horarios/${profesionalSeleccionado.id}`)
+        setLoading(false)
       }
     }
   }
 
   const handleDelete = async (data) => {
+    console.log('data', data);
+
     try {
-      const response = await deleteDisponibilidad(data)
-      if (response.validacion === true) {
+      const response = await eliminarDisponibilidadPorId(data)
+      console.log('response', response);
+
+      if (response.estado === true) {
+        setSuccess('success')
+        setError(`Disponibilidad eliminada exitosamente.`)
+      } else {
+        setSuccess('fail')
+        setError(`Ha ocurrido un problema ${response.detalle}`)
+      }
+    } catch (error) {
+      console.log('Error:', error)
+      setError(`Ha ocurrido un problema ${error}`)
+    } finally {
+      session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
+    }
+  }
+
+  const handleDeleteDisponibilidad = async (data) => {
+    console.log('data', data);
+    try {
+      const response = await eliminarDisponibilidadCompleta(data)
+      console.log('response', response);
+
+      if (response.estado === true) {
         setSuccess('success')
         setError(`Disponibilidad eliminada exitosamente.`)
       } else {
@@ -918,7 +946,7 @@ const AddSchedule = () => {
                           <div className="row">
                             <div className="col-12 col-lg-2" >
                               <div className="form-group select-gender">
-                             {/*    <div className="form-check-inline">
+                                {/*    <div className="form-check-inline">
                                   <label className="form-check-label">
                                     <input
                                       type="radio"
@@ -943,7 +971,7 @@ const AddSchedule = () => {
                                     Semanal
                                   </label>
                                 </div>
-                            {/*     <div className="form-check-inline">
+                                {/*     <div className="form-check-inline">
                                   <label className="form-check-label">
                                     <input
                                       type="radio"
@@ -1248,6 +1276,7 @@ const AddSchedule = () => {
                 calendario={calendario}
                 editBloque={handleEdit}
                 deleteBloque={handleDelete}
+                deleteDisponibilidad={handleDeleteDisponibilidad}
                 refresh={handleRefresh}
               />
             }
@@ -1315,8 +1344,6 @@ const AddSchedule = () => {
               : ''
         }
       </>
-
-
     </>
   )
 }

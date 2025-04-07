@@ -76,6 +76,8 @@ export const fetchScheduleByAvailability = async (id) => {
     body: JSON.stringify(body)
   })
   const response = await data.json()
+  console.log('RESPONSE', response);
+
   return response
 }
 
@@ -155,7 +157,8 @@ export const generarHorasMedicas = async (id) => {
           modalidad: hour.modalidad,
           repeticiones: hour.repeticiones,
           tipo: hour.tipo,
-          tipoServicio: hour.tipoServicio
+          tipoServicio: hour.tipoServicio,
+          uuid: hour.uuid,
         });
       }
 
@@ -341,12 +344,13 @@ export const getDates = (body) => {
 
 // CREATE DISPONIBILIDADES
 export const createSchedule = async (schedule) => {
-  const SCHEDULES_URL = process.env.NEXT_PUBLIC_CREATE_DISPONIBILIDADES
+  // const SCHEDULES_URL = process.env.NEXT_PUBLIC_CREATE_DISPONIBILIDADES
+const SCHEDULES_URL = 'https://edituserexcel-g5c9f2drbzb9evb9.eastus-01.azurewebsites.net/main'
   const semana = ["lunes", "martes", "miércoles", "jueves", "viernes"]
 
   const body = {
-    "detalleServicio": schedule.title,
     "campus": schedule.campus,
+    "detalleServicio": schedule.title,
     "dias": schedule.frecuencia === "semanal" ? schedule.semanal.dia
       : schedule.frecuencia === "mensual" ? [schedule.mensual['ordinal-dia']] : semana,
     "duracionServicio": schedule.duracionServicio,
@@ -579,3 +583,55 @@ export const deleteDisponibilidad = async (id) => {
     console.log('Error:', error)
   }
 }
+
+export const eliminarDisponibilidadPorId = async (id) => {
+  const URL = `${process.env.NEXT_PUBLIC_DISPONIBILIDADES}/delete/id` 
+  const body = {
+    id: id
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    const response = await data.json()
+    console.log('eliminarDisponibilidadPorId', response);
+    
+    return response
+  } catch (error) {
+    console.log('Error:', error);
+    return error
+  }
+}
+
+export const eliminarDisponibilidadCompleta = async (uuid) => {
+  console.log('UUID', uuid);
+  
+  const URL = `${process.env.NEXT_PUBLIC_DISPONIBILIDADES}/delete/uuid`
+  const body = {
+    uuid: uuid
+  }
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    const response = await data.json()
+    console.log('eliminarDisponibilidadCompleta', response);
+    return response
+
+  } catch (error) {
+    console.log('Error:', error);
+    return error
+  }
+}
+
