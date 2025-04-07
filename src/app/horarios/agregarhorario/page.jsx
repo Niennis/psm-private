@@ -293,11 +293,9 @@ const AddSchedule = () => {
   }
 
   const handleDelete = async (data) => {
-    console.log('data', data);
 
     try {
       const response = await eliminarDisponibilidadPorId(data)
-      console.log('response', response);
 
       if (response.estado === true) {
         setSuccess('success')
@@ -315,10 +313,8 @@ const AddSchedule = () => {
   }
 
   const handleDeleteDisponibilidad = async (data) => {
-    console.log('data', data);
     try {
       const response = await eliminarDisponibilidadCompleta(data)
-      console.log('response', response);
 
       if (response.estado === true) {
         setSuccess('success')

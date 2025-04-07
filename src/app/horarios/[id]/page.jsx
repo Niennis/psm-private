@@ -329,7 +329,7 @@ const ScheduleByProfessional = ({ params }) => {
   const handleDelete = async (data) => {
     try {
       const response = await eliminarDisponibilidadPorId(data)
-      if (response.validacion === true) {
+      if (response.estado === true) {
         setSuccess('success')
         setError(`Disponibilidad eliminada exitosamente.`)
       } else {
@@ -346,10 +346,8 @@ const ScheduleByProfessional = ({ params }) => {
   }
 
   const handleDeleteDisponibilidad = async (data) => {
-    console.log('data', data);
     try {
       const response = await eliminarDisponibilidadCompleta(data)
-      console.log('response', response);
 
       if (response.estado === true) {
         setSuccess('success')
@@ -461,9 +459,9 @@ const ScheduleByProfessional = ({ params }) => {
                         :
                         <Calender
                           calendario={calendario}
-                          deleteBloque={handleDelete}
                           editBloque={handleEdit}
                           profesional_id={params.id}
+                          deleteBloque={handleDelete}
                           deleteDisponibilidad={handleDeleteDisponibilidad}
                           refresh={handleRefresh}
                         />

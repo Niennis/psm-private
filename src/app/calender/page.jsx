@@ -221,15 +221,11 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
     setSuccess('warning')
     setMessage('¿Desea confirmar la eliminación del servicio seleccionado?')
   }
-
   
   const openWarningGrupal = () => {
-    console.log(calenderevent.extendedProps);
-    
     setSuccess('warningGrupal')
     setMessage('¿Desea confirmar la eliminación de los servicios seleccionados?')
   }
-
 
   return (
     <>
@@ -310,7 +306,6 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                           eventClick={(clickInfo) => handleEventClick(clickInfo)}
                           events={calendario}
                         />
-
                     }
                     <Modal
                       show={showModal}
