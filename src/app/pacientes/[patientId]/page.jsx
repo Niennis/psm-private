@@ -765,7 +765,7 @@ const EditPatients = ({ params }) => {
                             >
                               Actualizar
                             </button>
-                            <Link href={'/citas'}>
+                            <Link href={'/pacientes'}>
                               <button
                                 type="reset"
                                 className="btn btn-primary cancel-form"

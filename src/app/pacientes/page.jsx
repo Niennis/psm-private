@@ -6,36 +6,53 @@ import { Form, Switch, Table } from 'antd';
 import Sidebar from '../../components/Sidebar';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
 import { fetchUsers } from '../../services/UsersServices'
-import { search } from '../../services/AppointmentsServices'
+import { changeStatusAppointment, fetchAppointment, search } from '../../services/AppointmentsServices'
 import { fetchAppointments } from '../../services/AppointmentsServices';
 import {
   imagesend, plusicon, refreshicon, searchnormal,
 } from '../../components/imagepath';
 import Link from "next/link";
+import { Alert } from '@mui/material';
 
 import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
-
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { Button } from 'react-bootstrap'
 
 const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0); // Normaliza la fecha (elimina horas, minutos, segundos y milisegundos)
 
   return arrayDeObjetos.map(async (item) => {
+    const bodyUpdate = {
+      id: item.id_cita,
+      id_paciente: item.id_paciente,
+      id_profesional: item.id_profesional,
+      carrera: item.carrera || '',
+      email: item.email_estudiante || '',
+      appointment_date: item.fecha || '',
+      start_time: item.hora || '',
+      campus: item.campus || '',
+      nombre_estudiante: item.nombre_alumno,
+      selected_doctor: item.nombre_profesional || '',
+      quien_cancela: 'perdida',
+      status: item.estado,
+      tipo_cita: item.tipo_cita || '',
+    }
+
     const fechaItem = new Date(item[claveFecha]);
     fechaItem.setHours(0, 0, 0, 0);
+
     if (fechaItem < hoy && item["estado"].includes('pendiente')) {
-      const res = await changeStatusAppointment(item.id_cita, 'perdida')
+      const res = await changeStatusAppointment(bodyUpdate)
       return { ...item, estado: 'perdida' }
     } else {
       return item
     }
   });
 }
-
 
 const PatientsList = () => {
   const ROL = ["profesional"]
@@ -53,6 +70,10 @@ const PatientsList = () => {
   const [nombreEstudiante, setNombreEstudiante] = useState('')
   const [appointments, setAppointments] = useState([])
   const [idAppointment, setIdAppointment] = useState('')
+  const [success, setSuccess] = useState('initial')
+  const [message, setMessage] = useState('')
+  const [idCita, setIdCita] = useState('')
+  const mobile = useMediaQuery('(min-width:600px)');
 
   useEffect(() => {
     setProps({
@@ -73,48 +94,45 @@ const PatientsList = () => {
     });
   };
 
+  const fetchData = async () => {
+    const { users } = await fetchUsers()
+    const response = await fetchAppointments();
+
+    const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
+    const citasActivas = response.filter(item => (!item["estado"].includes('cancelada') /* && !item["estado"].includes('realizada') */))
+    const citasConStatus = citasActivas.map(item => {
+      const alumno = alumnos.find(alumno => alumno.id === item.id_paciente); // Buscar el alumno por ID
+      return {
+        ...item,                      // Copiar los datos de la cita
+        status: alumno?.status || null // Agregar `status`, manejar casos donde no exista alumno
+      };
+    });
+    if (session.user?.rol === 'profesional') {
+      const dataFiltered = citasConStatus.filter(item => item.id_profesional == parseInt(session.user?.id));
+      const resp = uniqueByEmail(dataFiltered)
+      setUsers(resp);
+      setResults(resp);
+      // setIsValidated(false)
+    } else if (session.user?.rol === 'administrador') {
+      const resp = uniqueByEmail(citasConStatus)
+
+      setUsers(resp);
+      setResults(resp);
+    }
+    setLoading(false)
+  }
+
   useEffect(() => {
     setLoading(true)
-    const fetchData = async () => {
-      const { users } = await fetchUsers()
-      const response = await fetchAppointments();
-
-      const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
-      const citasActivas = response.filter(item => (!item["estado"].includes('cancelada') && !item["estado"].includes('realizada')))
-      const citasConStatus = citasActivas.map(item => {
-        const alumno = alumnos.find(alumno => alumno.id === item.id_paciente); // Buscar el alumno por ID
-        return {
-          ...item,                      // Copiar los datos de la cita
-          status: alumno?.status || null // Agregar `status`, manejar casos donde no exista alumno
-        };
-      });
-      if (session.user?.rol === 'profesional') {
-        const dataFiltered = citasConStatus.filter(item => item.id_profesional == parseInt(session.user?.id));
-        const resp = uniqueByEmail(dataFiltered)
-        setUsers(resp);
-        setResults(resp);
-        // setIsValidated(false)
-      } else if (session.user?.rol === 'administrador') {
-        const resp = uniqueByEmail(citasConStatus)
-
-        setUsers(resp);
-        setResults(resp);
-      }
-
-      // setUsers(usuariosFiltrados)
-      // setResults(usuariosFiltrados)
-      setLoading(false)
-    }
     fetchData()
   }, [])
 
 
   const loadAppointments = async (record) => {
     setLoading(true);
-    setHash('basictab2')
+    setHash('citas')
 
     try {
-
       const response = await fetchAppointments();
       const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')) && item.id_paciente === record.id_paciente)
 
@@ -139,7 +157,6 @@ const PatientsList = () => {
       setLoading(false)
     }
   };
-
 
   const handleLoadingChange = (enable) => {
     setLoading(enable);
@@ -166,7 +183,7 @@ const PatientsList = () => {
 
 
   const handleName = name => {
-    setHash('basictab2')
+    setHash('citas')
     setNombreEstudiante(name)
   }
 
@@ -174,7 +191,6 @@ const PatientsList = () => {
   const handleNavigate = (fecha, hora) => {
     localStorage.setItem('fechaCita', JSON.stringify({ fecha, hora }));
   };
-
 
 
   const columns = [
@@ -294,7 +310,6 @@ const PatientsList = () => {
       ),
     },
   ]
-
 
   const patientColumns = [
     // {
@@ -423,7 +438,7 @@ const PatientsList = () => {
                         handleNavigate(record.fecha, record.hora)
                       }}
                       style={{
-                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? "not-allowed" : "pointer",
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada')  ? "not-allowed" : "pointer",
                         opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? 0.5 : 1,
                       }}
                     >
@@ -434,39 +449,30 @@ const PatientsList = () => {
                      <i className="far fa-edit me-2" />
                      Editar
                    </Link> */}
-                    <Link
-                      href={`/citas/${record.id_cita}`}
+                    <span
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
-                      onClick={() => {
-                        const estado = record.estado
-                        if (estado.includes('Cancelada') || estado.includes('cancelada')) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }
-                        setIdAppointment(record.id_cita)
-                      }}
+                      onClick={() => openWarning(record.id_cita)}
                       style={{
-                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? "not-allowed" : "pointer",
-                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? 0.5 : 1,
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
                       }}
                     >
                       <i className="fa fa-trash-alt m-r-5"></i>
                       Cancelar cita
-                    </Link>
+                    </span>
                   </>
                   ) :
                   (
-                    <Link
-                      href={`/citas/${record.id_cita}`}
+                    <span
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
-                      onClick={() => setIdAppointment(record.id_cita)}>
+                      onClick={() => openWarning(record.id_cita)}>
                       <i className="fa fa-trash-alt m-r-5"></i>
                       Cancelar cita
-                    </Link>
+                    </span>
                   )
                 }
               </div>
@@ -478,15 +484,61 @@ const PatientsList = () => {
     },
   ]
 
-
   const handleTabClick = (tabId) => {
     setHash(tabId);
   };
+
+  const changeStatusToCancel = async (id) => {
+    const citaSelected = appointments.find(item => item?.id_cita == id)
+
+    const bodyUpdate = {
+      id: citaSelected.id_cita,
+      id_paciente: citaSelected.id_paciente,
+      id_profesional: citaSelected.id_profesional,
+      carrera: citaSelected.carrera || '',
+      email: citaSelected.email_estudiante || '',
+      appointment_date: citaSelected.fecha || '',
+      start_time: citaSelected.hora || '',
+      campus: citaSelected.campus === 'centro'
+        ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
+        : citaSelected.campus === 'huechuraba'
+          ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
+          : 'Videollamada',
+      nombre_estudiante: citaSelected.nombre_alumno,
+      selected_doctor: citaSelected.nombre_profesional || '',
+      quien_cancela: session?.user?.id,
+      status: session?.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional',
+      tipo_cita: citaSelected.tipo_cita || '',
+    }
+
+    try {
+      const response = await changeStatusAppointment(bodyUpdate)
+      if (!response.validacion) {
+        setSuccess('fail')
+        setMessage('No se pudo cancelar la cita')
+      } else if (response.validacion) {
+        setSuccess('success')
+        setMessage('Cita cancelada con éxito')
+      }
+    } catch (error) {
+      console.log('Error', error)
+      setSuccess('fail')
+      setMessage('No se pudo cancelar la cita', error)
+    }
+  }
+
+
+  const openWarning = (id) => {
+    setSuccess('warning')
+    setMessage('¿Desea confirmar la eliminación del servicio seleccionado?')
+    setIdCita(id)
+  }
 
 
   const tableProps = {
     loading,
   };
+
   return (
     < >
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
@@ -535,18 +587,18 @@ const PatientsList = () => {
                           <ul className="nav nav-tabs">
                             <li className="nav-item">
                               <Link
-                                className={`nav-link ${hash === 'basictab1' ? 'active' : hash === '' ? 'active' : ''}`}
-                                href="#basictab1"
-                                onClick={() => handleTabClick('basictab1')}>
+                                className={`nav-link ${hash === 'pacientes' ? 'active' : hash === '' ? 'active' : ''}`}
+                                href="#pacientes"
+                                onClick={() => handleTabClick('pacientes')}>
                                 <h3>Lista de Pacientes</h3>
                               </Link>
                             </li>
-                            {hash === 'basictab2' &&
+                            {hash === 'citas' &&
                               <li className="nav-item">
                                 <Link
-                                  className={`nav-link ${hash === 'basictab2' ? 'active' : ''}`}
-                                  href="#basictab2"
-                                  onClick={() => handleTabClick('basictab2')}>
+                                  className={`nav-link ${hash === 'citas' ? 'active' : ''}`}
+                                  href="#citas"
+                                  onClick={() => handleTabClick('citas')}>
                                   <h3>{patientResults && patientResults[0]?.nombre_alumno || 'Detalle'} </h3>
                                 </Link>
                               </li>}
@@ -579,7 +631,7 @@ const PatientsList = () => {
                               </Link> */}
                               <Link
                                 href="#"
-                                onClick={handleRefresh}
+                                onClick={fetchData}
                                 className="btn btn-primary doctor-refresh ms-2"
                               >
                                 <img src={refreshicon.src} alt="#" />
@@ -594,9 +646,9 @@ const PatientsList = () => {
 
                   <div className="tab-content">
                     <div
-                      className={`tab-pane ${hash === 'basictab1' || hash === '' ? 'show active' : ''}`}
-                      id="basictab1">
-                      <div className="table-responsive doctor-list" style={{overflowY: 'hidden'}}>
+                      className={`tab-pane ${hash === 'pacientes' || hash === '' ? 'show active' : ''}`}
+                      id="pacientes">
+                      <div className="table-responsive doctor-list" style={{ overflowY: 'hidden' }}>
                         <Table
                           {...tableProps}
                           pagination={{
@@ -616,7 +668,7 @@ const PatientsList = () => {
                       </div>
                     </div>
                     <div
-                      className={`tab-pane ${hash === 'basictab2' ? 'show active' : ''}`} id="basictab2">
+                      className={`tab-pane ${hash === 'citas' ? 'show active' : ''}`} id="citas">
 
                       <Table
                         {...tableProps}
@@ -662,6 +714,100 @@ const PatientsList = () => {
             </div>
           </div>
         </div>
+      </div>
+      <div className='p-0 m-0'>
+        {
+          success === 'success'
+            ?
+            <div style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '105%',
+              zIndex: 99999,
+              background: '#00000080',
+              margin: 0,
+            }}>
+              {/* <div className="col-sm-12 col-lg-6"> */}
+              <Alert
+                severity="success"
+                onClose={() => { setSuccess('initial') }}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+              // spacing={2}
+              >
+                {message}
+              </Alert>
+              {/* </div> */}
+            </div>
+
+            : success === 'fail'
+              ?
+              <div className="row" style={{
+                height: '100%',
+                position: 'fixed',
+                top: '0',
+                width: '100%',
+                zIndex: 99999,
+                background: '#00000080',
+                margin: 0,
+              }}>
+                <div className="col-sm-12 col-lg-6">
+                  <Alert
+                    severity="error"
+                    onClose={() => { setSuccess('initial') }}
+                    sx={{
+                      zIndex: 'tooltip',
+                      position: 'absolute',
+                      left: '30%',
+                      width: '50%',
+                      padding: '50px',
+                      bottom: '50vh'
+                    }}
+                  // spacing={2}
+                  >
+                    {message}
+                  </Alert>
+                </div>
+              </div>
+              : success === 'warning'
+                ?
+                <div className="row" style={{
+                  height: '100%',
+                  position: 'fixed',
+                  top: '0',
+                  width: '100%',
+                  zIndex: 99999,
+                  background: '#00000080',
+                  margin: 0,
+                }}>
+                  <div className="col-sm-12 col-lg-6">
+                    <Alert
+                      severity="warning"
+                      onClose={() => { setSuccess('initial') }}
+                      sx={{
+                        zIndex: 'tooltip',
+                        position: 'absolute',
+                        left: '30%',
+                        width: '50%',
+                        padding: '50px',
+                        bottom: '50vh'
+                      }}
+                    // spacing={2}
+                    >
+                      <h4>{message}</h4>
+                      <Button variant="primary" onClick={() => { changeStatusToCancel(idCita) }}> Confirmar </Button>
+                    </Alert>
+                  </div>
+                </div>
+                : ""
+        }
       </div>
     </>
 
