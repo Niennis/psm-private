@@ -120,8 +120,11 @@ const AddInterviewRecord = ({ params }) => {
         parentesco_contacto_emergencia2: response[0].contacto2_relacion,
       }
 
-      const ultimoNumeroFicha = records.length > 0 ? records[records.length - 1].numero_ficha : null;
-      setValue('numero_ficha', parseInt(ultimoNumeroFicha) + 1)
+      const ultimoNumeroFicha = records.length > 0 ? records[records.length - 1].numero_ficha : 0;
+      obj.numero_ficha = parseInt(ultimoNumeroFicha) + 1 
+console.log('OBJ', obj);
+console.log('response', response[0]);
+
 
       setPatient(obj)
       setIsLoading(false)
@@ -264,6 +267,8 @@ const AddInterviewRecord = ({ params }) => {
       "prevision_salud_isapre": "Fonasa",
       "prevision_salud_fonasa": "",
       "prevision_salud_otro": "",
+      "id_emergencia": patient.id_contacto_emergencia1 || 0,
+      "id_emergencia_2": patient.id_contacto_emergencia2 || 0,
     }
 
     const bodyEstado = {
@@ -281,7 +286,6 @@ const AddInterviewRecord = ({ params }) => {
       start_time: data.hora_cita,
       tipo_cita: data.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional',
     }
-
 
     try {
       const appointment = await createInterviewRecord(body)
@@ -359,15 +363,16 @@ const AddInterviewRecord = ({ params }) => {
     return `${year}-${month}-${day}`;
   }
 
-  /* ENTREVISTA DE DESPEJE */
+  /* ------- ENTREVISTA DE DESPEJE ----------- */
   const handleInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
     const derivacion_interna = watch("derivacion_interna")
-
-    const body = {
+    setValue('numero_ficha', 1)
+    console.log('data', data)
+    const bodyInterview = {
       ...data,
-      id_receptor: derivacion_interna ? data.profesional_derivacion.id : '',
+      id_receptor: derivacion_interna ? data.profesionales.id : '',
       id_profesional: session?.user?.id,
       id_alumno: patient.id_alumno,
       fecha: formatDate(data.fecha),
@@ -378,7 +383,7 @@ const AddInterviewRecord = ({ params }) => {
       acuerdos: ''
     }
 
-    const bodyUpdate = {
+    const bodyUpdateUser = {
       "apellido": data.lastName || patient.apellido,
       "aplica_despeje": 0,  // el único q debiera cambiar
       "anoIngresoCarrera": data.ano_ingreso,
@@ -401,8 +406,8 @@ const AddInterviewRecord = ({ params }) => {
       "telefono": data.telefono || patient.telefono,
       "tipo_usuario": patient.tipo_usuario,
       "nombre_social": patient.nombre_social,
-      "id_emergencia": patient.id_emergencia || 0,
-      "id_emergencia_2": patient.id_emergencia_2 || 0,
+      "id_emergencia": patient.id_contacto_emergencia1 || 0,
+      "id_emergencia_2": patient.id_contacto_emergencia2 || 0,
     }
 
     const bodyEstado = {
@@ -419,16 +424,21 @@ const AddInterviewRecord = ({ params }) => {
       selected_doctor: data.profesional_evaluador,
       start_time: data.hora_cita,
       tipo_cita: data.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional',
+      quien_cancela: ''
     }
 
     try {
       const [resp, changeStatus, response] = await Promise.all([
-        createInterviewRecord(body),
+        createInterviewRecord(bodyInterview),
         changeStatusAppointment(bodyEstado),
-        updateUser(bodyUpdate)
+        updateUser(bodyUpdateUser)
       ]);
+      console.log('resp', resp);
+      console.log('changeStatus', changeStatus);
+      console.log('response', response);
+      
 
-      if (resp.estado === true && changeStatus.detalle === 'success!!!' && response.validacion === true) {
+      if (resp.estado === true && changeStatus.validacion === true && response.validacion === true) {
         setSuccess('success')
       } else if (resp.estado === true && changeStatus.detalle === 'success!!!') {
         setSuccess('success')
@@ -1013,7 +1023,8 @@ const AddInterviewRecord = ({ params }) => {
                                 </label>
                                 <input
                                   className="form-control"
-                                  // value={rut}
+                                  disabled
+                                  value={1}
                                   type="text"
                                   {...register('numero_ficha', {
                                     required: {
@@ -2251,7 +2262,7 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <div className="form-group local-forms">
-                                    <label>Área de atención de preferencia del/la estudiante<span className="login-danger">*</span>
+                                    <label>Tipos de apoyo actuales<span className="login-danger">*</span>
                                     </label>
                                     <Controller
                                       control={control}

@@ -1015,7 +1015,8 @@ const AddAppoinments = () => {
                           }
                         </AccordionDetails>
                       </Accordion>
-
+                      {Object.keys(errors).length > 0  && <span><small>** Quedan campos sin rellenar</small></span>
+                      }
                       <div className="col-12">
                         <div className="doctor-submit text-end mt-3">
                           <button
