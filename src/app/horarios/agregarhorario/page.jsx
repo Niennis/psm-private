@@ -293,10 +293,8 @@ const AddSchedule = () => {
   }
 
   const handleDelete = async (data) => {
-
     try {
       const response = await eliminarDisponibilidadPorId(data)
-
       if (response.estado === true) {
         setSuccess('success')
         setError(`Disponibilidad eliminada exitosamente.`)

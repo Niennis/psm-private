@@ -76,7 +76,6 @@ export const fetchScheduleByAvailability = async (id) => {
     body: JSON.stringify(body)
   })
   const response = await data.json()
-  console.log('RESPONSE', response);
 
   return response
 }
@@ -375,7 +374,6 @@ const SCHEDULES_URL = 'https://edituserexcel-g5c9f2drbzb9evb9.eastus-01.azureweb
     body.diaNumero = schedule.mensual["cardinal-numero"]
   }
 
-
   // getDates(body)
   const data = await fetch(SCHEDULES_URL, {
     method: "POST",
@@ -589,7 +587,6 @@ export const eliminarDisponibilidadPorId = async (id) => {
   const body = {
     id: id
   }
-
   try {
     const data = await fetch(URL, {
       method: "POST",
@@ -600,7 +597,6 @@ export const eliminarDisponibilidadPorId = async (id) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    console.log('eliminarDisponibilidadPorId', response);
     
     return response
   } catch (error) {
@@ -610,7 +606,6 @@ export const eliminarDisponibilidadPorId = async (id) => {
 }
 
 export const eliminarDisponibilidadCompleta = async (uuid) => {
-  console.log('UUID', uuid);
   
   const URL = `${process.env.NEXT_PUBLIC_DISPONIBILIDADES}/delete/uuid`
   const body = {
@@ -626,7 +621,6 @@ export const eliminarDisponibilidadCompleta = async (uuid) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    console.log('eliminarDisponibilidadCompleta', response);
     return response
 
   } catch (error) {
