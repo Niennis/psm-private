@@ -127,7 +127,6 @@ const AddFirstAppoinments = () => {
         region: response[0].region,
         comuna: response[0].comuna,
       };
-      console.log('patient', patient);
 
       setDataPatient(patient)
       return patient
@@ -359,9 +358,8 @@ const AddFirstAppoinments = () => {
   const handleClose = () => {
     setOpen(false);
     setSuccess('initial')
-    router.push('/citas')
+    session?.user?.rol === 'alumno' ? router.push('/citas') : router.push('/pacientes')
   }
-
 
   const fetchData = async () => {
     const users = await fetchFilteredProfesssionals('despeje')
@@ -478,7 +476,6 @@ const AddFirstAppoinments = () => {
       "id_emergencia": patient[0].id_emergencia || 0,
       "id_emergencia_2": patient[0].id_emergencia_2 || 0,
     }
-    console.log('bodyupdate', bodyUpdate);
 
     let id_contact_1;
     let id_contact_2;

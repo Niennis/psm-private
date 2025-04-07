@@ -99,7 +99,7 @@ const AddAppoinments = () => {
   const handleClose = () => {
     // setOpen(false);
     setSuccess('initial')
-    router.push('/citas')
+    router.push('/pacientes')
   }
 
   /* FETCH PACIENTES CON DESPEJE */
@@ -1025,7 +1025,7 @@ const AddAppoinments = () => {
                           >
                             Agendar
                           </button>
-                          <Link href={'/citas'}>
+                          <Link href={'/pacientes'}>
                             <button
                               type="reset"
                               className="btn btn-primary cancel-form"

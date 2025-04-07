@@ -131,7 +131,6 @@ export const updateAppointment = async (appointment) => {
 
 export const changeStatusAppointment = async (data) => {
   const APPOINMENT_API = process.env.NEXT_PUBLIC_CHANGE_STATUS
-  console.log('data', data);
 
   const body = {
     id: data.id,
@@ -142,9 +141,9 @@ export const changeStatusAppointment = async (data) => {
     dia_cita: data.appointment_date || '',
     hora_cita: data.start_time || '',
     lugar_cita: data.campus || '',
-    nombre_estudiante: `${data.name} ${data.lastName}` || '',
+    nombre_estudiante: data?.name && data?.lastName ? `${data.name} ${data.lastName}` : data?.nombre_estudiante ? data.nombre_estudiante : '',
     nombre_profesional: data.selected_doctor || '',
-    quien_cancela: data.status || '',
+    quien_cancela: data.quien_cancela || '', // id de quien cancela
     estado: data.status,
     tipo_cita: data.tipo_cita || '',
   }
@@ -159,8 +158,6 @@ export const changeStatusAppointment = async (data) => {
         body
       )
     })
-    // const response = await data.json()
-
     return await data.json()
 
   } catch (error) {

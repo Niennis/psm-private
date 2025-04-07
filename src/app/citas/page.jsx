@@ -13,7 +13,6 @@ import { onShowSizeChange, itemRender } from '@/components/Pagination'
 
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
 import { fetchAppointments, changeStatusAppointment, search } from '@/services/AppointmentsServices'
 
 import {
@@ -22,7 +21,8 @@ import {
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import PasswordAlert from '@/components/PasswordAlert';
-const cacheHandler = new CacheHandler();
+import { Button } from 'react-bootstrap'
+import { Alert } from '@mui/material';
 
 const AppoinmentList = () => {
   const { data: session, status } = useSession();
@@ -36,6 +36,8 @@ const AppoinmentList = () => {
   const [isValidated, setIsValidated] = useState(true)
   const [loading, setLoading] = useState(true)
   const [loadTable, setLoadTable] = useState(false);
+  const [success, setSuccess] = useState('initial')
+  const [message, setMessage] = useState('')
   const { setProps } = useSidebar();
 
   useEffect(() => {
@@ -47,55 +49,70 @@ const AppoinmentList = () => {
   }, [setProps]);
 
   const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
-    const hoy = new Date(); 
+    const hoy = new Date();
     hoy.setHours(0, 0, 0, 0); // Normaliza la fecha (elimina horas, minutos, segundos y milisegundos)
 
     return arrayDeObjetos.map(async (item) => {
-      const fechaItem = new Date(item[claveFecha]); 
-      fechaItem.setHours(0, 0, 0, 0); 
-      if ( fechaItem < hoy && item["estado"].includes('pendiente')) {
-        const res = await changeStatusAppointment(item.id_cita, 'perdida')
-        return {...item, estado :'perdida'}
+      const bodyUpdate = {
+        id: item.id_cita,
+        id_paciente: item.id_paciente,
+        id_profesional: item.id_profesional,
+        carrera: item.carrera || '',
+        email: item.email_estudiante || '',
+        appointment_date: item.fecha || '',
+        start_time: item.hora || '',
+        campus: item.campus || '',
+        nombre_estudiante: item.nombre_alumno,
+        selected_doctor: item.nombre_profesional || '',
+        quien_cancela: 'perdida',
+        status: item.estado,
+        tipo_cita: item.tipo_cita || '',
+      }
+
+      const fechaItem = new Date(item[claveFecha]);
+      fechaItem.setHours(0, 0, 0, 0);
+
+      if (fechaItem < hoy && item["estado"].includes('pendiente')) {
+        const res = await changeStatusAppointment(bodyUpdate)
+        return { ...item, estado: 'perdida' }
       } else {
         return item
       }
     });
   }
 
-  useEffect(() => {
-    const loadAppointments = async () => {
-      setLoading(true);
+  const loadAppointments = async () => {
+    setLoading(true);
+    try {
+      const response = await fetchAppointments();
+      const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')))
 
-      try {
+      const promises = filtrarFechasAnteriores(dataChangeStatus, "fecha")
+      const data = await Promise.all(promises)
 
-        const response = await fetchAppointments();
-        const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')))
-        
-        const promises= filtrarFechasAnteriores(dataChangeStatus, "fecha")
-        const data = await Promise.all(promises)
+      if (session.user?.rol === 'profesional') {
+        const dataFiltered = data.filter(item => item.id_profesional == session.user?.id);
+        setAppointments(dataFiltered);
+        setResults(dataFiltered);
+        // setIsValidated(false)
+      } else if (session.user?.rol === 'alumno') {
+        const dataFiltered = data.filter(item => item.id_paciente == session.user?.id);
 
-        if (session.user?.rol === 'profesional') {
-          const dataFiltered = data.filter(item => item.id_profesional == session.user?.sub);
-          setAppointments(dataFiltered);
-          setResults(dataFiltered);
-          // setIsValidated(false)
-        } else if (session.user?.rol === 'alumno') {
-          const dataFiltered = data.filter(item => item.id_paciente == session.user?.id);
-
-          setAppointments(dataFiltered);
-          setResults(dataFiltered);
-        } else if (session.user?.rol === 'administrador') {
-          setAppointments(data);
-          setResults(data);
-        }
-      } catch (error) {
-        setError('')
-      } finally {
-        setLoading(false)
+        setAppointments(dataFiltered);
+        setResults(dataFiltered);
+      } else if (session.user?.rol === 'administrador') {
+        setAppointments(data);
+        setResults(data);
       }
-    };
+    } catch (error) {
+      setError('')
+    } finally {
+      setLoading(false)
+    }
+  };
+
+  useEffect(() => {
     loadAppointments();
-    // }
   }, [session, status]);
 
   // if ( loading) {
@@ -121,7 +138,7 @@ const AppoinmentList = () => {
   }
 
   const handleRefresh = () => {
-    setResults(appointments)
+    loadAppointments()
   }
 
 
@@ -129,6 +146,52 @@ const AppoinmentList = () => {
     localStorage.setItem('fechaCita', JSON.stringify({ fecha, hora }));
   };
 
+
+  const openWarning = (id) => {
+    setSuccess('warning')
+    setMessage('¿Desea confirmar la eliminación del servicio seleccionado?')
+    setIdAppointment(id)
+  }
+
+
+  const changeStatusToCancel = async (id) => {
+    const citaSelected = appointments.find(item => item?.id_cita == id)
+
+    const bodyUpdate = {
+      id: citaSelected.id_cita,
+      id_paciente: citaSelected.id_paciente,
+      id_profesional: citaSelected.id_profesional,
+      carrera: citaSelected.carrera || '',
+      email: citaSelected.email_estudiante || '',
+      appointment_date: citaSelected.fecha || '',
+      start_time: citaSelected.hora || '',
+      campus: citaSelected.campus === 'centro'
+        ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
+        : citaSelected.campus === 'huechuraba'
+          ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
+          : 'Videollamada',
+      nombre_estudiante: citaSelected.nombre_alumno,
+      selected_doctor: citaSelected.nombre_profesional || '',
+      quien_cancela: session?.user?.id,
+      status: session?.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional',
+      tipo_cita: citaSelected.tipo_cita || '',
+    }
+
+    try {
+      const response = await changeStatusAppointment(bodyUpdate)
+      if (!response.validacion) {
+        setSuccess('fail')
+        setMessage('No se pudo cancelar la cita')
+      } else if (response.validacion) {
+        setSuccess('success')
+        setMessage('Cita cancelada con éxito')
+      }
+    } catch (error) {
+      console.log('Error', error)
+      setSuccess('fail')
+      setMessage('No se pudo cancelar la cita', error)
+    }
+  }
 
   const allColumns = [
     {
@@ -236,7 +299,7 @@ const AppoinmentList = () => {
           <div className="text-end">
             <div className="dropdown dropdown-action">
               <button
-                style={{border: 'none'}}
+                style={{ border: 'none' }}
                 className="action-icon dropdown-toggle"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
@@ -257,7 +320,7 @@ const AppoinmentList = () => {
                     <Link
                       className="dropdown-item"
                       href={`/fichas/agregarficha/${record.id_cita}`}
-                      onClick={() => {handleNavigate(record.fecha, record.hora)}}
+                      onClick={() => { handleNavigate(record.fecha, record.hora) }}
                     >
                       <i className="far fa-edit me-2" />
                       Registrar atención
@@ -271,22 +334,31 @@ const AppoinmentList = () => {
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
-                      onClick={() => setIdAppointment(record.id_cita)}>
+                      onClick={() => setIdAppointment(record.id_cita)}                      
+                      style={{
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
+                      }}
+                      >
                       <i className="fa fa-trash-alt m-r-5"></i>
                       Cancelar cita
                     </Link>
                   </>
                   ) :
                   (
-                    <Link
-                      href={`/citas/${record.id_cita}`}
+                    <span
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
-                      onClick={() => setIdAppointment(record.id_cita)}>
+                      onClick={() => openWarning(record.id_cita)}
+                      style={{
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
+                      }}
+                    >
                       <i className="fa fa-trash-alt m-r-5"></i>
                       Cancelar cita
-                    </Link>
+                    </span>
                   )
                 }
               </div>
@@ -388,7 +460,7 @@ const AppoinmentList = () => {
                             </Link>}
                             <Link
                               href="#"
-                              onClick={handleRefresh}
+                              onClick={loadAppointments}
                               className="btn btn-primary doctor-refresh ms-2"
                             >
                               <Image src={refreshicon} alt="#" />
@@ -481,6 +553,100 @@ const AppoinmentList = () => {
         </div>
       </div> : ''}
       <PasswordAlert />
+      <div className='p-0 m-0'>
+        {
+          success === 'success'
+            ?
+            <div style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '105%',
+              zIndex: 99999,
+              background: '#00000080',
+              margin: 0,
+            }}>
+              {/* <div className="col-sm-12 col-lg-6"> */}
+              <Alert
+                severity="success"
+                onClose={() => { setSuccess('initial') }}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+              // spacing={2}
+              >
+                {message}
+              </Alert>
+              {/* </div> */}
+            </div>
+
+            : success === 'fail'
+              ?
+              <div className="row" style={{
+                height: '100%',
+                position: 'fixed',
+                top: '0',
+                width: '100%',
+                zIndex: 99999,
+                background: '#00000080',
+                margin: 0,
+              }}>
+                <div className="col-sm-12 col-lg-6">
+                  <Alert
+                    severity="error"
+                    onClose={() => { setSuccess('initial') }}
+                    sx={{
+                      zIndex: 'tooltip',
+                      position: 'absolute',
+                      left: '30%',
+                      width: '50%',
+                      padding: '50px',
+                      bottom: '50vh'
+                    }}
+                  // spacing={2}
+                  >
+                    {message}
+                  </Alert>
+                </div>
+              </div>
+              : success === 'warning'
+                ?
+                <div className="row" style={{
+                  height: '100%',
+                  position: 'fixed',
+                  top: '0',
+                  width: '100%',
+                  zIndex: 99999,
+                  background: '#00000080',
+                  margin: 0,
+                }}>
+                  <div className="col-sm-12 col-lg-6">
+                    <Alert
+                      severity="warning"
+                      onClose={() => { setSuccess('initial') }}
+                      sx={{
+                        zIndex: 'tooltip',
+                        position: 'absolute',
+                        left: '30%',
+                        width: '50%',
+                        padding: '50px',
+                        bottom: '50vh'
+                      }}
+                    // spacing={2}
+                    >
+                      <h4>{message}</h4>
+                      <Button variant="primary" onClick={() => { changeStatusToCancel(idAppointment) }}> Confirmar </Button>
+                    </Alert>
+                  </div>
+                </div>
+                : ""
+        }
+      </div>
     </>
   )
 }

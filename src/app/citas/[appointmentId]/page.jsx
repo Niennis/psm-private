@@ -50,7 +50,7 @@ const EditAppoinments = ({ params }) => {
 
   const handleClose = () => {
     setSuccess('initial')
-    router.push('/citas')
+    session?.user?.rol === 'alumno'? router.push('/citas') : router.push('/pacientes')
   };
   const [profesional, setProfesional] = useState([]);
 
@@ -163,9 +163,10 @@ const EditAppoinments = ({ params }) => {
       data.name = patientByEmail.nombre_social || patientByEmail.nombre
       data.campus = data.campus === 'centro'
         ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
-        : "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
+        : data.campus === 'huechuraba' ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo" : 'Videollamada'
       data.tipo_cita = patientByEmail.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional'
       data.carrera = alumno[0]?.carrera || ''
+      data.quien_cancela = session?.user?.id
 
       if (data.status === "status") {
         const status = session.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional'
@@ -574,7 +575,7 @@ const EditAppoinments = ({ params }) => {
                             >
                               Modificar
                             </button>
-                            <Link href={'/citas'}>
+                            <Link href={session?.user?.rol === 'alumno' ? '/citas' : '/pacientes'}>
                               <button
                                 type="reset"
                                 className="btn btn-primary cancel-form"
