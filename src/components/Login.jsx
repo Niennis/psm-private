@@ -50,7 +50,9 @@ const Login = () => {
   // }, []);
 
   useEffect(() => {
-    if (session?.user?.rol === 'profesional') {
+    if (session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador') {
+      router.push('/pacientes')
+    } else if (session?.user?.rol === 'paciente') {
       router.push('/citas')
     }
   })
@@ -78,7 +80,7 @@ const Login = () => {
       try {
         setIsLoading(true)
         const res = await signIn('credentials', {
-          callbackUrl: '/citas',
+          callbackUrl: '/pacientes',
           email: data.email,
           password: data.password
         })
