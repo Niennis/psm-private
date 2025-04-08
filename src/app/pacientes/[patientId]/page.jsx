@@ -75,6 +75,7 @@ const EditPatients = ({ params }) => {
         id_emergencia_2: user[0].contacto2_id,
       }
       setInitial(obj)
+      console.log('obj', obj);
 
       return obj
     } catch (error) {
@@ -148,10 +149,11 @@ const EditPatients = ({ params }) => {
       "status": initial.status,
       "telefono": data.mobile || initial.mobile,
       "tipo_usuario": initial.tipo_usuario,
-      "nombre_social": initial.nombre_social,
+      "nombre_social": data.nombre_social || initial.nombre_social || '',
       "id_emergencia": initial.id_emergencia_1 || 0,
       "id_emergencia_2": initial.id_emergencia_2 || 0,
     }
+    console.log('bodyUpdate', bodyUpdate);
 
     try {
       const response = await updateUser(bodyUpdate)
@@ -801,6 +803,7 @@ const EditPatients = ({ params }) => {
             <Alert
               severity="success"
               onClose={handleClose}
+              closeText="Cerrar"
               sx={{
                 zIndex: 'tooltip',
                 position: 'absolute',
@@ -829,6 +832,7 @@ const EditPatients = ({ params }) => {
                 <Alert
                   severity="error"
                   onClose={() => { setSuccess('initial') }}
+                  closeText="Cerrar"
                   sx={{
                     zIndex: 'tooltip',
                     position: 'absolute',
