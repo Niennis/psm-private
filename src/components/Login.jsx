@@ -52,7 +52,7 @@ const Login = () => {
   useEffect(() => {
     if (session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador') {
       router.push('/pacientes')
-    } else if (session?.user?.rol === 'paciente') {
+    } else if (session?.user?.rol === 'alumno') {
       router.push('/citas')
     }
   })
@@ -115,7 +115,10 @@ const Login = () => {
   /* LOGIN CON GOOGLE */
   const handleSignIn = async () => {
     try {
-      await signIn('google', { callbackUrl: '/citas' })
+      await signIn('google', { 
+        callbackUrl: '/citas',
+        prompt: 'select_account' // Esto es clave: fuerza a Google a mostrar la selección de cuentas
+      });
       // setIsLoading(true);
 
     } catch (error) {

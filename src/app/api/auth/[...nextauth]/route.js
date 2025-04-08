@@ -13,16 +13,7 @@ const searchUser = async (email) => {
   if (cachedUser) return cachedUser;
 
   try {
-    const [users, professionals, administrador] = await Promise.all([
-      fetchUsers(),
-      fetchProfessionals(),
-      fetchUserByEmail(email),
-    ]);
-
-    const user = users.users.find((user) => user.email === email);
-    const professional = professionals.find((prof) => prof.email === email);
-    const foundUser = user || professional || administrador;
-
+    const foundUser = await fetchUserByEmail(email)
     if (foundUser) {
       // await cacheHandler.set(cacheKey, foundUser, { tags: ['users'] });
       return foundUser;
@@ -47,6 +38,12 @@ const authOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: "select_account", // Fuerza la selección de cuenta
+          access_type: "offline",
+        }
+      },
       profile(profile) {
         return {
           id: profile.sub,
@@ -83,16 +80,25 @@ const authOptions = {
     error: "/error/page",
   },
   callbacks: {
+
     async signIn({ account, profile, credentials }) {
       if (account.provider === "google") {
         if (
           profile.email_verified &&
-          (profile.email.endsWith("@mail.udp.cl") || profile.email.endsWith("@gmail.com"))
-        ) {
-          const user = await searchUser(profile.email);
-          return !!user;
+          (profile.email.endsWith("@mail.udp.cl") || profile.email.endsWith("@gmail.com"))) {
+          try {
+            const user = await searchUser(profile.email);
+            return !!user;
+
+          } catch (error) {
+            // return `/error/page?error=AccesoDenegado&email=${encodeURIComponent(profile.email)}`;
+            return false;
+          }
         } else {
-          throw new Error("Correo no autorizado o usuario no encontrado.");
+          // throw new Error("Correo no autorizado o usuario no encontrado.");
+          // return `/error/page?error=OAuthCallback`;
+
+          return false; // Esto activará el flujo de error de NextAuth
         }
       }
 
@@ -101,26 +107,36 @@ const authOptions = {
         const user = await fetchUserMailAndPass(body);
         return !!user;
       }
-
       return false;
     },
 
     async jwt({ token, user }) {
       if (user) {
         const profile = await searchUser(user.email);
+        
         if (profile?.validacion === false) {
           throw new Error("Usuario no encontrado.");
         }
-
         token.id = profile.id;
         token.name = profile.nombre || user.name;
         token.rol = profile.tipo_usuario;
         token.email = profile.email;
       }
-
       return token;
     },
 
+    async redirect({ url, baseUrl }) {
+      // Si la URL es una ruta relativa, crea una URL absoluta
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
+      }
+      // Si la URL ya es absoluta pero está en el mismo origen
+      else if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+      // Por defecto, redirige al baseUrl
+      return baseUrl;
+    },
     async session({ session, token }) {
       session.user = {
         id: token.id,
