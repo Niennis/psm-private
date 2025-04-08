@@ -267,7 +267,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                             center: "title",
                             right: "dayGridMonth,timeGridWeek,timeGridDay",
                           }}
-                          initialView="listWeek"
+                          initialView="dayGridMonth"
                           editable={false}
                           selectable={true}
                           selectMirror={true}
