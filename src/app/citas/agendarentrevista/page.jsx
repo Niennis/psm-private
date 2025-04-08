@@ -12,7 +12,7 @@ import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
 import 'dayjs/locale/es-mx'
 
-import Modal from "@/components/Modal";
+import ConsentimientoInformado from "@/components/ConsentimientoInformado";
 import Contact from "@/components/Contact"
 import SimpleBackdrop from "@/components/Backdrop";
 
@@ -1509,7 +1509,7 @@ const AddFirstAppoinments = () => {
                               <button
                                 disabled={Object.keys(errors).length > 0}
                                 className="btn btn-primary submit-form me-2"
-                                onClick={handleFirstInterview}
+                                onClick={handleOpen}
                               >
                                 Agendar entrevista
                               </button>
@@ -1533,7 +1533,7 @@ const AddFirstAppoinments = () => {
               </div>
             </div>
           </div>
-          <Modal open={open} handleClose={handleClose} onClick={handleFirstInterview} errors={errors} />
+          <ConsentimientoInformado open={open} handleClose={handleClose} onClick={handleFirstInterview} errors={errors} />
         </div>
 
         {openBackdrop && <SimpleBackdrop
