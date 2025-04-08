@@ -1625,7 +1625,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('chequeos_salud_ultimo_ano')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline col-6 col-md-2 col-xl-2">
@@ -1668,7 +1668,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('enfermedad_salud_fisica')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline col-6 col-md-2 col-xl-2">
@@ -1711,7 +1711,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('enfermedad_salud_mental')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline col-6 col-md-2 col-xl-2">
@@ -1754,7 +1754,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('medicacion_permanente')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline col-6 col-md-2 col-xl-2">
@@ -1796,7 +1796,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('atenciones_previas_salud_mental')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline col-6 col-md-2 col-xl-2">
@@ -1837,7 +1837,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('tratamientos_previos_salud_mental')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline col-6 col-md-2 col-xl-2">
@@ -1878,7 +1878,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('tratamiento_actual_salud_mental')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline col-6 col-md-2 col-xl-2">
@@ -1930,7 +1930,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('consume_alcohol')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline">
@@ -1996,7 +1996,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('consume_drogas')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline">
@@ -2096,7 +2096,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('primera_carrera')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline col-6 col-md-2 col-xl-2">
@@ -2137,7 +2137,7 @@ console.log('response', response[0]);
                                           className="form-check-input"
                                           {...register('satisfecho_decision_carrera')}
                                         />
-                                        Si
+                                        Sí
                                       </label>
                                     </div>
                                     <div className="form-check-inline col-6 col-md-2 col-xl-2">
