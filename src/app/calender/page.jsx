@@ -267,7 +267,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                             center: "title",
                             right: "dayGridMonth,timeGridWeek,timeGridDay",
                           }}
-                          initialView="dayGridMonth"
+                          initialView="listWeek"
                           editable={false}
                           selectable={true}
                           selectMirror={true}
@@ -295,12 +295,15 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                             center: "title",
                             right: "dayGridMonth,timeGridWeek,timeGridDay",
                           }}
-                          initialView="dayGridMonth"
+                          initialView="timeGridWeek"
                           editable={false}
                           selectable={true}
                           selectMirror={true}
                           dayMaxEvents={true}
                           weekends={false}
+                          // slotMinTime="08:00:00"  // Comienza a las 8 AM
+                          // slotMaxTime="18:00:00"  // Termina a las 6 PM
+                          allDaySlot={false}      // Oculta la sección "all-day"
                           // initialEvents={calendario?.length > 0 ? calendario : []} // alternatively, use the `events` setting to fetch from a feed
                           select={handleDateSelect}
                           eventClick={(clickInfo) => handleEventClick(clickInfo)}
