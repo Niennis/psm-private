@@ -610,7 +610,7 @@ const AddSchedule = () => {
 
                           <div className="form-group select-gender">
                             <div className="row">
-                              <div className="col-6 d-flex flex-column">
+                              <div className="col-12 col-lg-6 d-flex flex-column">
 
                                 <label className="form-check-label">
                                   <input
@@ -664,40 +664,36 @@ const AddSchedule = () => {
                                   />
                                   Psicopedagógica individual
                                 </label>
-
                               </div>
-                            </div>
-                            {/* <div className="form-check-inline"> 
-                              <div className="col-6 d-flex flex-column">
+
+                              <div className="col-12 col-lg-6 d-flex flex-column">
                                 <label className="form-check-label">
                                   <input
                                     type="checkbox"
                                     value="Grupo psicoterapéutico"
                                     name="tipo_cita"
                                     className="form-check-input"
-                                    {...register('tipo_cita')}
+                                    {...register('tipo_cita', {
+                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
+                                    })}
                                   />
                                   Grupo psicoterapéutico
                                 </label>
-                              </div>
-                              <div className="form-check-inline">
                                 <label className="form-check-label">
                                   <input
                                     type="checkbox"
-                                    value="Grupo psicopedagógico"
-                                    name="tipo_cita"
-                                    className="form-check-input"
-                                    {...register('tipo_cita')}
+                                    {...register('tipo_cita', {
+                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
+                                    })}
                                   />
                                   Grupo psicopedagógico
                                 </label>
                               </div>
-                            </div> */}
+                            </div>
 
                             {errors.tipo_cita && <span><small>{errors.tipo_cita.message}</small></span>}
                           </div>
                         </div>
-
 
 
                         {/* MODALIDAD */}

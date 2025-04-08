@@ -272,6 +272,8 @@ const ScheduleByProfessional = ({ params }) => {
     'Acompañamiento psicológico',
     'Psicoterapia breve',
     'Psicopedagógica individual',
+    'Grupo psicoterapéutico',
+    'Grupo psicopedagógico'
   ];
 
   const validateHoraFin = (value) => {
@@ -328,20 +330,21 @@ const ScheduleByProfessional = ({ params }) => {
 
   const handleDelete = async (data) => {
     try {
-          const response = await eliminarDisponibilidadPorId(data)
-          if (response.estado === true) {
-            setSuccess('success')
-            setError(`Disponibilidad eliminada exitosamente.`)
-          } else {
-            setSuccess('fail')
-            setError(`Ha ocurrido un problema ${response.detalle}`)
-          }
-        } catch (error) {
-          console.log('Error:', error)
-          setError(`Ha ocurrido un problema ${error}`)
-        } finally {
-          session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(session?.user?.id)
-        }
+      const response = await eliminarDisponibilidadPorId(data)
+      if (response.estado === true) {
+        setSuccess('success')
+        setError(`Disponibilidad eliminada exitosamente.`)
+      } else {
+        setSuccess('fail')
+        setError(`Ha ocurrido un problema ${response.detalle}`)
+      }
+    } catch (error) {
+      console.log('Error:', error)
+      setError(`Ha ocurrido un problema ${error}`)
+    } finally {
+      // session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
+      fetchData(session?.user?.id)
+    }
   }
 
   const handleDeleteDisponibilidad = async (data) => {
@@ -359,7 +362,8 @@ const ScheduleByProfessional = ({ params }) => {
       console.log('Error:', error)
       setError(`Ha ocurrido un problema ${error}`)
     } finally {
-      session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(session?.user?.id)
+      // session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
+      fetchData(session?.user?.id)
     }
   }
 
