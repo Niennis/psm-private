@@ -438,17 +438,17 @@ const PatientsList = () => {
                         handleNavigate(record.fecha, record.hora)
                       }}
                       style={{
-                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada')  ? "not-allowed" : "pointer",
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? "not-allowed" : "pointer",
                         opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? 0.5 : 1,
                       }}
                     >
                       <i className="far fa-edit me-2" />
                       Registrar atención
                     </Link>
-                    {/* <Link className="dropdown-item" href={`/citas/${record.id_cita}`}>
-                     <i className="far fa-edit me-2" />
-                     Editar
-                   </Link> */}
+                    <Link className="dropdown-item" href={`/citas/${record.id_cita}`}>
+                      <i className="far fa-edit me-2" />
+                      Editar
+                    </Link>
                     <span
                       className="dropdown-item"
                       data-bs-toggle="modal"
@@ -673,7 +673,7 @@ const PatientsList = () => {
                       <Table
                         {...tableProps}
                         pagination={{
-                          total: results.length,
+                          total: patientResults.length,
                           showTotal: (total, range) =>
                             `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
                           //showSizeChanger: true,

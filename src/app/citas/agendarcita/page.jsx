@@ -23,9 +23,11 @@ import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
 import 'dayjs/locale/es-mx'
 import { motivo_consulta } from "@/utils/selects";
+import SimpleBackdrop from "@/components/Backdrop";
 
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
+import { Button } from 'react-bootstrap'
 
 // Función para obtener fechas únicas
 const obtenerFechasUnicas = array => {
@@ -67,6 +69,7 @@ const AddAppoinments = () => {
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
   const [loadingDays, setLoadingDays] = useState(false)
+  const [loading, setLoading] = useState(false)
   const { setProps } = useSidebar();
   const router = useRouter();
 
@@ -90,10 +93,10 @@ const AddAppoinments = () => {
     { value: "individual", label: "Psicopedagógica individual" },
   ]
 
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const handleOpen = (e) => {
     e.preventDefault()
-    setOpen(true)
+    // setOpen(true)
   };
 
   const handleClose = () => {
@@ -225,6 +228,7 @@ const AddAppoinments = () => {
   const onSubmit = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
+    setLoading(true);
     try {
       // la función que crea la cita
       const appointment = await createAppointment({
@@ -250,7 +254,7 @@ const AddAppoinments = () => {
         setError(`No se encontró al paciente`);
       }
     } finally {
-      setOpen(false)
+      setLoading(false)
     }
   })
 
@@ -308,6 +312,8 @@ const AddAppoinments = () => {
       setDays(bloque)
     } catch (error) {
       console.log('Error: ', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -430,10 +436,16 @@ const AddAppoinments = () => {
     setValue('patientLastname', e?.lastName);
   }
 
+  const handleWarning = () => {
+    setSuccess('warning')
+    setError('¿Confirma creación de la cita?')
+  }
+
   return (
     < >
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
+        {loading && <SimpleBackdrop />}
         <div className="page-wrapper mt-5 pt-5">
           <div className="content">
             {/* Page Header */}
@@ -1015,14 +1027,14 @@ const AddAppoinments = () => {
                           }
                         </AccordionDetails>
                       </Accordion>
-                      {Object.keys(errors).length > 0  && <span><small>** Quedan campos sin rellenar</small></span>
+                      {Object.keys(errors).length > 0 && <span><small>** Quedan campos sin rellenar</small></span>
                       }
                       <div className="col-12">
                         <div className="doctor-submit text-end mt-3">
                           <button
-                            // type="submit"
+                            type="button"
                             className="btn btn-primary submit-form me-2"
-                            onClick={onSubmit}
+                            onClick={() => { handleWarning() }}
                           >
                             Agendar
                           </button>
@@ -1101,7 +1113,36 @@ const AddAppoinments = () => {
                 </Alert>
               </div>
             </div>
-            : ''
+            : success === 'warning'
+              ?
+              <div className="row" style={{
+                height: '100%',
+                position: 'fixed',
+                top: '0',
+                width: '100%',
+                zIndex: 99999,
+                background: '#00000080'
+              }}>
+                <div className="col-sm-12 col-lg-6">
+                  <Alert
+                    severity="warning"
+                    onClose={handleClose}
+                    sx={{
+                      zIndex: 'tooltip',
+                      position: 'absolute',
+                      left: '30%',
+                      width: '50%',
+                      padding: '50px',
+                      bottom: '50vh'
+                    }}
+                  // spacing={2}
+                  >
+                    <h4>{error}</h4>
+                    <Button variant="primary" onClick={onSubmit}> Confirmar </Button>
+                  </Alert>
+                </div>
+              </div>
+              : ""
         }
       </>
     </>
