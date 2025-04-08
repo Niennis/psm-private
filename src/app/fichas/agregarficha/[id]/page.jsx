@@ -433,10 +433,6 @@ console.log('response', response[0]);
         changeStatusAppointment(bodyEstado),
         updateUser(bodyUpdateUser)
       ]);
-      console.log('resp', resp);
-      console.log('changeStatus', changeStatus);
-      console.log('response', response);
-      
 
       if (resp.estado === true && changeStatus.validacion === true && response.validacion === true) {
         setSuccess('success')
@@ -1388,14 +1384,14 @@ console.log('response', response[0]);
                                       </label>
                                       <Controller
                                         control={control}
-                                        defaultValue={''}
+                                        defaultValue={null} // evita que lo exija
                                         rules={{ required: false }}
                                         name="area_atencion_preferencia"
                                         render={({ field: { onChange, onBlur, value } }) => (
                                           <Select
                                             isMulti
                                             instanceId="area_atencion_preferencia"
-                                            value={value}
+                                            value={value || []} // convierte null o undefined a array vacío
                                             onChange={onChange}
                                             options={area_atencion}
                                             // menuPortalTarget={document.body}
@@ -2266,14 +2262,14 @@ console.log('response', response[0]);
                                     </label>
                                     <Controller
                                       control={control}
-                                      defaultValue={''}
+                                      defaultValue={null}
                                       name="tipos_apoyo_actual"
                                       rules={{ required: false }}
                                       render={({ field: { onChange, onBlur, value } }) => (
                                         <Select
                                           isMulti
                                           instanceId="tipos_apoyo_actual"
-                                          value={value}
+                                          value={value || []}
                                           onChange={onChange}
                                           options={tipo_apoyo}
                                           // menuPortalTarget={document.body}
@@ -2413,14 +2409,14 @@ console.log('response', response[0]);
                                   <div className="form-group local-forms">
                                     <Controller
                                       control={control}
-                                      defaultValue={''}
+                                      defaultValue={null}
                                       rules={{ required: false }}
                                       name="modalidad_atencion_evaluacion"
                                       render={({ field: { onChange, onBlur, value } }) => (
                                         <Select
                                           isMulti
                                           instanceId="modalidad_atencion_evaluacion"
-                                          value={value}
+                                          value={value || []}
                                           onChange={onChange}
                                           options={modalidad}
                                           // menuPortalTarget={document.body}
