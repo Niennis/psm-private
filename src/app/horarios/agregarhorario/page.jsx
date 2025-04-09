@@ -926,14 +926,14 @@ const AddSchedule = () => {
                               <CustomizedTooltips text={(
                                 <>
                                   <p>
-                                    Al seleccionar una frecuencia, los intervalos seleccionados previamente se repetirán automáticamente para esa selección.
+                                  Selecciona los días en que atenderá el profesional. 
                                   </p>
                                   <p>
-                                    Por ejemplo, si se selecciona diariamente, entonces todos los días, a la misma hora, estará disponible el mismo servicio o grupo de servicios.
+                                  Por ejemplo, si deseas distintos horarios el lunes y martes, configúralos por separado. Si, por el contrario, los días lunes y miércoles tienen el mismo horario, selecciónalos juntos en las casillas correspondientes.
                                   </p>
                                 </>
                               )}>
-                                <h4 style={{ width: 'max-content' }}>Frecuencia <span className="login-danger">*</span><FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                                <h4 style={{ width: 'max-content' }}>Días de atención <span className="login-danger">*</span><FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
                               </CustomizedTooltips>
                             </div>
                           </div>
