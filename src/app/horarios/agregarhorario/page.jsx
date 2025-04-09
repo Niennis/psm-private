@@ -682,6 +682,9 @@ const AddSchedule = () => {
                                 <label className="form-check-label">
                                   <input
                                     type="checkbox"
+                                    value="Grupo psicopedagógico"
+                                    name="tipo_cita"
+                                    className="form-check-input"
                                     {...register('tipo_cita', {
                                       validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
                                     })}
@@ -694,6 +697,7 @@ const AddSchedule = () => {
                             {errors.tipo_cita && <span><small>{errors.tipo_cita.message}</small></span>}
                           </div>
                         </div>
+
 
 
                         {/* MODALIDAD */}

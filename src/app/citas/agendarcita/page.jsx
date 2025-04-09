@@ -91,6 +91,8 @@ const AddAppoinments = () => {
     { value: "Acompañamiento", label: "Acompañamiento psicológico" },
     { value: "breve", label: "Psicoterapia breve" },
     { value: "individual", label: "Psicopedagógica individual" },
+    { value: "psicoterapéutico", label: "Grupo psicoterapéutico" },
+    { value: "psicopedagógico", label: "Grupo psicopedagógico" },
   ]
 
   // const [open, setOpen] = useState(false);
