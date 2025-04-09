@@ -54,28 +54,29 @@ const EditPatients = ({ params }) => {
   const fetchInitialData = async () => {
     try {
       const { users: user } = await fetchUser(params.patientId)
+      
       const obj = {
-        name: user[0].nombre,
+        anoIngresoCarrera: user[0].anoIngresoCarrera,
+        address: user[0].direccion,
+        carrera: user[0].carrera,
+        comuna: user[0].comuna,
+        date: formatoAAAAMMDD(user[0].fecha_nacimiento),
+        confirmPassword: user[0].contrasena,
+        email: user[0].email,
+        genero: user[0].genero,
         lastName: user[0].apellido,
         mobile: user[0].telefono,
-        email: user[0].email,
-        password: user[0].contrasena,
-        confirmPassword: user[0].contrasena,
-        date: formatoAAAAMMDD(user[0].fecha_nacimiento),
-        genero: user[0].genero,
-        status: user[0].status,
-        carrera: user[0].carrera,
-        address: user[0].direccion,
-        region: user[0].region,
-        comuna: user[0].comuna,
-        tipo_usuario: user[0].tipo_usuario,
-        rut: user[0].rut,
+        name: user[0].nombre,
         nombre_social: user[0]?.nombre_social || '',
+        password: user[0].contrasena,
+        region: user[0].region,
+        rut: user[0].rut,
+        status: user[0].status,
+        tipo_usuario: user[0].tipo_usuario,
         id_emergencia_1: user[0].contacto1_id,
         id_emergencia_2: user[0].contacto2_id,
       }
       setInitial(obj)
-      console.log('obj', obj);
 
       return obj
     } catch (error) {
@@ -130,7 +131,7 @@ const EditPatients = ({ params }) => {
     const bodyUpdate = {
       "apellido": data.lastName || initial.lastName,
       "aplica_despeje": 1,
-      "anoIngresoCarrera": 'No aplica',
+      "anoIngresoCarrera": initial.anoIngresoCarrera || 0,
       "campus": data.campus || 'No aplica',
       "comuna": data.comuna.label || initial.comuna,
       "carrera": data.carrera.label || initial.carrera,
@@ -153,7 +154,6 @@ const EditPatients = ({ params }) => {
       "id_emergencia": initial.id_emergencia_1 || 0,
       "id_emergencia_2": initial.id_emergencia_2 || 0,
     }
-    console.log('bodyUpdate', bodyUpdate);
 
     try {
       const response = await updateUser(bodyUpdate)
