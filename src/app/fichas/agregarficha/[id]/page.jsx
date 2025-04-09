@@ -394,8 +394,7 @@ const AddInterviewRecord = ({ params }) => {
     e.preventDefault()
     setSuccess('initial')
     const derivacion_interna = watch("derivacion_interna")
-    setValue('numero_ficha', 1)
-    console.log('data', data)
+    // setValue('numero_ficha', 1)
     const bodyInterview = {
       ...data,
       id_receptor: derivacion_interna ? data.profesionales.id : '',
@@ -475,22 +474,21 @@ const AddInterviewRecord = ({ params }) => {
     let id_contact_2;
 
     try {
-      const response1 = dataPatient.contacto1_id == 0
+      const response1 = patient.contacto1_id == 0
         ? await createContact(bodyContactOne)
         : await editContact(bodyContactOne)
 
-      const response2 = dataPatient.contacto2_id == 0
+      const response2 = patient.contacto2_id == 0
         ? await createContact(bodyContactTwo)
         : await editContact(bodyContactTwo)
 
-
-      id_contact_1 = dataPatient.contacto1_id == 0
+      id_contact_1 = patient.contacto1_id == 0
         ? response1.id
-        : dataPatient.contacto1_id
+        : patient.id_contacto_emergencia1
 
-      id_contact_2 = dataPatient.contacto2_id == 0
+      id_contact_2 = patient.contacto2_id == 0
         ? response2.id
-        : dataPatient.contacto2_id
+        : patient.id_contacto_emergencia2
 
     } catch (error) {
       console.log(error)
