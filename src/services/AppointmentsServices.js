@@ -260,10 +260,15 @@ export const showContact = async (id) => {
   }
 }
 
-export const editContact = async (id) => {
+export const editContact = async (data) => {
   const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/emergencia_update`
+
   const body = {
-    id
+    nombre: data.nombre,
+    relacion: data.relacion,
+    numero: data.numero,
+    mail: data.mail,
+    id_emergencia: data.id_emergencia,
   }
 
   try {
@@ -276,6 +281,7 @@ export const editContact = async (id) => {
     });
 
     const response = await data.json();
+    
     return response;
   } catch (err) {
     console.error(err);

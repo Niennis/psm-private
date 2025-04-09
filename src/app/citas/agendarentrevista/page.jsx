@@ -22,7 +22,7 @@ import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { fetchUserByEmail, updateUser, fetchUser, fetchUsers } from "@/services/UsersServices";
-import { createInterview, createContact } from "@/services/AppointmentsServices"
+import { createInterview, createContact, editContact } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 import { fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
@@ -96,6 +96,7 @@ const AddFirstAppoinments = () => {
   const [loadingHours, setLoadingHours] = useState(false)
   const [disabled, setDisabled] = useState(false)
   const childFormRef = useRef();
+  const [datosPreCargados, setDatosPreCargados] = useState(null);
 
   useEffect(() => {
     setProps({
@@ -112,6 +113,7 @@ const AddFirstAppoinments = () => {
   const fetchInitialData = async (id) => {
     try {
       const { users: response } = await fetchUser(id);
+
       const patient = {
         name: response[0].nombre,
         lastName: response[0].apellido,
@@ -126,9 +128,28 @@ const AddFirstAppoinments = () => {
         address: response[0].direccion,
         region: response[0].region,
         comuna: response[0].comuna,
+        contacto1_id: response[0].contacto1_id || '',
+        email_contacto_emergencia1: response[0].contacto1_email || '',
+        nombre_contacto_emergencia1: response[0].contacto1_nombre || '',
+        celular_contacto_emergencia1: response[0].contacto1_numero || '',
+        parentesco_contacto_emergencia1: response[0].contacto1_relacion || '',
+        contacto2_id: response[0].contacto2_id || '',
+        email_contacto_emergencia2: response[0].contacto2_email || '',
+        nombre_contacto_emergencia2: response[0].contacto2_nombre || '',
+        celular_contacto_emergencia2: response[0].contacto2_numero || '',
+        parentesco_contacto_emergencia2: response[0].contacto2_relacion || '',
       };
 
+      const datosFormateados = {
+        nombre_contacto_emergencia2: response[0].contacto2_nombre || '',
+        parentesco_contacto_emergencia2: response[0].contacto2_relacion || '',
+        celular_contacto_emergencia2: response[0].contacto2_numero || '',
+        email_contacto_emergencia2: response[0].contacto2_email || ''
+      };
+
+      setDatosPreCargados(datosFormateados);
       setDataPatient(patient)
+
       return patient
     } catch (error) {
       console.error("Error fetching initial data:", error);
@@ -418,22 +439,24 @@ const AddFirstAppoinments = () => {
 
     e.preventDefault()
     setSuccess('initial')
-    const { users: patient } = await fetchUser(session.user?.id)
+    // const { users: patient } = await fetchUser(session.user?.id)
 
     const bodyContactOne = {
-      "nombre": data?.nombre_contacto_emergencia1 || '',
-      "relacion": data?.parentesco_contacto_emergencia1 || '',
-      "numero": data?.celular_contacto_emergencia1 || '',
-      "mail": data?.email_contact || '',
-      "parentesco": data?.parentesco_contacto_emergencia1 || '',
+      "nombre": data?.nombre_contacto_emergencia1 || dataPatient.nombre_contacto_emergencia1 || '',
+      "relacion": data?.parentesco_contacto_emergencia1 || dataPatient.parentesco_contacto_emergencia1 || '',
+      "numero": data?.celular_contacto_emergencia1 || dataPatient.celular_contacto_emergencia1 || '',
+      "mail": data?.email_contacto_emergencia1 || dataPatient.email_contacto_emergencia1 || '',
+      "parentesco": data?.parentesco_contacto_emergencia1 || dataPatient.parentesco_contacto_emergencia1 || '',
+      "id_emergencia": dataPatient.contacto1_id || 0
     }
 
     const bodyContactTwo = {
-      "nombre": childFormData?.nombre_contacto_emergencia2 || '',
-      "relacion": childFormData?.parentesco_contacto_emergencia2 || '',
-      "numero": childFormData?.celular_contacto_emergencia2 || '',
-      "mail": childFormData?.email_contact || '',
-      "parentesco": childFormData?.parentesco_contacto_emergencia2 || '',
+      "nombre": childFormData?.nombre_contacto_emergencia2 || dataPatient.nombre_contacto_emergencia2 || '',
+      "relacion": childFormData?.parentesco_contacto_emergencia2 || dataPatient.parentesco_contacto_emergencia2 || '',
+      "numero": childFormData?.celular_contacto_emergencia2 || dataPatient.celular_contacto_emergencia2 || '',
+      "mail": childFormData?.email_contacto_emergencia2 || dataPatient.email_contacto_emergencia2 || '',
+      "parentesco": childFormData?.parentesco_contacto_emergencia2 || dataPatient.parentesco_contacto_emergencia2 || '',
+      "id_emergencia": dataPatient.contacto2_id
     }
 
     const bodyInterview = {
@@ -441,7 +464,7 @@ const AddFirstAppoinments = () => {
       "nombre_contacto_emergencia2": childFormData?.nombre_contacto_emergencia2 || '',
       "parentesco_contacto_emergencia2": childFormData?.parentesco_contacto_emergencia2 || '',
       "celular_contacto_emergencia2": childFormData?.celular_contacto_emergencia2 || '',
-      "patient_id": patient[0].id,
+      "patient_id": dataPatient.id,
       "hora": data.selectedHour,
       "fecha": data.selectedDay,
       "region": regiones[0].label,
@@ -451,40 +474,53 @@ const AddFirstAppoinments = () => {
     }
 
     const bodyUpdate = {
-      "apellido": data.lastName || patient[0].apellido,
+      "apellido": data.lastName || dataPatient.apellido,
       "aplica_despeje": 1,
       "anoIngresoCarrera": 'No aplica',
       "campus": data.campus || 'No aplica',
-      "comuna": data.comuna.label || patient[0].comuna,
-      "carrera": data.carrera.label || patient[0].carrera,
+      "comuna": data.comuna.label || dataPatient.comuna,
+      "carrera": data.carrera.label || dataPatient.carrera,
       "contrasena": 'No aplica',
       "direccion": data.address,
       "email": data.email,
       "entrevistador": 0,
-      "fecha_nacimiento": data.birthday || patient[0].birthday,
-      "genero": data.genero || patient[0].genero,
-      "id": patient[0].id,
+      "fecha_nacimiento": data.birthday || dataPatient.birthday,
+      "genero": data.genero || dataPatient.genero,
+      "id": dataPatient.id,
       "jornada": 'No aplica',
       "mustChangePassword": 0,
-      "nombre": data.name || patient[0].nombre,
-      "nombre_social": data.nombre_social || patient[0].nombre_social,
-      "region": data.region.label || patient[0].region,
+      "nombre": data.name || dataPatient.nombre,
+      "nombre_social": data.nombre_social || dataPatient.nombre_social,
+      "region": data.region.label || dataPatient.region,
       "rut": data.rut,
-      "status": patient[0].status,
-      "telefono": data.mobile || patient[0].telefono,
-      "tipo_usuario": patient[0].tipo_usuario,
-      "id_emergencia": patient[0].id_emergencia || 0,
-      "id_emergencia_2": patient[0].id_emergencia_2 || 0,
+      "status": dataPatient.status,
+      "telefono": data.mobile || dataPatient.telefono,
+      "tipo_usuario": dataPatient.tipo_usuario,
+      "id_emergencia": dataPatient.id_emergencia || 0,
+      "id_emergencia_2": dataPatient.id_emergencia_2 || 0,
     }
 
     let id_contact_1;
     let id_contact_2;
 
     try {
-      const response1 = await createContact(bodyContactOne)
-      const response2 = await createContact(bodyContactTwo)
-      id_contact_1 = response1.id
-      id_contact_2 = response2.id
+      const response1 = dataPatient.contacto1_id == 0
+        ? await createContact(bodyContactOne)
+        : await editContact(bodyContactOne)
+
+      const response2 = dataPatient.contacto2_id == 0
+        ? await createContact(bodyContactTwo)
+        : await editContact(bodyContactTwo)
+
+
+      id_contact_1 = dataPatient.contacto1_id == 0
+        ? response1.id
+        : dataPatient.contacto1_id
+
+      id_contact_2 = dataPatient.contacto2_id == 0
+        ? response2.id
+        : dataPatient.contacto2_id
+
     } catch (error) {
       console.log(error)
     }
@@ -527,6 +563,7 @@ const AddFirstAppoinments = () => {
         index={contacts.length}
         deleteContact={() => handleDeleteContact(contacts.length)}
         ref={childFormRef}
+        datosPrecargados={datosPreCargados}
       />
     ];
     setContacts(newContact);
@@ -1154,7 +1191,7 @@ const AddFirstAppoinments = () => {
                                   className="form-control"
                                   type="email"
                                   defaultValue={""}
-                                  {...register('email_contact', {
+                                  {...register('email_contacto_emergencia1', {
                                     required: {
                                       value: true,
                                       message: 'El campo es obligatorio',
@@ -1165,7 +1202,7 @@ const AddFirstAppoinments = () => {
                                     }
                                   })} />
                                 {
-                                  errors.email_contact && <span><small>{errors.email_contact.message}</small></span>
+                                  errors.email_contacto_emergencia1 && <span><small>{errors.email_contacto_emergencia1.message}</small></span>
                                 }
                               </div>
                             </div>

@@ -14,7 +14,7 @@ import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/mater
 import { Modal, Button } from 'react-bootstrap'
 
 import { fetchUserByEmail, fetchUsers, fetchUser, updateUser, darAlta } from "@/services/UsersServices";
-import { fetchAppointments, changeStatusAppointment } from "@/services/AppointmentsServices"
+import { fetchAppointments, changeStatusAppointment, editContact, createContact } from "@/services/AppointmentsServices"
 import { createInterviewRecord, showRecords } from "@/services/RecordServices";
 import { fetchProfessionals } from "@/services/DoctorsServices";
 
@@ -99,8 +99,6 @@ const AddInterviewRecord = ({ params }) => {
         nombre_social: response[0].nombre_social,
         nombre: responsePatient.nombre,
         nombre_completo: date[0].nombre_alumno,
-        nombre_contacto_emergencia1: response[0].contacto_nombre,
-        parentesco_contacto_emergencia1: response[0].contacto_relacion,
         profesional_evaluador: date[0].nombre_profesional,
         region: response[0].region,
         rut: response[0].rut,
@@ -121,10 +119,7 @@ const AddInterviewRecord = ({ params }) => {
       }
 
       const ultimoNumeroFicha = records.length > 0 ? records[records.length - 1].numero_ficha : 0;
-      obj.numero_ficha = parseInt(ultimoNumeroFicha) + 1 
-console.log('OBJ', obj);
-console.log('response', response[0]);
-
+      obj.numero_ficha = parseInt(ultimoNumeroFicha) + 1
 
       setPatient(obj)
       setIsLoading(false)
@@ -204,12 +199,13 @@ console.log('response', response[0]);
 
   /* CITA NORMAL servicio es el mismo que el de despeje, pero se omiten los campos que no se necesitan */
   const handleAppointment = handleSubmit(async data => {
+    setIsLoading(true)
     setSuccess('initial')
     const patientName = watch("name")
     const patientLastname = watch("lastName")
     const derivacion_interna = watch("derivacion_interna")
 
-    const body = {
+    const bodyInterview = {
       ...data,
       anoIngresoCarrera: data.ano_ingreso,
       id_receptor: derivacion_interna ? data.profesional_derivacion.id : '',
@@ -287,9 +283,37 @@ console.log('response', response[0]);
       tipo_cita: data.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional',
     }
 
+    const bodyUpdateUser = {
+      "apellido": data.lastName || patient.apellido,
+      "aplica_despeje": 0,  // el único q debiera cambiar
+      "anoIngresoCarrera": data.ano_ingreso || patient.ano_ingreso,
+      "campus": data.campus || 'No aplica',
+      "comuna": data.comuna || patient.comuna,
+      "carrera": data.carrera || patient.carrera,
+      "contrasena": 'No aplica',
+      "direccion": data.direccion || patient.direccion,
+      "email": data.correo,
+      "entrevistador": 0,
+      "fecha_nacimiento": convertDateFormat(data.fecha_nacimiento) || convertDateFormat(patient.fecha_nacimiento),
+      "genero": data.genero || patient.genero,
+      "id": parseInt(patient.id_alumno),
+      "jornada": 'No aplica',
+      "mustChangePassword": 0,
+      "nombre": patient.nombre,
+      "nombre_social": patient.nombre_social,
+      "region": data.region || patient.region,
+      "rut": data.rut || patient.rut || ' ',
+      "status": patient.status,
+      "telefono": data.telefono || patient.telefono,
+      "tipo_usuario": patient.tipo_usuario,
+      "id_emergencia": patient.id_contacto_emergencia1 || 0,
+      "id_emergencia_2": patient.id_contacto_emergencia2 || 0,
+    }
+
     try {
-      const appointment = await createInterviewRecord(body)
+      const appointment = await createInterviewRecord(bodyInterview)
       const changeStatus = await changeStatusAppointment(bodyEstado)
+      const updateUserSubmit = await updateUser(bodyUpdateUser)
 
       if (appointment.estado === false && changeStatus.validacion === false) {
         setSuccess('fail')
@@ -302,6 +326,8 @@ console.log('response', response[0]);
       if (err.message.includes("Cannot read properties of undefined")) {
         setError(`No se encontró al paciente`);
       }
+    } finally {
+      setIsLoading(false)
     }
   })
 
@@ -386,7 +412,7 @@ console.log('response', response[0]);
     const bodyUpdateUser = {
       "apellido": data.lastName || patient.apellido,
       "aplica_despeje": 0,  // el único q debiera cambiar
-      "anoIngresoCarrera": data.ano_ingreso,
+      "anoIngresoCarrera": data.ano_ingreso || patient.ano_ingreso,
       "campus": data.campus || 'No aplica',
       "comuna": data.comuna || patient.comuna,
       "carrera": data.carrera || patient.carrera,
@@ -400,12 +426,12 @@ console.log('response', response[0]);
       "jornada": 'No aplica',
       "mustChangePassword": 0,
       "nombre": patient.nombre,
+      "nombre_social": patient.nombre_social,
       "region": data.region || patient.region,
       "rut": data.rut || patient.rut || ' ',
       "status": patient.status,
       "telefono": data.telefono || patient.telefono,
       "tipo_usuario": patient.tipo_usuario,
-      "nombre_social": patient.nombre_social,
       "id_emergencia": patient.id_contacto_emergencia1 || 0,
       "id_emergencia_2": patient.id_contacto_emergencia2 || 0,
     }
@@ -427,25 +453,70 @@ console.log('response', response[0]);
       quien_cancela: ''
     }
 
-    try {
-      const [resp, changeStatus, response] = await Promise.all([
-        createInterviewRecord(bodyInterview),
-        changeStatusAppointment(bodyEstado),
-        updateUser(bodyUpdateUser)
-      ]);
+    const bodyContactOne = {
+      "nombre": data?.nombre_contacto_emergencia1 || patient.nombre_contacto_emergencia1 || '',
+      "relacion": data?.parentesco_contacto_emergencia1 || patient.parentesco_contacto_emergencia1 || '',
+      "numero": data?.celular_contacto_emergencia1 || patient.celular_contacto_emergencia1 || '',
+      "mail": data?.email_contacto_emergencia1 || patient.mail_contacto_emergencia1 || '',
+      "parentesco": data?.parentesco_contacto_emergencia1 || patient.parentesco_contacto_emergencia1 || '',
+      "id_emergencia": patient.id_contacto_emergencia1 || 0
+    }
 
-      if (resp.estado === true && changeStatus.validacion === true && response.validacion === true) {
-        setSuccess('success')
-      } else if (resp.estado === true && changeStatus.detalle === 'success!!!') {
-        setSuccess('success')
-      } else {
-        setSuccess('fail')
-        setError(resp?.detalle || changeStatus?.detalle || response?.detalle)
-      }
+    const bodyContactTwo = {
+      "nombre": data?.nombre_contacto_emergencia2 || patient.nombre_contacto_emergencia2 || '',
+      "relacion": data?.parentesco_contacto_emergencia2 || patient.parentesco_contacto_emergencia2 || '',
+      "numero": data?.celular_contacto_emergencia2 || patient.celular_contacto_emergencia2 || '',
+      "mail": data?.email_contacto_emergencia2 || patient.mail_contacto_emergencia2 || '',
+      "parentesco": data?.parentesco_contacto_emergencia2 || patient.parentesco_contacto_emergencia2 || '',
+      "id_emergencia": patient.id_contacto_emergencia2 || 0
+    }
+
+    let id_contact_1;
+    let id_contact_2;
+
+    try {
+      const response1 = dataPatient.contacto1_id == 0
+        ? await createContact(bodyContactOne)
+        : await editContact(bodyContactOne)
+
+      const response2 = dataPatient.contacto2_id == 0
+        ? await createContact(bodyContactTwo)
+        : await editContact(bodyContactTwo)
+
+
+      id_contact_1 = dataPatient.contacto1_id == 0
+        ? response1.id
+        : dataPatient.contacto1_id
+
+      id_contact_2 = dataPatient.contacto2_id == 0
+        ? response2.id
+        : dataPatient.contacto2_id
 
     } catch (error) {
-      console.log('Error: ', error);
-      setSuccess('success')
+      console.log(error)
+    }
+
+    if (id_contact_1 || id_contact_2) {
+      try {
+        const [resp, changeStatus, response] = await Promise.all([
+          createInterviewRecord(bodyInterview),
+          changeStatusAppointment(bodyEstado),
+          updateUser(bodyUpdateUser)
+        ]);
+
+        if (resp.estado === true && changeStatus.validacion === true && response.validacion === true) {
+          setSuccess('success')
+        } else if (resp.estado === true && changeStatus.detalle === 'success!!!') {
+          setSuccess('success')
+        } else {
+          setSuccess('fail')
+          setError(resp?.detalle || changeStatus?.detalle || response?.detalle)
+        }
+
+      } catch (error) {
+        console.log('Error: ', error);
+        setSuccess('success')
+      }
     }
   })
 
@@ -465,6 +536,7 @@ console.log('response', response[0]);
     }
     try {
       const response = await darAlta(body)
+      
     } catch (error) {
       console.log('Error', error)
       setSuccess('fail')
@@ -903,8 +975,7 @@ console.log('response', response[0]);
                                           defaultValue={selectedOption}
                                           onChange={(e) => {
                                             onChange(e)
-                                            console.log(watch('derivacion_externa'))
-                                            console.log(watch('derivacion_interna'))
+                                            console.log('')
                                           }}
                                           getOptionLabel={e => e.label}
                                           options={profesionales}
@@ -2637,7 +2708,7 @@ console.log('response', response[0]);
                                           defaultValue={selectedOption}
                                           onChange={(e) => {
                                             onChange(e)
-                                            console.log(watch('derivacion_externa'))
+                                            console.log('')
                                           }}
                                           getOptionLabel={e => e.label}
                                           options={profesionales}

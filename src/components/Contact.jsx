@@ -1,12 +1,14 @@
 'use client'
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useEffect } from "react";
 import { useForm } from 'react-hook-form';
 import { MinusCircle } from 'feather-icons-react/build/IconComponents';
 
-const Contact = forwardRef(({ index, deleteContact }, ref) => {
-  const { register, handleSubmit, getValues, trigger,
+const Contact = forwardRef(({ index, deleteContact, datosPrecargados }, ref) => {
+  const { register, handleSubmit, reset, getValues, trigger,
     formState: { errors }
-  } = useForm()
+  } = useForm({
+    defaultValues: datosPrecargados || {}
+  })
 
   const handleClick = () => {
     deleteContact(index)
@@ -22,6 +24,14 @@ const Contact = forwardRef(({ index, deleteContact }, ref) => {
       return null; // Retorna null si hay errores
     },
   }));
+
+  // Precargar datos cuando estén disponibles
+  useEffect(() => {
+    if (datosPrecargados) {
+      reset(datosPrecargados); // Esto establecerá los valores en el formulario
+    }
+  }, [datosPrecargados, reset]);
+
 
   return (
     <>
@@ -88,7 +98,7 @@ const Contact = forwardRef(({ index, deleteContact }, ref) => {
           <input
             className="form-control" type="text"
             defaultValue={""}
-            {...register('email_contact')} />
+            {...register('email_contacto_emergencia2')} />
         </div>
       </div>
     </>
