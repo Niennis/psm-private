@@ -7,19 +7,20 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import Select from "react-select";
 import { useForm, Controller } from 'react-hook-form'
-import { fetchProfessionalById, fetchSpecialityById, changeEspecialidad, updateProfesional, changePassword } from "@/services/DoctorsServices";
+import { addEspecialidad, fetchProfessionalById, fetchSpecialityById, changeEspecialidad, updateProfesional, changePassword } from "@/services/DoctorsServices";
 
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 import { Alert } from "@mui/material";
 
 import { useSidebar } from "@/context/SidebarContext";
-import { especialidades } from "@/utils/selects";
+import { especialidades, genero } from "@/utils/selects";
 import { formatDateToYYYYMMDD } from "@/utils/managedata";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 import { fetchUserByEmail } from "@/services/UsersServices";
+import SimpleBackdrop from "@/components/Backdrop";
 
 const cacheHandler = new CacheHandler();
 
@@ -33,13 +34,14 @@ const EditDoctor = ({ params }) => {
   }
   const userId = params.id;
   if (session.user.id != userId && session?.user?.rol !== "administrador") {
-    redirect('/pacientes');
+    redirect('/profesionales');
   }
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
   const [initial, setInitial] = useState({})
   const [passwordVisible, setPasswordVisible] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [initialProfesional, setInitialProfesional] = useState('')
   const [selectedOption, setSelectedOption] = useState(null);
 
@@ -72,9 +74,10 @@ const EditDoctor = ({ params }) => {
 
   // DATOS PRECARGADOS
   const fetchInitialData = async () => {
+    setLoading(true)
     try {
       let user;
-      const { especialidades } = await fetchSpecialityById(params.id);
+      const { especialidades: especialidad } = await fetchSpecialityById(params.id);
       if (params.id == session?.user?.id) {
         user = await fetchUserByEmail(session?.user?.email)
       } else {
@@ -89,16 +92,19 @@ const EditDoctor = ({ params }) => {
         email: user.email,
         dateOfBirth: user.fecha_nacimiento,
         genero: user.genero,
-        speciality: especialidades[0]?.especialidad || 'No informada',
+        speciality: especialidad[0]?.especialidad || 'No informada',
         status: user.status,
-        password: '',
-        confirmPassword: ''
+        password: user.contrasena,
+        confirmPassword: user.contrasena
       };
       setInitial(obj)
+
       return obj
     } catch (error) {
       console.error("Error fetching initial data:", error);
       return {};
+    } finally{
+      setLoading(false)
     }
   };
 
@@ -136,118 +142,291 @@ const EditDoctor = ({ params }) => {
   }, [mobileValue, setValue]);
 
   // FUNCIÓN UPDATE
+
+  // FUNCIÓN UPDATE
+  const createUserPayload = (data) => ({
+    id: data.id,
+    id_emergencia: 0,
+    id_emergencia_2: 0,
+    anoIngresoCarrera: '0',
+    apellido: data.lastName || initial.apellido,
+    aplica_despeje: '0',
+    campus: 'ambas',
+    carrera: 'Psicopedagogia',
+    comuna: 'santiago',
+    contrasena: (data.password && data.confirmPassword && data.password === data.confirmPassword) ? data.password : undefined,
+    direccion: 'random',
+    email: initial.email,
+    entrevistador: '1',
+    fecha_nacimiento: formatDateToYYYYMMDD(initial.fecha_nacimiento),
+    genero: data.genero || initial.genero,
+    jornada: 'laboral',
+    mustChangePassword: initial.mustChangePassword || 0,
+    nombre: data.name || initial.nombre,
+    nombre_social: data.nombre_social || initial.nombre_social || initial.nombre,
+    region: 'santiago',
+    rut: '12345678-9',
+    status: data.status || initial.status,
+    telefono: data.mobile,
+    tipo_usuario: initial.tipo_usuario,
+  });
+
+  const createPasswordPayload = (data) => ({
+    contrasena: data.password,
+    id_user: initial.id
+  });
+
+  const handleEspecialidad = async (data, especialidades) => {
+    // Verificar si hay una especialidad seleccionada
+    const newEspecialidad = data.speciality ? especialidades.filter(item => item.value === data.speciality) : [];
+    const prevEspecialidad = initial.speciality ? especialidades.filter(item => item.value === initial.speciality) : [];
+
+    // Determinar qué función usar y con qué payload
+    if (newEspecialidad.length > 0) {
+      // Si hay una nueva especialidad seleccionada
+      const especialidadId = newEspecialidad[0].id;
+
+      // Si el usuario ya tenía una especialidad, actualizar
+      if (prevEspecialidad.length > 0) {
+        const updatePayload = {
+          id_user: initial.id,
+          id_especialidad: especialidadId
+        };
+        // validacion y detalle
+        return await changeEspecialidad(updatePayload);
+      }
+      // Si no tenía especialidad, crear nueva
+      else {
+        const createPayload = {
+          id: initial.id,
+          especialidad_id: especialidadId
+        };
+        // message , validacion y detalle
+        return await addEspecialidad(createPayload);
+      }
+    }
+    // Si no hay especialidad nueva pero había una previa, mantener la previa
+    else if (prevEspecialidad.length > 0) {
+      const updatePayload = {
+        id_user: initial.id,
+        id_especialidad: prevEspecialidad[0].id
+      };
+      // validacion y detalle
+      return await changeEspecialidad(updatePayload);
+    }
+
+    // Si no hay especialidad nueva ni previa, retornar un resultado "exitoso"
+    // ya que no hay cambios en especialidad que hacer
+    return { validacion: true };
+  };
+
+  const updateAll = async (userPayload, passwordPayload, data, especialidades) => {
+    try {
+      // Manejo de especialidad
+      const respEspecialidad = await handleEspecialidad(data, especialidades);
+
+      // Actualización de usuario y contraseña
+      const [respProfesional, respPass] = await Promise.all([
+        updateProfesional(userPayload),
+        changePassword(passwordPayload)
+      ]);
+
+      return {
+        success: respProfesional.validacion && (respEspecialidad.validacion || respEspecialidad.message) && respPass.validacion,
+        errors: [
+          respProfesional.validacion === false && respProfesional.detalle,
+          respEspecialidad.validacion === false && respEspecialidad.detalle,
+          respPass.validacion === false && respPass.detalle
+        ].filter(Boolean)
+      };
+    } catch (error) {
+      throw new Error(`Problema con el servicio: ${error.message}`);
+    }
+  };
+
+  const updatePasswordOnly = async (passwordPayload) => {
+    try {
+      const response = await changePassword(passwordPayload);
+      return {
+        success: response.validacion === true,
+        errors: response.validacion === false ? [response.detalle] : []
+      };
+    } catch (error) {
+      throw new Error(`Ocurrió un problema: ${error.message}`);
+    }
+  };
+
+  const updateUserAndEspecialidad = async (userPayload, data, especialidades) => {
+    try {
+      // Manejo de especialidad
+      const respEspecialidad = await handleEspecialidad(data, especialidades);
+
+      // Actualización de usuario
+      const respProfesional = await updateProfesional(userPayload);
+
+      return {
+        success: respProfesional.validacion && (respEspecialidad.validacion || respEspecialidad.message),
+        errors: [
+          respProfesional.validacion === false && respProfesional.detalle,
+          respEspecialidad.validacion === false && respEspecialidad.detalle
+        ].filter(Boolean)
+      };
+    } catch (error) {
+      throw new Error(`Problema con el servicio: ${error.message}`);
+    }
+  };
+
+  // FUNCIÓN UPDATE
   const handleEdit = handleSubmit(async (data, e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const match = data.password === data.confirmPassword;
+    try {
+      const isPasswordValid = data.password && data.confirmPassword && data.password === data.confirmPassword;
+      const hasChanges = Object.keys(dirtyFields).length > 0;
 
-    const body = {
-      id: data.id,
-      id_emergencia: 0,
-      id_emergencia_2: 0,
-      anoIngresoCarrera: '0',
-      apellido: data.lastName || initial.apellido,
-      aplica_despeje: '0',
-      campus: 'ambas',
-      carrera: 'Psicopedagogia',
-      comuna: 'santiago',
-      contrasena: (data.password && data.confirmPassword && match) && data.password,
-      direccion: 'random',
-      email: initial.email,
-      entrevistador: '1',
-      fecha_nacimiento: formatDateToYYYYMMDD(initial.fecha_nacimiento),
-      genero: data.genero || initial.genero,
-      jornada: 'laboral',
-      mustChangePassword: initial.mustChangePassword || 0,
-      nombre: data.name || initial.nombre,
-      nombre_social: data.nombre_social || initial.nombre_social || initial.nombre,
-      region: 'santiago',
-      rut: '12345678-9',
-      status: data.status || initial.status,
-      telefono: data.mobile,
-      tipo_usuario: initial.tipo_usuario,
-    };
+      const userPayload = createUserPayload(data, initial);
+      const passwordPayload = createPasswordPayload(data, initial);
 
-    const editPass = {
-      contrasena: data.password,
-      id_user: initial.id
-    }
+      let result;
 
-    const prevEspecialidad = especialidades.filter(item => item.value === initial.speciality)
-    const newEspecialidad = especialidades.filter(item => item.value === data.speciality)
+      if (hasChanges && isPasswordValid) {
+        // Actualizar todos: datos, especialidad y contraseña
+        result = await updateAll(userPayload, passwordPayload, data, especialidades);
 
-    const bodyEspecialidad = {
-      id_user: initial.id,
-      id_especialidad: newEspecialidad[0]?.id || prevEspecialidad[0]?.id
-    }
+      } else if (isPasswordValid) {
+        // Actualizar solo contraseña
+        result = await updatePasswordOnly(passwordPayload);
 
-    // CAMBIA TODOS LOS DATOS Y/O ESPECIALIDAD + CONTRASEÑA
-    if (Object.keys(dirtyFields).length > 0 && (data.password && data.confirmPassword && data.password === data.confirmPassword)) {
-
-      try {
-        const [respProfesional, respEspecialidad, respPass] = await Promise.all([
-          updateProfesional(body), changeEspecialidad(bodyEspecialidad), changePassword(editPass)
-        ])
-
-        if (respProfesional.validacion === true && respEspecialidad.validacion === true && respPass.validacion === true) {
-          setSuccess('success')
-        } else {
-          setSuccess('fail')
-          setError(`Ocurrió un problema: 
-            ${respProfesional.validacion === false && respProfesional.detalle} 
-            ${respEspecialidad.validacion === false && respEspecialidad.detalle}
-            ${respPass.validacion === false && respPass.detalle}
-             `)
-        }
-      } catch (error) {
-        setSuccess('fail')
-        setError(`Problema con el servicio: ${error.message}. Vuelve a intentar más tarde.`)
+      } else if (hasChanges) {
+        // Actualizar datos y/o especialidadRF
+        result = await updateUserAndEspecialidad(userPayload, data, especialidades);
       }
-    }
 
-    //  CAMBIA SOLO CONTRASEÑA
-    else if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
-      try {
-        const response = await changePassword(editPass)
-        if (response.validacion === true) {
-          setSuccess('success')
-        } else {
-          setSuccess('fail')
-          setError(`Ocurrió un problema: ${response.detalle}`)
-        }
-      } catch (error) {
-        setSuccess('fail')
-        setError(`Ocurrió un problema: ${error.message}. Intenta más tarde`)
+      if (result.success) {
+        setSuccess('success');
+      } else {
+        setSuccess('fail');
+        setError(`Ocurrió un problema: ${result.errors.join(' ')}`);
       }
+    } catch (error) {
+      setSuccess('fail');
+      setError(`${error.message}. Vuelve a intentar más tarde.`);
     }
-
-    // CAMBIA EL RESTO DE CAMPOS Y/O ESPECIALIDAD
-    else {
-      try {
-        const [respProfesional, respEspecialidad] = await Promise.all([
-          updateProfesional(body), changeEspecialidad(bodyEspecialidad)
-        ])
-
-        if (respProfesional.validacion === true && respEspecialidad.validacion === true) {
-          setSuccess('success')
-        } else {
-          setSuccess('fail')
-          setError(`Ocurrió un problema:
-            ${respProfesional.validacion === false && respProfesional.detalle} 
-            ${respEspecialidad.validacion === false && respEspecialidad.detalle}
-            `)
-        }
-      } catch (error) {
-        setSuccess('fail')
-        setError(`Problema con el servicio: ${error.message}. Vuelve a intentar más tarde.`)
-      }
-    }
-  })
+  });
 
   const handleClose = () => {
-    router.push('/pacientes');
-    setSuccess('initial')
-  }
+    router.push('/profesionales');
+    setSuccess('initial');
+  };
+
+  // const handleEdit = handleSubmit(async (data, e) => {
+  //   e.preventDefault()
+
+  //   const match = data.password === data.confirmPassword;
+
+  //   const body = {
+  //     id: data.id,
+  //     id_emergencia: 0,
+  //     id_emergencia_2: 0,
+  //     anoIngresoCarrera: '0',
+  //     apellido: data.lastName || initial.apellido,
+  //     aplica_despeje: '0',
+  //     campus: 'ambas',
+  //     carrera: 'No informada',
+  //     comuna: 'santiago',
+  //     contrasena: (data.password && data.confirmPassword && match) && data.password,
+  //     direccion: 'random',
+  //     email: initial.email,
+  //     entrevistador: '1',
+  //     fecha_nacimiento: formatDateToYYYYMMDD(initial.fecha_nacimiento),
+  //     genero: data.genero || initial.genero,
+  //     jornada: 'laboral',
+  //     mustChangePassword: initial.mustChangePassword || 0,
+  //     nombre: data.name || initial.nombre,
+  //     nombre_social: data.nombre_social || initial.nombre_social || initial.nombre,
+  //     region: 'santiago',
+  //     rut: '12345678-9',
+  //     status: data.status || initial.status,
+  //     telefono: data.mobile,
+  //     tipo_usuario: initial.tipo_usuario,
+  //   };
+
+  //   const editPass = {
+  //     contrasena: data.password,
+  //     id_user: initial.id
+  //   }
+
+  //   const prevEspecialidad = especialidades.filter(item => item.value === initial.speciality)
+  //   const newEspecialidad = especialidades.filter(item => item.value === data.speciality)
+
+  //   const bodyEspecialidad = {
+  //     id_user: initial.id,
+  //     id_especialidad: newEspecialidad[0]?.id || prevEspecialidad[0]?.id
+  //   }
+
+  //   // CAMBIA TODOS LOS DATOS Y/O ESPECIALIDAD + CONTRASEÑA
+  //   if (Object.keys(dirtyFields).length > 0 && (data.password && data.confirmPassword && data.password === data.confirmPassword)) {
+
+  //     try {
+  //       const [respProfesional, respEspecialidad, respPass] = await Promise.all([
+  //         updateProfesional(body), changeEspecialidad(bodyEspecialidad), changePassword(editPass)
+  //       ])
+
+  //       if (respProfesional.validacion === true && respEspecialidad.validacion === true && respPass.validacion === true) {
+  //         setSuccess('success')
+  //       } else {
+  //         setSuccess('fail')
+  //         setError(`Ocurrió un problema: 
+  //           ${respProfesional.validacion === false && respProfesional.detalle} 
+  //           ${respEspecialidad.validacion === false && respEspecialidad.detalle}
+  //           ${respPass.validacion === false && respPass.detalle}
+  //            `)
+  //       }
+  //     } catch (error) {
+  //       setSuccess('fail')
+  //       setError(`Problema con el servicio: ${error.message}. Vuelve a intentar más tarde.`)
+  //     }
+  //   }
+
+  //   //  CAMBIA SOLO CONTRASEÑA
+  //   else if (data.password && data.confirmPassword && data.password === data.confirmPassword) {
+  //     try {
+  //       const response = await changePassword(editPass)
+  //       if (response.validacion === true) {
+  //         setSuccess('success')
+  //       } else {
+  //         setSuccess('fail')
+  //         setError(`Ocurrió un problema: ${response.detalle}`)
+  //       }
+  //     } catch (error) {
+  //       setSuccess('fail')
+  //       setError(`Ocurrió un problema: ${error.message}. Intenta más tarde`)
+  //     }
+  //   }
+
+  //   // CAMBIA EL RESTO DE CAMPOS Y/O ESPECIALIDAD
+  //   else {
+  //     try {
+  //       const [respProfesional, respEspecialidad] = await Promise.all([
+  //         updateProfesional(body), changeEspecialidad(bodyEspecialidad)
+  //       ])
+
+  //       if (respProfesional.validacion === true && respEspecialidad.validacion === true) {
+  //         setSuccess('success')
+  //       } else {
+  //         setSuccess('fail')
+  //         setError(`Ocurrió un problema:
+  //           ${respProfesional.validacion === false && respProfesional.detalle} 
+  //           ${respEspecialidad.validacion === false && respEspecialidad.detalle}
+  //           `)
+  //       }
+  //     } catch (error) {
+  //       setSuccess('fail')
+  //       setError(`Problema con el servicio: ${error.message}. Vuelve a intentar más tarde.`)
+  //     }
+  //   }
+  // })
+
 
   return (
     < >
@@ -399,7 +578,9 @@ const EditDoctor = ({ params }) => {
                                 return (
                                   <Select
                                     value={especialidades.find(option => option.value === value) || value}
-                                    onChange={(option) => onChange(option.value)}
+                                    onChange={(option) => {
+                                      onChange(option.value)
+                                    }}
                                     options={especialidades}
                                     id="speciality"
                                     components={{
@@ -529,7 +710,7 @@ const EditDoctor = ({ params }) => {
                                   name="genero"
                                   value="no binarie"
                                   className="form-check-input"
-                                  defaultChecked={initial.genero === 'No binarie' || 'personalizado'}
+                                  defaultChecked={initial.genero === 'No binarie'}
                                   {...register('genero')}
                                 />
                                 No binarie
@@ -651,7 +832,7 @@ const EditDoctor = ({ params }) => {
                             >
                               Actualizar
                             </button>
-                            <Link href={'/pacientes'}>
+                            <Link href={'/profesionales'}>
                               <button
                                 type="reset"
                                 className="btn btn-primary cancel-form"
@@ -728,6 +909,7 @@ const EditDoctor = ({ params }) => {
             </div>
             : ''
         }
+        {loading && <SimpleBackdrop />}
       </>
     </>
   );

@@ -22,7 +22,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
-import { especialidades } from "@/utils/selects";
+import { especialidades, genero } from "@/utils/selects";
+import SimpleBackdrop from "@/components/Backdrop";
 
 const cacheHandler = new CacheHandler();
 
@@ -33,6 +34,7 @@ const AddProfessional = () => {
   const { setProps } = useSidebar();
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
   const [errorMessage, setErrorMessage] = useState('')
+  const [openBackdrop, setOpenBackdrop] = useState(false);
 
   const { register, handleSubmit, watch, control, reset, setValue, getValues, setError,
     formState: { errors, isSubmitSuccessful }
@@ -56,15 +58,6 @@ const AddProfessional = () => {
   const [dataDoctor, setDataDoctor] = useState(null)
   const [success, setSuccess] = useState('initial')
 
-  const [gender, setGender] = useState([
-    { value: "", label: "" },
-    { value: 1, label: "Hombre" },
-    { value: 2, label: "Mujer" },
-    { value: 3, label: "Hombre trans" },
-    { value: 4, label: "Mujer trans" },
-    { value: 5, label: "No binarie" }
-  ]);
-
   useEffect(() => {
     setProps({
       id: "menu-item1",
@@ -77,7 +70,7 @@ const AddProfessional = () => {
     setMenuPortalTarget(document.body);
 
     if (isSubmitSuccessful) {
-      reset()
+      // reset()
       setValue('genero.value', 0)
     }
   }, [isSubmitSuccessful, reset])
@@ -93,6 +86,9 @@ const AddProfessional = () => {
   const onSubmit = handleSubmit(async (data, e) => {
     e.preventDefault()
     setSuccess('initial')
+    setOpenBackdrop(true)
+    console.log('data', data);
+
     const saltRound = 10;
     const hashedPassword = await bcrypt.hash(data.password, saltRound)
     const dataWithHashPass = { ...data, password: hashedPassword }
@@ -123,8 +119,9 @@ const AddProfessional = () => {
         console.log('Error:', error)
         setSuccess('fail')
         setErrorMessage('El servicio no está disponible')
+      } finally {
+        setOpenBackdrop(false)
       }
-
     } else {
       setErrorMessage('El servicio no está disponible')
     }
@@ -171,7 +168,7 @@ const AddProfessional = () => {
               <div className="col-sm-12">
                 <div className="card">
                   <div className="card-body">
-                    <form onSubmit={onSubmit}>
+                    <form >
                       <div className="row">
                         <div className="col-12">
                           <div className="form-heading">
@@ -248,21 +245,23 @@ const AddProfessional = () => {
                               {...register('genero', {
                                 required: {
                                   value: true,
-                                  message: 'Género es requerida',
+                                  message: 'Género es requerido',
                                 }
                               })}
                               ref={null}
                               render={({ field: { onChange, onBlur, value } }) => (
                                 <Select
-                                  instanceId="genero"
-                                  menuPosition={'fixed'}
-                                  defaultValue={""}
-                                  onChange={onChange}
-                                  options={gender}
-                                  value={value || ""}
+                                  value={genero.find(option => option.value === value) || null}
+                                  onChange={(option) => {
+                                    console.log(option);
+
+                                    onChange(option.value)
+                                  }}
+                                  options={genero}
                                   menuPortalTarget={menuPortalTarget}
                                   styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                   id="genero"
+                                  instanceId="genero"
                                   components={{
                                     IndicatorSeparator: () => null
                                   }}
@@ -414,37 +413,41 @@ const AddProfessional = () => {
                               })}
                               ref={null}
                               render={({ field: { onChange, onBlur, value } }) => (
-                                <Select
-                                  instanceId="search-commodity"
-                                  defaultValue={''}
-                                  value={value || ""}
-                                  onChange={onChange}
-                                  options={especialidades}
-                                  id="search-commodity"
-                                  components={{
-                                    IndicatorSeparator: () => null
-                                  }}
-                                  styles={{
-                                    control: (baseStyles, state) => ({
-                                      ...baseStyles,
-                                      borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                      boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                      '&:hover': {
-                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                      },
-                                      borderRadius: '10px',
-                                      fontSize: "14px",
-                                      minHeight: "45px",
-                                    }),
-                                    dropdownIndicator: (base, state) => ({
-                                      ...base,
-                                      transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                      transition: '250ms',
-                                      width: '35px',
-                                      height: '35px',
-                                    }),
-                                  }}
-                                />
+                                <>
+                                  {console.log('value', value)
+                                  }
+                                  <Select
+                                    instanceId="search-commodity"
+                                    defaultValue={''}
+                                    value={especialidades.find(option => option.value === value) || null}
+                                    onChange={(option) => onChange(option.value)}
+                                    options={especialidades}
+                                    id="search-commodity"
+                                    components={{
+                                      IndicatorSeparator: () => null
+                                    }}
+                                    styles={{
+                                      control: (baseStyles, state) => ({
+                                        ...baseStyles,
+                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                        boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                        '&:hover': {
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                        },
+                                        borderRadius: '10px',
+                                        fontSize: "14px",
+                                        minHeight: "45px",
+                                      }),
+                                      dropdownIndicator: (base, state) => ({
+                                        ...base,
+                                        transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                        transition: '250ms',
+                                        width: '35px',
+                                        height: '35px',
+                                      }),
+                                    }}
+                                  />
+                                </>
                               )}
                             />
                             {errors.speciality && <span className="login-danger">
@@ -453,66 +456,6 @@ const AddProfessional = () => {
 
                           </div>
                         </div>
-
-                        {/* Campus */}
-                        {/* <div className="col-12 col-md-6 col-xl-6">
-                        <div className="form-group select-gender">
-                          <label className="gen-label">
-                            Campus <span className="login-danger">*</span>
-                          </label>
-                          <div className="form-check-inline">
-                            <label className="form-check-label">
-                              <input
-                                type="radio"
-                                value="centro"
-                                className="form-check-input"
-                                {...register('campus', {
-                                  required: {
-                                    value: true,
-                                    message: 'Campus es requerido'
-                                  }
-                                })}
-                              />
-                              Centro
-                            </label>
-                          </div>
-                          <div className="form-check-inline">
-                            <label className="form-check-label">
-                              <input
-                                type="radio"
-                                value="huechuraba"
-                                className="form-check-input"
-                                {...register('campus', {
-                                  required: {
-                                    value: true,
-                                    message: 'Campus es requerido'
-                                  }
-                                })}
-                              />
-                              Huechuraba
-                            </label>
-                          </div>
-                          <div className="form-check-inline">
-                            <label className="form-check-label">
-                              <input
-                                type="radio"
-                                value="ambas"
-                                className="form-check-input"
-                                {...register('campus', {
-                                  required: {
-                                    value: true,
-                                    message: 'Campus es requerido'
-                                  }
-                                })}
-                              />
-                              Ambas
-                            </label>
-                          </div>
-                          {errors.campus && <span className="login-danger">
-                            <small>{errors.campus.message}</small>
-                          </span>}
-                        </div>
-                      </div> */}
 
                         {
                           session?.user?.rol === "administrador" &&
@@ -564,9 +507,9 @@ const AddProfessional = () => {
                         <div className="col-12">
                           <div className="doctor-submit text-end">
                             <button
-                              type="submit"
+                              type="button"
                               className="btn btn-primary submit-form me-2"
-                              // onClick={onSubmit}
+                              onClick={onSubmit}
                             >
                               Agregar profesional
                             </button>
@@ -588,46 +531,67 @@ const AddProfessional = () => {
               </div>
             </div>
           </div>
-          <div className="row">
-            <div className="col-sm-12 col-lg-6">
-              {success === 'success'
-                ?
+        </div>
+
+        {openBackdrop && <SimpleBackdrop />}
+        {success === 'success'
+          ?
+          <div style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080'
+          }}>
+            {/* <div className="col-sm-12 col-lg-6"> */}
+            <Alert
+              severity="success"
+              onClose={() => { setSuccess('initial') }}
+              sx={{
+                zIndex: 'tooltip',
+                position: 'absolute',
+                left: '30%',
+                width: '50%',
+                padding: '50px',
+                bottom: '50vh'
+              }}
+              spacing={2}
+            >
+              El profesional se ha ingresado exitosamente.
+            </Alert>
+            {/* </div> */}
+          </div>
+          : success === 'fail'
+            ?
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
                 <Alert
-                  severity="success"
+                  severity="error"
                   onClose={() => { setSuccess('initial') }}
                   sx={{
                     zIndex: 'tooltip',
                     position: 'absolute',
-                    bottom: -10,
-                    left: '10%',
-                    width: '80%'
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
                   }}
                   spacing={2}
                 >
-                  El profesional se ha ingresado exitosamente.
+                  Ha ocurrido un problema. {errorMessage}
                 </Alert>
-
-                : success === 'fail'
-                  ?
-                  <Alert
-                    severity="error"
-                    onClose={() => { setSuccess('initial') }}
-                    sx={{
-                      zIndex: 'tooltip',
-                      position: 'absolute',
-                      bottom: -10,
-                      left: '10%',
-                      width: '80%'
-                    }}
-                    spacing={2}
-                  >
-                    Ha ocurrido un problema. {errorMessage}
-                  </Alert>
-                  : ''
-              }
+              </div>
             </div>
-          </div>
-        </div>
+            : ''
+        }
       </>
     </>
   );
