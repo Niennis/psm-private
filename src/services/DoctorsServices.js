@@ -98,16 +98,16 @@ export const addProfessional = async (user) => {
   const body = {
     "apellido": user.lastName,
     "nombre": user.name,
+    "genero": user.genero,
+    "email": user.email,
+    "contrasena": user.password,
+    "especialidad": user.speciality,
+    "tipo_usuario": user.speciality == 'Administrador' ? 'administrador' : 'profesional',
+    "status": user.status,
+    "campus": user.campus || '',
     "rut": "no informado",
     "fechaNacimiento": "1990-03-03",
-    "genero": user.genero.label,
-    "email": user.email,
     "telefono": "no informado",
-    "contrasena": user.password,
-    "especialidad": user.speciality.value,
-    "tipo_usuario": 'profesional',
-    "status": user.status,
-    "campus": user.campus,
     "carrera": "no informada",
     "anoIngresoCarrera": "2020-03-03",
     "jornada": "no informado",
@@ -126,7 +126,7 @@ export const addProfessional = async (user) => {
       },
       body: JSON.stringify(body)
     })
-    const response = data.json()
+    const response = await data.json()
     return response
   } catch (error) {
     console.log('Error:', error)
@@ -139,6 +139,7 @@ export const addEspecialidad = async (data)=> {
     id_user: data.id,
     id_especialidad: data.especialidad_id
   }
+console.log('add especialidad', body);
 
   try {
     const data = await fetch(URL, {
@@ -150,7 +151,7 @@ export const addEspecialidad = async (data)=> {
       },
       body: JSON.stringify(body)
     })
-    const response = data.json()
+    const response = await data.json()
     return response
   } catch (error) {
     console.log('Error:', error)
@@ -173,17 +174,18 @@ export const updateDoctor = async (user, id) => {
     "id_emergencia": 0,
 
   }
+console.log('update user', body);
 
   try {
-    // const data = await fetch(USERS_API, {
-    //   method: "POST",
-    //   headers: {
-    //     'content-type': 'application/json',
-    //     'access-control-allow-origin': '*',
-    //     'ngrok-skip-browser-warning': 'any'
-    //   },
-    //   body: JSON.stringify(body)
-    // })
+    const data = await fetch(USERS_API, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+        'ngrok-skip-browser-warning': 'any'
+      },
+      body: JSON.stringify(body)
+    })
 
     return data
   } catch (error) {
@@ -198,6 +200,8 @@ export const updateProfesional = async (user) => {
   const body = {
     ...user
   }
+  console.log('update user', body);
+  
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -218,6 +222,8 @@ export const changePassword = async (user) => {
   const body = {
     ...user,
   }
+  console.log('changepass', body);
+  
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -240,6 +246,8 @@ export const changeEspecialidad = async (user) => {
   const body = {
     ...user,
   }
+  console.log('change especialidad', body);
+  
   try {
     const data = await fetch(USERS_API, {
       method: "POST",

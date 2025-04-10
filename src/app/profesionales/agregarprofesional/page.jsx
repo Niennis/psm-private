@@ -101,8 +101,6 @@ const AddProfessional = () => {
     if (data) {
       try {
         const response = await addProfessional(data)
-        console.log('response', data);
-
         // const response = await addProfessional(dataWithHashPass)
         // const responseEspecialidad = await addEspecialidad(bodyEspecialidad)
         if (response?.validacion === false) {
@@ -255,7 +253,7 @@ const AddProfessional = () => {
                                 <Select
                                   value={genero.find(option => option.value === value) || null}
                                   onChange={(option) => {
-                                    console.log(option);
+                                    // console.log(option);
 
                                     onChange(option.value)
                                   }}
