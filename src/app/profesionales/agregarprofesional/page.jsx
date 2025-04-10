@@ -87,7 +87,6 @@ const AddProfessional = () => {
     e.preventDefault()
     setSuccess('initial')
     setOpenBackdrop(true)
-    console.log('data', data);
 
     const saltRound = 10;
     const hashedPassword = await bcrypt.hash(data.password, saltRound)
@@ -102,9 +101,11 @@ const AddProfessional = () => {
     if (data) {
       try {
         const response = await addProfessional(data)
+        console.log('response', response);
+
         // const response = await addProfessional(dataWithHashPass)
         // const responseEspecialidad = await addEspecialidad(bodyEspecialidad)
-        if (response.validacion === false) {
+        if (response?.validacion === false) {
           setSuccess('fail')
           if (response.detalle.includes('Duplicate entry') && response.detalle.includes('email')) {
             setErrorMessage('Email ya está registrado.')
@@ -135,8 +136,9 @@ const AddProfessional = () => {
     setPasswordVisible(!passwordVisible);
   };
 
-  const handleCancel = () => {
-    reset({ name: 'Holo' })
+  const handleClose = () => {
+    setSuccess('initial')
+    router.push('/profesionales')
   }
 
   return (
@@ -414,8 +416,6 @@ const AddProfessional = () => {
                               ref={null}
                               render={({ field: { onChange, onBlur, value } }) => (
                                 <>
-                                  {console.log('value', value)
-                                  }
                                   <Select
                                     instanceId="search-commodity"
                                     defaultValue={''}
@@ -547,7 +547,7 @@ const AddProfessional = () => {
             {/* <div className="col-sm-12 col-lg-6"> */}
             <Alert
               severity="success"
-              onClose={() => { setSuccess('initial') }}
+              onClose={handleClose}
               sx={{
                 zIndex: 'tooltip',
                 position: 'absolute',
@@ -575,7 +575,7 @@ const AddProfessional = () => {
               <div className="col-sm-12 col-lg-6">
                 <Alert
                   severity="error"
-                  onClose={() => { setSuccess('initial') }}
+                  onClose={handleClose}
                   sx={{
                     zIndex: 'tooltip',
                     position: 'absolute',
