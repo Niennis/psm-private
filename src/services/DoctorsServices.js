@@ -22,6 +22,25 @@ export const fetchProfessionals = async () => {
   }
 }
 
+export const fetchProfessionalsAndAdmins = async () => {
+  const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/shownoalumnos`
+  try {
+    const data = await fetch(URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      }
+    })
+    const response = await data.json()
+    return response
+  } catch (error) {
+    console.log('Error:', error)
+
+  }
+}
+
+
 export const fetchSpecialityById = async (usuario_id) => {
   const SPECIALITY_URL = process.env.NEXT_PUBLIC_SHOW_ESPECIALIDAD_BY_ID
   try {
@@ -133,13 +152,13 @@ export const addProfessional = async (user) => {
   }
 }
 
-export const addEspecialidad = async (data)=> {
+export const addEspecialidad = async (data) => {
   const URL = process.env.NEXT_PUBLIC_ADD_ESPECIALIDAD
   const body = {
     id_user: data.id,
     id_especialidad: data.especialidad_id
   }
-console.log('add especialidad', body);
+  console.log('add especialidad', body);
 
   try {
     const data = await fetch(URL, {
@@ -174,7 +193,7 @@ export const updateDoctor = async (user, id) => {
     "id_emergencia": 0,
 
   }
-console.log('update user', body);
+  console.log('update user', body);
 
   try {
     const data = await fetch(USERS_API, {
@@ -201,7 +220,7 @@ export const updateProfesional = async (user) => {
     ...user
   }
   console.log('update user', body);
-  
+
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -223,7 +242,7 @@ export const changePassword = async (user) => {
     ...user,
   }
   console.log('changepass', body);
-  
+
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -247,7 +266,7 @@ export const changeEspecialidad = async (user) => {
     ...user,
   }
   console.log('change especialidad', body);
-  
+
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
