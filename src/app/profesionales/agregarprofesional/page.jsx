@@ -101,7 +101,7 @@ const AddProfessional = () => {
     if (data) {
       try {
         const response = await addProfessional(data)
-        console.log('response', response);
+        console.log('response', data);
 
         // const response = await addProfessional(dataWithHashPass)
         // const responseEspecialidad = await addEspecialidad(bodyEspecialidad)
@@ -575,7 +575,7 @@ const AddProfessional = () => {
               <div className="col-sm-12 col-lg-6">
                 <Alert
                   severity="error"
-                  onClose={handleClose}
+                  onClose={() => setSuccess('initial')}
                   sx={{
                     zIndex: 'tooltip',
                     position: 'absolute',
