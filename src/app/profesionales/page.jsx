@@ -9,7 +9,7 @@ import { Form, Switch, Table } from 'antd';
 import { onShowSizeChange, itemRender } from '@/components/Pagination'
 import ProtectedPage from '@/components/ProtectedRoutes';
 import Sidebar from '@/components/Sidebar';
-import { fetchProfessionals, professionalsWithSpeciality, fetchSpecialities } from '@/services/DoctorsServices';
+import { fetchProfessionals, professionalsWithSpeciality, fetchSpecialities, fetchProfessionalsAndAdmins } from '@/services/DoctorsServices';
 import { search } from '@/services/AppointmentsServices'
 import { useSidebar } from "@/context/SidebarContext";
 
@@ -46,7 +46,7 @@ const DoctorList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const users = await fetchProfessionals();
+        const {users} = await fetchProfessionalsAndAdmins();
         const specialities = await fetchSpecialities()
         const professionals = await professionalsWithSpeciality(specialities, users);
         setDoctors(professionals)
