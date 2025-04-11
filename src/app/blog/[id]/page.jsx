@@ -162,7 +162,7 @@ const Blogdetails = ({ params }) => {
   return (
     <div>
       <>
-        <div className="main-wrapper main-blog sailec">
+        <div className="main-wrapper main-blog sailec" style={{ backgroundColor: '#FFFFFF' }}>
           {matches && <div style={{
             // marginTop: '100px',
             height: '620px',
@@ -221,7 +221,7 @@ const Blogdetails = ({ params }) => {
               </button>
             </>
           }
-          <div className="page-wrapper" style={{ marginLeft: 'unset' }}>
+          <div className="page-wrapper" >
             <div className="content" style={{ padding: 0 }}>
 
               {/* /Page Header */}
