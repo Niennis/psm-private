@@ -19,7 +19,7 @@ import { formatDateToYYYYMMDD } from "@/utils/managedata";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
-import { fetchUserByEmail } from "@/services/UsersServices";
+import { fetchUserByEmail, fetchUser } from "@/services/UsersServices";
 import SimpleBackdrop from "@/components/Backdrop";
 
 const cacheHandler = new CacheHandler();
@@ -78,12 +78,17 @@ const EditDoctor = ({ params }) => {
     try {
       let user;
       const { especialidades: especialidad } = await fetchSpecialityById(params.id);
+
       if (params.id == session?.user?.id) {
         user = await fetchUserByEmail(session?.user?.email)
-      } else {
+      } else if (session?.user?.rol === 'profesional') {
         const usersData = await fetchProfessionalById(params.id);
         user = usersData.users[0];
+      } else {
+        const { users } = await fetchUser(params.id)
+        user = users[0]
       }
+
       const obj = {
         ...user,
         name: user.nombre,
@@ -103,7 +108,7 @@ const EditDoctor = ({ params }) => {
     } catch (error) {
       console.error("Error fetching initial data:", error);
       return {};
-    } finally{
+    } finally {
       setLoading(false)
     }
   };
