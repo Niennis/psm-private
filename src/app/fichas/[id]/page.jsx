@@ -394,29 +394,61 @@ const FichaAlumno = ({ params }) => {
                                 <div className="activity-user">
                                   <img data-bs-toggle="tooltip" className="avatar"></img>
                                 </div>
-                                <div className="activity-content timeline-group-blk">
-                                  <div className="timeline-group flex-shrink-0">
-                                    <h4>{FormatearFecha(item.fecha)}</h4>
-                                  </div>
-                                  <div className="comman-activitys flex-grow-1">
-                                    <h3>
-                                      {item.numero_ficha} {" - "}
-                                      <span>Profesional evaluador: {toTitleCase(item.profesional_evaluador)}</span>
-                                    </h3>
-                                    <span>
-                                      {" "}
-                                      Motivo consulta: <strong>{item.motivo_consulta || 'MOTIVO CONSULTA'}</strong>
-                                    </span>
-                                    <h3>Observaciones: {item.observaciones || 'OBSERVACIONES'}</h3>
-                                    <button
-                                      className="btn btn-primary"
-                                      onClick={() => toggleVisibility(index)}
-                                    >
-                                      {visibleItem === index ? "Ocultar detalles" : "Ver más "}
-                                    </button>
-                                  </div>
-                                </div>
+                                {index === 0 ? (
+                                  <div className="activity-content timeline-group-blk">
+                                    <div className="timeline-group flex-shrink-0">
+                                      <h4>{FormatearFecha(item.fecha)}</h4>
+                                    </div>
+                                    <div className="comman-activitys flex-grow-1">
+                                      <h3>
+                                        {item.numero_ficha} {" - "}
+                                        Profesional evaluador: {toTitleCase(item.profesional_evaluador)}
+                                      </h3>
 
+                                      <span>
+                                        {" "}
+                                        <strong>Motivo consulta: {item.acuerdos || ''}</strong>
+                                      </span>
+
+
+                                      <h3><span>Observaciones: {item.observaciones || ''}</span></h3>
+                                      <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3>
+
+                                      <button
+                                        className="btn btn-primary"
+                                        onClick={() => toggleVisibility(index)}
+                                      >
+                                        {visibleItem === index ? "Ocultar detalles" : "Ver más "}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="activity-content timeline-group-blk">
+                                    <div className="timeline-group flex-shrink-0">
+                                      <h4>{FormatearFecha(item.fecha)}</h4>
+                                    </div>
+                                    <div className="comman-activitys flex-grow-1">
+                                      <h3>
+                                        {item.numero_ficha} {" - "}
+                                        Profesional evaluador: {toTitleCase(item.profesional_evaluador)}
+                                      </h3>
+
+                                      {" "}
+                                      <h3><span><strong>Observaciones:</strong> {item.observaciones || ''}</span></h3>
+
+                                      {" "}
+                                      <h3><span><strong>Acuerdos:</strong> {item.acuerdos || ''}</span></h3>
+
+                                      <button
+                                        className="btn btn-primary"
+                                        onClick={() => toggleVisibility(index)}
+                                      >
+                                        {visibleItem === index ? "Ocultar detalles" : "Ver más "}
+                                      </button>
+                                    </div>
+                                  </div>
+                                )
+                                }
                                 {/* Mostrar detalles en una tabla cuando el item es visible */}
                                 {visibleItem === index && (
                                   <div className="activity-content timeline-group-blk mt-2">
@@ -672,9 +704,9 @@ const FichaAlumno = ({ params }) => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </div >
+        </div >
+      </div >
     </>
   );
 };

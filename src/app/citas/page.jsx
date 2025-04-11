@@ -253,6 +253,13 @@ const AppoinmentList = () => {
       sorter: (a, b) => a['fecha'].localeCompare(b['fecha']),
       key: 'fecha',
       responsive: ['md'],
+      render: (text, record) => {
+        const fecha = new Date(text);
+        const dia = fecha.getDate().toString().padStart(2, '0');
+        const mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // meses son de 0 a 11
+        const año = fecha.getFullYear();
+        return `${dia}-${mes}-${año}`;
+      },
     }, {
       title: "Hora",
       dataIndex: "hora",
