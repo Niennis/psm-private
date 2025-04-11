@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Button } from 'react-bootstrap'
+import { FaCalendar } from "react-icons/fa";
 
 const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
   const hoy = new Date();
@@ -47,6 +48,8 @@ const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
 
     if (fechaItem < hoy && item["estado"].includes('pendiente')) {
       const res = await changeStatusAppointment(bodyUpdate)
+      console.log('bodyUpdate', bodyUpdate);
+
       return { ...item, estado: 'perdida' }
     } else {
       return item
@@ -209,7 +212,8 @@ const PatientsList = () => {
                 alt="profile image"
               />
             </Link> */}
-            <a onClick={() => loadAppointments(record)}>{record.nombre_alumno}</a>
+            <a style={{ color: '#0d6efd' }}
+              onClick={() => loadAppointments(record)}>{record.nombre_alumno}</a>
             {/* <Link href={`/fichas/${record.id_paciente}`}>{record.nombre_alumno}</Link> */}
           </h2>
 
@@ -300,8 +304,7 @@ const PatientsList = () => {
                 // data-bs-toggle="modal" 
                 // data-bs-target="#delete_patient"
                 >
-                  <i className="fa-regular fa-calendar-check me-2" />
-                  Ver citas
+                  <FaCalendar /> Ver citas
                 </Link>
               </div>
             </div>
@@ -424,7 +427,7 @@ const PatientsList = () => {
                   }
                 }}
               >
-                {session.user?.rol === ('profesional' || 'administrador') ?
+                {(session.user?.rol === 'profesional' || session.user?.rol === 'administrador') ?
                   (<>
                     <Link
                       className="dropdown-item"
@@ -453,7 +456,7 @@ const PatientsList = () => {
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
-                      onClick={() => openWarning(record.id_cita)}
+                      onClick={() => { openWarning(record.id_cita) }}
                       style={{
                         cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
                         opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
@@ -469,7 +472,7 @@ const PatientsList = () => {
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
-                      onClick={() => openWarning(record.id_cita)}>
+                      onClick={() => { openWarning(record.id_cita) }}>
                       <i className="fa fa-trash-alt m-r-5"></i>
                       Cancelar cita
                     </span>

@@ -1875,6 +1875,15 @@ export const carreras = [
 
 ]
 
+export const tipo_cita = [
+  { value: "Acompañamiento", label: "Acompañamiento psicológico" },
+  { value: "breve", label: "Psicoterapia breve" },
+  { value: "individual", label: "Psicopedagógica individual" },
+  { value: "psicoterapéutico", label: "Grupo psicoterapéutico" },
+  { value: "psicopedagógico", label: "Grupo psicopedagógico" },
+]
+
+
 export const especialidades = [
   { value: "", label: "", name: "", id: 0 },
   { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality", id: 1 },
