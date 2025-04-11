@@ -158,7 +158,6 @@ export const addEspecialidad = async (data) => {
     id_user: data.id,
     id_especialidad: data.especialidad_id
   }
-  console.log('add especialidad', body);
 
   try {
     const data = await fetch(URL, {
@@ -193,8 +192,6 @@ export const updateDoctor = async (user, id) => {
     "id_emergencia": 0,
 
   }
-  console.log('update user', body);
-
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -219,8 +216,6 @@ export const updateProfesional = async (user) => {
   const body = {
     ...user
   }
-  console.log('update user', body);
-
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -241,8 +236,6 @@ export const changePassword = async (user) => {
   const body = {
     ...user,
   }
-  console.log('changepass', body);
-
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -265,8 +258,6 @@ export const changeEspecialidad = async (user) => {
   const body = {
     ...user,
   }
-  console.log('change especialidad', body);
-
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
