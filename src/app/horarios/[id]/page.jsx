@@ -18,7 +18,6 @@ import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
 import CustomizedTooltips from '@/components/Tooltip';
 import { FaInfoCircle } from "react-icons/fa";
 import SimpleBackdrop from '@/components/Backdrop';
@@ -741,9 +740,9 @@ const ScheduleByProfessional = ({ params }) => {
                       <div className="col-12">
                         <div className="form-heading">
                           <CustomizedTooltips text={(
-                            <>Selecciona el tipo de disponibilidad para indicar cuándo y para qué tipos de atención estás disponible. Si no seleccionas un tipo, no se podrán agendar citas de esa categoría en el bloque horario especificado.</>
+                            <>No se pueden modificar las fechas ni la frecuencia de un bloque ya creado. Solo puedes actualizar el tipo de disponibilidad, modalidad y campus. Si necesitas cambiar la programación de tiempo, elimina este bloque y crea uno nuevo.</>
                           )}>
-                            <h4 style={{ width: 'max-content' }}>Tipo de disponibilidad <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                            <h4 style={{ width: 'max-content' }}>Fecha de disponibilidad <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
                           </CustomizedTooltips>
                         </div>
                       </div>
