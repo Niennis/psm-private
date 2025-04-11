@@ -89,7 +89,6 @@ const obtenerFechasUnicas = (hours) => {
 
 
 export const generarHorasMedicas = async (id) => {
-
   const { users: hours } = await fetchScheduleByAvailability(id)
   const fechasUnicas = obtenerFechasUnicas(hours);
 
@@ -138,7 +137,7 @@ export const generarHorasMedicas = async (id) => {
           hour.disponible === 1
         );
       });
-
+      
       if (bloqueDisponible) {
         horasMedicas.push({
           detalleServicio: hour.detalleServicio,
@@ -159,11 +158,12 @@ export const generarHorasMedicas = async (id) => {
           tipoServicio: hour.tipoServicio,
           uuid: hour.uuid,
         });
-      }
+      } 
 
       tiempoActual += duracion; // Avanza al siguiente bloque de tiempo
     }
   });
+  
   return horasMedicas;
 };
 
