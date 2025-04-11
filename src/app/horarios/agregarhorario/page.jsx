@@ -664,9 +664,7 @@ const AddSchedule = () => {
                                   />
                                   Psicopedagógica individual
                                 </label>
-                              </div>
 
-                              <div className="col-12 col-lg-6 d-flex flex-column">
                                 <label className="form-check-label">
                                   <input
                                     type="checkbox"
@@ -926,10 +924,10 @@ const AddSchedule = () => {
                               <CustomizedTooltips text={(
                                 <>
                                   <p>
-                                  Selecciona los días en que atenderá el profesional. 
+                                    Selecciona los días en que atenderá el profesional.
                                   </p>
                                   <p>
-                                  Por ejemplo, si deseas distintos horarios el lunes y martes, configúralos por separado. Si, por el contrario, los días lunes y miércoles tienen el mismo horario, selecciónalos juntos en las casillas correspondientes.
+                                    Por ejemplo, si deseas distintos horarios el lunes y martes, configúralos por separado. Si, por el contrario, los días lunes y miércoles tienen el mismo horario, selecciónalos juntos en las casillas correspondientes.
                                   </p>
                                 </>
                               )}>
