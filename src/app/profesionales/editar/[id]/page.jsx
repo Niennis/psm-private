@@ -80,11 +80,15 @@ const EditDoctor = ({ params }) => {
       const { especialidades: especialidad } = await fetchSpecialityById(params.id);
 
       if (params.id == session?.user?.id) {
+        console.log(1);
+        
         user = await fetchUserByEmail(session?.user?.email)
       } else if (session?.user?.rol === 'profesional') {
+        console.log(2);
         const usersData = await fetchProfessionalById(params.id);
         user = usersData.users[0];
       } else {
+        console.log(3);
         const { users } = await fetchUser(params.id)
         user = users[0]
       }
@@ -182,6 +186,8 @@ const EditDoctor = ({ params }) => {
   });
 
   const handleEspecialidad = async (data, especialidades) => {
+    console.log('handleEspecialidad');
+    
     // Verificar si hay una especialidad seleccionada
     const newEspecialidad = data.speciality ? especialidades.filter(item => item.value === data.speciality) : [];
     const prevEspecialidad = initial.speciality ? especialidades.filter(item => item.value === initial.speciality) : [];
@@ -226,6 +232,8 @@ const EditDoctor = ({ params }) => {
   };
 
   const updateAll = async (userPayload, passwordPayload, data, especialidades) => {
+    console.log('updateAll');
+    
     try {
       // Manejo de especialidad
       const respEspecialidad = await handleEspecialidad(data, especialidades);
@@ -235,9 +243,13 @@ const EditDoctor = ({ params }) => {
         updateProfesional(userPayload),
         changePassword(passwordPayload)
       ]);
+      console.log('handleEspecialidad', respEspecialidad);
+      console.log('updateProfesional', respProfesional);
+      console.log('changePassword', respPass);
+      
 
       return {
-        success: respProfesional.validacion && (respEspecialidad.validacion || respEspecialidad.message) && respPass.validacion,
+        success: respProfesional.validacion && (respEspecialidad?.validacion || respEspecialidad.message) && respPass.validacion,
         errors: [
           respProfesional.validacion === false && respProfesional.detalle,
           respEspecialidad.validacion === false && respEspecialidad.detalle,
@@ -250,6 +262,8 @@ const EditDoctor = ({ params }) => {
   };
 
   const updatePasswordOnly = async (passwordPayload) => {
+    console.log('updatePasswordOnly');
+    
     try {
       const response = await changePassword(passwordPayload);
       return {
@@ -262,6 +276,7 @@ const EditDoctor = ({ params }) => {
   };
 
   const updateUserAndEspecialidad = async (userPayload, data, especialidades) => {
+    console.log('updateUserAndEspecialidad')
     try {
       // Manejo de especialidad
       const respEspecialidad = await handleEspecialidad(data, especialidades);
@@ -295,14 +310,18 @@ const EditDoctor = ({ params }) => {
       let result;
 
       if (hasChanges && isPasswordValid) {
+        console.log('hasChanges && isPasswordValid');
+        
         // Actualizar todos: datos, especialidad y contraseña
         result = await updateAll(userPayload, passwordPayload, data, especialidades);
 
       } else if (isPasswordValid) {
+        console.log('isPasswordValid');
         // Actualizar solo contraseña
         result = await updatePasswordOnly(passwordPayload);
 
       } else if (hasChanges) {
+        console.log('hasChanges');
         // Actualizar datos y/o especialidadRF
         result = await updateUserAndEspecialidad(userPayload, data, especialidades);
       }
