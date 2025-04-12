@@ -607,13 +607,12 @@ const EditPatients = ({ params }) => {
                                     .replace(/[.\s]/g, "_") // Reemplaza puntos y espacios por "_"
                                     .replace(/_+/g, "_") // Convierte múltiples "_" en uno solo
                                   : null
-
                                 const opcionesComunas = regionKey ? comunas[regionKey] : []; // Busca las comunas según la región
                                 return (
                                   <Select
                                     instanceId="select-region"
-                                    defaultValue={selectedOption}
-                                    value={opcionesComunas.find((comuna) => comuna.label === value)}
+                                    defaultValue={'selectedOption'}
+                                    value={opcionesComunas?.find((comuna) => comuna.label === value) || null}
 
                                     onChange={onChange}
                                     options={comunas[regionKey]}
