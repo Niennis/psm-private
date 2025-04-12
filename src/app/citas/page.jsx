@@ -254,11 +254,8 @@ const AppoinmentList = () => {
       key: 'fecha',
       responsive: ['md'],
       render: (text, record) => {
-        const fecha = new Date(text);
-        const dia = fecha.getDate().toString().padStart(2, '0');
-        const mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // meses son de 0 a 11
-        const año = fecha.getFullYear();
-        return `${dia}-${mes}-${año}`;
+        const [year, month, day] = text.split('-');
+        return `${day}-${month}-${year}`;
       },
     }, {
       title: "Hora",
@@ -341,12 +338,12 @@ const AppoinmentList = () => {
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
-                      onClick={() => setIdAppointment(record.id_cita)}                      
+                      onClick={() => setIdAppointment(record.id_cita)}
                       style={{
                         cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
                         opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
                       }}
-                      >
+                    >
                       <i className="fa fa-trash-alt m-r-5"></i>
                       Cancelar cita
                     </Link>
