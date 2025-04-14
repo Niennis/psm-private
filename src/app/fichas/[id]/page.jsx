@@ -25,15 +25,16 @@ const FichaAlumno = ({ params }) => {
   const [records, setRecords] = useState()
   const [patient, setPatient] = useState()
   const [visibleItem, setVisibleItem] = useState(null);
+  const router = useRouter()
 
   dayjs.extend(utc);
   dayjs.extend(timezone)
 
   useEffect(() => {
     setProps({
-      id: "menu-item4",
-      id1: "menu-items4",
-      activeClassName: "activity",
+      id: "menu-item8",
+      id1: "menu-items8",
+      activeClassName: "ficha",
     });
   }, [setProps]);
 
@@ -388,7 +389,7 @@ const FichaAlumno = ({ params }) => {
 
 
                           {
-                            records && records.map((item, index) => (
+                            (session?.user?.rol === 'administrador' || session?.user?.rol === 'profesional') && records && records.map((item, index) => (
                               <li key={item.id_alumno + index}>
                                 {/* Fila principal con los datos generales */}
                                 <div className="activity-user">
@@ -695,8 +696,55 @@ const FichaAlumno = ({ params }) => {
                               </li>
                             ))
                           }
+                          {
+                            (session?.user?.rol === 'alumno' && session?.user?.id == params.id) && records && records.map((item, index) => (
+                              <li key={item.id_alumno + index}>
+                                {/* Fila principal con los datos generales */}
+                                <div className="activity-user">
+                                  <img data-bs-toggle="tooltip" className="avatar"></img>
+                                </div>
+                                {index === 0 ? (
+                                  <div className="activity-content timeline-group-blk">
+                                    <div className="timeline-group flex-shrink-0">
+                                      <h4>{FormatearFecha(item.fecha)}</h4>
+                                    </div>
+                                    <div className="comman-activitys flex-grow-1">
+                                      <h3>
+                                        {item.numero_ficha} {" - "}
+                                        Profesional evaluador: {toTitleCase(item.profesional_evaluador)}
+                                      </h3>
+
+                                      <span>
+                                        {" "}
+                                        <strong>Motivo consulta: {item.acuerdos || ''}</strong>
+                                      </span>
 
 
+                                      <h3><span>Observaciones: {item.observaciones || ''}</span></h3>
+                                      <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3>
+
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="activity-content timeline-group-blk">
+                                    <div className="timeline-group flex-shrink-0">
+                                      <h4>{FormatearFecha(item.fecha)}</h4>
+                                    </div>
+                                    <div className="comman-activitys flex-grow-1">
+                                      <h3>
+                                        {item.numero_ficha} {" - "}
+                                        Profesional evaluador: {toTitleCase(item.profesional_evaluador)}
+                                      </h3>
+
+                                      {" "}
+                                      <h3><span><strong>Acuerdos:</strong> {item.acuerdos || ''}</span></h3>
+
+                                    </div>
+                                  </div>
+                                )}
+                              </li>
+                            ))
+                          }
                         </ul>
                       </div>
                     </div>
@@ -711,4 +759,4 @@ const FichaAlumno = ({ params }) => {
   );
 };
 
-export default withAuth(FichaAlumno, ['administrador', 'profesional']);
+export default withAuth(FichaAlumno, ['administrador', 'profesional', 'alumno']);

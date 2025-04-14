@@ -7502,6 +7502,12 @@ a.status-purple {
 a.status-pink {
   background-color: #ffe5f6;
   color: #ff01a2;
+  transition: background-color 0.4s ease; 
+}
+
+.status-pink:hover {
+  background-color: #f7d2ea;
+  transition: background-color 0.4s ease; 
 }
 
 .status-grey,

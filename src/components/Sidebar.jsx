@@ -47,7 +47,6 @@ const Sidebar = () => {
   const patientLoggedIn = async () => {
     try {
       const { users: response } = await fetchUser(session?.user?.id)
-      setAlumno(response[0])
     } catch (error) {
       console.log('Error:', error)
     }
@@ -57,7 +56,7 @@ const Sidebar = () => {
     if (session?.user?.rol === 'alumno') {
       patientLoggedIn()
     }
-  })
+  }, [session])
 
   if (!session || !props) {
     return <SimpleBackdrop />;
@@ -101,12 +100,16 @@ const Sidebar = () => {
                     <li>
                       <Link className={props?.activeClassName === 'appoinment-list' ? 'active' : ''} href="/citas">Lista de Citas</Link>
                     </li>
-                    {alumno?.aplica_despeje === 1 && <li>
-                      <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
-                    </li>}
+                    <li>
+                      <Link className={props?.activeClassName === 'ficha' ? 'active' : ''} href={`/fichas/${session?.user?.id}`}>Ficha</Link>
+                    </li>
+                    {(alumno && alumno?.aplica_despeje) == 1 &&
+                      <li>
+                        <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
+                      </li>
+                    }
                   </>
                 }
-
 
                 {
                   /* ------ MENU SIDEBAR PROFESIONAL */
