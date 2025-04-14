@@ -5,7 +5,7 @@ import { Form, Switch, Table } from 'antd';
 // import Headerudp from '../Headerudp';
 import Sidebar from '../../components/Sidebar';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
-import { fetchUsers } from '../../services/UsersServices'
+import { fetchUser, fetchUsers } from '../../services/UsersServices'
 import { changeStatusAppointment, fetchAppointment, search } from '../../services/AppointmentsServices'
 import { fetchAppointments } from '../../services/AppointmentsServices';
 import {
@@ -48,7 +48,6 @@ const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
 
     if (fechaItem < hoy && item["estado"].includes('pendiente')) {
       const res = await changeStatusAppointment(bodyUpdate)
-      console.log('bodyUpdate', bodyUpdate);
 
       return { ...item, estado: 'perdida' }
     } else {
@@ -497,12 +496,13 @@ const PatientsList = () => {
 
   const changeStatusToCancel = async (id) => {
     const citaSelected = appointments.find(item => item?.id_cita == id)
+    const { users: alumno } = await fetchUser(citaSelected.id_paciente)
 
     const bodyUpdate = {
       id: citaSelected.id_cita,
       id_paciente: citaSelected.id_paciente,
       id_profesional: citaSelected.id_profesional,
-      carrera: citaSelected.carrera || '',
+      carrera: citaSelected.carrera || alumno[0]?.carrera || '',
       email: citaSelected.email_estudiante || '',
       appointment_date: citaSelected.fecha || '',
       start_time: citaSelected.hora || '',
@@ -520,10 +520,10 @@ const PatientsList = () => {
 
     try {
       const response = await changeStatusAppointment(bodyUpdate)
-      if (!response.validacion) {
+      if (!response['resultado_mail_estudiante'].validacion || !response['resultado_mail_profesional'].validacion) {
         setSuccess('fail')
         setMessage('No se pudo cancelar la cita')
-      } else if (response.validacion) {
+      } else if (response['resultado_mail_estudiante'].validacion && response['resultado_mail_profesional'].validacion) {
         setSuccess('success')
         setMessage('Cita cancelada con éxito')
       }
@@ -533,7 +533,6 @@ const PatientsList = () => {
       setMessage('No se pudo cancelar la cita', error)
     }
   }
-
 
   const openWarning = (id) => {
     setSuccess('warning')

@@ -23,6 +23,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import PasswordAlert from '@/components/PasswordAlert';
 import { Button } from 'react-bootstrap'
 import { Alert } from '@mui/material';
+import { fetchUser } from '@/services/UsersServices';
 
 const AppoinmentList = () => {
   const { data: session, status } = useSession();
@@ -156,12 +157,13 @@ const AppoinmentList = () => {
 
   const changeStatusToCancel = async (id) => {
     const citaSelected = appointments.find(item => item?.id_cita == id)
+    const { users: alumno } = await fetchUser(citaSelected.id_paciente)
 
     const bodyUpdate = {
       id: citaSelected.id_cita,
       id_paciente: citaSelected.id_paciente,
       id_profesional: citaSelected.id_profesional,
-      carrera: citaSelected.carrera || '',
+      carrera: citaSelected.carrera || alumno[0]?.carrera || '',
       email: citaSelected.email_estudiante || '',
       appointment_date: citaSelected.fecha || '',
       start_time: citaSelected.hora || '',
@@ -179,10 +181,10 @@ const AppoinmentList = () => {
 
     try {
       const response = await changeStatusAppointment(bodyUpdate)
-      if (!response.validacion) {
+      if (!response['resultado_mail_estudiante'].validacion || !response['resultado_mail_profesional'].validacion) {
         setSuccess('fail')
         setMessage('No se pudo cancelar la cita')
-      } else if (response.validacion) {
+      } else if (response['resultado_mail_estudiante'].validacion && response['resultado_mail_profesional'].validacion) {
         setSuccess('success')
         setMessage('Cita cancelada con éxito')
       }
