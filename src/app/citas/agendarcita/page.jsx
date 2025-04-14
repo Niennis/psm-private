@@ -106,6 +106,12 @@ const AddAppoinments = () => {
     setSuccess('initial')
     router.push('/pacientes')
   }
+  
+  const handleCloseWarning = () => {
+    // setOpen(false);
+    setSuccess('initial')
+  }
+
 
   /* FETCH PACIENTES CON DESPEJE */
   const getPatients = async () => {
@@ -645,8 +651,7 @@ const AddAppoinments = () => {
                       </Accordion>
                       {/* DATOS ESTUDIANTE */}
 
-                      <Accordion
-                        defaultExpanded={true}>
+                      <Accordion>
                         <AccordionSummary
                           expandIcon={<ExpandMoreIcon />}
                           aria-controls="panel1-content"
@@ -856,7 +861,12 @@ const AddAppoinments = () => {
                                       name="modalidad"
                                       value="videollamada"
                                       className="form-check-input"
-                                      {...register('modalidad')}
+                                      {...register('modalidad', {
+                                        required: {
+                                          value: true,
+                                          message: 'Seleccione una fecha'
+                                        }
+                                      })}
                                     />
                                     Videollamada
                                   </label>
@@ -868,7 +878,12 @@ const AddAppoinments = () => {
                                       name="modalidad"
                                       value="presencial"
                                       className="form-check-input"
-                                      {...register('modalidad')}
+                                      {...register('modalidad', {
+                                        required: {
+                                          value: true,
+                                          message: 'Seleccione una fecha'
+                                        }
+                                      })}
                                     />
                                     Presencial
                                   </label>
@@ -1128,7 +1143,7 @@ const AddAppoinments = () => {
                 <div className="col-sm-12 col-lg-6">
                   <Alert
                     severity="warning"
-                    onClose={handleClose}
+                    onClose={handleCloseWarning}
                     sx={{
                       zIndex: 'tooltip',
                       position: 'absolute',
@@ -1140,6 +1155,12 @@ const AddAppoinments = () => {
                   // spacing={2}
                   >
                     <h4>{error}</h4>
+                    {Object.keys(errors).length > 0 &&
+
+                      Object.values(errors).map((error, index) => (
+                        <span key={index} style={{display: 'block'}}> <small>{error.message}</small></span>
+                      ))
+                    }
                     <Button variant="primary" onClick={onSubmit}> Confirmar </Button>
                   </Alert>
                 </div>

@@ -103,9 +103,8 @@ export const createAppointment = async (appointment) => {
   }
 }
 
-
 export const updateAppointment = async (appointment) => {
-  const APPOINTMENT_API = process.env.NEXT_PUBLIC_EDIT_CITA
+  const APPOINTMENT_API = `${process.env.NEXT_PUBLIC_EDIT_CITA}/main`
   const body = {
     "profesional_id": appointment.selected_doctor.id,
     "alumno_id": appointment.patient_id,
@@ -147,7 +146,6 @@ export const changeStatusAppointment = async (data) => {
     estado: data.status,
     tipo_cita: data.tipo_cita || '',
   }
-
   try {
     const data = await fetch(APPOINMENT_API, {
       method: 'POST',
@@ -158,7 +156,8 @@ export const changeStatusAppointment = async (data) => {
         body
       )
     })
-    return await data.json()
+    const response = await data.json()
+    return response
 
   } catch (error) {
     console.log('Error:', error)
@@ -203,12 +202,64 @@ export const fetchAppointment = async (id) => {
 }
 
 export const search = (data, query) => {
-
   const response = data.filter(obj =>
     JSON.stringify(obj).toLowerCase().includes(query.toLowerCase()))
-
   return response
 }
+
+
+export const editAppointmentUuid = async (data) => {
+  const URL = `${process.env.NEXT_PUBLIC_EDIT_CITA}/updatehoraxuuid`
+  const body = {
+    uuid: data.uuid,
+    hora: data.hora
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+
+    const response = await data.json()
+    return response
+  } catch (error) {
+    console.log('Error:', error)
+  }
+}
+
+export const editAppointmentHour = async (data) => {
+  const URL = `${process.env.NEXT_PUBLIC_EDIT_CITA}/updatefechayhoraxid`
+  const body = {
+    id: data.id,
+    fecha: data.fecha, // "2025-04-08",
+    hora: data.hora // "10:30:00"
+  }
+  
+  try {
+    const data = await fetch(URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+
+    const response = await data.json()
+    
+    return response
+  } catch (error) {
+    console.log('Error:', error)
+  }
+}
+
+
+//  ---- SERVICIOS DE CONTACTO DE EMERGENCIA
 
 export const createContact = async (input) => {
   const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/emergencia_create`
@@ -281,7 +332,7 @@ export const editContact = async (data) => {
     });
 
     const response = await data.json();
-    
+
     return response;
   } catch (err) {
     console.error(err);
