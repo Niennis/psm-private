@@ -217,7 +217,8 @@ const Addblog = () => {
     <div>
       <div className="main-wrapper">
         <>
-          <div className="page-wrapper mt-5 pt-5">
+          <div className="page-wrapper
+          ">
 
             <div className="content">
               {/* Page Header */}

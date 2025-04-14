@@ -19,6 +19,7 @@ import { showGroups, showAllGroups } from '@/services/GroupServices';
 import { imagesend, plusicon, refreshicon, searchnormal } from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import SimpleBackdrop from '@/components/Backdrop';
+import Welcome from '@/components/Welcome';
 
 const GroupsList = () => {
   const { data: session } = useSession()
@@ -184,7 +185,7 @@ const GroupsList = () => {
   return (
     < >
       {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' /> */}
-      <div className="page-wrapper mt-5 pt-5">
+      <div className="page-wrapper">
         <div className="content">
           {/* Page Header */}
           <div className="page-header">
@@ -271,7 +272,7 @@ const GroupsList = () => {
                         dataSource={groups}
 
                         rowSelection={rowSelection}
-                        rowKey={(record) => record.nota}
+                        rowKey={(record) => record.uuid}
                         style={{
                           backgroundColor: '#f2f2f2',
                         }}

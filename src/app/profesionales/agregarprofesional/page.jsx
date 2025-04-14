@@ -143,7 +143,7 @@ const AddProfessional = () => {
     < >
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
-        <div className="page-wrapper mt-5 pt-5">
+        <div className="page-wrapper">
           <div className="content">
             {/* Page Header */}
             <div className="page-header">

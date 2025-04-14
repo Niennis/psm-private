@@ -96,7 +96,7 @@ const FichaAlumno = ({ params }) => {
   return (
     <>
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
-      <div className="main-wrapper mt-5 pt-5">
+      <div className="main-wrapper">
         <div className="page-wrapper">
           <div className="content">
             {/* Page Header */}

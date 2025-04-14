@@ -402,14 +402,14 @@ const AppoinmentList = () => {
         layout="inline"
         className="table-demo-control-bar"
         style={{
-          marginBottom: 16,
+          height: 0,
         }}
       >
         <Form.Item label="loading">
           <Switch checked={loading} onChange={handleLoadingChange} />
         </Form.Item>
       </Form>
-      <div className="page-wrapper mt-5 pt-5">
+      <div className="page-wrapper">
         <div className="content">
           {/* Page Header */}
           <div className="page-header">

@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 import { SectionProvider } from "@/context/SectionContext";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { DisponibilidadProvider } from "@/context/DisponibilidadContext";
+import Welcome from "@/components/Welcome";
 
 // import Hotjar from '@hotjar/browser';
 
@@ -43,20 +44,23 @@ export default async function RootLayout({ children, props }) {
                 a.appendChild(r);
             })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=')`
           }}></Script>
-        </head>
-        <body>
           <Script
             strategy="beforeInteractive"
             src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
           />
+        </head>
+        <body>
 
           <SectionProvider>
             <SidebarProvider>
               <DisponibilidadProvider>
                 {/* <LoadingProvider> */}
                 <Header />
+
                 {session && <Sidebar />}
-                {children}
+                <Welcome session={session}>
+                  {children}
+                </Welcome>
                 {/* </LoadingProvider> */}
               </DisponibilidadProvider>
             </SidebarProvider>

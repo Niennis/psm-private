@@ -322,7 +322,7 @@ const Editblog = ({ params }) => {
         {/* <DynamicSidebar id='menu-item11' id1='menu-items11' activeClassName='add-blog' /> */}
         {/* page-wrapper-start  */}
         <>
-          <div className="page-wrapper mt-5 pt-5">
+          <div className="page-wrapper">
 
             <div className="content">
               {/* Page Header */}

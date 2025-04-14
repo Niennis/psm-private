@@ -239,6 +239,7 @@ export const editAppointmentHour = async (data) => {
     fecha: data.fecha, // "2025-04-08",
     hora: data.hora // "10:30:00"
   }
+  console.log('body', body);
   
   try {
     const data = await fetch(URL, {

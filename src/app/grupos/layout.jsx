@@ -3,5 +3,5 @@
 import { GroupProvider } from "@/providers/GroupsProvider";
 
 export default function GruposLayout({ children }) {
-  return <GroupProvider>{children}</GroupProvider>
+  return <GroupProvider>{children}</GroupProvider>;
 }

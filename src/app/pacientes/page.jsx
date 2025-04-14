@@ -285,20 +285,31 @@ const PatientsList = () => {
                   }
                 }}
               >
-                <Link className="dropdown-item" href={`/pacientes/${record.id_paciente}`}
+                {/* <span
+                  className="dropdown-item"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    setLoading(true)
+                    router.push(`/pacientes/${record.id_paciente}`)
+                  }}
                 // data-bs-toggle="modal" 
                 // data-bs-target="#delete_patient"
                 >
                   <i className="far fa-edit me-2" />
                   Editar
-                </Link>
-                <Link className="dropdown-item" href={`/fichas/${record.id_paciente}`}
+                </span> */}
+                <span className="dropdown-item"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    setLoading(true)
+                    router.push(`/fichas/${record.id_paciente}`)
+                  }}
                 // data-bs-toggle="modal" 
                 // data-bs-target="#delete_patient"
                 >
                   <i className="fas fa-folder-open me-2" />
                   Ver ficha
-                </Link>
+                </span>
                 <Link className="dropdown-item" href={`#`} onClick={() => loadAppointments(record)}
                 // data-bs-toggle="modal" 
                 // data-bs-target="#delete_patient"
@@ -436,6 +447,7 @@ const PatientsList = () => {
                       className="dropdown-item"
                       href={`/fichas/agregarficha/${record.id_cita}`}
                       onClick={() => {
+                        setLoading(true)
                         const estado = record.estado
                         if (estado.includes('Cancelada') || estado.includes('cancelada')) {
                           e.preventDefault();
@@ -552,7 +564,7 @@ const PatientsList = () => {
         layout="inline"
         className="table-demo-control-bar"
         style={{
-          marginBottom: 16,
+          height: 0,
         }}
       >
         <Form.Item label="loading">
@@ -561,7 +573,7 @@ const PatientsList = () => {
       </Form>
       {/* <Headerudp /> */}
       {/* <Sidebar id='menu-item2' id1='menu-items2' activeClassName='patient-list' /> */}
-      <div className="page-wrapper mt-5 pt-5">
+      <div className="page-wrapper">
         <div className="content">
           {/* Page Header */}
           <div className="page-header">

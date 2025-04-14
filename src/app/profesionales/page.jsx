@@ -211,7 +211,7 @@ const DoctorList = () => {
   return (
     < >
       {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' /> */}
-      <div className="page-wrapper mt-5 pt-5">
+      <div className="page-wrapper">
         <div className="content">
           {/* Page Header */}
           <div className="page-header">

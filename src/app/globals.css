@@ -13686,3 +13686,20 @@ span small{
 .comman-activitys table {
   margin-bottom: 30px;
 }
+
+
+.welcome-container {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.welcome-container.authenticated {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Ocultar completamente en la página de inicio */
+.home-page .welcome-container {
+  display: none !important;
+}

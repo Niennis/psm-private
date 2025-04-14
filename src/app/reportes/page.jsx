@@ -80,31 +80,7 @@ const Admin_Dashboard = () => {
                 </div>
               </div>
             </div>
-            {/* /Page Header */}
-            <div className="good-morning-blk">
-              <div className="row mt-4">
-                <div className="col-md-6">
-                  <div className="morning-user">
-                    <h2>
-                      Buen día, <span>{session?.user?.name}</span>
-                    </h2>
-                    <p>Ten un buen día en el trabajo</p>
-                  </div>
-                </div>
-                <div className="col-md-6 position-blk" style={{ overflow: 'hidden' }}>
-                  <div className="morning-img">
-                    <Image
-                      src={morning_img_01}
-                      alt="#"
-                      style={{
-                        objectFit: 'bottom',
-                        bottom: '-50px'
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+          
             {/* <div className="row">
               <div className="col-md-6 col-sm-6 col-lg-6 col-xl-3">
                 <div className="dash-widget">
@@ -689,36 +665,18 @@ const Admin_Dashboard = () => {
                         <thead>
                           <tr>
                             <th>
-                              <div className="form-check check-tables">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  defaultValue="something"
-                                />
-                              </div>
+                              <span className=" mx-4">
+                                Tipo
+                              </span>
                             </th>
-                            <th>Tipo</th>
-                            {/* <th>Diagnosis</th> */}
                             <th>Descarga</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
-                            <td>
-                              <div className="form-check check-tables">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  defaultValue="something"
-                                />
-                              </div>
-                            </td>
-
-                            <td className="table-image">
-
+                            <td className="table-image mx-4">
                               <h2>Profesionales</h2>
                             </td>
-                            {/* <td>Heart attack</td> */}
                             <td>
                               <button
                                 className="custom-badge status-green "
@@ -758,17 +716,8 @@ const Admin_Dashboard = () => {
                             </td> */}
                           </tr>
                           <tr>
-                            <td>
-                              <div className="form-check check-tables">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  defaultValue="something"
-                                />
-                              </div>
-                            </td>
 
-                            <td className="table-image">
+                            <td className="table-image mx-4">
 
                               <h2>Citas</h2>
                             </td>
@@ -813,17 +762,7 @@ const Admin_Dashboard = () => {
                             </td> */}
                           </tr>
                           <tr>
-                            <td>
-                              <div className="form-check check-tables">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  defaultValue="something"
-                                />
-                              </div>
-                            </td>
-
-                            <td className="table-image">
+                            <td className="table-image mx-4">
 
                               <h2>Disponibilidades</h2>
                             </td>
@@ -868,17 +807,9 @@ const Admin_Dashboard = () => {
                             </td> */}
                           </tr>
                           <tr>
-                            <td>
-                              <div className="form-check check-tables">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  defaultValue="something"
-                                />
-                              </div>
-                            </td>
 
-                            <td className="table-image">
+
+                            <td className="table-image mx-4">
 
                               <h2>Tests</h2>
                             </td>
