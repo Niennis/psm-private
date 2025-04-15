@@ -68,7 +68,7 @@ export const createInterview = async (appointment) => {
 }
 
 export const createAppointment = async (appointment) => {
-  const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_APPOINTMENT
+  const APPOINTMENT_API = `${process.env.NEXT_PUBLIC_CREATE_APPOINTMENT}/insertcitas`
   const body = {
     alumno_id: appointment.patient_id,
     campus: appointment.campus,
@@ -83,6 +83,44 @@ export const createAppointment = async (appointment) => {
     notas: 'notas',
     primera_cita: 0,
     profesional_id: appointment.professional.id,
+    tratamiento: 'tratamientos',
+  }  
+
+  try {
+    const data = await fetch(APPOINTMENT_API, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*'
+      },
+      body: JSON.stringify(body)
+    })
+    const response = await data.json()
+
+    return response
+  } catch (error) {
+    console.log('Error:', error)
+  }
+}
+
+
+export const createAppointmentForGroup = async (input) => {
+  const APPOINTMENT_API = `${process.env.NEXT_PUBLIC_CREATE_APPOINTMENT}/insertcitasgrupo`
+  const body = {
+    grupo_uuid: input.patient_id,
+    profesional_id: input.professional.id,
+    fechaInicio: input.fecha,
+    hora: input.hora,
+    modalidad: input.modalidad,
+
+    campus: input.campus,
+    como: 'como se entero',
+    derivado_desde: 'derivado',
+    diagnostico_previo: 'diagnosticos',
+    estado: "pendiente",
+    motivo: input.motivo.label || 'motivo',
+    notas: 'notas',
+    primera_cita: 0,
     tratamiento: 'tratamientos',
   }
 
@@ -102,6 +140,8 @@ export const createAppointment = async (appointment) => {
     console.log('Error:', error)
   }
 }
+
+
 
 export const updateAppointment = async (appointment) => {
   const APPOINTMENT_API = `${process.env.NEXT_PUBLIC_EDIT_CITA}/main`
@@ -239,7 +279,6 @@ export const editAppointmentHour = async (data) => {
     fecha: data.fecha, // "2025-04-08",
     hora: data.hora // "10:30:00"
   }
-  console.log('body', body);
   
   try {
     const data = await fetch(URL, {

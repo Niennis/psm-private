@@ -6,28 +6,28 @@ import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller } from 'react-hook-form';
 import { useRouter } from "next/navigation";
+import { useSidebar } from "@/context/SidebarContext";
+import withAuth from '@/components/withAuth';
+import { useSession } from "next-auth/react";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
+import { ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import { Accordion, AccordionSummary, AccordionDetails, Alert, Box, LinearProgress } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Button } from 'react-bootstrap'
+import SimpleBackdrop from "@/components/Backdrop";
 
+import { createAppointment, createAppointmentForGroup } from "@/services/AppointmentsServices"
 import { fetchSpecialityById } from "@/services/DoctorsServices";
 import { fetchPatientsDespejeFalse } from "@/services/UsersServices";
-import { createAppointment } from "@/services/AppointmentsServices"
 import { fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
+import { showAllGroups } from "@/services/GroupServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 
-import { useSession } from "next-auth/react";
-import { ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
 import 'dayjs/locale/es-mx'
 import { motivo_consulta } from "@/utils/selects";
-import SimpleBackdrop from "@/components/Backdrop";
-
-import { useSidebar } from "@/context/SidebarContext";
-import withAuth from '@/components/withAuth';
-import { Button } from 'react-bootstrap'
 
 // Función para obtener fechas únicas
 const obtenerFechasUnicas = array => {
@@ -45,10 +45,8 @@ const obtenerFechasUnicas = array => {
 }
 
 const AddAppoinments = () => {
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
-  const [isClicked, setIsClicked] = useState(false);
-  const [startTime, setStartTime] = useState();
   const [selectedOption, setSelectedOption] = useState(null);
   const [doctor, setDoctor] = useState([]);
   const [patients, setPatients] = useState(null);
@@ -60,11 +58,11 @@ const AddAppoinments = () => {
   const [indiceDias, setIndiceDias] = useState(0);
   const [indiceHoras, setIndiceHoras] = useState(0);
   const [selectedPatient, setSelectedPatient] = useState('')
-  const [filteredData, setFilteredData] = useState([]);
   const [especialidad, setEspecialidad] = useState('')
   dayjs.extend(isLeapYear) // use plugin
   dayjs.locale('es-mx') // use locale
   const [bloques, setBloques] = useState([])
+  const [data, setData] = useState([])
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
@@ -81,10 +79,10 @@ const AddAppoinments = () => {
     });
   }, [setProps]);
 
-  const { register, handleSubmit, watch, control, setValue, resetField,
+  const { register, handleSubmit, watch, control, setValue, resetField, trigger,
     formState: { errors }, reset
   } = useForm({
-    defaultValues: async () => await getPatients()
+    defaultValues: async () => await getCombinedData()
   });
 
   const tipo_cita = [
@@ -106,7 +104,7 @@ const AddAppoinments = () => {
     setSuccess('initial')
     router.push('/pacientes')
   }
-  
+
   const handleCloseWarning = () => {
     // setOpen(false);
     setSuccess('initial')
@@ -119,14 +117,16 @@ const AddAppoinments = () => {
       const { users: alumnosFiltered } = await fetchPatientsDespejeFalse()
       const alumnosProcessed = alumnosFiltered.map((alumno, i) => {
         return {
-          value: i + 2,
+          value: `1-${i}`,
           label: alumno.email,
           name: alumno.nombre,
           lastName: alumno.apellido,
-          id: alumno.id
+          id: alumno.id,
+          type: 'alumno'
         }
       })
       setPatients(alumnosProcessed)
+      return alumnosProcessed;
     } catch (error) {
       console.error("Error al traer data inicial:", error);
       return {};
@@ -146,15 +146,69 @@ const AddAppoinments = () => {
     }
   }
 
+  const getAllGroups = async () => {
+    try {
+      const response = await showAllGroups()
+      const gruposArray = Object.values(response);
+      const gruposProcessed = gruposArray.map((group, i) => {
+        return {
+          value: `2-${i}`,
+          label: group.nota,
+          name: 'No aplica',
+          lastName: 'No aplica',
+          id: group.uuid,
+          type: 'grupo'
+        }
+      })
+
+      setLoading(false);
+      return gruposProcessed
+    } catch (error) {
+      console.log('Error: ', error)
+      setLoading(false);
+      return {};
+    } finally {
+      // Cambia isLoading a false cuando termina la carga
+      setLoading(false);
+    }
+  }
+
   const modalidad = watch("modalidad"); // Valor predeterminado: videollamada
   const campus = watch("campus", ""); // Valor predeterminado: ninguno
   const motivo_consulta_seleccionado = watch('motivo')
   const profesional = watch('professional')
 
+  const getCombinedData = async () => {
+    try {
+      const response1 = await getPatients()
+      const response2 = await getAllGroups()
+
+      const newData =
+        [
+          {
+            label: "Estudiantes",
+            options: response1
+          },
+          {
+            label: "Grupos",
+            options: response2
+          }
+        ]
+      setData(newData)
+      setLoading(false)
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching and combining data:", error);
+    }
+
+  }
+
   useEffect(() => {
     setMenuPortalTarget(document.body);
-    getPatients()
     getSpeciality()
+
+
+    getCombinedData()
   }, [])
 
 
@@ -207,14 +261,6 @@ const AddAppoinments = () => {
     setDays(uniqueFiltered);
   }, [modalidad, campus, doctor]);
 
-  const onChange = (date, dateString) => {
-    setIsClicked(true);
-  };
-
-  const loadFile = (event) => {
-    // Handle file loading logic here
-  };
-
   const obtenerDias = (objetos) => {
     let fechaActual = new Date();
 
@@ -231,39 +277,80 @@ const AddAppoinments = () => {
 
     return soloDias;
   }
-
   // SUBMIT FUNCTION
   const onSubmit = handleSubmit(async (data, e) => {
+    const formValid = await trigger(['selectedDay', 'selectedHour', 'motivo']);
+    if (!formValid) {
+      console.log('Validación de formulario falló', errors);
+      return;
+    }
     e.preventDefault()
     setSuccess('initial')
     setLoading(true);
-    try {
-      // la función que crea la cita
-      const appointment = await createAppointment({
-        ...data,
-        "patient_id": selectedPatient.id,
-        hora: data.selectedHour,
-        fecha: data.selectedDay,
-        motivo: data.motivo === 'Otro' ? data.otro : data.motivo,
-        campus: data.campus || 'No aplica'
-      })
+    if (data.alumno.type === 'grupo') {
+
+      try {
+        // la función que crea la cita
+        const appointment = await createAppointmentForGroup({
+          ...data,
+          "patient_id": selectedPatient.id,
+          hora: data.selectedHour + ':00',
+          fecha: data.selectedDay,
+          motivo: data.motivo === 'Otro' ? data.otro : data.motivo,
+          campus: data.campus || 'No aplica'
+        })
 
 
-      if (appointment.estado === false) {
+        if (appointment.estado === false) {
+          setSuccess('fail')
+          setError(appointment.detalle)
+        } else {
+          setSuccess('success')
+        }
+
+      } catch (err) {
         setSuccess('fail')
-        setError(appointment.detalle)
-      } else {
-        setSuccess('success')
+        if (err.message === "Cannot read properties of undefined (reading 'id')") {
+          setError(`No se encontró al paciente`);
+        } else {
+          setError('El servicio no se encuentra disponible.')
+        }
+      } finally {
+        setLoading(false)
       }
+    } else if (data.alumno.type === 'alumno') {
 
-    } catch (err) {
-      setSuccess('fail')
-      if (err.message === "Cannot read properties of undefined (reading 'id')") {
-        setError(`No se encontró al paciente`);
+      try {
+        // la función que crea la cita
+        const appointment = await createAppointment({
+          ...data,
+          "patient_id": selectedPatient.id,
+          hora: data.selectedHour + ':00',
+          fecha: data.selectedDay,
+          motivo: data.motivo === 'Otro' ? data.otro : data.motivo,
+          campus: data.campus || 'No aplica'
+        })
+
+
+        if (appointment.estado === false) {
+          setSuccess('fail')
+          setError(appointment.detalle)
+        } else {
+          setSuccess('success')
+        }
+
+      } catch (err) {
+        setSuccess('fail')
+        if (err.message === "Cannot read properties of undefined (reading 'id')") {
+          setError(`No se encontró al paciente`);
+        } else {
+          setError('El servicio no se encuentra disponible.')
+        }
+      } finally {
+        setLoading(false)
       }
-    } finally {
-      setLoading(false)
     }
+
   })
 
   // // // // // // // // // // // // // // // // // // // 
@@ -359,7 +446,7 @@ const AddAppoinments = () => {
     resetField('selecteHour')
     setTime('')
     resetField('selecteHour')
-    setValue('selectedDay', fecha)
+    setValue('selectedDay', fecha, { shouldValidate: true })
 
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
     try {
@@ -386,7 +473,7 @@ const AddAppoinments = () => {
 
   const handleHours = (hour) => {
     setTime(hour)
-    setValue('selectedHour', hour)
+    setValue('selectedHour', hour, { shouldValidate: true });
   }
 
   // Obtiene la duración y la agrega a la función agregarBloques
@@ -444,9 +531,14 @@ const AddAppoinments = () => {
     setValue('patientLastname', e?.lastName);
   }
 
-  const handleWarning = () => {
-    setSuccess('warning')
-    setError('¿Confirma creación de la cita?')
+  const handleWarning = async (e) => {
+    e.preventDefault();
+    const isValid = await trigger(['selectedDay', 'selectedHour', 'motivo']);
+
+    if (isValid) {
+      setSuccess('warning');
+      setError('¿Confirma creación de la cita?');
+    }
   }
 
   return (
@@ -454,7 +546,7 @@ const AddAppoinments = () => {
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
         {loading && <SimpleBackdrop />}
-        <div className="page-wrapper mt-5 pt-5">
+        <div className="page-wrapper">
           <div className="content">
             {/* Page Header */}
             <div className="page-header">
@@ -552,7 +644,7 @@ const AddAppoinments = () => {
                             <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group local-forms">
                                 <label>
-                                  Correo electrónico de alumno {/* <span className="login-danger">*</span> */}
+                                  Correo electrónico de alumno o Nombre del grupo{/* <span className="login-danger">*</span> */}
                                 </label>
                                 <Controller
                                   control={control}
@@ -560,42 +652,55 @@ const AddAppoinments = () => {
                                   {...register('alumno')}
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value, name, ref } }) => {
-                                    return (<Select
-                                      instanceId="alumno"
-                                      defaultValue={selectedOption}
-                                      onChange={(e) => {
-                                        onChange(e);
-                                        handleSelectedalumno(e);
-                                      }}
-                                      getOptionLabel={e => e.label}
-                                      options={patients}
-                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                      id="alumno"
-                                      components={{
-                                        IndicatorSeparator: () => null
-                                      }}
+                                    return (
+                                      <Select
+                                        instanceId="alumno"
+                                        defaultValue={selectedOption}
+                                        onChange={(e) => {
+                                          onChange(e);
+                                          handleSelectedalumno(e);
+                                        }}
+                                        getOptionLabel={e => e.label}
+                                        options={data}
+                                        styles={{
+                                          menuPortal: base => ({ ...base, zIndex: 9999 }),
+                                        }}
+                                        id="alumno"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
 
-                                      styles={{
-                                        control: (baseStyles, state) => ({
-                                          ...baseStyles,
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                          '&:hover': {
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                          },
-                                          borderRadius: '10px',
-                                          fontSize: "14px",
-                                          minHeight: "45px",
-                                        }),
-                                        dropdownIndicator: (base, state) => ({
-                                          ...base,
-                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                          transition: '250ms',
-                                          width: '35px',
-                                          height: '35px',
-                                        }),
-                                      }}
-                                    />)
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+                                          }), groupHeading: (provided) => ({
+                                            ...provided,
+                                            fontWeight: 'bold',
+                                            color: '#333',
+                                            backgroundColor: '#f2f2f2',
+                                            padding: '8px 12px',
+                                          }),
+                                          group: (provided) => ({
+                                            ...provided,
+                                            paddingBottom: 10,
+                                          }),
+                                        }}
+                                      />)
                                   }}
                                 />
                                 {errors.alumno && <span><small>{errors.alumno.message}</small></span>}
@@ -614,10 +719,10 @@ const AddAppoinments = () => {
                                 value={selectedPatient?.name || ''}
                                 disabled
                                 {...register('patientName', {
-                                  required: {
-                                    value: true,
-                                    message: 'Nombre de estudiante requerido'
-                                  }
+                                  // required: {
+                                  //   value: true,
+                                  //   message: 'Nombre de estudiante requerido'
+                                  // }
                                 })}
                               />
                               {
@@ -636,10 +741,10 @@ const AddAppoinments = () => {
                                 disabled
                                 value={selectedPatient?.lastName || ''}
                                 {...register('patientLastname', {
-                                  required: {
-                                    value: true,
-                                    message: 'Apellido de estudiante requerido'
-                                  }
+                                  // required: {
+                                  //   value: true,
+                                  //   message: 'Apellido de estudiante requerido'
+                                  // }
                                 })}
                               />
                               {
@@ -784,18 +889,14 @@ const AddAppoinments = () => {
                                 <Controller
                                   control={control}
                                   name="motivo"
-                                  {...register('motivo', {
-                                    required: {
-                                      value: true,
-                                      message: 'Motivo es requerido',
-                                    }
-                                  })}
+                                  rules={{ required: 'Motivo es requerido' }}
                                   ref={null}
-                                  render={({ field: { onChange, onBlur, value } }) => (
+                                  render={({ field }) => (
                                     <Select
+                                      {...field}
                                       instanceId="motivo"
                                       defaultValue={selectedOption}
-                                      onChange={onChange}
+                                      // onChange={onChange}
                                       options={motivo_consulta}
                                       menuPortalTarget={menuPortalTarget}
                                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
@@ -940,7 +1041,7 @@ const AddAppoinments = () => {
                                   <span className="login-danger">*</span>
                                 </label>
                                 {
-                                  loadingDays ?
+                                  loadingDays && !watch('modalidad') ?
 
                                     <Box sx={{ width: '100%' }}>
                                       <LinearProgress />
@@ -959,12 +1060,15 @@ const AddAppoinments = () => {
                                           {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
                                             return (
                                               <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
-                                                <input type="hidden" {...register("selectedDay", {
-                                                  required: {
-                                                    value: true,
-                                                    message: 'Seleccione una fecha'
-                                                  }
-                                                })} />
+                                                <input
+                                                  type="hidden"
+                                                  value={date}
+                                                  {...register("selectedDay", {
+                                                    required: {
+                                                      value: true,
+                                                      message: 'Seleccione una fecha'
+                                                    }
+                                                  })} />
                                                 <button
                                                   className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
 
@@ -1010,12 +1114,15 @@ const AddAppoinments = () => {
 
                                           return (
                                             <div key={`${hour.id}${i}hours`} style={{ display: 'inline-block' }}>
-                                              <input type="hidden" {...register("selectedHour", {
-                                                required: {
-                                                  value: true,
-                                                  message: 'Seleccione una hora'
-                                                }
-                                              })} />
+                                              <input
+                                                type="hidden"
+                                                value={time}
+                                                {...register("selectedHour", {
+                                                  required: {
+                                                    value: true,
+                                                    message: 'Seleccione una hora'
+                                                  }
+                                                })} />
                                               <button
                                                 type="button"
                                                 className={`btn me-2 ${time === hour.horaInicio ? "btn-primary" : "btn-cancel"}`}
@@ -1051,7 +1158,7 @@ const AddAppoinments = () => {
                           <button
                             type="button"
                             className="btn btn-primary submit-form me-2"
-                            onClick={() => { handleWarning() }}
+                            onClick={(e) => { handleWarning(e) }}
                           >
                             Agendar
                           </button>
@@ -1155,12 +1262,12 @@ const AddAppoinments = () => {
                   // spacing={2}
                   >
                     <h4>{error}</h4>
-                    {Object.keys(errors).length > 0 &&
+                    {/* {Object.keys(errors).length > 0 &&
 
                       Object.values(errors).map((error, index) => (
-                        <span key={index} style={{display: 'block'}}> <small>{error.message}</small></span>
+                        <span key={index} style={{ display: 'block' }}> <small>{error.message}</small></span>
                       ))
-                    }
+                    } */}
                     <Button variant="primary" onClick={onSubmit}> Confirmar </Button>
                   </Alert>
                 </div>
