@@ -47,6 +47,7 @@ const Sidebar = () => {
   const patientLoggedIn = async () => {
     try {
       const { users: response } = await fetchUser(session?.user?.id)
+      setAlumno(response[0])
     } catch (error) {
       console.log('Error:', error)
     }
