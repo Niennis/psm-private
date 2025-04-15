@@ -7,7 +7,7 @@ import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { useGroupContext } from '@/providers/GroupsProvider';
-import { setServerData } from '../actions';
+import Image from 'next/image';
 
 import Link from 'next/link';
 import { Form, Switch, Table } from 'antd';
@@ -226,26 +226,31 @@ const GroupsList = () => {
                                   onChange={(e) => { handleSearch(e.target.value) }}
                                 />
                                 <Link className="btn" href="#">
-                                  <img
-                                    src={searchnormal.src}
+                                  <Image
+                                    src={searchnormal}
                                     alt="#"
                                   />
                                 </Link>
                               </form>
                             </div>
                             <div className="add-group">
-                              <Link
-                                href="/profesionales/agregarprofesional"
+                              
+                              <span
+                              onClick={() => {
+                                setLoading(true)
+                                router.push("/grupos/crear")
+                              }}
                                 className="btn btn-primary add-pluss ms-2"
                               >
-                                <img src={plusicon.src} alt="#" />
-                              </Link>
+                                <Image src={plusicon} alt="#" />
+                              </span>
+
                               <Link
                                 href="#"
                                 onClick={handleRefresh}
                                 className="btn btn-primary doctor-refresh ms-2"
                               >
-                                <img src={refreshicon.src} alt="#" />
+                                <Image src={refreshicon} alt="#" />
                               </Link>
                             </div>
                           </div>

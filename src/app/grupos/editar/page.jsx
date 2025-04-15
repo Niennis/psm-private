@@ -74,7 +74,7 @@ const EditGroup = () => {
       console.error("Error al traer data inicial:", error);
       return {};
     } finally {
-      setLoading
+      setLoading(false)
     }
   };
 
@@ -155,7 +155,16 @@ const EditGroup = () => {
           setMessage('El servicio no está disponible')
         } else if (response?.message) {
           setAlertType('success')
-          setMessage(`El servicio salió exitoso: ${response?.message}`)
+          setMessage(response?.message)
+
+          // Actualizar datos después de agregar el usuario
+          await getPatientsByGroup(selectedGroupId);
+          await getPatientsWithDespeje();
+          // Limpiar la selección actual
+          setSelectedPatient('');
+          setValue('alumno', null);
+          setValue('fullName', '');
+          setValue('email', '');
         }
 
       } catch (error) {
@@ -164,6 +173,7 @@ const EditGroup = () => {
         setMessage('El servicio no está disponible')
       } finally {
         setOpenBackdrop(false)
+
       }
     } else {
       setMessage('El servicio no está disponible')
@@ -189,6 +199,10 @@ const EditGroup = () => {
         } else if (response?.message) {
           setAlertType('success')
           setMessage(`El servicio salió exitoso: ${response?.message}`)
+
+          // Actualizar datos después de eliminar el usuario
+          await getPatientsByGroup(selectedGroupId);
+          await getPatientsWithDespeje();
         }
 
       } catch (error) {
@@ -204,17 +218,20 @@ const EditGroup = () => {
   })
 
 
-  const handleOnSubmit = () => {
+  const handleOnSubmit = async () => {
     if (option === 'remove') {
-      handleRemoveUser(idPatient)
+      await handleRemoveUser(idPatient)
     } else if (option === 'add') {
-      handleAddUser(idPatient)
+      await handleAddUser(idPatient)
     }
   }
 
-  const handleCloseSuccess = () => {
+  const handleCloseSuccess = async () => {
     setAlertType('initial')
-    router.push('/grupos')
+    if (option === 'add' || option === 'remove') {
+      await getPatientsByGroup(selectedGroupId);
+      await getPatientsWithDespeje();
+    }
   }
 
   const handleCloseFail = () => {
@@ -489,20 +506,20 @@ const EditGroup = () => {
                     </div>
                     <div className="col-12">
                       <div className="doctor-submit text-end">
-                        <button
+                        {/* <button
                           type="button"
                           className="btn btn-primary submit-form me-2"
                           onClick={showConfirmation}
                         >
                           Agregar usuario
-                        </button>
+                        </button> */}
                         {/* } */}
                         <Link href={'/grupos'}>
                           <button
                             type="reset"
-                            className="btn btn-primary cancel-form"
+                            className="btn btn-primary cancel-form px-4"
                           >
-                            Cancelar
+                            Volver a Lista de Grupos
                           </button>
                         </Link>
                       </div>

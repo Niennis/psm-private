@@ -53,7 +53,6 @@ const CreateGroup = () => {
     if (data) {
       try {
         const response = await createGroup(data)
-        console.log('RESPONSE', response);
         if (!response) {
 
           setAlertType('fail')
@@ -61,7 +60,7 @@ const CreateGroup = () => {
         } else {
 
           setAlertType('success')
-          setMessage('El servicio salió exitoso')
+          setMessage('Grupo creado con éxito')
         }
 
       } catch (error) {
@@ -110,7 +109,7 @@ const CreateGroup = () => {
                         <FeatherIcon icon="chevron-right" />
                       </i>
                     </li>
-                    <li className="breadcrumb-item active">Agregar Grupo</li>
+                    <li className="breadcrumb-item active">Crear Grupo</li>
                   </ul>
                 </div>
               </div>
