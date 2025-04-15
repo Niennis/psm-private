@@ -18,6 +18,7 @@ import withAuth from '@/components/withAuth';
 
 import { showRecordById, showRecords } from "@/services/RecordServices";
 import { fetchUser } from "@/services/UsersServices";
+import { useUserContext } from "@/context/UserContext";
 
 const FichaAlumno = ({ params }) => {
   const { data: session } = useSession()
@@ -26,6 +27,7 @@ const FichaAlumno = ({ params }) => {
   const [patient, setPatient] = useState()
   const [visibleItem, setVisibleItem] = useState(null);
   const router = useRouter()
+  const { selectedUserId } = useUserContext()
 
   dayjs.extend(utc);
   dayjs.extend(timezone)
@@ -41,7 +43,7 @@ const FichaAlumno = ({ params }) => {
 
   const getRecords = async () => {
     try {
-      const { entrevista: response } = await showRecords(params.id)
+      const { entrevista: response } = await showRecords(selectedUserId)
       const motivo_consulta = response[0].motivo_consulta
       const recordsProcesados = response.map((record) => {
         return {
@@ -57,7 +59,7 @@ const FichaAlumno = ({ params }) => {
 
   const getStudent = async () => {
     try {
-      const { users: student } = await fetchUser(params.id)
+      const { users: student } = await fetchUser(selectedUserId)
       setPatient(student[0])
     } catch (error) {
       console.log(error)
@@ -697,7 +699,7 @@ const FichaAlumno = ({ params }) => {
                             ))
                           }
                           {
-                            (session?.user?.rol === 'alumno' && session?.user?.id == params.id) && records && records.map((item, index) => (
+                            (session?.user?.rol === 'alumno' && session?.user?.id == selectedUserId) && records && records.map((item, index) => (
                               <li key={item.id_alumno + index}>
                                 {/* Fila principal con los datos generales */}
                                 <div className="activity-user">

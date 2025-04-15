@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 import { SectionProvider } from "@/context/SectionContext";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { DisponibilidadProvider } from "@/context/DisponibilidadContext";
+import UserWrapper from "@/providers/UseProvider";
 import Welcome from "@/components/Welcome";
 
 // import Hotjar from '@hotjar/browser';
@@ -53,16 +54,18 @@ export default async function RootLayout({ children, props }) {
 
           <SectionProvider>
             <SidebarProvider>
-              <DisponibilidadProvider>
-                {/* <LoadingProvider> */}
-                <Header />
+              <UserWrapper>
+                <DisponibilidadProvider>
+                  {/* <LoadingProvider> */}
+                  <Header />
 
-                {session && <Sidebar />}
-                <Welcome session={session}>
-                  {children}
-                </Welcome>
-                {/* </LoadingProvider> */}
-              </DisponibilidadProvider>
+                  {session && <Sidebar />}
+                  <Welcome session={session}>
+                    {children}
+                  </Welcome>
+                  {/* </LoadingProvider> */}
+                </DisponibilidadProvider>
+              </UserWrapper>
             </SidebarProvider>
           </SectionProvider>
           {/* <Script src="./bot.js" data-args="Salud mental, #FFFFFF, #AA3C80FF, ./bot_salud_mental.png" id="bot"></Script> */}

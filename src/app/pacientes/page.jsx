@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Form, Switch, Table } from 'antd';
+import { useUserContext } from '@/context/UserContext';
 // import Headerudp from '../Headerudp';
 import Sidebar from '../../components/Sidebar';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
@@ -76,6 +77,7 @@ const PatientsList = () => {
   const [message, setMessage] = useState('')
   const [idCita, setIdCita] = useState('')
   const mobile = useMediaQuery('(min-width:600px)');
+  const { setSelectedUserId } = useUserContext()
 
   useEffect(() => {
     setProps({
@@ -302,7 +304,8 @@ const PatientsList = () => {
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
                     setLoading(true)
-                    router.push(`/fichas/${record.id_paciente}`)
+                    handleSelectedId(record.id_paciente)
+                    router.push(`/fichas/ver`)
                   }}
                 // data-bs-toggle="modal" 
                 // data-bs-target="#delete_patient"
@@ -556,6 +559,10 @@ const PatientsList = () => {
   const tableProps = {
     loading,
   };
+  
+  const handleSelectedId = (id) => {
+    setSelectedUserId(id)
+  }
 
   return (
     < >

@@ -14,12 +14,15 @@ import ProtectedPage from './ProtectedRoutes';
 import { useSession } from 'next-auth/react';
 import { useSidebar } from '@/context/SidebarContext';
 import SimpleBackdrop from './Backdrop';
+import { useUserContext } from '@/context/UserContext';
+
 const Sidebar = () => {
   const { data: session, status } = useSession()
   const { props } = useSidebar();
   const ROL = ["alumno"]
   const router = useRouter();
   const [alumno, setAlumno] = useState('')
+  const {setSelectedUserId} = useUserContext()
 
   const handleClick = (e, item, item1, item3) => {
     const div = document.querySelector(`#${item}`);
@@ -102,7 +105,12 @@ const Sidebar = () => {
                       <Link className={props?.activeClassName === 'appoinment-list' ? 'active' : ''} href="/citas">Lista de Citas</Link>
                     </li>
                     <li>
-                      <Link className={props?.activeClassName === 'ficha' ? 'active' : ''} href={`/fichas/${session?.user?.id}`}>Ficha</Link>
+                      <Link
+                        className={props?.activeClassName === 'ficha' ? 'active' : ''}
+                        onClick={() => setSelectedUserId(session?.user?.id)}
+                        href={`/fichas/ver`}>
+                        Ficha
+                      </Link>
                     </li>
                     {(alumno && alumno?.aplica_despeje) == 1 &&
                       <li>
