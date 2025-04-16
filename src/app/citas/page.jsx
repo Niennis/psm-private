@@ -222,7 +222,7 @@ const AppoinmentList = () => {
       dataIndex: "nombre_profesional",
       sorter: (a, b) => a['nombre_profesional'].localeCompare(b['nombre_profesional']),
       key: 'nombre_profesional',
-      responsive: ['md'],
+      // responsive: ['md'],
     },
     {
       title: "Especialidad",
@@ -254,7 +254,7 @@ const AppoinmentList = () => {
       dataIndex: "fecha",
       sorter: (a, b) => a['fecha'].localeCompare(b['fecha']),
       key: 'fecha',
-      responsive: ['md'],
+      // responsive: ['md'],
       render: (text, record) => {
         const [year, month, day] = text.split('-');
         return `${day}-${month}-${year}`;
@@ -264,7 +264,7 @@ const AppoinmentList = () => {
       dataIndex: "hora",
       sorter: (a, b) => a['hora'].localeCompare(b['hora']),
       key: 'hora',
-      responsive: ['md'],
+      // responsive: ['md'],
     }, {
       title: "Estado",
       dataIndex: "estado",
@@ -405,9 +405,9 @@ const AppoinmentList = () => {
           height: 0,
         }}
       >
-        <Form.Item label="loading">
+        {/* <Form.Item label="loading">
           <Switch checked={loading} onChange={handleLoadingChange} />
-        </Form.Item>
+        </Form.Item> */}
       </Form>
       <div className="page-wrapper">
         <div className="content">
@@ -438,11 +438,11 @@ const AppoinmentList = () => {
                   <div className="page-table-header mb-2">
                     <div className="row align-items-center">
                       <div className="col">
-                        <div className="doctor-table-blk">
+                        <div className="doctor-table-blk mobile-header">
                           {matches && <h3>Lista de citas </h3>}
                           <div className="doctor-search-blk">
-                            <div className="top-nav-search table-search-blk col-6">
-                              <form style={{ width: `${matches ? '270px' : '150px'} ` }}>
+                            <div className="top-nav-search table-search-blk mobile-header">
+                              <form >
                                 <input
                                   type="text"
                                   className="form-control"
@@ -457,22 +457,23 @@ const AppoinmentList = () => {
                                 </Link>
                               </form>
                             </div>
-                          </div>
-                          <div className="add-group">
-                            {session?.user?.rol !== "alumno" && <Link href="/citas/agendarcita"
-                              className="btn btn-primary add-pluss ms-2"
-                            >
-                              <Image src={plusicon} alt="#" />
-                            </Link>}
-                            <Link
-                              href="#"
-                              onClick={loadAppointments}
-                              className="btn btn-primary doctor-refresh ms-2"
-                            >
-                              <Image src={refreshicon} alt="#" />
-                            </Link>
+                            <div className="add-group">
+                              {session?.user?.rol !== "alumno" && <Link href="/citas/agendarcita"
+                                className="btn btn-primary add-pluss ms-2"
+                              >
+                                <Image src={plusicon} alt="#" />
+                              </Link>}
+                              <Link
+                                href="#"
+                                onClick={loadAppointments}
+                                className="btn btn-primary doctor-refresh ms-2"
+                              >
+                                <Image src={refreshicon} alt="#" />
+                              </Link>
+                            </div>
                           </div>
                         </div>
+
                       </div>
                       {/* <div className="col-auto text-end float-end ms-auto download-grp">
                           <Link href="#" className=" me-2">
@@ -507,7 +508,7 @@ const AppoinmentList = () => {
                       columns={columns}
                       dataSource={results}
 
-                      rowSelection={rowSelection}
+                      // rowSelection={rowSelection}
                       rowKey={(record) => `${record.id_cita}`}
                     />
 
