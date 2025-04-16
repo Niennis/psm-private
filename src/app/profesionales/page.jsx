@@ -211,6 +211,7 @@ const DoctorList = () => {
   return (
     < >
       {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' /> */}
+      <div className="sidebar-overlay" data-reff=""  style={{ zIndex: 98 }}/>
       <div className="page-wrapper">
         <div className="content">
           {/* Page Header */}
@@ -240,10 +241,10 @@ const DoctorList = () => {
                   <div className="page-table-header mb-2">
                     <div className="row align-items-center">
                       <div className="col">
-                        <div className="doctor-table-blk">
+                        <div className="doctor-table-blk mobile-header">
                           <h3>Lista Profesionales</h3>
                           <div className="doctor-search-blk">
-                            <div className="top-nav-search table-search-blk">
+                            <div className="top-nav-search table-search-blk mobile-header">
                               <form>
                                 <input
                                   type="text"
@@ -297,7 +298,7 @@ const DoctorList = () => {
                         columns={columns}
                         dataSource={results}
 
-                        rowSelection={rowSelection}
+                        // rowSelection={rowSelection}
                         rowKey={(record) => record.id}
                         style={{
                           backgroundColor: '#f2f2f2',
@@ -305,44 +306,6 @@ const DoctorList = () => {
                       />)
                     }
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="delete_patient" className="modal fade delete-modal" role="dialog">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-body text-center">
-              <img src={imagesend.src} alt="#" width={50} height={46} />
-              <h3>Are you sure want to delete this ?</h3>
-              <div className="m-t-20">
-                {" "}
-                <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-                  Cerrar
-                </Link>
-                <button type="submit" className="btn btn-danger">
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="delete_patient" className="modal fade delete-modal" role="dialog">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-body text-center">
-                <img src={imagesend.src} alt="#" width={50} height={46} />
-                <h3>Are you sure want to delete this ?</h3>
-                <div className="m-t-20">
-                  {" "}
-                  <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-                    Close
-                  </Link>
-                  <button type="submit" className="btn btn-danger">
-                    Delete
-                  </button>
                 </div>
               </div>
             </div>

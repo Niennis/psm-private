@@ -35,7 +35,7 @@ const GroupsList = () => {
     setProps({
       id: "menu-item5",
       id1: "menu-items5",
-      activeClassName: "add-shedule",
+      activeClassName: "group-list",
     });
   }, [setProps]);
 
@@ -184,9 +184,11 @@ const GroupsList = () => {
 
   return (
     < >
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' /> */}
       <div className="page-wrapper">
         <div className="content">
+
           {/* Page Header */}
           <div className="page-header">
             <div className="row">
@@ -204,6 +206,7 @@ const GroupsList = () => {
                 </ul>
               </div>
             </div>
+
           </div>
           {/* /Page Header */}
           <div className="row">
@@ -214,10 +217,10 @@ const GroupsList = () => {
                   <div className="page-table-header mb-2">
                     <div className="row align-items-center">
                       <div className="col">
-                        <div className="doctor-table-blk">
+                        <div className="doctor-table-blk mobile-header">
                           <h3>Lista Grupos</h3>
                           <div className="doctor-search-blk">
-                            <div className="top-nav-search table-search-blk">
+                            <div className="top-nav-search table-search-blk mobile-header">
                               <form>
                                 <input
                                   type="text"
@@ -234,12 +237,12 @@ const GroupsList = () => {
                               </form>
                             </div>
                             <div className="add-group">
-                              
+
                               <span
-                              onClick={() => {
-                                setLoading(true)
-                                router.push("/grupos/crear")
-                              }}
+                                onClick={() => {
+                                  setLoading(true)
+                                  router.push("/grupos/crear")
+                                }}
                                 className="btn btn-primary add-pluss ms-2"
                               >
                                 <Image src={plusicon} alt="#" />
@@ -257,6 +260,7 @@ const GroupsList = () => {
                         </div>
                       </div>
                     </div>
+
                   </div>
                   {/* /Table Header */}
                   <div className="table-responsive doctor-list">
@@ -276,7 +280,7 @@ const GroupsList = () => {
                         columns={columns}
                         dataSource={groups}
 
-                        rowSelection={rowSelection}
+                        // rowSelection={rowSelection}
                         rowKey={(record) => record.uuid}
                         style={{
                           backgroundColor: '#f2f2f2',
@@ -288,6 +292,7 @@ const GroupsList = () => {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </>

@@ -76,7 +76,7 @@ const PatientsList = () => {
   const [success, setSuccess] = useState('initial')
   const [message, setMessage] = useState('')
   const [idCita, setIdCita] = useState('')
-  const mobile = useMediaQuery('(min-width:600px)');
+  const mobile = useMediaQuery('(max-width:780px)');
   const { setSelectedUserId } = useUserContext()
 
   useEffect(() => {
@@ -203,6 +203,11 @@ const PatientsList = () => {
       dataIndex: "nombre",
       sorter: (a, b) => a.nombre_alumno,
       fixed: 'left',
+      onCell: () => ({
+        style: {
+          background: 'red', // Color de fondo para esta columna
+        },
+      }),
       render: (text, record) => (
         <>
           <h2 className="profile-image">
@@ -219,7 +224,7 @@ const PatientsList = () => {
           </h2>
 
         </>
-      )
+      ),
     },
     {
       title: "Teléfono",
@@ -347,7 +352,6 @@ const PatientsList = () => {
       dataIndex: "nombre_profesional",
       sorter: (a, b) => a['nombre_profesional'].localeCompare(b['nombre_profesional']),
       key: 'nombre_profesional',
-      responsive: ['md'],
     },
     {
       title: "Especialidad",
@@ -372,7 +376,6 @@ const PatientsList = () => {
       dataIndex: "fecha",
       sorter: (a, b) => a['fecha'].localeCompare(b['fecha']),
       key: 'fecha',
-      responsive: ['md'],
       render: (text, record) => {
         const [year, month, day] = text.split('-');
         return `${day}-${month}-${year}`;
@@ -382,7 +385,6 @@ const PatientsList = () => {
       dataIndex: "hora",
       sorter: (a, b) => a['hora'].localeCompare(b['hora']),
       key: 'hora',
-      responsive: ['md'],
     }, {
       title: "Estado",
       dataIndex: "estado",
@@ -559,7 +561,7 @@ const PatientsList = () => {
   const tableProps = {
     loading,
   };
-  
+
   const handleSelectedId = (id) => {
     setSelectedUserId(id)
   }
@@ -574,9 +576,9 @@ const PatientsList = () => {
           height: 0,
         }}
       >
-        <Form.Item label="loading">
+        {/* <Form.Item label="loading">
           <Switch checked={loading} onChange={handleLoadingChange} />
-        </Form.Item>
+        </Form.Item> */}
       </Form>
       {/* <Headerudp /> */}
       {/* <Sidebar id='menu-item2' id1='menu-items2' activeClassName='patient-list' /> */}
@@ -607,9 +609,9 @@ const PatientsList = () => {
                   <div className="page-table-header mb-2">
                     <div className="row align-items-center">
                       <div className="col">
-                        <div className="doctor-table-blk">
+                        <div className="doctor-table-blk mobile-header">
 
-                          <ul className="nav nav-tabs">
+                          <ul className="nav nav-tabs mobile-header">
                             <li className="nav-item">
                               <Link
                                 className={`nav-link ${hash === 'pacientes' ? 'active' : hash === '' ? 'active' : ''}`}
@@ -630,7 +632,7 @@ const PatientsList = () => {
                           </ul>
 
                           <div className="doctor-search-blk">
-                            <div className="top-nav-search table-search-blk">
+                            <div className="top-nav-search table-search-blk mobile-header">
                               <form>
                                 <input
                                   type="text"
@@ -687,30 +689,37 @@ const PatientsList = () => {
                           columns={columns}
                           dataSource={results}
 
-                          rowSelection={rowSelection}
+                          // rowSelection={rowSelection}
                           rowKey={(record) => record.id_paciente}
                         />
                       </div>
                     </div>
+
+                    </div>
+                  {/* /Table Header */}
+
+                  <div className="tab-content">
                     <div
                       className={`tab-pane ${hash === 'citas' ? 'show active' : ''}`} id="citas">
+                      <div className="table-responsive doctor-list" style={{ overflowY: 'hidden' }}>
 
-                      <Table
-                        {...tableProps}
-                        pagination={{
-                          total: patientResults.length,
-                          showTotal: (total, range) =>
-                            `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
-                          //showSizeChanger: true,
-                          onShowSizeChange: onShowSizeChange,
-                          itemRender: itemRender,
-                        }}
-                        columns={patientColumns}
-                        dataSource={patientResults}
+                        <Table
+                          {...tableProps}
+                          pagination={{
+                            total: patientResults.length,
+                            showTotal: (total, range) =>
+                              `Mostrando ${range[0]} a ${range[1]} de ${total} entradas`,
+                            //showSizeChanger: true,
+                            onShowSizeChange: onShowSizeChange,
+                            itemRender: itemRender,
+                          }}
+                          columns={patientColumns}
+                          dataSource={patientResults}
 
-                        rowSelection={rowSelection}
-                        rowKey={(record) => `${record.id_cita}`}
-                      />
+                          // rowSelection={rowSelection}
+                          rowKey={(record) => `${record.id_cita}`}
+                        />
+                      </div>
                     </div>
                   </div>
 
