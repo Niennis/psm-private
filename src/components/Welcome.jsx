@@ -51,7 +51,7 @@ const Welcome = ({ children }) => {
                   justifyContent: 'center', // Centra horizontalmente
                   alignItems: 'flex-end' // Alinea en la parte inferior
                 }}>
-                  <div className="morning-img" style={{
+                  <div className="morning-img desktop" style={{
                     position: 'relative',
                     width: '200px', // Ancho fijo (ajusta según necesites)
                     height: '150px' // Altura fija (ajusta según necesites)

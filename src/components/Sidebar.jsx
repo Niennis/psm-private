@@ -177,10 +177,10 @@ const Sidebar = () => {
                             <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos">Lista de Grupos</Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos/crear">Crear Grupos</Link>
+                            <Link className={props?.activeClassName === 'add-group' ? 'active' : ''} href="/grupos/crear">Crear Grupos</Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos/editar">Editar Grupos</Link>
+                            <Link className={props?.activeClassName === 'edit-group' ? 'active' : ''} href="/grupos/editar">Editar Grupos</Link>
                           </li>
                         </ul>
                       </li>
@@ -286,10 +286,10 @@ const Sidebar = () => {
                             <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos">Lista de Grupos</Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos/crear">Crear Grupos</Link>
+                            <Link className={props?.activeClassName === 'add-group' ? 'active' : ''} href="/grupos/crear">Crear Grupos</Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos/editar">Editar Grupos</Link>
+                            <Link className={props?.activeClassName === 'edit-group' ? 'active' : ''} href="/grupos/editar">Editar Grupos</Link>
                           </li>
                         </ul>
                       </li>

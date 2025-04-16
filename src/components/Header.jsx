@@ -189,7 +189,9 @@ const Header = () => {
             <Link id="toggle_btn" href="#" onClick={handlesidebar} >
               <Image src={baricon} alt="" />
             </Link>
-            <Link id="mobile_btn" className="mobile_btn float-start" href="#" onClick={handlesidebarmobilemenu}>
+            <Link id="mobile_btn" className="mobile_btn float-start" href="#" onClick={handlesidebarmobilemenu}
+              style={{position: 'revert'}}
+            >
               <Image src={baricon1} alt="" />
             </Link>
           </>
@@ -295,8 +297,8 @@ const Header = () => {
             }}
           >
             <Image
-              src={'https://github.com/Niennis/imagesudp/blob/main/UDP_Logo_small.png?raw=true'}
-              width={100}
+              src={logo}
+              width={200}
               height={100}
               alt="logo udp"
               style={{ height: 'auto', justifyContent: 'center' }}
