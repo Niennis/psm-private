@@ -288,7 +288,7 @@ const AddAppoinments = () => {
     setSuccess('initial')
     setLoading(true);
     if (data.alumno.type === 'grupo') {
-
+      console.log('grupo')
       try {
         // la función que crea la cita
         const appointment = await createAppointmentForGroup({
@@ -319,6 +319,7 @@ const AddAppoinments = () => {
         setLoading(false)
       }
     } else if (data.alumno.type === 'alumno') {
+      console.log('alumno')
 
       try {
         // la función que crea la cita
@@ -356,7 +357,13 @@ const AddAppoinments = () => {
   // // // // // // // // // // // // // // // // // // // 
 
   const orderByDate = (arr) => {
-    return arr.sort((a, b) => dayjs(a.fechaInicio).isAfter(dayjs(b.fechaInicio)) ? 1 : -1);
+    return [...arr].sort((a, b) => {
+      try {
+        return dayjs(a.fechaInicio).isAfter(dayjs(b.fechaInicio)) ? 1 : -1;
+      } catch (e) {
+        return 0; // Si hay error en el parseo, mantiene el orden original
+      }
+    });
   }
 
   const handleSelectedType = async (e) => {
@@ -391,15 +398,18 @@ const AddAppoinments = () => {
     resetField('selectedDay')
     resetField('selecteHour')
     try {
-      const horasmedicas = await generarHorasMedicas(e.id)
+      // Obtener horas médicas y filtrar solo las disponibles (disponible > 0)
+      const todasHorasMedicas = await generarHorasMedicas(e.id)
+      const horasmedicas = todasHorasMedicas.filter(hora => hora.disponible > 0)
 
-      // Traer disponibilidades
+      // Traer disponibilidades (esto parece necesario para otra lógica)
       const { users: byProf } = await fetchScheduleByAvailability(e.id)
 
-      // Filtrar para que salgan solo las fechas posteriores
-      const hoy = new Date();
-      const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy);
+      // Filtrar para que salgan solo las fechas posteriores (manteniendo tu lógica original)
+      const hoy = new Date()
+      const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy)
 
+      // Resto de tu lógica original
       const orderedData = orderByDate(filterByDate)
       const bloque = obtenerDias(orderedData)
       setAllDays(orderedData)
@@ -440,36 +450,39 @@ const AddAppoinments = () => {
 
   // Muestra horas por día
   const handleDays = async (e, fecha, id) => {
-    e.preventDefault()
-    setHours('')
-    setBloques('')
-    resetField('selecteHour')
-    setTime('')
-    resetField('selecteHour')
-    setValue('selectedDay', fecha, { shouldValidate: true })
-
-    const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
+    e.preventDefault();
+    setHours('');
+    setBloques('');
+    resetField('selecteHour');
+    setTime('');
+    resetField('selecteHour');
+    setValue('selectedDay', fecha, { shouldValidate: true });
+  
+    const fechaMod = dayjs(fecha).format('YYYY-MM-DD');
     try {
-      setDate(fechaMod)
-      const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod)
-
-      let newBloques = []
-      selectedDays.forEach(item => {
-        newBloques.push(calcularHoraInicioDeBloques(item))
-      })
-      const flatted = newBloques.flat()
-
-      const arrayOrdenado = flatted.sort((a, b) => {
-        const horaA = new Date(`1970-01-01T${a.horaInicio}:00`).getTime();
-        const horaB = new Date(`1970-01-01T${b.horaInicio}:00`).getTime();
-        return horaA - horaB;
-      });
-
-      setHours(arrayOrdenado)
+      setDate(fechaMod);
+      
+      // 1. Filtrar horarios para la fecha seleccionada
+      const horariosDelDia = allDays.filter(item => item.fechaInicio === fechaMod);
+      
+      // 2. Extraer y ordenar las horas disponibles directamente
+      const horasDisponibles = horariosDelDia
+        .map(item => ({
+          ...item,
+          horaInicioBloque: item.horaInicio, // Usamos las horas ya calculadas
+          horaFinBloque: item.horaFin
+        }))
+        .sort((a, b) => {
+          const horaA = convertirAHoras(a.horaInicio);
+          const horaB = convertirAHoras(b.horaInicio);
+          return horaA - horaB; // Orden ascendente
+        });
+      
+      setHours(horasDisponibles);
     } catch (error) {
-      console.log(error)
+      console.error('Error al cargar horarios:', error);
     }
-  }
+  };
 
   const handleHours = (hour) => {
     setTime(hour)

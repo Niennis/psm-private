@@ -146,20 +146,27 @@ const ScheduleByProfessional = ({ params }) => {
     try {
       const response = await generarHorasMedicas(id)
       const processed = response.map(item => {
-        // detalleServicio y duracionServicio
-        return (
-          {
-            ...item,
-            start: datesToTimestamp(item.fechaInicio, `${item.horaInicio}:00`),
-            end: datesToTimestamp(item.fechaInicio, `${item.horaFin}:00`),
-            className:
-              item.modalidad === 'videollamada'
-                ? 'bg-videollamada' : item.modalidad === 'presencial'
-                  ? 'bg-presencial' : 'bg-ambas',
-            title: item.detalleServicio || 'Disponible',
-          }
-        )
-      })
+        // Determinar la clase según disponibilidad y modalidad
+        let className;
+        if (item.disponible === 0) {
+          className = 'busy'; // Clase para horarios no disponibles
+        } else {
+          // Clases según modalidad para horarios disponibles
+          className = item.modalidad === 'videollamada'
+            ? 'bg-videollamada'
+            : item.modalidad === 'presencial'
+              ? 'bg-presencial'
+              : 'bg-ambas';
+        }
+
+        return {
+          ...item,
+          start: datesToTimestamp(item.fechaInicio, `${item.horaInicio}:00`),
+          end: datesToTimestamp(item.fechaInicio, `${item.horaFin}:00`),
+          className: className,
+          title: item.detalleServicio || 'Disponible',
+        };
+      });
       const prueba = [...processed]
 
       setCalendario([...processed])
