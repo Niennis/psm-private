@@ -215,6 +215,7 @@ const Addblog = () => {
 
   return (
     <div>
+      <div className="sidebar-overlay" data-reff=""  style={{ zIndex: 98 }}/>
       <div className="main-wrapper">
         <>
           <div className="page-wrapper
@@ -527,7 +528,6 @@ const Addblog = () => {
         </>
         {/* page-wrapper-end */}
       </div>
-      <div className="sidebar-overlay" data-reff="" />
     </div>
   )
 }

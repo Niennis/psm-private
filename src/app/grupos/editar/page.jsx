@@ -45,7 +45,7 @@ const EditGroup = () => {
     setProps({
       id: "menu-item5",
       id1: "menu-items5",
-      activeClassName: "add-shedule",
+      activeClassName: "edit-group",
     });
   }, [setProps]);
 

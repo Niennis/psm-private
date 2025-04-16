@@ -51,7 +51,7 @@ const normalizarTexto = (texto) => {
   // Expresiones regulares dinámicas para base y key
   const baseRegex = new RegExp(`(${process.env.NEXT_PUBLIC_BASE_IMG})`, "i");
   const removeInterrogationMark = process.env.NEXT_PUBLIC_KEY_IMG.split('?')[1]
-  
+
   const keyRegex = new RegExp(removeInterrogationMark, "i");
 
   // Expresión regular para la URL (nombre de archivo de imagen con extensión)
@@ -164,6 +164,7 @@ const BlogView = () => {
 
   return (
     <div>
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <div className="main-wrapper">
 
         <div className="page-wrapper">

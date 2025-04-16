@@ -5699,7 +5699,7 @@ a.vert-icon:hover {
 .action-icon {
   color: #777;
   font-size: 14px;
-  background: rgba(51, 52, 72, 0.05);
+  /* background: rgba(51, 52, 72, 0.05); */
   border-radius: 10px;
   width: 31px;
   height: 31px;
@@ -13647,12 +13647,12 @@ td:has(div.text-end) {
 
 /* MEDIA QUERY */
 
-.mobile {
-  /* display: block; */
+.mobile{
+  display: block;
 }
 
 .desktop {
-  /* display: none; */
+  display: none;
 }
 
 @media (min-width: 500px) {
@@ -13702,4 +13702,53 @@ span small{
 /* Ocultar completamente en la página de inicio */
 .home-page .welcome-container {
   display: none !important;
+}
+
+.ant-table-tbody > tr > td.column-with-background {
+  background-color: #f0f0f0 !important;
+}
+
+td.ant-table-cell.ant-table-cell-fix-left.ant-table-cell-fix-left-last,
+th.ant-table-cell.ant-table-cell-fix-left.ant-table-cell-fix-left-last.ant-table-column-has-sorters,
+th.ant-table-cell.ant-table-cell-fix-left.ant-table-cell-fix-left-last.ant-table-column-has-sorters  {
+  background-color: white !important;
+  z-index: 1 !important;
+}
+
+td.ant-table-cell.ant-table-cell-fix-left {
+  z-index: 2 !important;
+  background-color: white !important;
+}
+
+
+/*  ---- TABLES MOBILE ------ */
+
+@media screen and (max-width: 780px) {
+  .page-table-header .doctor-table-blk.mobile-header{
+    flex-direction: column;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .page-table-header .nav.nav-tabs.mobile-header{
+    border: none;
+  }
+
+  .page-table-header .top-nav-search.table-search-blk.mobile-header{
+    margin-left: 0;
+    margin-top: 5px;
+  }
+
+  .page-table-header .top-nav-search.table-search-blk.mobile-header form {
+    width: unset;
+  }
+
+  th.ant-table-cell.ant-table-column-has-sorters{
+    z-index: 0;
+  }
+}
+
+.busy {
+  background-color: grey;
+  color: darkgray;
 }

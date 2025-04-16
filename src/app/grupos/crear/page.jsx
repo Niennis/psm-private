@@ -41,7 +41,7 @@ const CreateGroup = () => {
     setProps({
       id: "menu-item5",
       id1: "menu-items5",
-      activeClassName: "add-shedule",
+      activeClassName: "add-group",
     });
   }, [setProps]);
 
@@ -162,7 +162,7 @@ const CreateGroup = () => {
                               className="btn btn-primary submit-form me-2"
                               onClick={showConfirmation}
                             >
-                              Agregar grupo
+                              Crear grupo
                             </button>
                             {/* } */}
                             <Link href={'/profesionales'}>
