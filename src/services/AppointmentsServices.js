@@ -84,7 +84,7 @@ export const createAppointment = async (appointment) => {
     primera_cita: 0,
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
-  }  
+  }
 
   try {
     const data = await fetch(APPOINTMENT_API, {
@@ -222,6 +222,30 @@ export const fetchAppointments = async () => {
   }
 };
 
+export const fetchAppointmentById = async (id) => {
+  const URL = `${process.env.NEXT_PUBLIC_SHOWCITA_BY_ID}`
+  const body = {
+    id_cita: id
+  }
+  try {
+    const data = await fetch(URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+
+    const response = await data.json()
+    
+    return response
+  } catch (error) {
+    console.log('Error:', error)
+  }
+
+}
+
 export const fetchAppointment = async (id) => {
   try {
     const data = await fetch(process.env.NEXT_PUBLIC_APPOINTMENTS_API)
@@ -279,7 +303,7 @@ export const editAppointmentHour = async (data) => {
     fecha: data.fecha, // "2025-04-08",
     hora: data.hora // "10:30:00"
   }
-  
+
   try {
     const data = await fetch(URL, {
       method: 'POST',
@@ -291,7 +315,7 @@ export const editAppointmentHour = async (data) => {
     })
 
     const response = await data.json()
-    
+
     return response
   } catch (error) {
     console.log('Error:', error)

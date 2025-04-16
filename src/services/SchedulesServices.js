@@ -76,7 +76,6 @@ export const fetchScheduleByAvailability = async (id) => {
     body: JSON.stringify(body)
   })
   const response = await data.json()
-
   return response
 }
 
@@ -89,84 +88,74 @@ const obtenerFechasUnicas = (hours) => {
 
 
 export const generarHorasMedicas = async (id) => {
-  const { users: hours } = await fetchScheduleByAvailability(id)
-  const fechasUnicas = obtenerFechasUnicas(hours);
-
-  const bloquesPromesas = fechasUnicas.map(async (date) => {
-    const { bloques } = await fetchBlocksAvailables(id, date)
-    return bloques.map((item) => ({ ...item, fecha: date }));
-  })
-
-  const bloquesTotales = await Promise.all(bloquesPromesas)
-
-  // const bloquesDisponibles = bloquesTotales.flatMap(obj => obj.bloques)
-  const bloquesDisponibles = bloquesTotales.flat()
-  const convertirHoraAMinutos = (hora) => {
-    const [h, m, s] = hora.split(":").map(Number);
-    return h * 60 + m + s / 60;
-  };
-
-  const convertirMinutosAHora = (minutos) => {
-    const h = Math.floor(minutos / 60).toString().padStart(2, "0");
-    const m = Math.floor(minutos % 60).toString().padStart(2, "0");
-    return `${h}:${m}`;
-  };
-
-  const horasMedicas = [];
-
-  hours.forEach((hour) => {
-    const duracion = hour.duracionServicio; // duración en minutos
-    const inicioServicio = convertirHoraAMinutos(hour.horaIni);
-    const finServicio = convertirHoraAMinutos(hour.horaFin);
-    const fechaServicio = hour.fechaInicio;
-
-    let tiempoActual = inicioServicio;
-
-    while (tiempoActual + duracion <= finServicio) {
-      const horaInicio = tiempoActual;
-      const horaFin = tiempoActual + duracion;
-
-      const bloqueDisponible = bloquesDisponibles.some(bloque => {
-        const inicioBloque = convertirHoraAMinutos(bloque.hora_inicio);
-        const finBloque = convertirHoraAMinutos(bloque.hora_fin);
-        return (
-          bloque.fecha === fechaServicio &&
-          horaInicio >= inicioBloque ||
-          horaFin <= finBloque &&
-          bloque.usuario_id === hour.id_user &&
-          hour.disponible === 1
-        );
-      });
-      
-      if (bloqueDisponible) {
-        horasMedicas.push({
-          detalleServicio: hour.detalleServicio,
-          dia: hour.dia,
-          duracionServicio: hour.duracionServicio,
-          fechaInicio: hour.fechaInicio,
-          fechaFin: hour.fechaFin,
-          frecuencia: hour.frecuencia,
-          horaInicio: convertirMinutosAHora(horaInicio),
-          horaFin: convertirMinutosAHora(horaFin),
-          id_disponibilidad: hour.id,
-          id_bloque: hour.id_bloque,
-          id_user: hour.id_user,
-          campus: hour.campus,
-          modalidad: hour.modalidad,
-          repeticiones: hour.repeticiones,
-          tipo: hour.tipo,
-          tipoServicio: hour.tipoServicio,
-          uuid: hour.uuid,
-        });
-      } 
-
-      tiempoActual += duracion; // Avanza al siguiente bloque de tiempo
-    }
-  });
+ // Obtener los horarios de disponibilidad del profesional
+ const { users: schedules } = await fetchScheduleByAvailability(id);
   
-  return horasMedicas;
+ // Obtener todas las fechas únicas de los horarios
+ const fechasUnicas = [...new Set(schedules.map(schedule => schedule.fechaInicio))];
+ 
+ // Obtener los bloques disponibles para cada fecha
+ const bloquesPromesas = fechasUnicas.map(async (date) => {
+   const { bloques } = await fetchBlocksAvailables(id, date);
+   return bloques.map(bloque => ({ ...bloque, fecha: date }));
+ });
+ 
+ const bloquesDisponibles = (await Promise.all(bloquesPromesas)).flat();
+ 
+ // Función para convertir hora a minutos para comparaciones
+ const horaAMinutos = (hora) => {
+   const [h, m, s] = hora.split(':').map(Number);
+   return h * 60 + m;
+ };
+ 
+ // Procesar cada horario para determinar disponibilidad
+ const horasMedicas = schedules.map(schedule => {
+   const inicioSchedule = horaAMinutos(schedule.horaIni);
+   const finSchedule = horaAMinutos(schedule.horaFin);
+   
+   // Buscar bloques que coincidan con este horario
+   const bloquesEnEsteHorario = bloquesDisponibles.filter(bloque => {
+     if (bloque.fecha !== schedule.fechaInicio) return false;
+     
+     const inicioBloque = horaAMinutos(bloque.hora_inicio);
+     const finBloque = horaAMinutos(bloque.hora_fin);
+     
+     // Verificar si el bloque está dentro del horario del schedule
+     return (
+       (inicioBloque >= inicioSchedule && finBloque <= finSchedule) &&
+       bloque.usuario_id === schedule.id_user
+     );
+   });
+   
+   // Calcular disponibilidad (promedio de bloques disponibles)
+   const totalBloques = bloquesEnEsteHorario.length;
+   const bloquesDisponiblesCount = bloquesEnEsteHorario.filter(b => b.disponible === 1).length;
+   const disponibilidad = totalBloques > 0 ? bloquesDisponiblesCount / totalBloques : 0;
+   
+   return {
+     detalleServicio: schedule.detalleServicio,
+     dia: schedule.dia,
+     duracionServicio: schedule.duracionServicio,
+     fechaInicio: schedule.fechaInicio,
+     fechaFin: schedule.fechaFin,
+     frecuencia: schedule.frecuencia,
+     horaInicio: schedule.horaIni,
+     horaFin: schedule.horaFin,
+     id_disponibilidad: schedule.id,
+     id_bloque: schedule.id_bloque,
+     id_user: schedule.id_user,
+     campus: schedule.campus,
+     modalidad: schedule.modalidad,
+     repeticiones: schedule.repeticiones,
+     tipo: schedule.tipo,
+     tipoServicio: schedule.tipoServicio,
+     uuid: schedule.uuid,
+     disponible: disponibilidad
+   };
+ });
+ 
+ return horasMedicas;
 };
-
 
 
 const recurrencia = (obj) => {
