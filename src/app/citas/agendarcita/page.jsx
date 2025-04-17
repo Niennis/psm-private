@@ -294,7 +294,7 @@ const AddAppoinments = () => {
         const appointment = await createAppointmentForGroup({
           ...data,
           "patient_id": selectedPatient.id,
-          hora: data.selectedHour + ':00',
+          hora: data.selectedHour,
           fecha: data.selectedDay,
           motivo: data.motivo === 'Otro' ? data.otro : data.motivo,
           campus: data.campus || 'No aplica'
@@ -326,7 +326,7 @@ const AddAppoinments = () => {
         const appointment = await createAppointment({
           ...data,
           "patient_id": selectedPatient.id,
-          hora: data.selectedHour + ':00',
+          hora: data.selectedHour,
           fecha: data.selectedDay,
           motivo: data.motivo === 'Otro' ? data.otro : data.motivo,
           campus: data.campus || 'No aplica'

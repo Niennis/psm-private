@@ -200,8 +200,8 @@ const PatientsList = () => {
   const columns = [
     {
       title: "Nombre",
-      dataIndex: "nombre",
-      sorter: (a, b) => a.nombre_alumno,
+      dataIndex: "nombre",      
+      sorter: (a, b) => a['nombre_alumno'].localeCompare(b['nombre_alumno']),
       fixed: 'left',
       onCell: () => ({
         style: {
@@ -241,12 +241,12 @@ const PatientsList = () => {
     {
       title: "Email",
       dataIndex: "email_estudiante",
-      sorter: (a, b) => a.email_estudiante.length - b.email_estudiante.length
+      sorter: (a, b) =>  a.email_estudiante.localeCompare(b.email_estudiante, undefined, { sensitivity: 'base' })
     },
     {
       title: "Estado",
       dataIndex: "status",
-      sorter: (a, b) => a.status.length - b.status.length,
+      sorter: (a, b) => a.status - b.status,
       render: (text, record) => (
         <div>
           {record.status === "activo" && (

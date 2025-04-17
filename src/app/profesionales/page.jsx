@@ -110,7 +110,7 @@ const DoctorList = () => {
     {
       title: "Especialidad",
       dataIndex: "especialidad",
-      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
+      sorter: (a, b) => a.especialidad.localeCompare(b.especialidad),
     },
     {
       title: "Teléfono",
@@ -124,12 +124,12 @@ const DoctorList = () => {
     }, {
       title: "Email",
       dataIndex: "email",
-      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
+      sorter: (a, b) => a.email.localeCompare(b.email),
     },
     {
       title: "Estado",
       dataIndex: "status",
-      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
+      sorter: (a, b) => a.status.localeCompare(b.status),
       render: (text, record) => (
         <div>
           {record.status === "activo" && (
