@@ -181,7 +181,6 @@ const GroupsList = () => {
     loading,
   };
 
-
   return (
     < >
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
