@@ -288,7 +288,6 @@ const AddAppoinments = () => {
     setSuccess('initial')
     setLoading(true);
     if (data.alumno.type === 'grupo') {
-      console.log('grupo')
       try {
         // la función que crea la cita
         const appointment = await createAppointmentForGroup({
@@ -319,7 +318,6 @@ const AddAppoinments = () => {
         setLoading(false)
       }
     } else if (data.alumno.type === 'alumno') {
-      console.log('alumno')
 
       try {
         // la función que crea la cita
