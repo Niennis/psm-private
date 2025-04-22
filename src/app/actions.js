@@ -28,7 +28,7 @@ export async function logInAction(token, formData) {
     }
   }
 
-  // success response
+  // success respuesta
   return {
     success: true,
     message: "Verificado"

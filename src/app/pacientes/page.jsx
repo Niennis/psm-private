@@ -1,19 +1,19 @@
 "use client"
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { Form, Switch, Table } from 'antd';
+import { Form, Table } from 'antd';
 import { useUserContext } from '@/context/UserContext';
 // import Headerudp from '../Headerudp';
-import Sidebar from '../../components/Sidebar';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
 import { fetchUser, fetchUsers } from '../../services/UsersServices'
-import { changeStatusAppointment, fetchAppointment, search } from '../../services/AppointmentsServices'
+import { changeStatusAppointment, search } from '../../services/AppointmentsServices'
 import { fetchAppointments } from '../../services/AppointmentsServices';
 import {
-  imagesend, plusicon, refreshicon, searchnormal,
+  imagesend, refreshicon, searchnormal,
 } from '../../components/imagepath';
 import Link from "next/link";
-import { Alert } from '@mui/material';
+import Image from 'next/image';
+import Alert from '@mui/material/Alert';
 
 import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
@@ -21,7 +21,6 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Button } from 'react-bootstrap'
-import { FaCalendar } from "react-icons/fa";
 
 const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
   const hoy = new Date();
@@ -200,7 +199,7 @@ const PatientsList = () => {
   const columns = [
     {
       title: "Nombre",
-      dataIndex: "nombre",      
+      dataIndex: "nombre",
       sorter: (a, b) => a['nombre_alumno'].localeCompare(b['nombre_alumno']),
       fixed: 'left',
       onCell: () => ({
@@ -241,7 +240,7 @@ const PatientsList = () => {
     {
       title: "Email",
       dataIndex: "email_estudiante",
-      sorter: (a, b) =>  a.email_estudiante.localeCompare(b.email_estudiante, undefined, { sensitivity: 'base' })
+      sorter: (a, b) => a.email_estudiante.localeCompare(b.email_estudiante, undefined, { sensitivity: 'base' })
     },
     {
       title: "Estado",
@@ -322,7 +321,7 @@ const PatientsList = () => {
                 // data-bs-toggle="modal" 
                 // data-bs-target="#delete_patient"
                 >
-                  <FaCalendar /> Ver citas
+                  <i className="fas fa-calendar"></i> Ver citas
                 </Link>
               </div>
             </div>
@@ -641,8 +640,8 @@ const PatientsList = () => {
                                   onChange={(e) => { handleSearch(e.target.value) }}
                                 />
                                 <Link href="#" className="btn">
-                                  <img
-                                    src={searchnormal.src}
+                                  <Image
+                                    src={searchnormal}
                                     alt="#"
                                   />
                                 </Link>
@@ -661,7 +660,7 @@ const PatientsList = () => {
                                 onClick={fetchData}
                                 className="btn btn-primary doctor-refresh ms-2"
                               >
-                                <img src={refreshicon.src} alt="#" />
+                                <Image src={refreshicon} alt="#" />
                               </Link>
                             </div>
                           </div>
@@ -695,7 +694,7 @@ const PatientsList = () => {
                       </div>
                     </div>
 
-                    </div>
+                  </div>
                   {/* /Table Header */}
 
                   <div className="tab-content">
@@ -729,25 +728,6 @@ const PatientsList = () => {
           </div>
         </div>
 
-      </div>
-      <div id="delete_patient" className="modal fade delete-modal" role="dialog">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-body text-center">
-              <img src={imagesend.src} alt="#" width={50} height={46} />
-              <h3>Are you sure want to delete this ?</h3>
-              <div className="m-t-20">
-                {" "}
-                <Link href="#" className="btn btn-white me-2" data-bs-dismiss="modal">
-                  Cerrar
-                </Link>
-                <button type="submit" className="btn btn-danger">
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
       <div className='p-0 m-0'>
         {

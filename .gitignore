@@ -13,6 +13,8 @@
 /.next/
 !.next/static
 /out/
+.next/cache/
+.next/static/chunks/
 
 # production
 /build
