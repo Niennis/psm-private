@@ -1,19 +1,10 @@
 'use client'
-import Divider from '@mui/material/Divider';
 import Image from 'next/image';
 import Link from 'next/link';
-import { white_logo, white_acreditacion, logo02_white } from './imagepath';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import { LinkSharp, LocationCity } from '@mui/icons-material';
-import Map from 'feather-icons-react/build/IconComponents/Map';
-import Phone from 'feather-icons-react/build/IconComponents/Phone';
-import Mail from 'feather-icons-react/build/IconComponents/Mail';
-import { Box, useMediaQuery } from '@mui/material';
+import { logo02_white } from './imagepath';
+import Box from '@mui/material/Box';
+import useMediaQuery from '@mui/system/useMediaQuery';
 
-import { FaFacebookF, FaLinkedinIn, FaTwitter, FaYoutube } from "react-icons/fa";
-import { BsInstagram, BsTwitterX } from "react-icons/bs";
-import { FaXTwitter } from "react-icons/fa6";
-import { FaLocationDot } from "react-icons/fa6";
 import ReserveBtn from './ReserveBtn';
 import { useEffect } from 'react';
 
@@ -93,7 +84,6 @@ const FooterDae = () => {
               display: 'flex',
               justifyContent: 'center',
               gap: matches ? '0px' : '20px',
-              borderBottom: '1px solid white',
             }}
           >
             <div className={`col-10 col-md-8 ${matches ? '' : 'mt-4'}`}>
@@ -165,7 +155,7 @@ const FooterDae = () => {
                         fontSize: '25px',
                         margin: '0 10px',
                       }}>
-                      <FaLinkedinIn />
+                      <i className="fab fa-linkedin-in"></i>
                     </a>
                     <a href="https://www.facebook.com/bienestarestudiantiludp/"
                       style={{
@@ -175,7 +165,7 @@ const FooterDae = () => {
                         fontSize: '25px',
                         margin: '0 10px',
                       }}>
-                      <FaFacebookF />
+                      <i className="fab fa-facebook-f"></i>
                     </a>
 
                     <a href="https://www.instagram.com/daeudp"
@@ -186,7 +176,7 @@ const FooterDae = () => {
                         fontSize: '25px',
                         margin: '0 10px',
                       }}>
-                      <BsInstagram />
+                      <i className="fab fa-instagram"></i>
                     </a>
                     <a href="https://twitter.com/udp_cl"
                       style={{
@@ -196,8 +186,7 @@ const FooterDae = () => {
                         fontSize: '25px',
                         margin: '0 10px',
                       }}>
-
-                      <FaTwitter />
+                      <i className="fab fa-twitter"></i>
                       {/* <BsTwitterX  /> */}
                     </a>
                     <a href="https://www.youtube.com/channel/UCt8RovDPs5pdklo_oBVLuEw"
@@ -208,7 +197,7 @@ const FooterDae = () => {
                         fontSize: '25px',
                         margin: '0 10px',
                       }}>
-                      <FaYoutube />
+                        <i className="fab fa-youtube"></i>
                     </a>
                   </div>
                 </div>
@@ -234,7 +223,7 @@ const FooterDae = () => {
                         fontSize: '30px',
                         margin: '0 14px',
                       }}>
-                      <FaLinkedinIn />
+                      <i className="fab fa-linkedin-in"></i>
                     </a>
                     <a href="https://www.facebook.com/bienestarestudiantiludp/"
                       style={{
@@ -245,7 +234,7 @@ const FooterDae = () => {
                         fontSize: '30px',
                         margin: '0 14px',
                       }}>
-                      <FaFacebookF />
+                      <i className="fab fa-facebook-f"></i>
                     </a>
 
                     <a href="https://www.instagram.com/daeudp"
@@ -256,7 +245,7 @@ const FooterDae = () => {
                         fontSize: '30px',
                         margin: '0 14px',
                       }}>
-                      <BsInstagram />
+                      <i className="fab fa-instagram"></i>
                     </a>
                     <a href="https://twitter.com/udp_cl"
                       style={{
@@ -268,8 +257,7 @@ const FooterDae = () => {
                         margin: '0 14px',
                       }}>
 
-                      <FaTwitter />
-                      {/* <BsTwitterX  /> */}
+                      <i className="fab fa-twitter"></i>
                     </a>
                     <a href="https://www.youtube.com/channel/UCt8RovDPs5pdklo_oBVLuEw"
                       style={{
@@ -280,7 +268,7 @@ const FooterDae = () => {
                         fontSize: '30px',
                         margin: '0 14px',
                       }}>
-                      <FaYoutube />
+                        <i className="fab fa-youtube"></i>
                     </a>
                   </div>
                 </div>
@@ -329,7 +317,7 @@ const FooterDae = () => {
                   </div>
                   <div className="col-4" style={{ alignSelf: "center" }}>
                     <p style={{ fontSize: "12px", margin: "0px", padding: "10px 0" }}>
-                      <FaLocationDot /> Av. Manuel Rodríguez 343, Santiago, Región Metropolitana
+                    <i className="fas fa-map-marker-alt"></i> Av. Manuel Rodríguez 343, Santiago, Región Metropolitana
                     </p>
                   </div>
                 </div>
@@ -349,7 +337,7 @@ const FooterDae = () => {
                 }}>
                 <div className="col-12" style={{ alignSelf: "center" }}>
                   <p style={{ fontSize: "12px", margin: "0px", padding: "10px 0" }}>
-                    <FaLocationDot /> Av. Manuel Rodríguez 343, Santiago, Región Metropolitana
+                  <i className="fas fa-map-marker-alt"></i> Av. Manuel Rodríguez 343, Santiago, Región Metropolitana
                   </p>
                 </div>
                 <div className="col-12" style={{ alignSelf: "center", borderRadius: '8px 8px 0 0', backgroundColor: '#A6A6A6' }}>

@@ -1,17 +1,25 @@
 const path = require("path");
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 
-module.exports = {
+module.exports = withBundleAnalyzer({
   cacheHandler: require.resolve('./src/utils/cache-handler.js'),
   // distDir: '.next', // Mantener el estándar.
   compress: true, // Habilita compresión por defecto.
+  swcMinify: true,
+  productionBrowserSourceMaps: false,
+  experimental: {
+    // optimizePackageImports: [ // Agrupa imports de MUI y otras librerías
+    //   '@mui/material',
+    //   '@mui/icons-material',
+    //   '@fullcalendar/react'
+    // ],
+    esmExternals: 'loose', // Reduce duplicación de dependencias
+  },
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-        port: '',
-      },
-    ],
+    remotePatterns: [{ protocol: 'https', hostname: '**' }],
+    formats: ['image/webp'],
   },
   webpack: (config) => {
     config.resolve.alias = {
@@ -21,15 +29,20 @@ module.exports = {
       'ckeditor5': path.resolve(__dirname, 'node_modules/ckeditor5'),
     };
 
+    // config.module.rules.push({
+    //   test: /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+    //   use: ['raw-loader'],
+    // });
+
+    // config.module.rules.push({
+    //   test: /ckeditor\.css$/,
+    //   use: ["style-loader", "css-loader"],
+    // });
     config.module.rules.push({
-      test: /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
-      use: ['raw-loader'],
+      test: /ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/,
+      use: { loader: 'babel-loader' }
     });
-    
-    config.module.rules.push({
-      test: /ckeditor\.css$/,
-      use: ["style-loader", "css-loader"],
-    });
+
     return config;
   },
   async headers() {
@@ -57,4 +70,4 @@ module.exports = {
       },
     ];
   },
-};
+});

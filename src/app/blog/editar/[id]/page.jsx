@@ -1,20 +1,17 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+// eslint-disable-next-line react-hooks/exhaustive-deps
+import React, { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link';
 
-import { useSession } from "next-auth/react";
-import { useRouter } from 'next/navigation';
-
-import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
-import DownloadSection from '@/components/DownloadsSection';
+import { useForm, FormProvider } from 'react-hook-form';
 
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
-import { fetchBlog, updateBlog, createBlog, uploadFile, createDownload } from '@/services/BlogServices';
+import { fetchBlog, updateBlog, uploadFile } from '@/services/BlogServices';
 
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import { Alert } from '@mui/material';
@@ -47,13 +44,6 @@ const Editblog = ({ params }) => {
       activeClassName: "edit-blog",
     });
   }, [setProps]);
-
-  const loadFile = (event) => {
-    // Handle file loading logic here
-  };
-  const [selectedOption, setSelectedOption] = useState(null);
-  // eslint-disable-next-line no-unused-vars
-
 
   const formatText = (input) => {
     return input

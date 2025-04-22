@@ -1,10 +1,11 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
+/* eslint-disable-next-line react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react'
-import Sidebar from '../../../components/Sidebar';
 import Link from 'next/link';
-import { TextField, Alert } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import Alert from '@mui/material/Alert';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import { useForm, Controller } from 'react-hook-form'
 
@@ -19,7 +20,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CustomizedTooltips from '@/components/Tooltip';
-import { FaInfoCircle } from "react-icons/fa";
 import SimpleBackdrop from '@/components/Backdrop';
 import { useDisponibilidadContext } from '@/context/DisponibilidadContext';
 
@@ -490,7 +490,7 @@ const ScheduleByProfessional = ({ params }) => {
                             <>El nombre del servicio es un nombre de fantasía para identificar las horas disponibles en los reportes. Este nombre permite agrupar diferentes tipos de disponibilidad en un mismo grupo.</>
                           )}>
                             <label>
-                              Nombre servicio o evento  <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} />
+                              Nombre servicio o evento  <span className="login-danger">*</span> <i className="fa fa-info-circle font-blue" aria-hidden="true" style={{ fontSize: '14px' }} ></i>
                             </label>
                           </CustomizedTooltips>
                           <input
@@ -508,7 +508,7 @@ const ScheduleByProfessional = ({ params }) => {
                             <>La duración del servicio indica cuánto tiempo se dedicará a la atención profesional indicada.</>
                           )}>
                             <label>
-                              Duración servicio <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} />
+                              Duración servicio <span className="login-danger">*</span> <i className="fa fa-info-circle font-blue" aria-hidden="true" style={{ fontSize: '14px' }} ></i>
                             </label>
 
                           </CustomizedTooltips>
@@ -573,7 +573,7 @@ const ScheduleByProfessional = ({ params }) => {
                             <CustomizedTooltips text={(
                               <>Selecciona el tipo de disponibilidad para indicar cuándo y para qué tipos de atención estás disponible. Si no seleccionas un tipo, no se podrán agendar citas de esa categoría en el bloque horario especificado.</>
                             )}>
-                              <h4 style={{ width: 'max-content' }}>Tipo de disponibilidad <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                              <h4 style={{ width: 'max-content' }}>Tipo de disponibilidad <span className="login-danger">*</span> <i className="fa fa-info-circle font-blue" aria-hidden="true" style={{ fontSize: '14px' }} ></i></h4>
                             </CustomizedTooltips>
                           </div>
                         </div>
@@ -641,7 +641,7 @@ const ScheduleByProfessional = ({ params }) => {
                             <CustomizedTooltips text={(
                               <>Al seleccionar un tipo de modalidad u otra, se ofrecerá como opción al momento de agendar una cita. Si estarás disponible para todos los tipos de modalidad, selecciona Ambas.</>
                             )}>
-                              <h4 style={{ width: 'max-content' }}>Modalidad <span className="login-danger">*</span><FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                              <h4 style={{ width: 'max-content' }}>Modalidad <span className="login-danger">*</span> <i className="fa fa-info-circle font-blue" aria-hidden="true" style={{ fontSize: '14px' }} ></i></h4>
                             </CustomizedTooltips>
                           </div>
                         </div>
@@ -710,7 +710,7 @@ const ScheduleByProfessional = ({ params }) => {
                               <CustomizedTooltips text={(
                                 <>Al seleccionar un campus, se podrán asignar horas de atención para dicho lugar.</>
                               )}>
-                                <h4 style={{ width: 'max-content' }}>Campus <span className="login-danger">*</span><FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                                <h4 style={{ width: 'max-content' }}>Campus <span className="login-danger">*</span> <i className="fa fa-info-circle font-blue" aria-hidden="true" style={{ fontSize: '14px' }} ></i></h4>
                               </CustomizedTooltips>
                             </div>
                           </div>
@@ -749,7 +749,7 @@ const ScheduleByProfessional = ({ params }) => {
                           <CustomizedTooltips text={(
                             <>No se pueden modificar las fechas ni la frecuencia de un bloque ya creado. Solo puedes actualizar el tipo de disponibilidad, modalidad y campus. Si necesitas cambiar la programación de tiempo, elimina este bloque y crea uno nuevo.</>
                           )}>
-                            <h4 style={{ width: 'max-content' }}>Fecha de disponibilidad <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                            <h4 style={{ width: 'max-content' }}>Fecha de disponibilidad <span className="login-danger">*</span> <i className="fa fa-info-circle font-blue" aria-hidden="true" style={{ fontSize: '14px' }} ></i></h4>
                           </CustomizedTooltips>
                         </div>
                       </div>
@@ -843,7 +843,7 @@ const ScheduleByProfessional = ({ params }) => {
                                 </p>
                               </>
                             )}>
-                              <h4 style={{ width: 'max-content' }}>Fecha <span className="login-danger">*</span> <FaInfoCircle className="font-blue" style={{ fontSize: '14px' }} /></h4>
+                              <h4 style={{ width: 'max-content' }}>Fecha <span className="login-danger">*</span> <i className="fa fa-info-circle font-blue" aria-hidden="true" style={{ fontSize: '14px' }} ></i></h4>
                             </CustomizedTooltips>
                           </div>
                         </div>

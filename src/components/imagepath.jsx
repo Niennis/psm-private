@@ -274,49 +274,8 @@ export { default as report_icon2 } from "../assets/img/icons/report-icon-02.svg"
 export { default as report_icon3 } from "../assets/img/icons/report-icon-03.svg";
 export { default as report_icon4 } from "../assets/img/icons/report-icon-04.svg";
 
-
-export { default as modelo_dsme } from "../assets/img/Modelo-DSME-90-x-42-cm-1568x732.jpg";
-
 export { default as white_logo } from "../assets/img/logoudp_blanco_footer.png"
 export { default as logo02_white } from "../assets/img/logo02_white.png"
 export { default as white_acreditacion } from "../assets/img/Logo_Acreditacion_udp.png"
-export { default as como_pedir_ayuda } from "../assets/img/cuando-pedir-ayuda-1024x576.png"
-export { default as redes_externas } from "../assets/img/Redes-Externas-1-864x1536.png"
-export { default as suicidio_info } from "../assets/img/suicidio-1024x842.jpg"
-export { default as suicidio } from "../assets/img/suicidio10.jpg"
-export { default as acercate } from "../assets/img/acercate.jpg"
-export { default as decide } from "../assets/img/decide.jpg"
-export { default as droga01 } from "../assets/img/droga01-768x583.jpg"
-export { default as droga02 } from "../assets/img/droga03-768x894.jpg"
-
-export { default as carrousel01 } from "../assets/img/carrousel01.jpeg"
-export { default as carrousel02 } from "../assets/img/carrousel02.jpeg"
-export { default as carrousel03 } from "../assets/img/carrousel03.jpeg"
-export { default as carrousel04 } from "../assets/img/carrousel04.jpg"
-export { default as banner01 } from "../assets/img/banner01.png"
-export { default as banner02 } from "../assets/img/banner02.png"
-export { default as banner03 } from "../assets/img/banner03.png"
-export { default as banner04 } from "../assets/img/homepage/ansiedad_y_educacion.jpeg"
-export { default as banner05 } from "../assets/img/homepage/vida_universitaria.jpeg"
-export { default as banner06 } from "../assets/img/homepage/biblioteca_viva.jpg"
-export { default as banner07 } from "../assets/img/homepage/distraccion_positiva.jpg"
-
-// export { default as saludMental01 } from "../assets/img/saludMental01.jpeg"
-// export { default as saludMental02 } from "../assets/img/saludMental02.jpeg"
-// export { default as saludMental03 } from "../assets/img/saludMental03.jpeg"
-// export { default as saludMental04 } from "../assets/img/cafeina.jpg" 
-export { default as saludMental05 } from "../assets/img/ansiedad.jpg" 
-
-export { default as conferencia } from "../assets/img/salon01.jpg"
-export { default as profesional01} from "../assets/img/homepage/sicologa.png"
 
 export { default as bot_icon } from "../assets/img/bot_salud_mental.png"
-
-export { default as map} from "../assets/img/mapa-udp.png"
-
-export {default as blog0101 } from "../assets/img/blog/ansiedad01.jpg"
-export {default as blog0102 } from "../assets/img/blog/ansiedad02.jpg"
-export {default as blog0201 } from "../assets/img/blog/suicidio01.jpg"
-export {default as blog0202 } from "../assets/img/blog/suicidio02.jpg"
-export {default as blog0301 } from "../assets/img/blog/drogas01.jpg"
-export {default as blog0302 } from "../assets/img/blog/drogas02.jpg"

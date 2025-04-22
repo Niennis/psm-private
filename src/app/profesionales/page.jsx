@@ -4,29 +4,24 @@ import { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Form, Switch, Table } from 'antd';
+import Image from 'next/image';
+import { Table } from 'antd';
 
 import { onShowSizeChange, itemRender } from '@/components/Pagination'
-import ProtectedPage from '@/components/ProtectedRoutes';
-import Sidebar from '@/components/Sidebar';
-import { fetchProfessionals, professionalsWithSpeciality, fetchSpecialities, fetchProfessionalsAndAdmins } from '@/services/DoctorsServices';
+import {  professionalsWithSpeciality, fetchSpecialities, fetchProfessionalsAndAdmins } from '@/services/DoctorsServices';
 import { search } from '@/services/AppointmentsServices'
 import { useSidebar } from "@/context/SidebarContext";
 
-import { imagesend, plusicon, refreshicon, searchnormal } from '@/components/imagepath';
+import {  plusicon, refreshicon, searchnormal } from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
 import SimpleBackdrop from '@/components/Backdrop';
 import { setServerData } from '../actions';
 
-const cacheHandler = new CacheHandler();
 
 const DoctorList = () => {
-  const ROL = ["administrador", "profesional"]
   const { data: session } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
 
   const [doctors, setDoctors] = useState([])
   const [results, setResults] = useState([])
@@ -95,9 +90,9 @@ const DoctorList = () => {
         <>
           <h2 className="profile-image">
             {record.img && <Link href={`/profesionales/editar/${record.id}`} className="avatar avatar-sm me-2">
-              <img
+              <Image
                 className="avatar-img rounded-circle"
-                src={record.src}
+                src={record}
                 alt="User Image"
               />
             </Link>}
@@ -253,8 +248,8 @@ const DoctorList = () => {
                                   onChange={(e) => { handleSearch(e.target.value) }}
                                 />
                                 <Link className="btn" href="#">
-                                  <img
-                                    src={searchnormal.src}
+                                  <Image
+                                    src={searchnormal}
                                     alt="#"
                                   />
                                 </Link>
@@ -265,14 +260,14 @@ const DoctorList = () => {
                                 href="/profesionales/agregarprofesional"
                                 className="btn btn-primary add-pluss ms-2"
                               >
-                                <img src={plusicon.src} alt="#" />
+                                <Image src={plusicon} alt="#" />
                               </Link>
                               <Link
                                 href="#"
                                 onClick={handleRefresh}
                                 className="btn btn-primary doctor-refresh ms-2"
                               >
-                                <img src={refreshicon.src} alt="#" />
+                                <Image src={refreshicon} alt="#" />
                               </Link>
                             </div>
                           </div>

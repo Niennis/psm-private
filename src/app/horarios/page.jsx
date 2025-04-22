@@ -2,28 +2,24 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect } from "react";
 import { useState } from "react";
-import Sidebar from "../../components/Sidebar";
 import Link from "next/link";
+import Image from "next/image";
 import { Table } from "antd";
 import { onShowSizeChange, itemRender } from "../../components/Pagination";
 import { imagesend, plusicon, refreshicon, searchnormal } from "../../components/imagepath";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { fetchScheduleByUser, getSpecialities } from "@/services/SchedulesServices";
-import { fetchProfessionals, fetchProfessionalById, addDoctor, updateDoctor } from '../../services/DoctorsServices';
+import { getSpecialities } from "@/services/SchedulesServices";
+import { fetchProfessionals } from '../../services/DoctorsServices';
 import { useForm } from 'react-hook-form';
 
 import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
-
-const cacheHandler = new CacheHandler();
 
 const ScheduleList = () => {
-  const ROL = ["profesional"]
   const { data: session } = useSession()
   const router = useRouter();
 
@@ -388,10 +384,10 @@ const ScheduleList = () => {
                                     placeholder="Search here"
                                   />
                                   <Link className="btn" href="#">
-                                    <img
+                                    {/* <img
                                       src={searchnormal.src}
                                       alt="#"
-                                    />
+                                    /> */}
                                   </Link>
                                 </form>
                               </div>
@@ -400,13 +396,13 @@ const ScheduleList = () => {
                                   href="#"
                                   className="btn btn-primary add-pluss ms-2"
                                 >
-                                  <img src={plusicon.src} alt="#" />
+                                  {/* <img src={plusicon.src} alt="#" /> */}
                                 </Link>
                                 <Link
                                   href="#"
                                   className="btn btn-primary doctor-refresh ms-2"
                                 >
-                                  <img src={refreshicon.src} alt="#" />
+                                  {/* <img src={refreshicon.src} alt="#" /> */}
                                 </Link>
                               </div>
                             </div>
@@ -471,7 +467,7 @@ const ScheduleList = () => {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-body text-center">
-                  <img src={imagesend.src} alt="#" width={50} height={46} />
+                  {/* <img src={imagesend.src} alt="#" width={50} height={46} /> */}
                   <h3>Are you sure want to delete this ?</h3>
                   <div className="m-t-20">
                     {" "}

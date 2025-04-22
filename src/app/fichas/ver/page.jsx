@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable-next-line react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
@@ -394,8 +395,8 @@ const FichaAlumno = ({ params }) => {
                             (session?.user?.rol === 'administrador' || session?.user?.rol === 'profesional') && records && records.map((item, index) => (
                               <li key={item.id_alumno + index}>
                                 {/* Fila principal con los datos generales */}
-                                <div className="activity-user">
-                                  <img data-bs-toggle="tooltip" className="avatar"></img>
+                                <div className="activity-user font-blue" style={{ top: '6px' }}>
+                                  <i className="fas fa-circle"></i>
                                 </div>
                                 {index === 0 ? (
                                   <div className="activity-content timeline-group-blk">
@@ -702,8 +703,8 @@ const FichaAlumno = ({ params }) => {
                             (session?.user?.rol === 'alumno' && session?.user?.id == selectedUserId) && records && records.map((item, index) => (
                               <li key={item.id_alumno + index}>
                                 {/* Fila principal con los datos generales */}
-                                <div className="activity-user">
-                                  <img data-bs-toggle="tooltip" className="avatar"></img>
+                                <div className="activity-user font-blue" style={{ top: '6px' }}>
+                                  <i className="fas fa-circle"></i>
                                 </div>
                                 {index === 0 ? (
                                   <div className="activity-content timeline-group-blk">

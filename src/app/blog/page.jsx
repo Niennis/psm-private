@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
+import Image from 'next/image';
 
 import FeatherIcon from "feather-icons-react";
 import {
@@ -14,9 +15,6 @@ import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
-
-const cacheHandler = new CacheHandler();
 
 const truncarPalabras = (texto, num) => {
   const aux = texto.split(' ');
@@ -196,7 +194,7 @@ const BlogView = () => {
                     <div className="blog grid-blog">
                       <div className="blog-image">
                         <Link href="/blog">
-                          <img
+                          <Image
                             className="img-fluid"
                             width={313}
                             height={173}

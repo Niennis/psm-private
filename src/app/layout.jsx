@@ -32,8 +32,8 @@ export default async function RootLayout({ children, props }) {
           <link rel="icon" href="/favicon.ico" sizes="any" />
           <title>Salud Mental Estudiantil UDP</title>
 
-          <Script src="https://kit.fontawesome.com/7a6fedca6c.js" ></Script>
-          <Script id="fontawesome" src="https://kit.fontawesome.com/a790242b27.js" ></Script>
+          <Script id="fontawesome" src="https://kit.fontawesome.com/7a6fedca6c.js" ></Script>
+          {/* <Script id="fontawesome" src="https://kit.fontawesome.com/a790242b27.js" ></Script> */}
           <Script id="hotjar" strategy="afterInteractive" dangerouslySetInnerHTML={{
             __html:
               `(function(h,o,t,j,a,r){

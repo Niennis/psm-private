@@ -1,31 +1,22 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
+// eslint-disable-next-line react-hooks/exhaustive-deps
 import { useEffect, useState, Fragment } from 'react'
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Sidebar from '../../../components/Sidebar';
-import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
-import Select from "react-select";
-/* eslint-disable no-unused-vars */
 import { fetchBlog } from '@/services/BlogServices';
 import FooterDae from '@/components/FooterDae';
-import { blogs } from '@/utils/blogs';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import Image from 'next/image'
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { FaArrowLeft } from "react-icons/fa";
-import { FaDownload } from 'react-icons/fa';
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
 import ParserImgToImage from '@/components/Parser';
 
-const cacheHandler = new CacheHandler();
 
 const normalizarTexto = (texto) => {
   // Expresiones regulares dinámicas para base y key
@@ -127,7 +118,7 @@ const card = (item) => {
               fontWeight: 600,
               border: '2px solid #A5C8FF'
             }}>
-            Descargar <FaDownload />
+            Descargar <i className="fas fa-download"></i>
           </button>
         </a>
 
@@ -171,19 +162,25 @@ const Blogdetails = ({ params }) => {
             // alignItems: 'center',
           }}>
             {blog?.blog_imagen &&
-              <>
-                <img
-                  alt="#"
-                  // src={`${process.env.NEXT_PUBLIC_BASE_IMG}${blog?.blog_imagen}${process.env.NEXT_PUBLIC_KEY_IMG}`}
-                  // src={blog?.blog_imagen.includes(process.env.NEXT_PUBLIC_KEY_IMG) ? `${blog?.blog_imagen}` : `${blog?.blog_imagen}${process.env.NEXT_PUBLIC_KEY_IMG}`}
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  aspectRatio: '16/9',
+                  overflow: 'hidden' 
+                }}>
+                <Image
                   src={prepareImg(blog?.blog_imagen)}
-                  width={'100%'}
+                  alt={blog?.title || "Imagen del blog"}
+                  fill
                   style={{
-                    backgroundPosition: 'center',
-                    // height: 'fit-content'
+                    objectFit: 'cover',
+                    objectPosition: 'center',
                   }}
+                  quality={75} 
+                  priority={false} 
                 />
-              </>
+              </div>
             }
 
           </div>}
@@ -200,7 +197,7 @@ const Blogdetails = ({ params }) => {
                 }}
                 onClick={() => router.back()}
               >
-                <FaArrowLeft /> Volver
+                <i className="fas fa-arrow-left"></i> Volver
               </button>
 
               <button className='btn mt-4 mb-5'

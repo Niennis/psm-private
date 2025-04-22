@@ -1,4 +1,5 @@
 // components/ProtectedPage.js
+/* eslint-disable-next-line react-hooks/exhaustive-deps */
 // import { useUser } from '@/context/auth-context';
 'use client'
 import { useEffect } from 'react';

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { redirect, useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from 'next/link';
-
+import Image from 'next/image';
 import { fetchUserByEmail } from "@/services/UsersServices";
 
 
@@ -77,8 +77,21 @@ const ForgotPassword = () => {
                   <div className="loginbox">
                     <div className="login-right">
                       <div className="login-right-wrap">
-                        <div className="account-logo pt-5">
-                          <img src={logo.src} width="100%" alt="logo udp" style={{ maxWidth: '400px ', display: !matches && 'none' }} />
+                        <div className="account-logo pt-5" style={{ maxWidth: '400px', display: !matches ? 'none' : 'block' }}>
+                          <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
+                            <Image
+                              src={logo.src}
+                              alt="logo udp"
+                              width={400} 
+                              height={200} 
+                              style={{
+                                width: '100%',
+                                height: 'auto',
+                                objectFit: 'contain', 
+                              }}
+                              priority
+                            />
+                          </div>
                         </div>
                         <h2>Recuperar Contraseña</h2>
                         {/* Form */}

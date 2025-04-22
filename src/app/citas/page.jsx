@@ -1,5 +1,7 @@
 'use client'
 /* eslint-disable no-unused-vars */
+/* eslint-disable-next-line react-hooks/exhaustive-deps */
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link';
 import Image from 'next/image';

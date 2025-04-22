@@ -5,6 +5,7 @@ import { logo } from '@/components/imagepath';
 import { useMediaQuery } from "@mui/material";
 import { Alert } from "@mui/material";
 import { useForm } from 'react-hook-form'
+import Image from 'next/image'
 
 import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 
@@ -35,7 +36,7 @@ const ChangePassword = () => {
       if (res.ok) {
         setSuccess('success')
         setMessage('Contraseña cambiada con éxito. Puedes iniciar sesión');
-        
+
         // router.push('/'); // Redirige al inicio de sesión
       } else {
         setSuccess('fail')
@@ -76,8 +77,21 @@ const ChangePassword = () => {
                 <div className="loginbox">
                   <div className="login-right">
                     <div className="login-right-wrap">
-                      <div className="account-logo pt-5">
-                        <img src={logo.src} width="100%" alt="logo udp" style={{ maxWidth: '400px ', display: !matches && 'none' }} />
+                      <div className="account-logo pt-5" style={{ maxWidth: '400px', display: !matches ? 'none' : 'block' }}>
+                        <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
+                          <Image
+                            src={logo.src}
+                            alt="logo udp"
+                            width={400} 
+                            height={200} 
+                            style={{
+                              width: '100%',
+                              height: 'auto',
+                              objectFit: 'contain',
+                            }}
+                            priority
+                          />
+                        </div>
                       </div>
                       <h2>Cambiar Contraseña</h2>
                       {/* Form */}

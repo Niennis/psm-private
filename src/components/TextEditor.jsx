@@ -1,9 +1,9 @@
-
+/* eslint-disable-next-line react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 // import { CKEditor } from "@ckeditor/ckeditor5-react";
 export const forceDynamic = 'force-dynamic';
 import dynamic from 'next/dynamic'
-
+// import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 const CKEditorNoSSR = dynamic(
   () => import('@ckeditor/ckeditor5-react').then(mod => mod.CKEditor),

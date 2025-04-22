@@ -1,5 +1,6 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
+/* eslint-disable-next-line react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'

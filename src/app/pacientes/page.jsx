@@ -1,4 +1,5 @@
 "use client"
+/* eslint-disable-next-line react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Form, Table } from 'antd';

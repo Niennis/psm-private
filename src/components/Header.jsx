@@ -7,14 +7,18 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { logo } from "./imagepath";
-import { useMediaQuery } from "@mui/material";
-import { Tooltip, Avatar } from '@mui/material';
-
-import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, MenuItem } from '@mui/material';
+import useMediaQuery from "@mui/system/useMediaQuery";
+import Tooltip from "@mui/material/Tooltip";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import Container from "@mui/material/Container";
+import Button from "@mui/material/Button";
+import MenuItem from "@mui/material/MenuItem";
 import MenuIcon from '@mui/icons-material/Menu';
-// import { IoMdLogIn } from "react-icons/io";
-import { FaUserCircle } from "react-icons/fa";
-import { FaChevronDown } from "react-icons/fa";
 import {
   baricon,
   baricon1,
@@ -190,7 +194,7 @@ const Header = () => {
               <Image src={baricon} alt="" />
             </Link>
             <Link id="mobile_btn" className="mobile_btn float-start" href="#" onClick={handlesidebarmobilemenu}
-              style={{position: 'revert'}}
+              style={{ position: 'revert' }}
             >
               <Image src={baricon1} alt="" />
             </Link>
@@ -326,7 +330,7 @@ const Header = () => {
                   <Tooltip title="Cómo trabajamos">
                     <Button
                       className={`sailec ${activeSection === 'como_trabajamos' ? 'active-header' : ''}`}
-                      sx={{ p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px' , width: 'min-content'}}>
+                      sx={{ p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px', width: 'min-content' }}>
                       {page.title}
                     </Button>
                   </Tooltip>
@@ -349,7 +353,7 @@ const Header = () => {
                       <MenuItem
                         key={setting.url}
                         onClick={handleCloseUserMenuDesktop}
-                        // sx={{ py: 1 }}
+                      // sx={{ py: 1 }}
                       >
                         <Typography className="sailec">
                           <a
@@ -391,7 +395,7 @@ const Header = () => {
                 ? <>
                   <ReserveBtn text={'Reservar'} bgColor={'#FABB00'} color={'#000'} />
                   <Link href="/#profesionales" style={{ textDecoration: 'none' }}>
-                    <FaUserCircle style={{ fontSize: matches ? '50px' : '38px', color: '#000', border: '1px solid #ff5253', borderRadius: '50px', padding: '5px', marginLeft: '5px', background: '#b82925', color: '#fff', fontFamily: 'sailec' }} />
+                    <i className=" fas fa-user-circle" style={{ fontSize: matches ? '50px' : '38px', color: "#b82925", background: '#fff', padding: '5px', marginLeft: '5px' }}></i>
                   </Link>
                 </>
                 : session.user?.picture ?
@@ -412,7 +416,7 @@ const Header = () => {
                   </button>
                   :
                   <Link href={session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador' ? '/pacientes' : '/citas'} style={{ padding: 0, margin: 0, textAlign: 'right' }}>
-                    <FaUserCircle style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} />
+                    <i className="fas fa-user-circle" style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} ></i>
                     <small style={{ display: 'block', textAlign: 'right', width: 'min-content' }}>
                       {`Bienvenido, 
                       ${(session.user?.name).split(' ')[0]}`}

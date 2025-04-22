@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+/* eslint-disable-next-line react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 "use client"
 import React, { useEffect, useState, useContext } from 'react'

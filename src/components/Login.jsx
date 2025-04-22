@@ -1,14 +1,11 @@
 "use client"
-import { useState, useEffect, useRef } from "react";
-import { redirect, useParams, usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { redirect, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { signIn } from "next-auth/react"
 import { useForm } from 'react-hook-form';
 import { signOut } from "next-auth/react";
-
-// import { AuthData } from "@/providers/AuthWrapper";
-
-import { fetchUserMailAndPass } from "@/services/UsersServices";
 
 import { useMediaQuery } from "@mui/material";
 import { logo } from "@/components/imagepath";
@@ -115,7 +112,7 @@ const Login = () => {
   /* LOGIN CON GOOGLE */
   const handleSignIn = async () => {
     try {
-      await signIn('google', { 
+      await signIn('google', {
         callbackUrl: '/citas',
         prompt: 'select_account' // Esto es clave: fuerza a Google a mostrar la selección de cuentas
       });
@@ -164,9 +161,26 @@ const Login = () => {
                     }}>
                     <div className="login-right mx-2 p-0">
                       <div className="login-right-wrap">
-                        <div className="account-logo pt-5">
-                          <Link href="#">
-                            <img src={logo.src} width="100%" alt="logo udp" style={{ maxWidth: '400px ', display: !matches && 'none' }} />
+                        <div className="account-logo pt-5" style={{ display: !matches ? 'none' : 'block' }}>
+                          <Link href="#" style={{ display: 'block', maxWidth: '400px' }}>
+                            <div style={{
+                              position: 'relative',
+                              width: '100%',
+                              height: '80px'
+                            }}>
+                              <Image
+                                src={logo.src}
+                                alt="logo udp"
+                                width={400}
+                                height={200}
+                                style={{
+                                  width: '100%',
+                                  height: 'auto',
+                                  objectFit: 'contain',
+                                }}
+                                priority
+                              />
+                            </div>
                           </Link>
                         </div>
 

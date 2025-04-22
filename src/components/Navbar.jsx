@@ -3,6 +3,7 @@ import Link from "next/link";
 import { logo, baricon, baricon1 } from "./imagepath";
 import ReserveBtn from "./ReserveBtn";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 const Navbar = () => {
   const handlesidebar = () => {
@@ -22,13 +23,13 @@ const Navbar = () => {
       <div className="header" style={{ justifyContent: 'space-between', display: 'flex', alignItems: 'center' }}>
         <div className="header-left">
           <Link id="toggle_btn" href="#" onClick={handlesidebar}>
-            <img src={baricon.src} alt="" />
+            <Image src={baricon} alt="" />
           </Link>
           <Link id="mobile_btn" className="mobile_btn float-start" href="#" onClick={handlesidebarmobilemenu}>
-            <img src={baricon1.src} alt="" />
+            <Image src={baricon1} alt="" />
           </Link>
           <Link href="/" className="logo">
-            <img src={logo.src} width={263} height={70} alt="" />{" "}
+            <Image src={logo} width={263} height={70} alt="" />{" "}
           </Link>
         </div>
         <ul className="nav user-menu float-end ">

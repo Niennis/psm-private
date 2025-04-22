@@ -1,10 +1,11 @@
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Sidebar from '../../../components/Sidebar';
 import { Profileuser, cameraicon, doctor, imagesend, medalicon, medalicon02, medalicon03, menuicon16, profilebg } from '../../../components/imagepath';
 import FeatherIcon from "feather-icons-react";
 // import { Link } from 'react-router-dom';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSidebar } from "@/context/SidebarContext";
 
 import { useSession } from "next-auth/react";
@@ -74,20 +75,20 @@ const DoctorProfile = () => {
                         </div>
                         <div className="doctor-profile-head">
                           <div className="profile-bg-img">
-                            <img src={profilebg} alt="Profile" />
+                            <Image src={profilebg} alt="Profile" />
                           </div>
                           <div className="row">
                             <div className="col-lg-4 col-md-4">
                               <div className="profile-user-box">
                                 <div className="profile-user-img">
-                                  <img
+                                  <Image
                                     src={Profileuser}
                                     alt="Profile"
                                   />
                                   <div className="form-group doctor-up-files profile-edit-icon mb-0">
                                     <div className="uplod d-flex">
                                       <label className="file-upload profile-upbtn mb-0">
-                                        <img
+                                        <Image
                                           src={cameraicon}
                                           alt="Profile"
                                         />
@@ -255,7 +256,7 @@ const DoctorProfile = () => {
                           </div>
                           <div className="personal-activity">
                             <div className="personal-icons status-grey">
-                              <img src={medalicon} alt="#" />
+                              <Image src={medalicon} alt="#" />
                             </div>
                             <div className="views-personal">
                               <h4>Proffesionals</h4>
@@ -264,7 +265,7 @@ const DoctorProfile = () => {
                           </div>
                           <div className="personal-activity">
                             <div className="personal-icons status-green">
-                              <img src={medalicon02} alt="#" />
+                              <Image src={medalicon02} alt="#" />
                             </div>
                             <div className="views-personal">
                               <h4>Certified</h4>
@@ -273,7 +274,7 @@ const DoctorProfile = () => {
                           </div>
                           <div className="personal-activity mb-0">
                             <div className="personal-icons status-orange">
-                              <img src={medalicon03} alt="#" />
+                              <Image src={medalicon03} alt="#" />
                             </div>
                             <div className="views-personal">
                               <h4>Medication Laser</h4>
@@ -293,7 +294,7 @@ const DoctorProfile = () => {
                               <li>
                                 <Link href="doctor-profile.html" className="active">
                                   <span className="set-about-icon me-2">
-                                    <img
+                                    <Image
                                       src={doctor}
                                       alt="#"
                                     />
@@ -304,7 +305,7 @@ const DoctorProfile = () => {
                               <li>
                                 <Link href="/doctor-setting">
                                   <span className="set-about-icon me-2">
-                                    <img
+                                    <Image
                                       src={menuicon16}
                                       alt="#"
                                     />
@@ -702,7 +703,7 @@ const DoctorProfile = () => {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-body text-center">
-                <img src={imagesend} alt="#" width={50} height={46} />
+                <Image src={imagesend} alt="#" width={50} height={46} />
                 <h3>Are you sure want to delete this ?</h3>
                 <div className="m-t-20">
                   {" "}
