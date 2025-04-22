@@ -2,7 +2,6 @@
 export const createGroup = async (input) => {
   const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/grupo/create`
   const body = { nota: input.name }
-  console.log('BODY', body);
 
   try {
     const data = await fetch(URL, {
@@ -13,7 +12,6 @@ export const createGroup = async (input) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    console.log('RESPONSE CREATE', response);
     return response
 
   } catch (error) {
@@ -48,7 +46,6 @@ export const showGroups = async (input) => {
   const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/grupo/showgrupos`
 
   const body = { id_user: input.id_user }
-  console.log('BODY', body);
   try {
     const data = await fetch(URL, {
       method: "POST",
@@ -58,7 +55,6 @@ export const showGroups = async (input) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    console.log('RESPONSE CREATE', response);
     return response
 
   } catch (error) {
@@ -94,7 +90,6 @@ export const addUserToGroup = async (input) => {
     uuid: input.uuid,
     id_user: input.id_user
   }
-  console.log('BODY', body);
   try {
     const data = await fetch(URL, {
       method: "POST",
@@ -104,7 +99,6 @@ export const addUserToGroup = async (input) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    console.log('RESPONSE CREATE', response);
     return response
 
   } catch (error) {
@@ -120,7 +114,6 @@ export const deleteUserFromGroup = async (input) => {
     uuid: input.uuid,
     id_user: input.id_user
   }
-  console.log('BODY', body);
   try {
     const data = await fetch(URL, {
       method: "POST",
@@ -130,7 +123,6 @@ export const deleteUserFromGroup = async (input) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    console.log('RESPONSE CREATE', response);
     return response
 
   } catch (error) {
@@ -145,7 +137,6 @@ export const deleteGroup = async (input) => {
   const body = {
     uuid: input.uuid,
   }
-  console.log('BODY', body);
   try {
     const data = await fetch(URL, {
       method: "POST",
@@ -155,7 +146,6 @@ export const deleteGroup = async (input) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    console.log('RESPONSE CREATE', response);
     return response
 
   } catch (error) {
