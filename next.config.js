@@ -1,9 +1,6 @@
 const path = require("path");
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
 
-module.exports = withBundleAnalyzer({
+module.exports = {
   cacheHandler: require.resolve('./src/utils/cache-handler.js'),
   // distDir: '.next', // Mantener el estándar.
   compress: true, // Habilita compresión por defecto.
@@ -70,4 +67,4 @@ module.exports = withBundleAnalyzer({
       },
     ];
   },
-});
+};
