@@ -42,7 +42,7 @@ const Error = () => {
 
   const error = searchParams.get('error') // Obtener el parámetro "error" de la URL
 
-  const errorMessage = error && (errors[error] ?? errors.default);
+  const errorMessage = error && (errors[error] || errors.default);
 
   const handleUnauthorizedEmail = async () => {
     console.log('Limpiando sesión y redirigiendo...');
