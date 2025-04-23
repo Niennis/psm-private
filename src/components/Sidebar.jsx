@@ -119,7 +119,7 @@ const Sidebar = () => {
                           Ficha
                         </Link>
                       </li>
-                      {(alumno && alumno?.aplica_despeje) == 1 &&
+                      {(alumno && alumno?.aplica_despeje) == 0 &&
                         <li>
                           <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
                         </li>
@@ -266,7 +266,7 @@ const Sidebar = () => {
                           <span className="menu-side">
                             <Image src={patients} alt="" />
                           </span>{" "}
-                          <span>Pacientes </span> {/* <span className="menu-arrow" /> */}
+                          <span>Pacientes </span> <span className="menu-arrow" />
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items2">
                           <li>
