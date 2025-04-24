@@ -168,6 +168,7 @@ const ScheduleByProfessional = ({ params }) => {
         };
       });
       const prueba = [...processed]
+// console.log('processed', processed);
 
       setCalendario([...processed])
 
@@ -299,7 +300,10 @@ const ScheduleByProfessional = ({ params }) => {
     setValue('tipo_cita', updatedValues, { shouldValidate: true });
   };
 
+  /*  EDITA EL BLOQUE */
   const onSubmit = handleSubmit(async data => {
+    // console.log(data.duracion.label)
+
     const body = {
       "id_user": disponibilidad.id_user,
       "id": disponibilidad.id,
@@ -348,8 +352,8 @@ const ScheduleByProfessional = ({ params }) => {
       console.log('Error:', error)
       setError(`Ha ocurrido un problema ${error}`)
     } finally {
-      // session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
-      fetchData(session?.user?.id)
+      session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(params.id)
+      // fetchData(session?.user?.id)
     }
   }
 
@@ -368,8 +372,8 @@ const ScheduleByProfessional = ({ params }) => {
       console.log('Error:', error)
       setError(`Ha ocurrido un problema ${error}`)
     } finally {
-      // session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
-      fetchData(session?.user?.id)
+      session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(params.id)
+      // fetchData(session?.user?.id)
     }
   }
 
@@ -380,7 +384,9 @@ const ScheduleByProfessional = ({ params }) => {
 
   const handleRefresh = () => {
     setIsLoading(true)
-    fetchData(session?.user?.id)
+    session?.user?.rol === 'profesional'
+      ? fetchData(session?.user?.id)
+      : fetchData(params.id)
     setTimeout(() => {
       setIsLoading(false)
     }, 300);
@@ -478,7 +484,7 @@ const ScheduleByProfessional = ({ params }) => {
 
 
                       {/* DETALLES DEL SERVICIO */}
-                      <div className="col-12">
+                      <div className="col-12" id='detalles'>
                         <div className="form-heading">
                           <h4>Detalles del servicio</h4>
                         </div>

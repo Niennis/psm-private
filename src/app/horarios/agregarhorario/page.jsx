@@ -325,13 +325,17 @@ const AddSchedule = () => {
       console.log('Error:', error)
       setError(`Ha ocurrido un problema ${error}`)
     } finally {
-      session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(profesionalSeleccionado.id)
+      session?.user?.rol === 'profesional'
+        ? fetchData(session?.user?.id)
+        : fetchData(profesionalSeleccionado.id)
     }
   }
 
   const handleRefresh = () => {
     setIsLoading(true)
-    fetchData(session?.user?.id)
+    session?.user?.rol === 'profesional'
+      ? fetchData(session?.user?.id)
+      : fetchData(profesionalSeleccionado.id)
     setTimeout(() => {
       setIsLoading(false)
     }, 300);
