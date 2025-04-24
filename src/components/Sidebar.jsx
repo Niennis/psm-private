@@ -119,7 +119,7 @@ const Sidebar = () => {
                           Ficha
                         </Link>
                       </li>
-                      {(alumno && alumno?.aplica_despeje) == 0 &&
+                      {(alumno && alumno?.aplica_despeje) == 1 &&
                         <li>
                           <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
                         </li>
