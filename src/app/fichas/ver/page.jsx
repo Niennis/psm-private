@@ -296,7 +296,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto1_nombre || ""}
+                                    value={patient?.contacto1_nombre === "NA" ? "" : patient?.contacto1_nombre}
                                     readOnly
                                   />
                                 </div>
@@ -307,7 +307,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto1_relacion || ""}
+                                    value={patient?.contacto1_relacion === "NA" ? "" : patient?.contacto1_relacion}
                                     readOnly
                                   />
                                 </div>
@@ -322,7 +322,7 @@ const FichaAlumno = ({ params }) => {
                                     <input
                                       className="form-control"
                                       type="tel"
-                                      value={patient?.contacto1_numero || ""}
+                                      value={patient?.contacto1_numero === "NA" ? "" : patient?.contacto1_numero}
                                       readOnly
                                     />
                                   </div>
@@ -335,7 +335,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto2_nombre || ""}
+                                    value={patient?.contacto2_nombre === "NA" ? "" : patient?.contacto2_nombre}
                                     readOnly
                                   />
                                 </div>
@@ -346,7 +346,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto2_relacion || ""}
+                                    value={patient?.contacto2_relacion === "NA" ? "" : patient?.contacto2_relacion}
                                     readOnly
                                   />
                                 </div>
@@ -361,7 +361,7 @@ const FichaAlumno = ({ params }) => {
                                     <input
                                       className="form-control"
                                       type="tel"
-                                      value={patient?.contacto2_numero || ""}
+                                      value={patient?.contacto2_numero === "NA" ? "" : patient?.contacto2_numero}
                                       readOnly
                                     />
                                   </div>

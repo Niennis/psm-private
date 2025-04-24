@@ -5,12 +5,12 @@
 import { useState, useEffect, useRef } from "react";
 import Select from "react-select";
 import Link from "next/link";
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { useSession } from "next-auth/react";
 
 import { useRouter } from 'next/navigation';
 import * as dayjs from 'dayjs'
-import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
+import * as isLeapYear from 'dayjs/plugin/isLeapYear'
 import 'dayjs/locale/es-mx'
 
 import ConsentimientoInformado from "@/components/ConsentimientoInformado";
@@ -22,7 +22,7 @@ import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import { fetchUserByEmail, updateUser, fetchUser, fetchUsers } from "@/services/UsersServices";
+import { updateUser, fetchUser } from "@/services/UsersServices";
 import { createInterview, createContact, editContact } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 import { fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
@@ -30,10 +30,9 @@ import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
 
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
 import { validarRut } from "@/utils/managedata";
-
-const cacheHandler = new CacheHandler();
+import { formatAndValidateRUT } from "@/utils/rutFormat";
+import SelectorDeDias from "@/components/SelectorDias";
 
 const formatRut = (value) => {
   const cleanedValue = value.replace(/[^\dkK]/g, '');
@@ -65,12 +64,10 @@ const obtenerFechasUnicas = array => {
 const AddFirstAppoinments = () => {
   const { data: session } = useSession()
   const router = useRouter();
-  // useAuthorization(['alumno'])
   dayjs.extend(isLeapYear) // use plugin
   dayjs.locale('es-mx') // use locale
 
   const [isClicked, setIsClicked] = useState(false);
-  const [startTime, setStartTime] = useState();
   const [selectedOption, setSelectedOption] = useState(null);
   const [doctor, setDoctor] = useState([]);
   const [contacts, setContacts] = useState([])
@@ -84,7 +81,6 @@ const AddFirstAppoinments = () => {
   const [allDays, setAllDays] = useState([])
   const [checked, setChecked] = useState(true);
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
-  const [rut, setRut] = useState('');
   // fechas siguiente
   const [indiceDias, setIndiceDias] = useState(0);
   const [indiceHoras, setIndiceHoras] = useState(0);
@@ -99,6 +95,8 @@ const AddFirstAppoinments = () => {
   const childFormRef = useRef();
   const [datosPreCargados, setDatosPreCargados] = useState(null);
 
+  const [cargaCompletada, setCargaCompletada] = useState(false);
+  
   useEffect(() => {
     setProps({
       id: "menu-item4",
@@ -106,10 +104,6 @@ const AddFirstAppoinments = () => {
       activeClassName: "add-first-appoinment",
     });
   }, [setProps]);
-
-  const handleChange = () => {
-    setChecked((prev) => !prev);
-  };
 
   const fetchInitialData = async (id) => {
     try {
@@ -130,22 +124,22 @@ const AddFirstAppoinments = () => {
         region: response[0].region,
         comuna: response[0].comuna,
         contacto1_id: response[0].contacto1_id || '',
-        email_contacto_emergencia1: response[0].contacto1_email || '',
-        nombre_contacto_emergencia1: response[0].contacto1_nombre || '',
-        celular_contacto_emergencia1: response[0].contacto1_numero || '',
-        parentesco_contacto_emergencia1: response[0].contacto1_relacion || '',
+        email_contacto_emergencia1: response[0].contacto1_email === 'NA' ? '' : response[0].contacto1_email,
+        nombre_contacto_emergencia1: response[0].contacto1_nombre === 'NA' ? '' : response[0].contacto1_nombre,
+        celular_contacto_emergencia1: response[0].contacto1_numero === 'NA' ? '' : response[0].contacto1_numero,
+        parentesco_contacto_emergencia1: response[0].contacto1_relacion === 'NA' ? '' : response[0].contacto1_relacion,
         contacto2_id: response[0].contacto2_id || '',
-        email_contacto_emergencia2: response[0].contacto2_email || '',
-        nombre_contacto_emergencia2: response[0].contacto2_nombre || '',
-        celular_contacto_emergencia2: response[0].contacto2_numero || '',
-        parentesco_contacto_emergencia2: response[0].contacto2_relacion || '',
+        email_contacto_emergencia2: response[0].contacto2_email === 'NA' ? '' : response[0].contacto2_email,
+        nombre_contacto_emergencia2: response[0].contacto2_nombre === 'NA' ? '' : response[0].contacto2_nombre,
+        celular_contacto_emergencia2: response[0].contacto2_numero === 'NA' ? '' : response[0].contacto2_numero,
+        parentesco_contacto_emergencia2: response[0].contacto2_relacion === 'NA' ? '' : response[0].contacto2_relacion,
       };
 
       const datosFormateados = {
-        nombre_contacto_emergencia2: response[0].contacto2_nombre || '',
-        parentesco_contacto_emergencia2: response[0].contacto2_relacion || '',
-        celular_contacto_emergencia2: response[0].contacto2_numero || '',
-        email_contacto_emergencia2: response[0].contacto2_email || ''
+        nombre_contacto_emergencia2: response[0].contacto2_nombre === 'NA' ? '' : response[0].contacto2_nombre,
+        parentesco_contacto_emergencia2: response[0].contacto2_relacion === 'NA' ? '' : response[0].contacto2_relacion,
+        celular_contacto_emergencia2: response[0].contacto2_numero === 'NA' ? '' : response[0].contacto2_numero,
+        email_contacto_emergencia2: response[0].contacto2_email === 'NA' ? '' : response[0].contacto2_email,
       };
 
       setDatosPreCargados(datosFormateados);
@@ -158,7 +152,7 @@ const AddFirstAppoinments = () => {
     }
   };
 
-  const { register, handleSubmit, watch, control, setValue,
+  const { register, handleSubmit, watch, control, setValue, getValues, clearErrors,
     formState: { errors }, reset
   } = useForm();
 
@@ -174,6 +168,15 @@ const AddFirstAppoinments = () => {
     setDefaultValues();
   }, [session?.user?.rol, reset]);
 
+  const rutValue = useWatch({ control, name: 'rut' });
+
+  useEffect(() => {
+    if (rutValue) {
+      const { formattedRUT } = formatAndValidateRUT(rutValue);
+      setValue('rut', formattedRUT, { shouldValidate: true });
+    }
+  }, [rutValue, setValue]);
+
   const selectedRegion = watch('region')
   const selectedComuna = watch('comuna')
   const profesional = watch('professional')
@@ -185,71 +188,61 @@ const AddFirstAppoinments = () => {
     setMenuPortalTarget(document.body);
   }, [])
 
-  const getComuna = (region, comunaName) => {
-    const reg = region.toLowerCase()
-    if (!comunas[reg]) {
-      return `Región "${reg}" no encontrada.`;
-    }
 
-    const comuna = comunas[reg].find((comuna) => comuna.label === comunaName);
+  // useEffect(() => {
 
-    return comuna
-  }
+  //   // setLoadingDays(true)
+  //   let filtered = allDays;
+  //   let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
+  //     return filtered.find(item => `${item.fechaInicio}` === compositeKey);
+  //   });
 
-  useEffect(() => {
+  //   if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
+  //     setDays([])
+  //     setHours([])
+  //     setDate('')
+  //     setTime('')
+  //     uniqueFiltered = uniqueFiltered.filter(item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "centro"));
+  //     setLoadingDays(false)
 
-    setLoadingDays(true)
-    let filtered = allDays;
-    let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
-      return filtered.find(item => `${item.fechaInicio}` === compositeKey);
-    });
+  //   } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
+  //     setDays([])
+  //     setHours([])
+  //     setDate('')
+  //     setTime('')
 
-    if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
-      uniqueFiltered = uniqueFiltered.filter(item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "centro"));
-      setLoadingDays(false)
+  //     uniqueFiltered = uniqueFiltered.filter(
+  //       item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "huechuraba")
+  //     );
+  //     setLoadingDays(false)
+  //   } else if (modalidad === "videollamada" || modalidad === "ambas") {
+  //     setDays([])
+  //     setHours([])
+  //     setDate('')
+  //     setTime('')
+  //     uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
+  //     );
+  //     setLoadingDays(false)
 
-    } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
+  //   } else if (modalidad === "presencial" || modalidad === "ambas") {
+  //     setDays([])
+  //     setHours([])
+  //     setDate('')
+  //     setTime('')
 
-      uniqueFiltered = uniqueFiltered.filter(
-        item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "huechuraba")
-      );
-      setLoadingDays(false)
-    } else if (modalidad === "videollamada" || modalidad === "ambas") {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
-      );
-      setLoadingDays(false)
+  //     uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
+  //     );
+  //     setLoadingDays(false)
+  //   }
 
-    } else if (modalidad === "presencial" || modalidad === "ambas") {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
+  //   setDays(uniqueFiltered);
+  // }, [modalidad, campus, doctor]);
 
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
-      );
-      setLoadingDays(false)
-    }
-
-    setDays(uniqueFiltered);
-  }, [modalidad, campus, doctor]);
-
-  const handleChangeRut = (e) => {
-    const inputValue = e.target.value;
-    const formattedRut = formatRut(inputValue);
-    setRut(formattedRut);
-  };
+  // const handleChangeRut = (e) => {
+  //   const inputValue = e.target.value;
+  //   const formattedRut = formatRut(inputValue);
+  //   setRut(formattedRut);
+  // };
 
   const obtenerDias = (objetos) => {
     let fechaActual = new Date();
@@ -274,28 +267,39 @@ const AddFirstAppoinments = () => {
 
   /* Retorna días disponibles */
   const handleSelectedProfessional = async (e) => {
-    setDays([])
-    setHours([])
-    setDate('')
-    setTime('')
-    setLoadingDays(true)
-    try {
-      const horasmedicas = await generarHorasMedicas(e.id)
-      // Traer disponibilidades
-      const { users: byProf } = await fetchScheduleByAvailability(e.id)
+    setDays([]);
+    setHours([]);
+    setDate('');
+    setTime('');
+    setLoadingDays(true);
+    setCargaCompletada(false); // nuevo: comienza carga
+    setValue('profesional', '');
+    setValue('modalidad', '');
+    setAllDays([]);
+    setDays([]);
 
-      // Filtrar para que salgan solo las fechas posteriores
+    try {
+      const horasmedicas = await generarHorasMedicas(e.id);
+      const { users: byProf } = await fetchScheduleByAvailability(e.id);
+
       const hoy = new Date();
       const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy);
 
-      const orderedData = orderByDate(filterByDate)
-      const bloque = obtenerDias(orderedData)
-      setAllDays(orderedData)
-      setLoadingDays(false)
+      const orderedData = orderByDate(filterByDate);
+      const bloque = obtenerDias(orderedData);
+
+      setAllDays(orderedData);
+      setDays(bloque); // importante: esto sí llena el estado
     } catch (error) {
-      console.log('Error: ', error)
+      console.log('Error: ', error);
+      setDays([]); // en caso de error, aseguramos estado vacío
+    } finally {
+      setTimeout(() => {
+        setLoadingDays(false);
+        setCargaCompletada(true); // nuevo: carga finalizada
+      }, 1000);
     }
-  }
+  };
 
   const horaAMinutos = (hora) => {
     const partesHora = hora.split(":");
@@ -323,33 +327,47 @@ const AddFirstAppoinments = () => {
     const minutosRestantes = minutos % 60;
     return `${String(horas).padStart(2, "0")}:${String(minutosRestantes).padStart(2, "0")}:00`;
   }
+
   const handleDays = async (e, fecha, id) => {
-    e.preventDefault()
-    setHours('')
-    setBloques('')
-    setValue('selectedDay', fecha)
+    e.preventDefault(); // Para evitar el comportamiento predeterminado del botón
+    setHours(''); // Limpiar las horas cuando se seleccione una nueva fecha
+    setBloques('');
 
-    const fechaMod = dayjs(fecha).format('YYYY-MM-DD')
+    // Actualiza el valor de 'selectedDay' en el formulario de forma correcta
+    setDate(fecha); // Esto actualiza el estado 'date' con la fecha seleccionada
+
+    setValue('selectedDay', fecha);
+
+    const data = getValues()
+    if (data?.selectedDay !== '') {
+      clearErrors('selectedDay')
+    }
+    const fechaMod = dayjs(fecha).format('YYYY-MM-DD');
     try {
-      setDate(fechaMod)
-      const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod)
-
-      let newBloques = []
+      const selectedDays = allDays.filter(item => item.fechaInicio === fechaMod);
+      let newBloques = [];
       selectedDays.forEach(item => {
-        newBloques.push(calcularHoraInicioDeBloques(item))
-      })
-      const flatted = newBloques.flat()
-
-      const arrayOrdenado = flatted.sort((a, b) => { const horaA = new Date(`1970-01-01T${a.horaIni}:00`).getTime(); const horaB = new Date(`1970-01-01T${b.horaIni}:00`).getTime(); return horaA - horaB; });
-      setHours(arrayOrdenado.reverse())
+        newBloques.push(calcularHoraInicioDeBloques(item)); // Aquí calculas las horas disponibles
+      });
+      const flatted = newBloques.flat();
+      const arrayOrdenado = flatted.sort((a, b) => {
+        const horaA = new Date(`1970-01-01T${a.horaIni}:00`).getTime();
+        const horaB = new Date(`1970-01-01T${b.horaIni}:00`).getTime();
+        return horaA - horaB;
+      });
+      setHours(arrayOrdenado.reverse());
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 
   const handleHours = (hour) => {
     setTime(hour)
     setValue('selectedHour', hour)
+    const data = getValues()
+    if (data?.selectedHour !== '') {
+      clearErrors('selectedHour')
+    }
   }
 
   // Función para convertir la hora en formato HH:mm:ss a segundos
@@ -376,6 +394,11 @@ const AddFirstAppoinments = () => {
     setOpen(true)
   };
 
+  const handleCloseModal = () => {
+    setOpen(false);
+    setSuccess('initial')
+    // session?.user?.rol === 'alumno' ? router.push('/citas') : router.push('/pacientes')
+  }
 
   const handleClose = () => {
     setOpen(false);
@@ -400,13 +423,6 @@ const AddFirstAppoinments = () => {
     }
   }
 
-  const onChange = (date, dateString) => {
-    setIsClicked(true);
-  };
-  const loadFile = (event) => {
-    // Handle file loading logic here
-  };
-
   const motivo_consulta_seleccionado = watch('motivo')
 
   const gender = [
@@ -418,20 +434,30 @@ const AddFirstAppoinments = () => {
   ]
   // Función para validar el formato y largo del RUT
   const validateRUT = (rut) => {
-    const cleanRUT = rut.replace(/[.-]/g, "");
+    const cleanedRUT = rutInput.replace(/[^0-9kK]/g, '').toUpperCase();
 
-    if (cleanRUT.length < 8 || cleanRUT.length > 10) {
-      return "El RUT debe tener entre 8 y 10 caracteres.";
+    if (cleanedRUT.length < 8) return "RUT demasiado corto";
+
+    // Algoritmo de validación
+    const body = cleanedRUT.slice(0, -1);
+    const dv = cleanedRUT.slice(-1);
+
+    let sum = 0;
+    let multiplier = 2;
+
+    for (let i = body.length - 1; i >= 0; i--) {
+      sum += parseInt(body[i]) * multiplier;
+      multiplier = multiplier === 7 ? 2 : multiplier + 1;
     }
 
-    if (!/^\d+k?$/i.test(cleanRUT)) {
-      return "El RUT solo puede contener números y la letra K.";
-    }
+    const calculatedDV = (11 - (sum % 11)).toString();
+    const expectedDV = calculatedDV === '10' ? 'K' : calculatedDV === '11' ? '0' : calculatedDV;
 
-    return true; // RUT válido
+    return expectedDV === dv || "RUT inválido";
   };
 
   const handleFirstInterview = handleSubmit(async (data, e) => {
+    console.log('Datos enviados: ', data)
     setOpenBackdrop(true)
     let childFormData;
     if (childFormRef.current) {
@@ -714,16 +740,12 @@ const AddFirstAppoinments = () => {
                             <div className="col-12 col-md-6 col-xl-6">
                               <div className="form-group local-forms">
                                 <label>
-                                  Nombre social <span className="login-danger">*</span>
+                                  Nombre social
                                 </label>
                                 <input
                                   className="form-control"
                                   type="text"
                                   {...register('nombre_social', {
-                                    required: {
-                                      value: true,
-                                      message: 'Nombre social es requerido'
-                                    },
                                     minLength: {
                                       value: 2,
                                       message: 'Nombre debe tener al menos 2 caracteres'
@@ -741,18 +763,14 @@ const AddFirstAppoinments = () => {
                                   Rut <span className="login-danger">*</span>
                                 </label>
                                 <input
-                                  onChange={handleChangeRut}
                                   className="form-control"
                                   maxLength={12}
-                                  minLength={8}
-                                  // name="rut"
                                   type="text"
+                                  // name="rut"
+                                  style={{ border: errors.rut ? '2px solid red' : '2px solid green' }}
                                   {...register('rut', {
-                                    required: {
-                                      value: true,
-                                      message: 'Rut es requerido'
-                                    },
-                                    validate: validateRUT
+                                    required: "RUT es requerido",
+                                    validate: (value) => formatAndValidateRUT(value).isValid || "RUT inválido",
                                   })}
                                 />
                                 {
@@ -876,6 +894,12 @@ const AddFirstAppoinments = () => {
                                   <input
                                     className="form-control"
                                     type="tel"
+                                    onKeyDown={(e) => {
+                                      // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                      if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                        e.preventDefault();
+                                      }
+                                    }}
                                     {...register('mobile', {
                                       required: {
                                         value: true,
@@ -1237,7 +1261,7 @@ const AddFirstAppoinments = () => {
                                 <Controller
                                   control={control}
                                   name="professional"
-                                  {...register('professional')}
+                                  rules={{ required: 'El campo es obligatorio' }}
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value, name, ref } }) => {
                                     return (<Select
@@ -1367,7 +1391,12 @@ const AddFirstAppoinments = () => {
                                       name="modalidad"
                                       value="videollamada"
                                       className="form-check-input"
-                                      {...register('modalidad')}
+                                      {...register('modalidad', {
+                                        required: {
+                                          value: true,
+                                          message: 'Seleccione videollamada o presencial'
+                                        }
+                                      })}
                                     />
                                     Videollamada
                                   </label>
@@ -1379,7 +1408,12 @@ const AddFirstAppoinments = () => {
                                       name="modalidad"
                                       value="presencial"
                                       className="form-check-input"
-                                      {...register('modalidad')}
+                                      {...register('modalidad', {
+                                        required: {
+                                          value: true,
+                                          message: 'Seleccione videollamada o presencial'
+                                        }
+                                      })}
                                     />
                                     Presencial
                                   </label>
@@ -1390,6 +1424,8 @@ const AddFirstAppoinments = () => {
                               </div>
                             </div>
                           </div>
+
+                          {/*   SEDES  */}
                           {modalidad === 'presencial' &&
                             <div className="row">
                               <div className="col-12 col-md-12 col-xl-12">
@@ -1425,120 +1461,148 @@ const AddFirstAppoinments = () => {
                                 </div>
                               </div>
                             </div>
-
                           }
 
-
-                          {profesional &&
-
-                            <div className="row">
-                              <div className="col-12 col-md-12 col-xl-12">
-                                <label>
-                                  Día de la Cita{" "}
-                                  <span className="login-danger">*</span>
-                                </label>
-                                {
-                                  loadingDays ?
-
-                                    <Box sx={{ width: '100%' }}>
-                                      <LinearProgress />
-                                    </Box>
-                                    : <div className="form-group local-forms mb-0">
-                                      {days.length > 0 && modalidad !== null && (
-                                        <>
-                                          <button
-                                            className="btn btn-primary"
-                                            onClick={e => { mostrarAnterioresDias(e) }}
-                                            disabled={indiceDias === 0}>
-                                            <ChevronLeft />
-                                          </button>
-
-                                          {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
-                                            return (
-                                              <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
-                                                <input type="hidden" {...register("selectedDay", {
-                                                  required: {
-                                                    value: true,
-                                                    message: 'Seleccione una fecha'
-                                                  }
-                                                })} />
-                                                <button
-                                                  className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
-
-                                                  onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
-                                                  {dayjs(day.fechaInicio).format('ddd DD MMM')}
-
-                                                </button>
-                                              </div>
-                                            )
-                                          }
-                                          )}
-                                          <button
-                                            className="btn btn-primary"
-                                            onClick={e => { mostrarSiguientesDias(e) }}
-                                            disabled={indiceDias + 5 >= days.length}>
-                                            <ChevronRight />
-                                          </button>
-                                        </>)
-                                      }
+                          {/*  FECHAS  */}
+                          {profesional && (
+                            <>
+                              {!modalidad || (modalidad === 'presencial' && !campus) ? null : (
+                                <>
+                                  {loadingDays ? (
+                                    <div className="row">
+                                      <div className="col-12 col-md-12 col-xl-12">
+                                        <label>
+                                          Día de la Cita <span className="login-danger">*</span>
+                                        </label>
+                                        <Box sx={{ width: '100%' }}>
+                                          <LinearProgress />
+                                        </Box>
+                                      </div>
                                     </div>
-                                }
-                                {
-                                  errors.selectedDay && errors.selectedDay && <span><small>{errors.selectedDay.message}</small></span>
-                                }
-                              </div>
-                              {/* <DatePick /> */}
-                              {date !== '' &&
-                                <div className="col-12 col-md-12 col-xl-12 mt-3">
-                                  <label>
-                                    Hora <span className="login-danger">*</span>
-                                  </label>
-                                  <div className="form-group local-forms">
-                                    {hours.length > 0 && (
-                                      <>
-                                        <button
-                                          className="btn btn-primary"
-                                          onClick={e => { mostrarAnterioresHoras(e) }}
-                                          disabled={indiceHoras === 0}>
-                                          <ChevronLeft />
-                                        </button>
-                                        {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
+                                  ) :
 
-                                          return (
-                                            <div key={`${hour.id}${i}hours`} style={{ display: 'inline-block' }}>
-                                              <input type="hidden" {...register("selectedHour", {
-                                                required: {
-                                                  value: true,
-                                                  message: 'Seleccione una hora'
-                                                }
-                                              })} />
-                                              <button
-                                                type="button"
-                                                className={`btn me-2 ${time === hour.horaInicio ? "btn-primary" : "btn-cancel"}`}
-                                                onClick={() => { handleHours(hour.horaInicio) }}>
-                                                {hour.horaInicioBloque}
-                                              </button>
+                                    !loadingDays && cargaCompletada && days.length === 0 ? (
+                                      <div className="row">
+                                        <div className="col-12">
+                                          <div className="alert alert-info">
+                                            No hay horas disponibles para esta opción.
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+
+                                      : cargaCompletada && days.length > 0 ? (
+                                        <div className="row">
+                                          <div className="col-12 col-md-12 col-xl-12">
+                                            <label>
+                                              Día de la Cita <span className="login-danger">*</span>
+                                            </label>
+                                            <div className="form-group local-forms mb-0">
+                                              <>
+                                                <button
+                                                  className="btn btn-primary"
+                                                  onClick={e => { mostrarAnterioresDias(e) }}
+                                                  disabled={indiceDias === 0}>
+                                                  <ChevronLeft />
+                                                </button>
+                                                <input
+                                                  type="hidden"
+                                                  {...register("selectedDay", {
+                                                    required: {
+                                                      value: true,
+                                                      message: 'Seleccione una fecha'
+                                                    }
+                                                  })}
+                                                />
+                                                {days.slice(indiceDias, indiceDias + 5).map((day, i) => (
+                                                  <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
+                                                    <button
+                                                      className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
+                                                      onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
+                                                      {dayjs(day.fechaInicio).format('ddd DD MMM')}
+                                                    </button>
+                                                  </div>
+                                                ))}
+
+                                                <button
+                                                  className="btn btn-primary"
+                                                  onClick={e => { mostrarSiguientesDias(e) }}
+                                                  disabled={indiceDias + 5 >= days.length}>
+                                                  <ChevronRight />
+                                                </button>
+                                              </>
                                             </div>
-                                          )
-                                        }
-                                        )}
-                                        <button
-                                          className="btn btn-primary"
-                                          onClick={e => { mostrarSiguientesHoras(e) }}
-                                          disabled={indiceHoras + 5 >= hours.length}>
-                                          <ChevronRight />
-                                        </button>
-                                      </>)
-                                    }
-                                  </div>
-                                </div>
-                              }
-                              {
-                                errors.selectedHour && <span><small>{errors.selectedHour.message}</small></span>
-                              }
-                            </div>
-                          }
+                                            {errors.selectedDay && <span><small>{errors.selectedDay.message}</small></span>}
+                                          </div>
 
+                                          {/* Horas */}
+                                          {date !== '' && (
+                                            <div className="col-12 col-md-12 col-xl-12 mt-3">
+                                              <label>
+                                                Hora <span className="login-danger">*</span>
+                                              </label>
+                                              <div className="form-group local-forms">
+                                                {hours.length > 0 ? (
+                                                  <>
+                                                    <button
+                                                      className="btn btn-primary"
+                                                      onClick={e => { mostrarAnterioresHoras(e) }}
+                                                      disabled={indiceHoras === 0}>
+                                                      <ChevronLeft />
+                                                    </button>
+                                                    <input
+                                                      type="hidden"
+                                                      {...register("selectedHour", {
+                                                        required: {
+                                                          value: true,
+                                                          message: 'Seleccione una hora'
+                                                        }
+                                                      })}
+                                                    />
+                                                    {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => (
+                                                      <div key={`${hour.id}${i}hours`} style={{ display: 'inline-block' }}>
+                                                        <button
+                                                          type="button"
+                                                          className={`btn me-2 ${time === hour.horaInicio ? "btn-primary" : "btn-cancel"}`}
+                                                          onClick={() => handleHours(hour.horaInicio)}>
+                                                          {hour.horaInicioBloque}
+                                                        </button>
+                                                      </div>
+                                                    ))}
+
+                                                    <button
+                                                      className="btn btn-primary"
+                                                      onClick={e => { mostrarSiguientesHoras(e) }}
+                                                      disabled={indiceHoras + 5 >= hours.length}>
+                                                      <ChevronRight />
+                                                    </button>
+                                                  </>
+                                                ) : (
+                                                  <div>No hay horas disponibles para esta fecha.</div>
+                                                )}
+                                              </div>
+                                              {errors.selectedHour && <span><small>{errors.selectedHour.message}</small></span>}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ) : null}
+                                </>
+                              )}
+                            </>
+                          )}
+
+                          <SelectorDeDias
+                            allDays={allDays}
+                            modalidad={modalidad}
+                            campus={campus}
+                            profesional={profesional}
+                            setDays={setDays}
+                            setHours={setHours}
+                            setDate={setDate}
+                            setTime={setTime}
+                            setLoadingDays={setLoadingDays}
+                            loadingDays={loadingDays}
+                          />
                           {
                             Object.keys(errors).length > 0 && <span><small>Hay campos sin completar.</small></span>
                           }
@@ -1571,7 +1635,7 @@ const AddFirstAppoinments = () => {
               </div>
             </div>
           </div>
-          <ConsentimientoInformado open={open} handleClose={handleClose} onClick={handleFirstInterview} errors={errors} />
+          <ConsentimientoInformado open={open} handleClose={handleCloseModal} onClick={handleFirstInterview} errors={errors} />
         </div>
 
         {openBackdrop && <SimpleBackdrop
