@@ -21,6 +21,7 @@ import CacheHandler from "@/utils/cache-handler";
 import { Modal, Button } from 'react-bootstrap'
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useDisponibilidadContext } from "@/context/DisponibilidadContext";
+import SimpleBackdrop from "@/components/Backdrop";
 
 const cacheHandler = new CacheHandler();
 
@@ -29,6 +30,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
   const [success, setSuccess] = useState('initial')
   const [message, setMessage] = useState('')
   const { data, setData } = useDisponibilidadContext()
+  const [loading, setLoading] = useState(false)
 
   const [startDate, setDate] = useState(new Date()),
     [showCategory, setshowCategory] = useState(false),
@@ -53,6 +55,9 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
   const [showModal, setShowModal] = useState(false)
   const [eventDetails, setEventDetails] = useState('');
   const mobile = useMediaQuery('(min-width:600px)');
+  const [eventosDelDia, setEventosDelDia] = useState([]);
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
 
   const handleShow = () => setShowModal(true);
 
@@ -221,11 +226,13 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
     setSuccess('warning')
     setMessage('¿Desea confirmar la eliminación del servicio seleccionado?')
   }
-  
+
   const openWarningGrupal = () => {
     setSuccess('warningGrupal')
     setMessage('¿Desea confirmar la eliminación de los servicios seleccionados?')
   }
+
+
 
   return (
     <>
@@ -241,6 +248,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
             </div>
           </div>
           {/* /Page Header */}
+          {loading && <SimpleBackdrop /> }
           <div className="row">
             <div className="col-lg-12 col-md-12">
               <div className="card">
@@ -308,8 +316,110 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                           select={handleDateSelect}
                           eventClick={(clickInfo) => handleEventClick(clickInfo)}
                           events={calendario}
+                          dayMaxEventRows={true}
+                          moreLinkClick={(arg) => {
+                            setEventosDelDia(arg.allSegs.map(seg => seg.event));
+                            setFechaSeleccionada(arg.date);
+                            setMostrarModal(true);
+                            return 'none'; // evita el popover por defecto
+                          }}
                         />
                     }
+                    {mostrarModal && (
+                      <div style={{
+                        position: "fixed",
+                        top: 0, left: 0,
+                        width: "100vw",
+                        height: "100vh",
+                        backgroundColor: "rgba(0,0,0,0.2)",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        zIndex: 9999
+                      }}>
+                        <div style={{
+                          backgroundColor: "#fff",
+                          borderRadius: "4px",
+                          width: "260px",
+                          padding: "10px 10px 14px 10px",
+                          fontFamily: "Arial, sans-serif",
+                          fontSize: "13px",
+                          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+                          position: "relative"
+                        }}>
+                          {/* Cierre */}
+                          <button onClick={() => setMostrarModal(false)} style={{
+                            position: "absolute",
+                            top: "6px",
+                            right: "6px",
+                            border: "none",
+                            background: "none",
+                            fontSize: "16px",
+                            cursor: "pointer",
+                            color: "#888"
+                          }}>×</button>
+
+                          {/* Fecha */}
+                          <div style={{
+                            fontWeight: "bold",
+                            marginBottom: "8px",
+                            paddingRight: "20px"
+                          }}>
+                            {fechaSeleccionada?.toLocaleDateString("es-ES", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric"
+                            })}
+                          </div>
+
+                          {/* Eventos */}
+                          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                            {eventosDelDia.map((evento, i) => (
+                              <div
+                                key={i}
+                                className={evento.classNames?.join(" ")} // Usa clases del evento para el color
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  padding: "6px 8px",
+                                  borderRadius: "4px",
+                                  color: "#fff",
+                                  cursor: "pointer"
+                                }}
+                                onClick={() => handleEventClick({ event: evento })}
+                              >
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "6px",
+                                    fontWeight: "bold",
+                                    fontSize: "13px",
+                                    whiteSpace: "nowrap"
+                                  }}>
+                                  <span style={{
+                                    width: "8px",
+                                    height: "8px",
+                                    borderRadius: "50%",
+                                    backgroundColor: evento.backgroundColor || "#3788d8"
+                                  }}></span>
+                                  {evento.start
+                                    ? new Date(evento.start).toLocaleTimeString("es-ES", {
+                                      hour: "2-digit",
+                                      minute: "2-digit"
+                                    })
+                                    : ""}
+                                </div>
+                                <span style={{ marginLeft: "auto", fontWeight: 600 }}>
+                                  {evento.title}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <Modal
                       show={showModal}
                       onHide={handleClose}
@@ -319,6 +429,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                         <Modal.Title>{event_title}</Modal.Title>
                       </Modal.Header>
                       <Modal.Body>
+                        <p>Hora: {calenderevent && (calenderevent?.extendedProps?.horaInicio).split(':').slice(0, 2).join(':')} - {calenderevent && (calenderevent?.extendedProps?.horaFin).split(':').slice(0, 2).join(':')}</p>
                         <p>Modalidad: {calenderevent && calenderevent?.extendedProps?.modalidad}</p>
                         <p>Tipo de servicio:  </p> {calenderevent && formatToBullets(calenderevent?.extendedProps?.tipoServicio)}
                       </Modal.Body>
@@ -496,35 +607,35 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                   </div>
                 </div>
                 : success === 'warningGrupal'
-                ?
-                <div className="row" style={{
-                  height: '100%',
-                  position: 'fixed',
-                  top: '0',
-                  width: '100%',
-                  zIndex: 99999,
-                  background: '#00000080'
-                }}>
-                  <div className="col-sm-12 col-lg-6">
-                    <Alert
-                      severity="warning"
-                      onClose={() => { setSuccess('initial') }}
-                      sx={{
-                        zIndex: 'tooltip',
-                        position: 'absolute',
-                        left: '30%',
-                        width: '50%',
-                        padding: '50px',
-                        bottom: '50vh'
-                      }}
-                    // spacing={2}
-                    >
-                      <h4>{message}</h4>
-                      <Button variant="primary" onClick={handleDeleteDisponibilidad}> Confirmar </Button>
-                    </Alert>
+                  ?
+                  <div className="row" style={{
+                    height: '100%',
+                    position: 'fixed',
+                    top: '0',
+                    width: '100%',
+                    zIndex: 99999,
+                    background: '#00000080'
+                  }}>
+                    <div className="col-sm-12 col-lg-6">
+                      <Alert
+                        severity="warning"
+                        onClose={() => { setSuccess('initial') }}
+                        sx={{
+                          zIndex: 'tooltip',
+                          position: 'absolute',
+                          left: '30%',
+                          width: '50%',
+                          padding: '50px',
+                          bottom: '50vh'
+                        }}
+                      // spacing={2}
+                      >
+                        <h4>{message}</h4>
+                        <Button variant="primary" onClick={handleDeleteDisponibilidad}> Confirmar </Button>
+                      </Alert>
+                    </div>
                   </div>
-                </div>
-                : ""
+                  : ""
         }
       </div>
 
