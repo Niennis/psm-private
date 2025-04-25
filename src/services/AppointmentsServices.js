@@ -344,6 +344,7 @@ export const createContact = async (input) => {
       },
       body: JSON.stringify(body)
     })
+    
     const response = await data.json()
     return response
   } catch (error) {
@@ -385,7 +386,6 @@ export const editContact = async (data) => {
     mail: data.mail,
     id_emergencia: data.id_emergencia,
   }
-
   try {
     const data = await fetch(URL, {
       method: "POST",
@@ -396,7 +396,6 @@ export const editContact = async (data) => {
     });
 
     const response = await data.json();
-
     return response;
   } catch (err) {
     console.error(err);

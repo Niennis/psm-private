@@ -1,6 +1,8 @@
 'use client'
 /* eslint-disable-next-line react-hooks/exhaustive-deps */
+/* eslint-disable react/jsx-no-duplicate-props */
 import React, { useState, useEffect } from "react";
+import Select from "react-select";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -16,10 +18,17 @@ import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 
 import { showRecordById, showRecords } from "@/services/RecordServices";
 import { fetchUser } from "@/services/UsersServices";
 import { useUserContext } from "@/context/UserContext";
+import { formatAndValidateRUT } from "@/utils/rutFormat";
+import { updateUser } from "@/services/UsersServices";
+import { createContact, editContact } from "@/services/AppointmentsServices";
+import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
+import { Button } from 'react-bootstrap'
+import SimpleBackdrop from "@/components/Backdrop";
 
 const FichaAlumno = ({ params }) => {
   const { data: session } = useSession()
@@ -29,6 +38,11 @@ const FichaAlumno = ({ params }) => {
   const [visibleItem, setVisibleItem] = useState(null);
   const router = useRouter()
   const { selectedUserId } = useUserContext()
+  const [success, setSuccess] = useState('initial')
+  const [message, setMessage] = useState('')
+  const [menuPortalTarget, setMenuPortalTarget] = useState(null);
+  const [loading, setLoading] = useState(false)
+  const [edad, setEdad] = useState('')
 
   dayjs.extend(utc);
   dayjs.extend(timezone)
@@ -41,6 +55,34 @@ const FichaAlumno = ({ params }) => {
     });
   }, [setProps]);
 
+  useEffect(() => {
+    setMenuPortalTarget(document.body);
+  }, [])
+
+  const { register, handleSubmit, watch, control, setValue,
+    formState: { errors }
+  } = useForm({
+    defaultValues: async () => {
+      try {
+        const data = await getStudent();
+        return data
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        return { data: [] };
+      }
+    }
+  })
+
+  const rutValue = useWatch({ control, name: 'rut' });
+  useEffect(() => {
+    if (rutValue) {
+      const { formattedRUT } = formatAndValidateRUT(rutValue);
+      setValue('rut', formattedRUT, { shouldValidate: true });
+    }
+
+    const formattedAge = patient?.fecha_nacimiento ? calcularEdad(patient.fecha_nacimiento) : ''
+    setEdad(formattedAge)
+  }, [rutValue, setValue]);
 
   const getRecords = async () => {
     try {
@@ -58,10 +100,52 @@ const FichaAlumno = ({ params }) => {
     }
   }
 
+  const convertirAInputDate = fechaTexto => {
+    const fecha = dayjs.utc(fechaTexto).tz('America/Santiago', true);
+    return fecha.format('YYYY-MM-DD');
+  }
+
   const getStudent = async () => {
     try {
       const { users: student } = await fetchUser(selectedUserId)
-      setPatient(student[0])
+
+      const patient = {
+        anoIngresoCarrera: student[0].anoIngresoCarrera,
+        name: student[0].nombre,
+        apellido: student[0].apellido,
+        nombre_social: student[0].nombre_social || ' ',
+        email: session.user?.email,
+        fecha_nacimiento: student[0].fecha_nacimiento
+          ? convertirAInputDate(student[0].fecha_nacimiento)
+          : '',
+        genero: student[0].genero === 'personalizado' ? 'No binarie' : student[0].genero,
+        telefono: student[0].telefono,
+        aplica_despeje: student[0].aplica_despeje,
+        rut: student[0].rut,
+        carrera: student[0].carrera,
+        address: student[0].direccion,
+        region: student[0].region,
+        comuna: student[0].comuna,
+        direccion: student[0].direccion,
+        contacto1_id: student[0].contacto1_id || '',
+        contacto1_email: student[0].contacto1_email === 'NA' ? '' : student[0].contacto1_email,
+        contacto1_nombre: student[0].contacto1_nombre === 'NA' ? '' : student[0].contacto1_nombre,
+        contacto1_numero: student[0].contacto1_numero === 'NA' ? '' : student[0].contacto1_numero,
+        contacto1_relacion: student[0].contacto1_relacion === 'NA' ? '' : student[0].contacto1_relacion,
+        contacto2_id: student[0].contacto2_id || '',
+        contacto2_email: student[0].contacto2_email === 'NA' ? '' : student[0].contacto2_email,
+        contacto2_nombre: student[0].contacto2_nombre === 'NA' ? '' : student[0].contacto2_nombre,
+        contacto2_numero: student[0].contacto2_numero === 'NA' ? '' : student[0].contacto2_numero,
+        contacto2_relacion: student[0].contacto2_relacion === 'NA' ? '' : student[0].contacto2_relacion,
+        tipo_usuario: student[0].tipo_usuario,
+        status: student[0].status,
+        nombre: student[0].nombre,
+        nombre_social: student[0].nombre_social,
+        id: student[0].id
+      };
+
+      setPatient(patient)
+      return patient
     } catch (error) {
       console.log(error)
     }
@@ -77,8 +161,7 @@ const FichaAlumno = ({ params }) => {
     setVisibleItem(visibleItem === id ? null : id);
   };
 
-
-  const FormatearFecha = (fechaOriginal) => {
+  const formatearFecha = (fechaOriginal) => {
     const fecha = dayjs(fechaOriginal).locale('es').utc();
 
     // Usamos el formato 'ddd, DD-MM-YYYY' para incluir el día de la semana
@@ -90,14 +173,157 @@ const FichaAlumno = ({ params }) => {
     return fechaFinal; // 'Lun, 15-04-2024'
   }
 
-  function toTitleCase(str) {
+  const toTitleCase = str => {
     return str
       .toLowerCase() // Convertir todo a minúsculas primero
       .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalizar la primera letra de cada palabra
   }
 
+  const handleUpdate = handleSubmit(async data => {
+    setLoading(true)
+
+    const bodyUpdateUser = {
+      "apellido": data.lastName || patient?.apellido,
+      "aplica_despeje": 0,  // el único q debiera cambiar
+      "anoIngresoCarrera": data.anoIngresoCarrera || patient?.anoIngresoCarrera,
+      "campus": data.campus || 'No aplica',
+      "comuna": data.comuna.label || patient?.comuna,
+      "carrera": data.carrera.label || patient?.carrera,
+      "contrasena": 'No aplica',
+      "direccion": data.direccion || patient?.direccion,
+      "email": data.email,
+      "entrevistador": 0,
+      "fecha_nacimiento": data.fecha_nacimiento || patient?.fecha_nacimiento,
+      "genero": data.genero || patient?.genero,
+      "id": parseInt(patient?.id),
+      "jornada": 'No aplica',
+      "mustChangePassword": 0,
+      "nombre": patient?.nombre,
+      "nombre_social": patient?.nombre_social,
+      "region": data.region.label || patient?.region,
+      "rut": data.rut || patient?.rut || ' ',
+      "status": patient?.status,
+      "telefono": data.telefono || patient?.telefono,
+      "tipo_usuario": patient?.tipo_usuario,
+      "id_emergencia": patient?.contacto1_id || 0,
+      "id_emergencia_2": patient?.contacto2_id || 0,
+    }
+
+    const bodyContactOne = {
+      "nombre": data?.contacto1_nombre || patient?.contacto1_nombre || '',
+      "relacion": data?.contacto1_relacion || patient?.contacto1_relacion || '',
+      "numero": data?.contacto1_numero || patient?.contacto1_numero || '',
+      "mail": data?.contacto1_email || patient?.mail_contacto_emergencia1 || '',
+      "parentesco": data?.contacto1_relacion || patient?.contacto1_relacion || '',
+      "id_emergencia": patient?.contacto1_id || 0
+    }
+
+    const bodyContactTwo = {
+      "nombre": data?.contacto2_nombre || patient?.contacto2_nombre || '',
+      "relacion": data?.contacto2_relacion || patient?.contacto2_relacion || '',
+      "numero": data?.contacto2_numero || patient?.contacto2_numero || '',
+      "mail": data?.contacto2_email || patient?.mail_contacto_emergencia2 || '',
+      "parentesco": data?.contacto2_relacion || patient?.contacto2_relacion || '',
+      "id_emergencia": patient?.contacto2_id || 0
+    }
+
+    let id_contact_1;
+    let id_contact_2;
+
+    try {
+      const response1 = patient.contacto1_id == 0
+        ? await createContact(bodyContactOne)
+        : await editContact(bodyContactOne)
+
+      const response2 = patient.contacto2_id == 0
+        ? await createContact(bodyContactTwo)
+        : await editContact(bodyContactTwo)
+
+      id_contact_1 = patient.contacto1_id == 0
+        ? response1.id
+        : patient?.contacto1_id
+
+      id_contact_2 = patient.contacto2_id == 0
+        ? response2.id
+        : patient?.contacto2_id
+
+    } catch (error) {
+      console.log(error)
+      setSuccess('fail')
+      const detail1 = `${response1?.message}.` || ''
+      const detail2 = `${response2?.message}.` || ''
+      setMessage(`${detail1}${detail2}`)
+    }
+
+    if (id_contact_1 || id_contact_2) {
+      try {
+        const response = await updateUser(bodyUpdateUser)
+        if (response.validacion === true) {
+          setSuccess('success')
+          setMessage('Datos actualizados con éxito.')
+        } else {
+          setSuccess('fail')
+          if (response?.detalle.includes('fecha_nacimiento')) {
+            setMessage('Error al registrar la fecha. Revisa que el formato sea similar a 01-01-2025, día-mes-año')
+          } else {
+            setMessage(response?.detalle)
+          }
+        }
+      } catch (error) {
+        console.log('Error: ', error);
+        setSuccess('fail')
+        if (response?.detalle.includes('fecha_nacimiento')) {
+          setMessage('Error al registrar la fecha. Revisa que el formato sea similar a 01-01-2025, día-mes-año')
+        } else {
+          setMessage('Ocurrió un problema.')
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+  })
+
+  const parsearFecha = (fechaStr) => {
+    // Extraer día, mes y año manualmente
+
+    const partes = fechaStr.split(/[-/]/);
+    if (partes.length !== 3) return null;
+
+    const [dia, mes, anio] = partes.map(Number);
+    return new Date(anio, mes - 1, dia);
+  };
+
+
+  const calcularEdad = (fechaStr) => {
+    const fecha = dayjs(fechaStr, 'DD-MM-YYYY', true); // true = modo estricto
+
+    if (!fecha.isValid()) return "";
+    setEdad(dayjs().diff(fecha, 'year'))
+    return dayjs().diff(fecha, 'year');
+  };
+
+  const convertDateFormat = (dateString) => {
+    const [day, month, year] = dateString.split("-");
+    return `${year}-${month}-${day}`;
+  }
+
+  const openWarning = (e) => {
+    e.preventDefault()
+    setSuccess('warning')
+    setMessage('¿Confirma la actualización de su información?')
+  }
+
+  const handleClose = () => {
+    setSuccess('initial')
+  }
+
+  const handleCloseModal = () => {
+    setSuccess('initial')
+  }
+
   return (
     <>
+      {loading && <SimpleBackdrop />}
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <div className="main-wrapper">
         <div className="page-wrapper">
@@ -132,7 +358,7 @@ const FichaAlumno = ({ params }) => {
                         </div>
                       </div>
 
-                      {/* Nombre profesional */}
+                      {/* Nombre estudiante */}
                       <div className="col-12 col-md-6 col-xl-6">
                         <div className="form-group local-forms">
                           <label className="col-md-6 col-form-label">
@@ -142,14 +368,44 @@ const FichaAlumno = ({ params }) => {
                             <input
                               type="text"
                               className="form-control"
-                              value={`${patient?.nombre} ${patient?.apellido}` || ""}
-                              readOnly
+                              {...register('nombre')}
                             />
                           </div>
                         </div>
                       </div>
-                      <div className="col-12 col-md-6 col-xl-6">
 
+
+                      <div className="col-12 col-md-6 col-xl-6">
+                        <div className="form-group local-forms">
+                          <label className="col-md-6 col-form-label">
+                            Nombre social
+                          </label>
+                          <div className="col-md-12">
+                            <input
+                              type="text"
+                              className="form-control"
+                              {...register('nombre_social')}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="col-12 col-md-6 col-xl-6">
+                        <div className="form-group local-forms">
+                          <label className="col-md-6 col-form-label">
+                            Apellido
+                          </label>
+                          <div className="col-md-12">
+                            <input
+                              type="text"
+                              className="form-control"
+                              {...register('apellido')}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="col-12 col-md-6 col-xl-6">
                         <div className="form-group local-forms">
                           <label className="col-md-6 col-form-label">
                             Email estudiante
@@ -158,8 +414,8 @@ const FichaAlumno = ({ params }) => {
                             <input
                               type="email"
                               className="form-control"
-                              value={patient?.email || ""}
-                              readOnly
+                              value={patient && patient?.email || ""}
+                              disabled
                             />
                           </div>
                         </div>
@@ -185,13 +441,17 @@ const FichaAlumno = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Rut</label>
                                   <input
-                                    type="text"
                                     className="form-control"
                                     maxLength={12}
-                                    minLength={8}
-                                    value={patient?.rut || ""}
-                                    readOnly
+                                    type="text"
+                                    style={{ border: errors.rut ? '2px solid red' : '2px solid green' }}
+                                    {...register('rut', {
+                                      validate: (value) => formatAndValidateRUT(value).isValid || "RUT inválido",
+                                    })}
                                   />
+                                  {
+                                    errors.rut && <span><small>{errors.rut.message}</small></span>
+                                  }
                                 </div>
                               </div>
 
@@ -199,34 +459,16 @@ const FichaAlumno = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Fecha de nacimiento</label>
                                   <input
-                                    type="text"
-                                    className="form-control"
-                                    value={dayjs.utc(patient?.fecha_nacimiento).format('DD-MM-YYYY') || ""}
-                                    readOnly
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="col-12 col-md-6 col-xl-6">
-                                <div className="form-group local-forms">
-                                  <label>Carrera</label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    value={patient?.carrera || ""}
-                                    readOnly
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="col-12 col-md-6 col-xl-6">
-                                <div className="form-group local-forms">
-                                  <label>Año de ingreso</label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    value={patient?.anoIngresoCarrera || ""}
-                                    readOnly
+                                    className="form-control datetimepicker"
+                                    type="date"
+                                    placeholder=""
+                                    {...register('fecha_nacimiento', {
+                                      required: {
+                                        value: true,
+                                        message: 'Fecha de nacimiento es requerida'
+                                      }
+                                    })}
+                                    onChange={e => { calcularEdad(e.target.value) }}
                                   />
                                 </div>
                               </div>
@@ -237,23 +479,13 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     type="text"
                                     className="form-control"
-                                    value={dayjs().diff(dayjs.utc(patient?.fecha_nacimiento), 'year') || ""}
-                                    readOnly
+                                    value={edad}
+                                    disabled
                                   />
                                 </div>
                               </div>
 
-                              <div className="col-12 col-md-6 col-xl-6">
-                                <div className="form-group local-forms">
-                                  <label>Comuna</label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    value={patient?.comuna || ""}
-                                    readOnly
-                                  />
-                                </div>
-                              </div>
+
 
                               <div className="col-12 col-md-6 col-xl-6">
                                 <div className="form-group local-forms">
@@ -267,12 +499,205 @@ const FichaAlumno = ({ params }) => {
                                       className="form-control"
                                       maxLength={9}
                                       minLength={9}
-                                      value={patient?.telefono || ""}
-                                      readOnly
+                                      {...register('telefono')}
                                     />
                                   </div>
                                 </div>
                               </div>
+
+
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Carrera</label>
+                                  <Controller
+                                    control={control}
+                                    name="carrera"
+                                    rules={{
+                                      required: {
+                                        value: true,
+                                        message: 'Carrera es requerido',
+                                      }
+                                    }}
+                                    ref={null}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                      <Select
+                                        instanceId="carrera"
+                                        onChange={onChange}
+                                        value={carreras.find(option => option.label === value) || value}
+
+                                        options={carreras}
+                                        menuPortalTarget={menuPortalTarget}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="carrera"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
+
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+                                          }),
+                                        }}
+                                      />
+                                    )}
+                                  />
+                                  {errors.carrera && <span><small>{errors.carrera.message}</small></span>}
+
+                                </div>
+                              </div>
+
+                              <div className="col-12 col-md-6 col-xl-6">
+                                <div className="form-group local-forms">
+                                  <label>Año de ingreso</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    {...register('anoIngresoCarrera')}
+                                  />
+                                </div>
+                              </div>
+
+
+                              <div className="col-12 col-sm-6">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Región <span className="login-danger">*</span>
+                                  </label>
+                                  <Controller
+                                    control={control}
+                                    name="region"
+                                    {...register('region')}
+                                    ref={null}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                      <Select
+                                        instanceId="select-region"
+                                        onChange={onChange}
+                                        options={regiones}
+                                        value={regiones.find(option => option.label === value) || value}
+
+                                        // isDisabled={true}
+                                        menuPortalTarget={menuPortalTarget}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="select-region"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
+
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+
+                                          }),
+                                        }}
+                                      />
+                                    )}
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-12 col-sm-6">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Comuna <span className="login-danger">*</span>
+                                  </label>
+                                  <Controller
+                                    control={control}
+                                    name="comuna"
+                                    rules={{
+                                      required: {
+                                        value: true,
+                                        message: 'Comuna es requerido',
+                                      }
+                                    }}
+                                    ref={null}
+                                    render={({ field: { onChange, onBlur, value, ref } }) => {
+                                      const regionKey = watch('region')?.value || patient?.region?.toLowerCase()
+                                        .normalize("NFD") // Descompone caracteres con acentos
+                                        .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
+                                        .replace(/\s+/g, "_") // Reemplaza espacios por "_" 
+
+                                      const opcionesComunas = regionKey ? comunas[regionKey] : [];
+
+                                      const selectedComuna = opcionesComunas?.find(comuna => comuna.label === value || comuna.label === value?.label) || null;
+
+                                      return (
+                                        <Select
+                                          instanceId="select-region"
+                                          value={selectedComuna}
+
+                                          onChange={(selectedOption) => {
+                                            // Guarda el valor (no el objeto completo) en el formulario
+
+                                            onChange(selectedOption || null);
+                                          }}
+                                          onBlur={onBlur}
+                                          options={opcionesComunas}
+                                          menuPortalTarget={menuPortalTarget}
+                                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                          id="select-region"
+                                          components={{
+                                            IndicatorSeparator: () => null
+                                          }}
+
+                                          styles={{
+                                            control: (baseStyles, state) => ({
+                                              ...baseStyles,
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                              boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                              '&:hover': {
+                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                              },
+                                              borderRadius: '10px',
+                                              fontSize: "14px",
+                                              minHeight: "45px",
+                                            }),
+                                            dropdownIndicator: (base, state) => ({
+                                              ...base,
+                                              transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                              transition: '250ms',
+                                              width: '35px',
+                                              height: '35px',
+
+                                            }),
+                                          }}
+                                        />
+                                      )
+                                    }}
+                                  />
+                                </div>
+                              </div>
+
+
+
                             </div>
                           </AccordionDetails>
                         </Accordion>
@@ -296,8 +721,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto1_nombre === "NA" ? "" : patient?.contacto1_nombre}
-                                    readOnly
+                                    {...register('contacto1_nombre')}
                                   />
                                 </div>
                               </div>
@@ -307,8 +731,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto1_relacion === "NA" ? "" : patient?.contacto1_relacion}
-                                    readOnly
+                                    {...register('contacto1_relacion')}
                                   />
                                 </div>
                               </div>
@@ -322,8 +745,7 @@ const FichaAlumno = ({ params }) => {
                                     <input
                                       className="form-control"
                                       type="tel"
-                                      value={patient?.contacto1_numero === "NA" ? "" : patient?.contacto1_numero}
-                                      readOnly
+                                      {...register('contacto1_numero')}
                                     />
                                   </div>
                                 </div>
@@ -335,8 +757,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto2_nombre === "NA" ? "" : patient?.contacto2_nombre}
-                                    readOnly
+                                    {...register('contacto2_nombre')}
                                   />
                                 </div>
                               </div>
@@ -346,8 +767,7 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     className="form-control"
                                     type="text"
-                                    value={patient?.contacto2_relacion === "NA" ? "" : patient?.contacto2_relacion}
-                                    readOnly
+                                    {...register('contacto2_relacion')}
                                   />
                                 </div>
                               </div>
@@ -361,8 +781,7 @@ const FichaAlumno = ({ params }) => {
                                     <input
                                       className="form-control"
                                       type="tel"
-                                      value={patient?.contacto2_numero === "NA" ? "" : patient?.contacto2_numero}
-                                      readOnly
+                                      {...register('contacto2_numero')}
                                     />
                                   </div>
                                 </div>
@@ -371,10 +790,20 @@ const FichaAlumno = ({ params }) => {
                           </AccordionDetails>
                         </Accordion>
 
+                        <div className="col-12">
+                          <div className="doctor-submit text-end mt-3">
+                            <button
+                              // type="submit"
+                              className="btn btn-primary submit-form me-2"
+                              onClick={openWarning}
+                            >
+                              Actualizar datos
+                            </button>
+                          </div>
+                        </div>
 
 
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -401,7 +830,7 @@ const FichaAlumno = ({ params }) => {
                                 {index === 0 ? (
                                   <div className="activity-content timeline-group-blk">
                                     <div className="timeline-group flex-shrink-0">
-                                      <h4>{FormatearFecha(item.fecha)}</h4>
+                                      <h4>{formatearFecha(item.fecha)}</h4>
                                     </div>
                                     <div className="comman-activitys flex-grow-1">
                                       <h3>
@@ -429,7 +858,7 @@ const FichaAlumno = ({ params }) => {
                                 ) : (
                                   <div className="activity-content timeline-group-blk">
                                     <div className="timeline-group flex-shrink-0">
-                                      <h4>{FormatearFecha(item.fecha)}</h4>
+                                      <h4>{formatearFecha(item.fecha)}</h4>
                                     </div>
                                     <div className="comman-activitys flex-grow-1">
                                       <h3>
@@ -709,7 +1138,7 @@ const FichaAlumno = ({ params }) => {
                                 {index === 0 ? (
                                   <div className="activity-content timeline-group-blk">
                                     <div className="timeline-group flex-shrink-0">
-                                      <h4>{FormatearFecha(item.fecha)}</h4>
+                                      <h4>{formatearFecha(item.fecha)}</h4>
                                     </div>
                                     <div className="comman-activitys flex-grow-1">
                                       <h3>
@@ -731,7 +1160,7 @@ const FichaAlumno = ({ params }) => {
                                 ) : (
                                   <div className="activity-content timeline-group-blk">
                                     <div className="timeline-group flex-shrink-0">
-                                      <h4>{FormatearFecha(item.fecha)}</h4>
+                                      <h4>{formatearFecha(item.fecha)}</h4>
                                     </div>
                                     <div className="comman-activitys flex-grow-1">
                                       <h3>
@@ -756,8 +1185,101 @@ const FichaAlumno = ({ params }) => {
               </div>
             </div>
           </div >
+
+
+
+
         </div >
       </div >
+
+      {success === 'success'
+        ?
+        <div style={{
+          height: '100%',
+          position: 'fixed',
+          top: '0',
+          width: '100%',
+          zIndex: 99999,
+          background: '#00000080'
+        }}>
+          {/* <div className="col-sm-12 col-lg-6"> */}
+          <Alert
+            severity="success"
+            onClose={handleClose}
+            sx={{
+              zIndex: 'tooltip',
+              position: 'absolute',
+              left: '30%',
+              width: '50%',
+              padding: '50px',
+              bottom: '50vh'
+            }}
+            spacing={2}
+          >
+            {message}
+          </Alert>
+          {/* </div> */}
+        </div>
+
+        : success === 'fail'
+          ?
+          <div className="row" style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080'
+          }}>
+            <div className="col-sm-12 col-lg-6">
+              <Alert
+                severity="error"
+                onClose={handleCloseModal}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+                spacing={2}
+              >
+                Ha ocurrido un problema. {message}
+              </Alert>
+            </div>
+          </div>
+          : success === 'warning'
+            ?
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
+                <Alert
+                  severity="warning"
+                  onClose={handleCloseModal}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                // spacing={2}
+                >
+                  <h4>{message}</h4>
+                  <Button variant="primary" onClick={(e) => { handleUpdate(e) }}> Confirmar </Button>
+                </Alert>
+              </div>
+            </div>
+            : ""
+      }
     </>
   );
 };

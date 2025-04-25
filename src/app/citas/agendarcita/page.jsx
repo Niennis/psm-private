@@ -977,7 +977,7 @@ const AddAppoinments = () => {
                                       {...register('modalidad', {
                                         required: {
                                           value: true,
-                                          message: 'Seleccione una fecha'
+                                          message: 'Seleccione videollamada o presencial'
                                         }
                                       })}
                                     />
@@ -994,7 +994,7 @@ const AddAppoinments = () => {
                                       {...register('modalidad', {
                                         required: {
                                           value: true,
-                                          message: 'Seleccione una fecha'
+                                          message: 'Seleccione videollamada o presencial'
                                         }
                                       })}
                                     />
