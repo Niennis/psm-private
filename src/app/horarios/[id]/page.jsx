@@ -53,6 +53,40 @@ const obtenerRangoHorarioOptimizado = bloques => {
   };
 }
 
+const asegurarSegundos = horaStr => {
+  const partes = horaStr.split(':');
+  if (partes.length === 2) {
+    return `${horaStr}:00`;
+  }
+  return horaStr;
+}
+
+const hayChoqueDeHorarios = (bloques, editado) => {
+  const bloquesFiltrados = bloques.filter(item => item.fechaInicio === editado.fechaInicio)
+
+  const parseHora = (hora) => {
+    const [h, m] = hora.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  const editadoInicio = parseHora(editado.horaIni);
+  const editadoFin = parseInt(editadoInicio) + parseInt(editado.duracionServicio);
+
+  for (const bloque of bloquesFiltrados) {
+    const inicio = parseHora(bloque.horaInicio);
+
+    const fin = inicio + bloque.duracionServicio;
+
+    if (inicio === editadoInicio) continue;
+
+    if (editadoInicio < fin && editadoFin > inicio) {
+      return true; // hay choque
+    }
+  }
+
+  return false;
+}
+
 const ScheduleByProfessional = ({ params }) => {
   const ROL = ["profesional"]
   const { data: session } = useSession()
@@ -71,6 +105,7 @@ const ScheduleByProfessional = ({ params }) => {
   const [infoDelHijo, setInfoDelHijo] = useState(null);
   const [disponibilidad, setDisponibilidad] = useState()
   const router = useRouter();
+  const [vista, setVista] = useState('timeGridWeek');
 
 
   // const [selectedOption, setSelectedOption] = useState(null);
@@ -87,6 +122,12 @@ const ScheduleByProfessional = ({ params }) => {
     });
   }, [setProps]);
 
+  
+  useEffect(() => {
+    const vistaGuardada = localStorage.getItem('cal-vista');
+    if (vistaGuardada) setVista(vistaGuardada);
+  }, []);
+
   useEffect(() => {
     const fetchProfesional = async () => {
       const { especialidades: user } = await fetchSpecialityById(params.id)
@@ -102,6 +143,7 @@ const ScheduleByProfessional = ({ params }) => {
     { label: '60', value: 3 },
     { label: '75', value: 4 },]
 
+  /*  CARGA DATOS DE LOS APPS SERVICES */
   const { register, handleSubmit, watch, control, setValue, reset, getValues,
     formState: { errors }
   } = useForm({
@@ -167,9 +209,6 @@ const ScheduleByProfessional = ({ params }) => {
           title: item.detalleServicio || 'Disponible',
         };
       });
-      const prueba = [...processed]
-// console.log('processed', processed);
-
       setCalendario([...processed])
 
     } catch (error) {
@@ -250,7 +289,6 @@ const ScheduleByProfessional = ({ params }) => {
   }
 
   const handleEdit = (data) => {
-
     setDisponibilidad(data)
     setInfoDelHijo(data);
 
@@ -302,7 +340,23 @@ const ScheduleByProfessional = ({ params }) => {
 
   /*  EDITA EL BLOQUE */
   const onSubmit = handleSubmit(async data => {
-    // console.log(data.duracion.label)
+    const parseHora = (hora) => {
+      const [h, m] = hora.split(":").map(Number);
+      return h * 60 + m;
+    };
+
+    function minutosAHora(minutos) {
+      const horas = Math.floor(minutos / 60);
+      const mins = minutos % 60;
+      return `${String(horas).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+    }
+
+    if (data.duracion.label != disponibilidad.duracionServicio) {
+      const horaFin = parseHora(data.horaIni)
+      const nuevoFin = horaFin + parseInt(data.duracion.label)
+      data.horaFin = minutosAHora(nuevoFin)
+    }
+
 
     const body = {
       "id_user": disponibilidad.id_user,
@@ -313,8 +367,8 @@ const ScheduleByProfessional = ({ params }) => {
       "fechaInicio": data.fecha_inicio,
       "fechaFin": data.fecha_inicio,
       "repeticiones": 0,
-      "horaIni": data.horaIni,
-      "horaFin": data.horaFin,
+      "horaIni": asegurarSegundos(data.horaIni),
+      "horaFin": asegurarSegundos(data.horaFin),
       "modalidad": data.modalidad,
       "frecuencia": disponibilidad.frecuencia || null,
       "detalleServicio": data.title || disponibilidad.title,
@@ -323,18 +377,26 @@ const ScheduleByProfessional = ({ params }) => {
       "campus": data.campus,
     }
 
-    try {
-      const response = await editDisponibilidad(body)
-      if (response.detalle.includes('success')) {
-        setSuccess('success')
-        setError('Se ha editado correctamente.')
-      } else {
-        setSuccess('fail')
-        setError(response.detalle)
-      }
+    if (hayChoqueDeHorarios(calendario, body)) {
+      setSuccess('fail')
+      setError('Hay choque de horario, revise la duración del servicio')
+    } else {
 
-    } catch (error) {
-      console.log('error', error)
+      try {
+        const response = await editDisponibilidad(body)
+        if (response.detalle.includes('success')) {
+          setSuccess('success')
+          setError('Se ha editado correctamente.')
+        } else {
+          setSuccess('fail')
+          setError(response.detalle)
+        }
+
+      } catch (error) {
+        console.log('error', error)
+      } finally{
+        handleRefresh()
+      }
     }
   })
 
@@ -353,7 +415,6 @@ const ScheduleByProfessional = ({ params }) => {
       setError(`Ha ocurrido un problema ${error}`)
     } finally {
       session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(params.id)
-      // fetchData(session?.user?.id)
     }
   }
 
@@ -373,7 +434,6 @@ const ScheduleByProfessional = ({ params }) => {
       setError(`Ha ocurrido un problema ${error}`)
     } finally {
       session?.user?.rol === 'profesional' ? fetchData(session?.user?.id) : fetchData(params.id)
-      // fetchData(session?.user?.id)
     }
   }
 
@@ -391,6 +451,13 @@ const ScheduleByProfessional = ({ params }) => {
       setIsLoading(false)
     }, 300);
   }
+
+  
+  const manejarCambioVista = (nuevaVista) => {
+    setVista(nuevaVista);
+    localStorage.setItem('cal-vista', nuevaVista);
+  };
+
 
   return (
     < >
@@ -479,6 +546,8 @@ const ScheduleByProfessional = ({ params }) => {
                           deleteBloque={handleDelete}
                           deleteDisponibilidad={handleDeleteDisponibilidad}
                           refresh={handleRefresh}
+                          vistaInicial={vista}
+                          onVistaChange={manejarCambioVista}
                         />
                       }
 

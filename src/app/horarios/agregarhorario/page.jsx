@@ -41,6 +41,7 @@ const AddSchedule = () => {
   const pathname = usePathname();
   const { setProps } = useSidebar();
   const [idProfesional, setIdProfesional] = useState()
+  const [vista, setVista] = useState('timeGridWeek');
 
   const onChange = (date, dateString) => {
   };
@@ -57,6 +58,11 @@ const AddSchedule = () => {
       activeClassName: "add-shedule",
     });
   }, [setProps]);
+
+  useEffect(() => {
+    const vistaGuardada = localStorage.getItem('cal-vista');
+    if (vistaGuardada) setVista(vistaGuardada);
+  }, []);
 
   const datesToTimestamp = (fecha, hora) => {
     // Combinar fecha y hora en un formato ISO 8601 compatible con `Date`
@@ -340,6 +346,11 @@ const AddSchedule = () => {
       setIsLoading(false)
     }, 300);
   }
+
+  const manejarCambioVista = (nuevaVista) => {
+    setVista(nuevaVista);
+    localStorage.setItem('cal-vista', nuevaVista);
+  };
 
   return (
     < >
@@ -1274,6 +1285,8 @@ const AddSchedule = () => {
                 deleteBloque={handleDelete}
                 deleteDisponibilidad={handleDeleteDisponibilidad}
                 refresh={handleRefresh}
+                vistaInicial={vista}
+                onVistaChange={manejarCambioVista}
               />
             }
           </div>

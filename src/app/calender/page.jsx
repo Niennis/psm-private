@@ -17,15 +17,18 @@ import {
 } from "@/services/SchedulesServices";
 import CalendarSkeleton from "@/components/skeletons/CalendarSkeleton";
 import withAuth from '@/components/withAuth';
-import CacheHandler from "@/utils/cache-handler";
 import { Modal, Button } from 'react-bootstrap'
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useDisponibilidadContext } from "@/context/DisponibilidadContext";
 import SimpleBackdrop from "@/components/Backdrop";
 
-const cacheHandler = new CacheHandler();
+const normalizarHora = (horaStr) => {
+  const partes = horaStr.split(':');
+  const partesNormalizadas = partes.map(parte => parte.padStart(2, '0'));
+  return partesNormalizadas.join(':');
+}
 
-const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBloque, deleteDisponibilidad, refresh }, calendarRef) => {
+const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendario, deleteBloque, deleteDisponibilidad, refresh }, calendarRef) => {
   const [menu, setMenu] = useState(false);
   const [success, setSuccess] = useState('initial')
   const [message, setMessage] = useState('')
@@ -115,8 +118,8 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
       "fechaInicio": data.fechaInicio,
       "fechaFin": data.fechaFin,
       "repeticiones": data.repeticiones,
-      "horaIni": data.horaInicio,
-      "horaFin": data.horaFin,
+      "horaIni": normalizarHora(data.horaInicio),
+      "horaFin": normalizarHora(data.horaFin),
       "modalidad": data.modalidad,
       "frecuencia": data.frecuencia,
       "detalleServicio": data.detalleServicio,
@@ -248,7 +251,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
             </div>
           </div>
           {/* /Page Header */}
-          {loading && <SimpleBackdrop /> }
+          {loading && <SimpleBackdrop />}
           <div className="row">
             <div className="col-lg-12 col-md-12">
               <div className="card">
@@ -303,7 +306,7 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                             center: "title",
                             right: "dayGridMonth,timeGridWeek,timeGridDay",
                           }}
-                          initialView="timeGridWeek"
+                          initialView={vistaInicial}
                           editable={false}
                           selectable={true}
                           selectMirror={true}
@@ -322,6 +325,11 @@ const Calender = forwardRef(({ editBloque, profesional_id, calendario, deleteBlo
                             setFechaSeleccionada(arg.date);
                             setMostrarModal(true);
                             return 'none'; // evita el popover por defecto
+                          }}
+                          datesSet={(info) => {
+                            if (onVistaChange) {
+                              onVistaChange(info.view.type);
+                            }
                           }}
                         />
                     }
