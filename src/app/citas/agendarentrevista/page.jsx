@@ -6,30 +6,30 @@ import { useState, useEffect, useRef } from "react";
 import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller, useWatch } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import { useSidebar } from "@/context/SidebarContext";
+import withAuth from '@/components/withAuth';
 import { useSession } from "next-auth/react";
 
-import { useRouter } from 'next/navigation';
+import FeatherIcon from "feather-icons-react/build/FeatherIcon";
+import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
+import { Alert, Accordion, AccordionSummary, AccordionDetails, Box, LinearProgress } from "@mui/material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+import SimpleBackdrop from "@/components/Backdrop";
+
+import { createInterview, createContact, editContact } from "@/services/AppointmentsServices"
+import { updateUser, fetchUser } from "@/services/UsersServices";
+import { fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
+import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
+
 import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear'
 import 'dayjs/locale/es-mx'
 
 import ConsentimientoInformado from "@/components/ConsentimientoInformado";
 import Contact from "@/components/Contact"
-import SimpleBackdrop from "@/components/Backdrop";
-
-import { Alert, Accordion, AccordionSummary, AccordionDetails, Box, LinearProgress } from "@mui/material";
-import FeatherIcon from "feather-icons-react/build/FeatherIcon";
-import { PlusCircle, ChevronLeft, ChevronRight } from "feather-icons-react/build/IconComponents";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
-import { updateUser, fetchUser } from "@/services/UsersServices";
-import { createInterview, createContact, editContact } from "@/services/AppointmentsServices"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
-import { fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
-import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
-
-import { useSidebar } from "@/context/SidebarContext";
-import withAuth from '@/components/withAuth';
 import { validarRut } from "@/utils/managedata";
 import { formatAndValidateRUT } from "@/utils/rutFormat";
 import SelectorDeDias from "@/components/SelectorDias";
@@ -67,7 +67,6 @@ const AddFirstAppoinments = () => {
   dayjs.extend(isLeapYear) // use plugin
   dayjs.locale('es-mx') // use locale
 
-  const [isClicked, setIsClicked] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [doctor, setDoctor] = useState([]);
   const [contacts, setContacts] = useState([])
@@ -188,62 +187,6 @@ const AddFirstAppoinments = () => {
     setMenuPortalTarget(document.body);
   }, [])
 
-
-  // useEffect(() => {
-
-  //   // setLoadingDays(true)
-  //   let filtered = allDays;
-  //   let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
-  //     return filtered.find(item => `${item.fechaInicio}` === compositeKey);
-  //   });
-
-  //   if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
-  //     setDays([])
-  //     setHours([])
-  //     setDate('')
-  //     setTime('')
-  //     uniqueFiltered = uniqueFiltered.filter(item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "centro"));
-  //     setLoadingDays(false)
-
-  //   } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
-  //     setDays([])
-  //     setHours([])
-  //     setDate('')
-  //     setTime('')
-
-  //     uniqueFiltered = uniqueFiltered.filter(
-  //       item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "huechuraba")
-  //     );
-  //     setLoadingDays(false)
-  //   } else if (modalidad === "videollamada" || modalidad === "ambas") {
-  //     setDays([])
-  //     setHours([])
-  //     setDate('')
-  //     setTime('')
-  //     uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
-  //     );
-  //     setLoadingDays(false)
-
-  //   } else if (modalidad === "presencial" || modalidad === "ambas") {
-  //     setDays([])
-  //     setHours([])
-  //     setDate('')
-  //     setTime('')
-
-  //     uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
-  //     );
-  //     setLoadingDays(false)
-  //   }
-
-  //   setDays(uniqueFiltered);
-  // }, [modalidad, campus, doctor]);
-
-  // const handleChangeRut = (e) => {
-  //   const inputValue = e.target.value;
-  //   const formattedRut = formatRut(inputValue);
-  //   setRut(formattedRut);
-  // };
-
   const obtenerDias = (objetos) => {
     let fechaActual = new Date();
 
@@ -284,8 +227,9 @@ const AddFirstAppoinments = () => {
 
       const hoy = new Date();
       const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy);
+      const filterByAvailability = filterByDate.filter(item => item.disponible === 1)
 
-      const orderedData = orderByDate(filterByDate);
+      const orderedData = orderByDate(filterByAvailability);
       const bloque = obtenerDias(orderedData);
 
       setAllDays(orderedData);
@@ -1316,12 +1260,7 @@ const AddFirstAppoinments = () => {
                               <Controller
                                 control={control}
                                 name="motivo"
-                                {...register('motivo', {
-                                  required: {
-                                    value: true,
-                                    message: 'Motivo es requerido',
-                                  }
-                                })}
+                                rules={{ required: 'Motivo es requerido' }}
                                 ref={null}
                                 render={({ field: { onChange, onBlur, value } }) => (
                                   <Select

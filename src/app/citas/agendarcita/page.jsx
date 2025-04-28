@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable no-unused-vars */
-// eslint-disable-next-line react-hooks/exhaustive-deps
+/* eslint-disable-next-line react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
 import Select from "react-select";
 import Link from "next/link";
@@ -29,6 +29,7 @@ import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
 import 'dayjs/locale/es-mx'
 import { motivo_consulta } from "@/utils/selects";
+import SelectorDeDias from "@/components/SelectorDias";
 
 // Función para obtener fechas únicas
 const obtenerFechasUnicas = array => {
@@ -71,6 +72,9 @@ const AddAppoinments = () => {
   const [loading, setLoading] = useState(false)
   const { setProps } = useSidebar();
   const router = useRouter();
+  const [datosPreCargados, setDatosPreCargados] = useState(null);
+
+  const [cargaCompletada, setCargaCompletada] = useState(false);
 
   useEffect(() => {
     setProps({
@@ -80,7 +84,7 @@ const AddAppoinments = () => {
     });
   }, [setProps]);
 
-  const { register, handleSubmit, watch, control, setValue, resetField, trigger,
+  const { register, handleSubmit, watch, control, setValue, resetField, trigger, clearErrors,
     formState: { errors }, reset
   } = useForm({
     defaultValues: async () => await getCombinedData()
@@ -212,56 +216,6 @@ const AddAppoinments = () => {
     getCombinedData()
   }, [])
 
-
-  // Filtros
-  useEffect(() => {
-    setLoadingDays(true)
-    let filtered = allDays;
-    let uniqueFiltered = Array.from(new Set(filtered.map(item => `${item.fechaInicio}`))).map(compositeKey => {
-      return filtered.find(item => `${item.fechaInicio}` === compositeKey);
-    });
-
-    if (modalidad === "presencial" && (campus === "centro" || campus === "ambas")) {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
-      uniqueFiltered = uniqueFiltered.filter(item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "centro"));
-      setLoadingDays(false)
-
-    } else if (modalidad === "presencial" && (campus === "huechuraba" || campus === "ambas")) {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
-
-      uniqueFiltered = uniqueFiltered.filter(
-        item => (item.modalidad === "presencial" || item.modalidad === "ambas") && (item.campus === "huechuraba")
-      );
-      setLoadingDays(false)
-    } else if (modalidad === "videollamada" || modalidad === "ambas") {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "videollamada" || item.modalidad === "ambas"
-      );
-      setLoadingDays(false)
-
-    } else if (modalidad === "presencial" || modalidad === "ambas") {
-      setDays([])
-      setHours([])
-      setDate('')
-      setTime('')
-
-      uniqueFiltered = uniqueFiltered.filter(item => item.modalidad === "presencial" || item.modalidad === "ambas"
-      );
-      setLoadingDays(false)
-    }
-
-    setDays(uniqueFiltered);
-  }, [modalidad, campus, doctor]);
-
   const obtenerDias = (objetos) => {
     let fechaActual = new Date();
 
@@ -387,39 +341,40 @@ const AddAppoinments = () => {
 
   // Obtiene días según profesional seleccionado
   const handleSelectedProfessional = async (e) => {
-    setDays([])
-    setHours([])
-    setDate('')
-    setTime('')
-    setLoadingDays(true)
-    resetField('modalidad')
-    resetField('campus')
-    resetField('selectedDay')
-    resetField('selecteHour')
+    setDays([]);
+    setHours([]);
+    setDate('');
+    setTime('');
+    setLoadingDays(true);
+    setCargaCompletada(false); // nuevo: comienza carga
+    setValue('profesional', '');
+    setValue('modalidad', '');
+    setAllDays([]);
+    setDays([]);
+
     try {
-      // Obtener horas médicas y filtrar solo las disponibles (disponible > 0)
-      const todasHorasMedicas = await generarHorasMedicas(e.id)
-      const horasmedicas = todasHorasMedicas.filter(hora => hora.disponible > 0)
+      const horasmedicas = await generarHorasMedicas(e.id);
+      const { users: byProf } = await fetchScheduleByAvailability(e.id);
 
-      // Traer disponibilidades (esto parece necesario para otra lógica)
-      const { users: byProf } = await fetchScheduleByAvailability(e.id)
+      const hoy = new Date();
+      const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy);
+      const filterByAvailability = filterByDate.filter(item => item.disponible === 1)
 
-      // Filtrar para que salgan solo las fechas posteriores (manteniendo tu lógica original)
-      const hoy = new Date()
-      const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy)
+      const orderedData = orderByDate(filterByAvailability);
+      const bloque = obtenerDias(orderedData);
 
-      // Resto de tu lógica original
-      const orderedData = orderByDate(filterByDate)
-      const bloque = obtenerDias(orderedData)
-      setAllDays(orderedData)
-      setLoadingDays(false)
-      setDays(bloque)
+      setAllDays(orderedData);
+      setDays(bloque); // importante: esto sí llena el estado
     } catch (error) {
-      console.log('Error: ', error)
+      console.log('Error: ', error);
+      setDays([]); // en caso de error, aseguramos estado vacío
     } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoadingDays(false);
+        setCargaCompletada(true); // nuevo: carga finalizada
+      }, 1000);
     }
-  }
+  };
 
   const horaAMinutos = (hora) => {
     const partesHora = hora.split(":");
@@ -456,14 +411,14 @@ const AddAppoinments = () => {
     setTime('');
     resetField('selecteHour');
     setValue('selectedDay', fecha, { shouldValidate: true });
-  
+
     const fechaMod = dayjs(fecha).format('YYYY-MM-DD');
     try {
       setDate(fechaMod);
-      
+
       // 1. Filtrar horarios para la fecha seleccionada
       const horariosDelDia = allDays.filter(item => item.fechaInicio === fechaMod);
-      
+
       // 2. Extraer y ordenar las horas disponibles directamente
       const horasDisponibles = horariosDelDia
         .map(item => ({
@@ -476,7 +431,7 @@ const AddAppoinments = () => {
           const horaB = convertirAHoras(b.horaInicio);
           return horaA - horaB; // Orden ascendente
         });
-      
+
       setHours(horasDisponibles);
     } catch (error) {
       console.error('Error al cargar horarios:', error);
@@ -661,7 +616,7 @@ const AddAppoinments = () => {
                                 <Controller
                                   control={control}
                                   name="alumno"
-                                  {...register('alumno')}
+                                  rules={{ required: 'Correo electrónico es obligatorio' }}
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value, name, ref } }) => {
                                     return (
@@ -791,10 +746,11 @@ const AddAppoinments = () => {
                                   <Controller
                                     control={control}
                                     name="tipo_cita"
-                                    {...register('tipo_cita')}
+                                    rules={{ required: 'Tipo de atención es requerido' }}
+                                    
                                     ref={null}
-                                    render={({ field: { onChange, onBlur, value, name, ref } }) => {
-                                      return (<Select
+                                    render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                                      <Select
                                         instanceId="tipo_cita"
                                         defaultValue={selectedOption}
                                         onChange={(e) => {
@@ -829,11 +785,10 @@ const AddAppoinments = () => {
                                             height: '35px',
                                           }),
                                         }}
-                                      />)
-                                    }}
+                                      />
+                                    )}
                                   />
-                                  {errors.professional && <span><small>{errors.professional.message}</small></span>}
-
+                                  {errors.tipo_cita && <span><small>{errors.tipo_cita.message}</small></span>}
                                 </div>
                               </div>
                             </div>
@@ -847,7 +802,7 @@ const AddAppoinments = () => {
                                 <Controller
                                   control={control}
                                   name="professional"
-                                  {...register('professional')}
+                                  rules={{ required: 'Profesional es requerido' }}
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value, name, ref } }) => {
                                     return (<Select
@@ -1001,7 +956,7 @@ const AddAppoinments = () => {
                                     Presencial
                                   </label>
                                 </div>
-                                {errors.modalidad && errors.modalidad && <span><small>{errors.modalidad.message}</small></span>}
+                                {errors.modalidad && <span><small>{errors.modalidad.message}</small></span>}
                               </div>
                             </div>
                           </div>
@@ -1044,123 +999,145 @@ const AddAppoinments = () => {
 
                           }
 
-                          {profesional &&
+                          {profesional && (
+                            <>
+                              {!modalidad || (modalidad === 'presencial' && !campus) ? null : (
+                                <>
+                                  {loadingDays ? (
+                                    <div className="row">
+                                      <div className="col-12 col-md-12 col-xl-12">
+                                        <label>
+                                          Día de la Cita <span className="login-danger">*</span>
+                                        </label>
+                                        <Box sx={{ width: '100%' }}>
+                                          <LinearProgress />
+                                        </Box>
+                                      </div>
+                                    </div>
+                                  ) :
 
-                            <div className="row">
-                              <div className="col-12 col-md-12 col-xl-12">
-                                <label>
-                                  Día de la Cita{" "}
-                                  <span className="login-danger">*</span>
-                                </label>
-                                {
-                                  loadingDays && !watch('modalidad') ?
+                                    !loadingDays && cargaCompletada && days.length === 0 ? (
+                                      <div className="row">
+                                        <div className="col-12">
+                                          <div className="alert alert-info">
+                                            No hay horas disponibles para esta opción.
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
 
-                                    <Box sx={{ width: '100%' }}>
-                                      <LinearProgress />
-                                    </Box>
-                                    :
-                                    <div className="form-group local-forms mb-0">
-                                      {days.length > 0 && modalidad !== null && (
-                                        <>
-                                          <button
-                                            className="btn btn-primary"
-                                            onClick={e => { mostrarAnterioresDias(e) }}
-                                            disabled={indiceDias === 0}>
-                                            <ChevronLeft />
-                                          </button>
-
-                                          {days.slice(indiceDias, indiceDias + 5).map((day, i) => {
-                                            return (
-                                              <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
+                                      : cargaCompletada && days.length > 0 ? (
+                                        <div className="row">
+                                          <div className="col-12 col-md-12 col-xl-12">
+                                            <label>
+                                              Día de la Cita <span className="login-danger">*</span>
+                                            </label>
+                                            <div className="form-group local-forms mb-0">
+                                              <>
+                                                <button
+                                                  className="btn btn-primary"
+                                                  onClick={e => { mostrarAnterioresDias(e) }}
+                                                  disabled={indiceDias === 0}>
+                                                  <ChevronLeft />
+                                                </button>
                                                 <input
                                                   type="hidden"
-                                                  value={date}
                                                   {...register("selectedDay", {
                                                     required: {
                                                       value: true,
                                                       message: 'Seleccione una fecha'
                                                     }
-                                                  })} />
+                                                  })}
+                                                />
+                                                {days.slice(indiceDias, indiceDias + 5).map((day, i) => (
+                                                  <div key={`${day.id}${i}days`} style={{ display: 'inline-block' }}>
+                                                    <button
+                                                      className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
+                                                      onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
+                                                      {dayjs(day.fechaInicio).format('ddd DD MMM')}
+                                                    </button>
+                                                  </div>
+                                                ))}
+
                                                 <button
-                                                  className={`btn me-2 ${date === day.fechaInicio ? "btn-primary" : "btn-cancel"}`}
-
-                                                  onClick={(e) => handleDays(e, day.fechaInicio, day.id_user)}>
-                                                  {dayjs(day.fechaInicio).format('ddd DD MMM')}
-
+                                                  className="btn btn-primary"
+                                                  onClick={e => { mostrarSiguientesDias(e) }}
+                                                  disabled={indiceDias + 5 >= days.length}>
+                                                  <ChevronRight />
                                                 </button>
-                                              </div>
-                                            )
-                                          }
-                                          )}
-                                          <button
-                                            className="btn btn-primary"
-                                            onClick={e => { mostrarSiguientesDias(e) }}
-                                            disabled={indiceDias + 5 >= days.length}>
-                                            <ChevronRight />
-                                          </button>
-                                        </>)
-                                      }
-                                    </div>
-                                }
-                                {
-                                  errors.selectedDay && errors.selectedDay && <span><small>{errors.selectedDay.message}</small></span>
-                                }
-                              </div>
-
-                              {/* <DatePick /> */}
-                              {date !== '' &&
-                                <div className="col-12 col-md-12 col-xl-12 mt-3">
-                                  <label>
-                                    Hora <span className="login-danger">*</span>
-                                  </label>
-                                  <div className="form-group local-forms">
-                                    {hours.length > 0 && (
-                                      <>
-                                        <button
-                                          className="btn btn-primary"
-                                          onClick={e => { mostrarAnterioresHoras(e) }}
-                                          disabled={indiceHoras === 0}>
-                                          <ChevronLeft />
-                                        </button>
-                                        {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => {
-
-                                          return (
-                                            <div key={`${hour.id}${i}hours`} style={{ display: 'inline-block' }}>
-                                              <input
-                                                type="hidden"
-                                                value={time}
-                                                {...register("selectedHour", {
-                                                  required: {
-                                                    value: true,
-                                                    message: 'Seleccione una hora'
-                                                  }
-                                                })} />
-                                              <button
-                                                type="button"
-                                                className={`btn me-2 ${time === hour.horaInicio ? "btn-primary" : "btn-cancel"}`}
-                                                onClick={() => { handleHours(hour.horaInicio) }}>
-                                                {hour.horaInicioBloque}
-                                              </button>
+                                              </>
                                             </div>
-                                          )
-                                        }
-                                        )}
-                                        <button
-                                          className="btn btn-primary"
-                                          onClick={e => { mostrarSiguientesHoras(e) }}
-                                          disabled={indiceHoras + 5 >= hours.length}>
-                                          <ChevronRight />
-                                        </button>
-                                      </>)
-                                    }
-                                  </div>
-                                </div>
-                              }
-                              {
-                                errors.selectedHour && <span><small>{errors.selectedHour.message}</small></span>
-                              }
-                            </div>
-                          }
+                                            {errors.selectedDay && <span><small>{errors.selectedDay.message}</small></span>}
+                                          </div>
+
+                                          {/* Horas */}
+                                          {date !== '' && (
+                                            <div className="col-12 col-md-12 col-xl-12 mt-3">
+                                              <label>
+                                                Hora <span className="login-danger">*</span>
+                                              </label>
+                                              <div className="form-group local-forms">
+                                                {hours.length > 0 ? (
+                                                  <>
+                                                    <button
+                                                      className="btn btn-primary"
+                                                      onClick={e => { mostrarAnterioresHoras(e) }}
+                                                      disabled={indiceHoras === 0}>
+                                                      <ChevronLeft />
+                                                    </button>
+                                                    <input
+                                                      type="hidden"
+                                                      {...register("selectedHour", {
+                                                        required: {
+                                                          value: true,
+                                                          message: 'Seleccione una hora'
+                                                        }
+                                                      })}
+                                                    />
+                                                    {hours.slice(indiceHoras, indiceHoras + 5).map((hour, i) => (
+                                                      <div key={`${hour.id}${i}hours`} style={{ display: 'inline-block' }}>
+                                                        <button
+                                                          type="button"
+                                                          className={`btn me-2 ${time === hour.horaInicio ? "btn-primary" : "btn-cancel"}`}
+                                                          onClick={() => handleHours(hour.horaInicio)}>
+                                                          {hour.horaInicioBloque}
+                                                        </button>
+                                                      </div>
+                                                    ))}
+
+                                                    <button
+                                                      className="btn btn-primary"
+                                                      onClick={e => { mostrarSiguientesHoras(e) }}
+                                                      disabled={indiceHoras + 5 >= hours.length}>
+                                                      <ChevronRight />
+                                                    </button>
+                                                  </>
+                                                ) : (
+                                                  <div>No hay horas disponibles para esta fecha.</div>
+                                                )}
+                                              </div>
+                                              {errors.selectedHour && <span><small>{errors.selectedHour.message}</small></span>}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ) : null}
+                                </>
+                              )}
+                            </>
+                          )}
+
+                          <SelectorDeDias
+                            allDays={allDays}
+                            modalidad={modalidad}
+                            campus={campus}
+                            profesional={profesional}
+                            setDays={setDays}
+                            setHours={setHours}
+                            setDate={setDate}
+                            setTime={setTime}
+                            setLoadingDays={setLoadingDays}
+                            loadingDays={loadingDays}
+                          />
                         </AccordionDetails>
                       </Accordion>
                       {Object.keys(errors).length > 0 && <span><small>** Quedan campos sin rellenar</small></span>

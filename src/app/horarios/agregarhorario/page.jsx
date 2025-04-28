@@ -216,7 +216,7 @@ const AddSchedule = () => {
       dias: data.frecuencia === "semanal" ? data.semanal.dia : semana,
       fecha_inicio: data.fecha_inicio,
     }
-
+    
     const dates = getDates(newData, fechas)
     let esValido = []
     if (dates.length === 0) {
@@ -230,6 +230,7 @@ const AddSchedule = () => {
     })
     Promise.all(promesas)
       .then(async (values) => {
+        
         if (values.includes(true)) {
           setSuccess('fail')
           setError('Hay choque de horario.')

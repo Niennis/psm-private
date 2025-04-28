@@ -485,8 +485,6 @@ const FichaAlumno = ({ params }) => {
                                 </div>
                               </div>
 
-
-
                               <div className="col-12 col-md-6 col-xl-6">
                                 <div className="form-group local-forms">
                                   <label>Teléfono</label>
@@ -499,7 +497,20 @@ const FichaAlumno = ({ params }) => {
                                       className="form-control"
                                       maxLength={9}
                                       minLength={9}
-                                      {...register('telefono')}
+                                      onKeyDown={(e) => {
+                                        // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                        if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                          e.preventDefault();
+                                        }
+                                      }}
+                                      {...register('telefono', {
+                                        required: {
+                                          value: true,
+                                          message: 'Teléfono es requerido'
+                                        },
+                                        validate: (value) =>
+                                          value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                      })}
                                     />
                                   </div>
                                 </div>
@@ -745,7 +756,18 @@ const FichaAlumno = ({ params }) => {
                                     <input
                                       className="form-control"
                                       type="tel"
-                                      {...register('contacto1_numero')}
+                                      onKeyDown={(e) => {
+                                        // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                        if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                          e.preventDefault();
+                                        }
+                                      }}
+                                      {...register('contacto1_numero', {
+                                        validate: (value) =>
+                                          value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                      })}
+                                      maxLength={9}
+                                      minLength={9}
                                     />
                                   </div>
                                 </div>
@@ -781,7 +803,18 @@ const FichaAlumno = ({ params }) => {
                                     <input
                                       className="form-control"
                                       type="tel"
-                                      {...register('contacto2_numero')}
+                                      onKeyDown={(e) => {
+                                        // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                        if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                          e.preventDefault();
+                                        }
+                                      }}
+                                      {...register('contacto2_numero', {
+                                        validate: (value) =>
+                                          value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                      })}
+                                      maxLength={9}
+                                      minLength={9}
                                     />
                                   </div>
                                 </div>

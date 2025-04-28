@@ -38,8 +38,6 @@ export const fetchScheduleByDate = async (id, date) => {
   return response;
 }
 
-
-
 // BLOQUES DISPONIBLES POR DIA
 export const fetchBlocksAvailables = async (id, date) => {
   const SHOW_BLOQUES = process.env.NEXT_PUBLIC_SCHEDULE_AVAILABLE;
@@ -58,7 +56,6 @@ export const fetchBlocksAvailables = async (id, date) => {
   const response = await data.json()
   return response;
 }
-
 
 // SHOW DISPONIBILIDADES
 export const fetchScheduleByAvailability = async (id) => {
@@ -79,82 +76,79 @@ export const fetchScheduleByAvailability = async (id) => {
   return response
 }
 
-
 const obtenerFechasUnicas = (hours) => {
   const fechas = hours.map((hour) => hour.fechaInicio);
   return [...new Set(fechas)]; // Elimina duplicados usando Set
 };
 
-
-
 export const generarHorasMedicas = async (id) => {
- // Obtener los horarios de disponibilidad del profesional
- const { users: schedules } = await fetchScheduleByAvailability(id);
-  
- // Obtener todas las fechas únicas de los horarios
- const fechasUnicas = [...new Set(schedules.map(schedule => schedule.fechaInicio))];
- 
- // Obtener los bloques disponibles para cada fecha
- const bloquesPromesas = fechasUnicas.map(async (date) => {
-   const { bloques } = await fetchBlocksAvailables(id, date);
-   return bloques.map(bloque => ({ ...bloque, fecha: date }));
- });
- 
- const bloquesDisponibles = (await Promise.all(bloquesPromesas)).flat();
- 
- // Función para convertir hora a minutos para comparaciones
- const horaAMinutos = (hora) => {
-   const [h, m, s] = hora.split(':').map(Number);
-   return h * 60 + m;
- };
- 
- // Procesar cada horario para determinar disponibilidad
- const horasMedicas = schedules.map(schedule => {
-   const inicioSchedule = horaAMinutos(schedule.horaIni);
-   const finSchedule = horaAMinutos(schedule.horaFin);
-   
-   // Buscar bloques que coincidan con este horario
-   const bloquesEnEsteHorario = bloquesDisponibles.filter(bloque => {
-     if (bloque.fecha !== schedule.fechaInicio) return false;
-     
-     const inicioBloque = horaAMinutos(bloque.hora_inicio);
-     const finBloque = horaAMinutos(bloque.hora_fin);
-     
-     // Verificar si el bloque está dentro del horario del schedule
-     return (
-       (inicioBloque >= inicioSchedule && finBloque <= finSchedule) &&
-       bloque.usuario_id === schedule.id_user
-     );
-   });
-   
-   // Calcular disponibilidad (promedio de bloques disponibles)
-   const totalBloques = bloquesEnEsteHorario.length;
-   const bloquesDisponiblesCount = bloquesEnEsteHorario.filter(b => b.disponible === 1).length;
-   const disponibilidad = totalBloques > 0 ? bloquesDisponiblesCount / totalBloques : 0;
-   
-   return {
-     detalleServicio: schedule.detalleServicio,
-     dia: schedule.dia,
-     duracionServicio: schedule.duracionServicio,
-     fechaInicio: schedule.fechaInicio,
-     fechaFin: schedule.fechaFin,
-     frecuencia: schedule.frecuencia,
-     horaInicio: schedule.horaIni,
-     horaFin: schedule.horaFin,
-     id_disponibilidad: schedule.id,
-     id_bloque: schedule.id_bloque,
-     id_user: schedule.id_user,
-     campus: schedule.campus,
-     modalidad: schedule.modalidad,
-     repeticiones: schedule.repeticiones,
-     tipo: schedule.tipo,
-     tipoServicio: schedule.tipoServicio,
-     uuid: schedule.uuid,
-     disponible: disponibilidad
-   };
- });
- 
- return horasMedicas;
+  // Obtener los horarios de disponibilidad del profesional
+  const { users: schedules } = await fetchScheduleByAvailability(id);
+
+  // Obtener todas las fechas únicas de los horarios
+  const fechasUnicas = [...new Set(schedules.map(schedule => schedule.fechaInicio))];
+
+  // Obtener los bloques disponibles para cada fecha
+  const bloquesPromesas = fechasUnicas.map(async (date) => {
+    const { bloques } = await fetchBlocksAvailables(id, date);
+    return bloques.map(bloque => ({ ...bloque, fecha: date }));
+  });
+
+  const bloquesDisponibles = (await Promise.all(bloquesPromesas)).flat();
+
+  // Función para convertir hora a minutos para comparaciones
+  const horaAMinutos = (hora) => {
+    const [h, m, s] = hora.split(':').map(Number);
+    return h * 60 + m;
+  };
+
+  // Procesar cada horario para determinar disponibilidad
+  const horasMedicas = schedules.map(schedule => {
+    const inicioSchedule = horaAMinutos(schedule.horaIni);
+    const finSchedule = horaAMinutos(schedule.horaFin);
+
+    // Buscar bloques que coincidan con este horario
+    const bloquesEnEsteHorario = bloquesDisponibles.filter(bloque => {
+      if (bloque.fecha !== schedule.fechaInicio) return false;
+
+      const inicioBloque = horaAMinutos(bloque.hora_inicio);
+      const finBloque = horaAMinutos(bloque.hora_fin);
+
+      // Verificar si el bloque está dentro del horario del schedule
+      return (
+        (inicioBloque >= inicioSchedule && finBloque <= finSchedule) &&
+        bloque.usuario_id === schedule.id_user
+      );
+    });
+
+    // Calcular disponibilidad (promedio de bloques disponibles)
+    const totalBloques = bloquesEnEsteHorario.length;
+    const bloquesDisponiblesCount = bloquesEnEsteHorario.filter(b => b.disponible === 1).length;
+    const disponibilidad = totalBloques > 0 ? bloquesDisponiblesCount / totalBloques : 0;
+
+    return {
+      detalleServicio: schedule.detalleServicio,
+      dia: schedule.dia,
+      duracionServicio: schedule.duracionServicio,
+      fechaInicio: schedule.fechaInicio,
+      fechaFin: schedule.fechaFin,
+      frecuencia: schedule.frecuencia,
+      horaInicio: schedule.horaIni,
+      horaFin: schedule.horaFin,
+      id_disponibilidad: schedule.id,
+      id_bloque: schedule.id_bloque,
+      id_user: schedule.id_user,
+      campus: schedule.campus,
+      modalidad: schedule.modalidad,
+      repeticiones: schedule.repeticiones,
+      tipo: schedule.tipo,
+      tipoServicio: schedule.tipoServicio,
+      uuid: schedule.uuid,
+      disponible: disponibilidad
+    };
+  });
+
+  return horasMedicas;
 };
 
 
@@ -333,7 +327,7 @@ export const getDates = (body) => {
 // CREATE DISPONIBILIDADES
 export const createSchedule = async (schedule) => {
   // const SCHEDULES_URL = process.env.NEXT_PUBLIC_CREATE_DISPONIBILIDADES
-const SCHEDULES_URL = 'https://edituserexcel-g5c9f2drbzb9evb9.eastus-01.azurewebsites.net/main'
+  const SCHEDULES_URL = 'https://edituserexcel-g5c9f2drbzb9evb9.eastus-01.azurewebsites.net/main'
   const semana = ["lunes", "martes", "miércoles", "jueves", "viernes"]
 
   const body = {
@@ -426,7 +420,6 @@ const hayChoqueHorario = (inicioMayor, finMayor, bloquesMenores) => {
       return true; // Hay choque de horario
     }
   }
-
   return false; // No hay choque de horario
 }
 
@@ -438,7 +431,6 @@ export const validateDates = async (fecha, horaInicio, horaFin, id) => {
   } else {
     return hayChoqueHorario(horaInicio, horaFin, bloquesMenores)
   }
-
 }
 
 export const getSpecialities = async () => {
@@ -546,6 +538,7 @@ export const editDisponibilidad = async (body) => {
 
     return response
   } catch (error) {
+    console.log(error)
   }
 }
 
@@ -572,7 +565,7 @@ export const deleteDisponibilidad = async (id) => {
 }
 
 export const eliminarDisponibilidadPorId = async (id) => {
-  const URL = `${process.env.NEXT_PUBLIC_DISPONIBILIDADES}/delete/id` 
+  const URL = `${process.env.NEXT_PUBLIC_DISPONIBILIDADES}/delete/id`
   const body = {
     id: id
   }
@@ -586,7 +579,7 @@ export const eliminarDisponibilidadPorId = async (id) => {
       body: JSON.stringify(body)
     })
     const response = await data.json()
-    
+
     return response
   } catch (error) {
     console.log('Error:', error);
@@ -595,7 +588,7 @@ export const eliminarDisponibilidadPorId = async (id) => {
 }
 
 export const eliminarDisponibilidadCompleta = async (uuid) => {
-  
+
   const URL = `${process.env.NEXT_PUBLIC_DISPONIBILIDADES}/delete/uuid`
   const body = {
     uuid: uuid
