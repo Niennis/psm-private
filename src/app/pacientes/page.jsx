@@ -468,10 +468,17 @@ const PatientsList = () => {
                       <i className="far fa-edit me-2" />
                       Registrar atención
                     </Link>
-                    {/* <Link className="dropdown-item" href={`/citas/${record.id_cita}`}>
+                    <Link
+                      className="dropdown-item"
+                      href={`/citas/${record.id_cita}`}
+                      style={{
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
+                      }}
+                    >
                       <i className="far fa-edit me-2" />
                       Editar
-                    </Link> */}
+                    </Link>
                     <span
                       className="dropdown-item"
                       data-bs-toggle="modal"
