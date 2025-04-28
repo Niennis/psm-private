@@ -243,7 +243,6 @@ export const fetchAppointmentById = async (id) => {
   } catch (error) {
     console.log('Error:', error)
   }
-
 }
 
 export const fetchAppointment = async (id) => {
