@@ -1,22 +1,18 @@
-function ensureReCaptchaLoaded() {
-  return new Promise((resolve) => {
-    if (typeof grecaptcha !== 'undefined' && typeof grecaptcha.ready === 'function') {
-      resolve();
-      return;
-    }
+function ensureReCaptchaLoaded(timeout = 5000) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    console.log('typeof grecaptcha.ready:', typeof grecaptcha.ready);
 
-    const checkInterval = setInterval(() => {
+    (function check() {
       if (typeof grecaptcha !== 'undefined' && typeof grecaptcha.ready === 'function') {
-        clearInterval(checkInterval);
         resolve();
+      } else if (Date.now() - start >= timeout) {
+        console.error("Tiempo de espera para reCAPTCHA excedido");
+        resolve(); // o reject();
+      } else {
+        setTimeout(check, 100);
       }
-    }, 100);
-
-    setTimeout(() => {
-      clearInterval(checkInterval);
-      console.error("Tiempo de espera para reCAPTCHA excedido");
-      resolve();
-    }, 5000);
+    })();
   });
 }
 
@@ -64,6 +60,7 @@ export async function verifyCaptchaToken(token) {
 
   const res = await fetch(url, { method: 'POST' });
   const captchaData = await res.json();
+  console.log('captchaData:', captchaData);
 
   if (!res.ok) return null;
 

@@ -86,6 +86,7 @@ const Login = () => {
     try {
       const token = await getCaptchaToken()
       const response = await logInAction(token, data)
+      console.log('RESPONSE logInAction', response);
 
       if (!response?.success) {
         setError("Captcha inválido")
@@ -102,8 +103,8 @@ const Login = () => {
       if (res?.ok) {
         setIsLoggedIn(true)
       } else {
-        if(res.error ==='cuenta-no-validada')
-        setError("El mail y la contraseña no coinciden")
+        if (res.error === 'cuenta-no-validada')
+          setError("El mail y la contraseña no coinciden")
       }
 
     } catch (err) {
@@ -344,7 +345,7 @@ const Login = () => {
 
                                         <input type="hidden" name="recaptcha_token" value={token || ''} />
                                         <div className="form-group login-btn">
-                                          <button  disabled={!token}
+                                          <button disabled={!token}
                                             className="btn btn-primary btn-block sailec-medium"
                                             onClick={handleOnSubmit}
                                           >
