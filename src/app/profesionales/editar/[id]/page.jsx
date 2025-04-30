@@ -42,20 +42,20 @@ const EditDoctor = ({ params }) => {
   const [initial, setInitial] = useState({})
   const [passwordVisible, setPasswordVisible] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [initialProfesional, setInitialProfesional] = useState('')
-  const [selectedOption, setSelectedOption] = useState(null);
+  // const [initialProfesional, setInitialProfesional] = useState('')
+  // const [selectedOption, setSelectedOption] = useState(null);
 
-  const [speciality, setSpeciality] = useState([
-    { value: "", label: "", name: "", id: 0 },
-    { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality", id: 1 },
-    { value: "Psicología", label: "Psicología", name: "speciality", id: 2 },
-    { value: "Psiquiatría", label: "Psiquiatría", name: "speciality", id: 3 },
-    { value: "Trabajo Social", label: "Trabajo Social", name: "speciality", id: 4 },
-    { value: "Practicante Psicología", label: "Practicante Psicología", name: "speciality", id: 5 },
-    { value: "Practicante Psicopedagogía", label: "Practicante Psicopedagogía", name: "speciality", id: 6 },
-    { value: "Practicante Psiquiatría", label: "Practicante Psiquiatría", name: "speciality", id: 7 },
-    { value: "Practicante Trabajo Social", label: "Practicante Trabajo Social", name: "speciality", id: 8 },
-  ]);
+  // const [speciality, setSpeciality] = useState([
+  //   { value: "", label: "", name: "", id: 0 },
+  //   { value: "Psicopedagogía", label: "Psicopedagogía", name: "speciality", id: 1 },
+  //   { value: "Psicología", label: "Psicología", name: "speciality", id: 2 },
+  //   { value: "Psiquiatría", label: "Psiquiatría", name: "speciality", id: 3 },
+  //   { value: "Trabajo Social", label: "Trabajo Social", name: "speciality", id: 4 },
+  //   { value: "Practicante Psicología", label: "Practicante Psicología", name: "speciality", id: 5 },
+  //   { value: "Practicante Psicopedagogía", label: "Practicante Psicopedagogía", name: "speciality", id: 6 },
+  //   { value: "Practicante Psiquiatría", label: "Practicante Psiquiatría", name: "speciality", id: 7 },
+  //   { value: "Practicante Trabajo Social", label: "Practicante Trabajo Social", name: "speciality", id: 8 },
+  // ]);
 
   useEffect(() => {
     setProps({
@@ -64,13 +64,6 @@ const EditDoctor = ({ params }) => {
       activeClassName: "edit-doctor",
     });
   }, [setProps]);
-
-  const [show, setShow] = useState(false);
-  const onChange = (date, dateString) => {
-  };
-  const loadFile = (event) => {
-    // Handle file loading logic here
-  };
 
   // DATOS PRECARGADOS
   const fetchInitialData = async () => {
@@ -85,8 +78,9 @@ const EditDoctor = ({ params }) => {
         const usersData = await fetchProfessionalById(params.id);
         user = usersData.users[0];
       } else {
-        const { users } = await fetchUser(params.id)
-        user = users[0]
+        const { users } = await fetchProfessionalById(params.id)
+        const findUser = await fetchUserByEmail(users[0]?.email)
+        user = findUser
       }
 
       const obj = {
@@ -123,23 +117,23 @@ const EditDoctor = ({ params }) => {
     setPasswordVisible(!passwordVisible);
   };
 
-  const formatDateToYYYYDDMM = dateString => {
-    const timestamp = Date.parse(dateString);
-    const date = new Date(timestamp);
+  // const formatDateToYYYYDDMM = dateString => {
+  //   const timestamp = Date.parse(dateString);
+  //   const date = new Date(timestamp);
 
-    const formattedDate = date.toISOString().split("T")[0];
-    return formattedDate
-  }
+  //   const formattedDate = date.toISOString().split("T")[0];
+  //   return formattedDate
+  // }
 
-  const statusPass = (data) => {
-    const pass = data.password
-    const confirmPass = data.confirmPassword
-    if (data.mustChangePassword === 1 && pass && confirmPass && pass === confirmPass) {
-      return 0
-    } else {
-      return data.mustChangePassword
-    }
-  }
+  // const statusPass = (data) => {
+  //   const pass = data.password
+  //   const confirmPass = data.confirmPassword
+  //   if (data.mustChangePassword === 1 && pass && confirmPass && pass === confirmPass) {
+  //     return 0
+  //   } else {
+  //     return data.mustChangePassword
+  //   }
+  // }
 
   const mobileValue = watch('mobile'); // Observar cambios en el valor de 'mobile' 
   useEffect(() => {
