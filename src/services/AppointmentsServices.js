@@ -29,6 +29,17 @@ export const sendEmail = async (email, typeUser) => {
   }
 }
 
+const formatearHora = (hora) => {
+  const partes = hora.split(':');
+  if (partes.length === 2) {
+    return hora; // Ya está en formato hh:mm
+  } else if (partes.length === 3) {
+    return partes.slice(0, 2).join(':'); // Quita los segundos
+  } else {
+    return hora; // Formato no esperado, lo devuelve tal cual
+  }
+}
+
 export const createInterview = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_INTERVIEW
   const body = {
@@ -41,7 +52,7 @@ export const createInterview = async (appointment) => {
     diagnostico_previo: 'diagnosticos',
     estado: "pendiente",
     fechaInicio: appointment.fecha,
-    hora: appointment.hora,
+    hora: formatearHora(appointment.hora),
     modalidad: appointment.modalidad || 'modalidad',
     motivo: appointment.motivo.label || 'motivo',
     notas: 'notas',
@@ -49,6 +60,7 @@ export const createInterview = async (appointment) => {
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
   }
+console.log('BODY', body);
 
   try {
     const data = await fetch(APPOINTMENT_API, {

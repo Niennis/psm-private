@@ -97,6 +97,7 @@ const AddFirstAppoinments = () => {
       const { users: response } = await fetchUser(id);
 
       const patient = {
+        id: response[0].id,
         name: response[0].nombre,
         lastName: response[0].apellido,
         nombre_social: response[0].nombre_social || ' ',
@@ -389,7 +390,6 @@ const AddFirstAppoinments = () => {
   };
 
   const handleFirstInterview = handleSubmit(async (data, e) => {
-    console.log('Datos enviados: ', data)
     setOpenBackdrop(true)
     let childFormData;
     if (childFormRef.current) {
@@ -490,7 +490,7 @@ const AddFirstAppoinments = () => {
           createInterview(bodyInterview),
           updateUser({ ...bodyUpdate, "id_emergencia": id_contact_1, "id_emergencia_2": id_contact_2 })
         ]);
-
+        
         if (appointment.estado === false && update.estado === false) {
           setSuccess('fail')
         } else if (appointment.estado === true && update.estado === false) {
