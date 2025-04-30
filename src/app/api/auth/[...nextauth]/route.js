@@ -32,7 +32,7 @@ const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 4 * 60 * 60, // 4 horas
+    maxAge: 1 * 60 * 60, // 4 horas
   },
   providers: [
     GoogleProvider({
@@ -67,38 +67,51 @@ const authOptions = {
 
         try {
           const user = await fetchUserMailAndPass(body);
-          if (!user) throw new Error("Usuario no encontrado.");
-          return user;
+          if (!user) {
+            // Este string literal será enviado como `res.error`
+            throw new Error("usuario-no-encontrado");
+          }
+          if (user?.validacion === false) {
+            throw new Error("cuenta-no-validada");
+          }
+
+          return user; // éxito
         } catch (error) {
-          throw new Error(`Ocurrió un problema: ${error}`);
+          console.error('ERROR en authorize:', error);
+          throw new Error(error.message || "error-desconocido");
         }
-      },
+      }
     }),
   ],
   pages: {
     signIn: "/",
-    error: "/error/page",
+    error: "/error",
   },
   callbacks: {
 
     async signIn({ account, profile, credentials }) {
       if (account.provider === "google") {
+        const allowedDomains = ["@mail.udp.cl", "@gmail.com"];
+        const isAllowedDomain = allowedDomains.some(domain =>
+          profile.email.endsWith(domain)
+        );
+
         if (
-          profile.email_verified &&
-          (profile.email.endsWith("@mail.udp.cl") || profile.email.endsWith("@gmail.com"))) {
+          profile.email_verified && isAllowedDomain) {
           try {
             const user = await searchUser(profile.email);
-            return !!user;
+            // return !!user;
+            if (user.validacion === false) {
+              // No se encontró en tu base de datos
+              return "/error?error=EmailSignin";
+            }
+            return true;
 
           } catch (error) {
-            // return `/error/page?error=AccesoDenegado&email=${encodeURIComponent(profile.email)}`;
-            return false;
+            return "/error?error=Configuration";
           }
         } else {
-          // throw new Error("Correo no autorizado o usuario no encontrado.");
-          // return `/error/page?error=OAuthCallback`;
-
-          return false; // Esto activará el flujo de error de NextAuth
+          return "/error/page?error=DominioNoPermitido";
         }
       }
 
@@ -113,10 +126,10 @@ const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         const profile = await searchUser(user.email);
-        
-        if (profile?.validacion === false) {
-          throw new Error("Usuario no encontrado.");
-        }
+
+        // if (profile?.validacion === false) {
+        //   throw new Error("Usuario no encontrado.");
+        // }
         token.id = profile.id;
         token.name = profile.nombre || user.name;
         token.rol = profile.tipo_usuario;

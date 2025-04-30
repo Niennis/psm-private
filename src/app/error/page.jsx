@@ -17,13 +17,14 @@ const errors = {
   EmailCreateAccount: "Ocurrió un problema. Revisa tu información o ingresa más tarde.",
   Callback: "Ocurrió un problema. Revisa tu información o ingresa más tarde. Recuerda usar tu mail UDP.",
   OAuthAccountNotLinked: "Para confirmar tu identidad, ingresa con la misma cuenta con que ingresasteoriginalmente.",
-  EmailSignin: "Revisa el email ingresado.",
+  EmailSignin: "Revisa el email ingresado. Recuerda usar tu correo UDP.",
   CredentialsSignin: "El ingreso falló. Revisa que tus datos sean correctos.",
   Configuration: "Ocurrió un problema. Intenta más tarde",
   AccessDenied: "Revisa tus datos ingresados. Recuerda que si eres estudiante, debes ingresar con tu mail UDP.",
   Verification: "Vuelve a intentar más tarde.",
   default: "Ocurrió un problema. Revisa tu información o ingresa más tarde.",
   AccesoDenegado: "Tu correo no está registrado. Contacta al soporte o intenta con otra cuenta.",
+  DominioNoPermitido: "Recuerda usar tu correo UDP."
 }
 
 const Error = () => {
@@ -35,17 +36,11 @@ const Error = () => {
     setIsMounted(true)
   }, [])
 
-  // Solo renderizar cuando el componente esté montado y `searchParams` esté disponible
-  if (!isMounted) {
-    return null // O puedes renderizar un UI de carga
-  }
+  const errorKey = searchParams.get('error') // Obtener el parámetro "error" de la URL
 
-  const error = searchParams.get('error') // Obtener el parámetro "error" de la URL
-
-  const errorMessage = error && (errors[error] || errors.default);
+  const errorMessage = errorKey && (errors[errorKey] || errors.default);
 
   const handleUnauthorizedEmail = async () => {
-    console.log('Limpiando sesión y redirigiendo...');
 
     // Eliminar cookies relacionadas con la sesión de Google
     document.cookie.split(";").forEach((c) => {
@@ -67,12 +62,17 @@ const Error = () => {
     }, 100);
   };
 
+  // Solo renderizar cuando el componente esté montado y `searchParams` esté disponible
+  if (!isMounted) {
+    return null // O puedes renderizar un UI de carga
+  }
+
   return (
     <div className='center'>
       <div className="row justify-content-center " style={{ padding: 0, margin: "250px auto 0", width: '500px' }}>
         <div className="col-12 text-center " style={{ padding: 0, margin: '32px 0 0' }}>
 
-          <Card sx={{ minWidth: 275, padding: '20px',  }}>
+          <Card sx={{ minWidth: 275, padding: '20px', }}>
             <CardContent>
               {/* <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
                 Word of the Day
@@ -86,7 +86,14 @@ const Error = () => {
               </Typography>
             </CardContent>
             <CardActions>
-              <button className="btn btn-primary" size="small" onClick={handleUnauthorizedEmail}>Ir a página inicio</button>
+              <button
+                className="btn btn-primary"
+                size="small"
+                onClick={handleUnauthorizedEmail}
+                style={{margin: 'auto'}}
+                >
+                Ir a página inicio
+              </button>
             </CardActions>
           </Card>
         </div>

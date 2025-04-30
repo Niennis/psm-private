@@ -1,10 +1,8 @@
 "use client";
 import React, { createContext, useContext, useState } from "react";
 
-// Crear el contexto
 const SidebarContext = createContext();
 
-// Proveedor del contexto
 export const SidebarProvider = ({ children, initialProps = {} }) => {
   const [props, setProps] = useState(initialProps);
 
@@ -15,7 +13,6 @@ export const SidebarProvider = ({ children, initialProps = {} }) => {
   );
 };
 
-// Hook para usar el contexto
 export const useSidebar = () => {
   const context = useContext(SidebarContext);
   if (!context) {

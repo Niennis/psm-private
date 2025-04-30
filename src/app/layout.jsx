@@ -10,6 +10,7 @@ import { SidebarProvider } from '@/context/SidebarContext';
 import { DisponibilidadProvider } from "@/context/DisponibilidadContext";
 import UserWrapper from "@/providers/UseProvider";
 import Welcome from "@/components/Welcome";
+import AppProviders from "./providers";
 
 // import Hotjar from '@hotjar/browser';
 
@@ -26,7 +27,7 @@ export default async function RootLayout({ children, props }) {
 
   const session = await getServerSession();
   return (
-    <AuthProvider session={session}>
+    // <AuthProvider session={session}>
       <html lang="en">
         <head>
           <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -45,32 +46,36 @@ export default async function RootLayout({ children, props }) {
                 a.appendChild(r);
             })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=')`
           }}></Script>
-          <Script
+          {/* <Script
             strategy="beforeInteractive"
             src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-          />
+          /> */}
         </head>
         <body>
+<AppProviders session={session}>
 
-          <SectionProvider>
-            <SidebarProvider>
-              <UserWrapper>
-                <DisponibilidadProvider>
+          {/* <SectionProvider> */}
+            {/* <SidebarProvider> */}
+              {/* <UserWrapper> */}
+                {/* <DisponibilidadProvider> */}
                   {/* <LoadingProvider> */}
                   <Header />
 
-                  {session && <Sidebar />}
+                  {/* {session && <Sidebar />} */}
+                  <Sidebar />
                   <Welcome session={session}>
                     {children}
                   </Welcome>
+</AppProviders>
+
                   {/* </LoadingProvider> */}
-                </DisponibilidadProvider>
-              </UserWrapper>
-            </SidebarProvider>
-          </SectionProvider>
+                {/* </DisponibilidadProvider> */}
+              {/* </UserWrapper> */}
+            {/* </SidebarProvider> */}
+          {/* </SectionProvider> */}
           {/* <Script src="./bot.js" data-args="Salud mental, #FFFFFF, #AA3C80FF, ./bot_salud_mental.png" id="bot"></Script> */}
         </body>
       </html>
-    </AuthProvider>
+    // </AuthProvider>
   );
 }

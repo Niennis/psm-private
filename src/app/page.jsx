@@ -16,9 +16,9 @@ const Home = () => {
   }
 
   return (
-    <GoogleReCaptchaWrapper>
+    // <GoogleReCaptchaWrapper>
       <Login />
-    </GoogleReCaptchaWrapper>
+    // </GoogleReCaptchaWrapper>
 
   );
 };

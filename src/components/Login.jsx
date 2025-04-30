@@ -14,10 +14,11 @@ import { getCaptchaToken } from "@/utils/captcha";
 import { logInAction } from "@/app/actions";
 import SimpleBackdrop from "./Backdrop";
 import { useSession } from "next-auth/react";
+import { useReCaptchaReady } from "../../hooks/useReCaptchaReady";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(true);
-  const [isInvalid, setIsInvalid] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [submit, setSubmit] = useState('')
   const [hash, setHash] = useState('');
@@ -27,6 +28,9 @@ const Login = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
+  const isCaptchaReady = useReCaptchaReady()
+  const { executeRecaptcha } = useGoogleReCaptcha();
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -34,17 +38,20 @@ const Login = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   signOut({ redirect: false }).then(() => {
-  //     console.log("Sesión completamente eliminada.");
-  //   });
+  useEffect(() => {
+    const getRecaptchaToken = async () => {
+      if (!executeRecaptcha) return;
 
-  //   // Eliminamos cualquier cookie remanente
-  //   document.cookie = "next-auth.session-token=; Max-Age=0; Path=/;";
-  //   document.cookie = "next-auth.csrf-token=; Max-Age=0; Path=/;";
-  //   localStorage.clear();
-  //   sessionStorage.clear();
-  // }, []);
+      try {
+        const newToken = await executeRecaptcha('login');
+        setToken(newToken);
+      } catch (err) {
+        console.error("Error ejecutando reCAPTCHA:", err);
+      }
+    };
+
+    getRecaptchaToken();
+  }, [executeRecaptcha]);
 
   useEffect(() => {
     if (session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador') {
@@ -68,42 +75,44 @@ const Login = () => {
   const handleOnSubmit = handleSubmit(async (data) => {
     setIsLoading(true)
     setSubmit('')
-    // if (status === 'unauthenticated') /* <SimpleBackdrop /> */ <h1>CARGANDO...</h1>
+    setError('')
 
-    const token = await getCaptchaToken()
-    const response = await logInAction(token, data)
-
-    if (response && response.success) {
-      try {
-        setIsLoading(true)
-        const res = await signIn('credentials', {
-          callbackUrl: '/pacientes',
-          email: data.email,
-          password: data.password
-        })
-
-        if (res.validacion === false) {
-          setIsInvalid(true)
-        } else {
-          setIsInvalid(false)
-          setIsLoggedIn(true)
-        }
-
-      } catch (err) {
-        setIsLoading(true)
-        console.log('Hubo un error:', err)
-        if (err.message == `Failed to execute 'json' on 'Response': Unexpected end of JSON input`) {
-          setError('El mail y la contraseña no coinciden')
-        }
-      }
-      finally {
-        setIsLoading(false)
-      }
-    } else {
-      setError('Ocurrió un problema, intenta más tarde')
-      console.log('Captcha no válida')
+    if (!isCaptchaReady) {
+      setError("Captcha aún no está listo. Espera unos segundos e intenta de nuevo.")
+      setIsLoading(false)
+      return
     }
-  })
+
+    try {
+      const token = await getCaptchaToken()
+      const response = await logInAction(token, data)
+
+      if (!response?.success) {
+        setError("Captcha inválido")
+        return
+      }
+
+      const res = await signIn('credentials', {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+        callbackUrl: "/pacientes"
+      })
+
+      if (res?.ok) {
+        setIsLoggedIn(true)
+      } else {
+        if(res.error ==='cuenta-no-validada')
+        setError("El mail y la contraseña no coinciden")
+      }
+
+    } catch (err) {
+      console.error("Hubo un error:", err)
+      setError("Ocurrió un problema inesperado")
+    } finally {
+      setIsLoading(false)
+    }
+  });
 
   const handleTabClick = (tabId) => {
     setHash(tabId);
@@ -120,6 +129,7 @@ const Login = () => {
 
     } catch (error) {
       console.log('Error:', error)
+      signOut()
       if (error.message === 'No se pudo acceder. Correo no autorizado.') {
         setError('No tienes acceso. Tu correo no está autorizado.');
       } else {
@@ -133,12 +143,15 @@ const Login = () => {
     }
   }
   const URL_RESERVAR = process.env.NEXT_PUBLIC_URL_RESERVAR
+
+  if (status === "loading") return <SimpleBackdrop />
+  // if (status === "authenticated") router.push('/pacientes')
+
   return (
     <>
       {isLoading && <SimpleBackdrop text={'el login'} />}
       <div className="main-wrapper login-body sailec">
         <div className="container-fluid px-0">
-
           <div className="row ">
             {/* Login logo */}
             <div className="col-lg-6 login-wrap" style={{
@@ -303,7 +316,6 @@ const Login = () => {
                                             errors.password && <span className="font-red"><small>{errors.password.message}</small></span>
                                           }
 
-                                          {isInvalid && <span style={{ color: 'red' }}><small>Usuario no encontrado</small></span>}
                                           {error &&
                                             <p className="account-subtitle font-red">
                                               {error}
@@ -330,8 +342,9 @@ const Login = () => {
                                           <Link href="/olvido-contrasena">¿Olvidaste la contraseña?</Link>
                                         </div>
 
+                                        <input type="hidden" name="recaptcha_token" value={token || ''} />
                                         <div className="form-group login-btn">
-                                          <button
+                                          <button  disabled={!token}
                                             className="btn btn-primary btn-block sailec-medium"
                                             onClick={handleOnSubmit}
                                           >

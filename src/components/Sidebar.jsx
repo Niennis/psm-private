@@ -64,12 +64,14 @@ const Sidebar = () => {
       patientLoggedIn()
     }
   }, [session])
-
-  if (!session || !props) {
+  
+  if (status === "loading") {
     return <SimpleBackdrop />;
   }
-
-
+  
+  if (!session || !props) {
+    return null; // o un fallback adecuado
+  }
   const expandMenu = () => {
     document.body.classList.remove("expand-menu");
   };
