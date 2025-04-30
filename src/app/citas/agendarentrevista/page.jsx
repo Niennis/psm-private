@@ -34,18 +34,6 @@ import { validarRut } from "@/utils/managedata";
 import { formatAndValidateRUT } from "@/utils/rutFormat";
 import SelectorDeDias from "@/components/SelectorDias";
 
-const formatRut = (value) => {
-  const cleanedValue = value.replace(/[^\dkK]/g, '');
-  const [number, verifierDigit] = cleanedValue.split('-');
-
-  const formattedNumber = number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  const response = validarRut(value)
-  if (response) {
-    return `${formattedNumber}-${verifierDigit || ''}`;
-  }
-  setError('Rut inválido')
-};
-
 // Función para obtener fechas únicas
 const obtenerFechasUnicas = array => {
   let fechasUnicas = [];
@@ -95,7 +83,7 @@ const AddFirstAppoinments = () => {
   const [datosPreCargados, setDatosPreCargados] = useState(null);
 
   const [cargaCompletada, setCargaCompletada] = useState(false);
-  
+
   useEffect(() => {
     setProps({
       id: "menu-item4",
@@ -712,6 +700,18 @@ const AddFirstAppoinments = () => {
                                   type="text"
                                   // name="rut"
                                   style={{ border: errors.rut ? '2px solid red' : '2px solid green' }}
+                                  onKeyDown={(e) => {
+                                    const key = e.key;
+                                    if (
+                                      ['Backspace', 'ArrowLeft', 'ArrowRight', 'Tab', 'Delete'].includes(key)
+                                    ) {
+                                      return;
+                                    }
+                                    const isAllowed = /^[0-9kK]$/.test(key);
+                                    if (!isAllowed) {
+                                      e.preventDefault();
+                                    }
+                                  }}
                                   {...register('rut', {
                                     required: "RUT es requerido",
                                     validate: (value) => formatAndValidateRUT(value).isValid || "RUT inválido",
@@ -1161,10 +1161,6 @@ const AddFirstAppoinments = () => {
                                   type="email"
                                   defaultValue={""}
                                   {...register('email_contacto_emergencia1', {
-                                    required: {
-                                      value: true,
-                                      message: 'El campo es obligatorio',
-                                    },
                                     pattern: {
                                       value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
                                       message: 'Correo no es válido'

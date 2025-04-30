@@ -362,15 +362,23 @@ const FichaAlumno = ({ params }) => {
                       <div className="col-12 col-md-6 col-xl-6">
                         <div className="form-group local-forms">
                           <label className="col-md-6 col-form-label">
-                            Nombre estudiante
+                            Nombre estudiante <span className="login-danger">*</span>
                           </label>
                           <div className="col-md-12">
                             <input
                               type="text"
                               className="form-control"
-                              {...register('nombre')}
+                              {...register('nombre', {
+                                required: {
+                                  value: true,
+                                  message: 'Nombre es requerido'
+                                },
+                              })}
                             />
                           </div>
+                          {
+                            errors.nombre && <span><small>{errors.nombre.message}</small></span>
+                          }
                         </div>
                       </div>
 
@@ -393,15 +401,23 @@ const FichaAlumno = ({ params }) => {
                       <div className="col-12 col-md-6 col-xl-6">
                         <div className="form-group local-forms">
                           <label className="col-md-6 col-form-label">
-                            Apellido
+                            Apellido <span className="login-danger">*</span>
                           </label>
                           <div className="col-md-12">
                             <input
                               type="text"
                               className="form-control"
-                              {...register('apellido')}
+                              {...register('apellido', {
+                                required: {
+                                  value: true,
+                                  message: 'Apellido es requerido'
+                                },
+                              })}
                             />
                           </div>
+                          {
+                            errors.apellido && <span><small>{errors.apellido.message}</small></span>
+                          }
                         </div>
                       </div>
 
@@ -439,13 +455,29 @@ const FichaAlumno = ({ params }) => {
 
                               <div className="col-12 col-md-6 col-xl-6">
                                 <div className="form-group local-forms">
-                                  <label>Rut</label>
+                                  <label>Rut <span className="login-danger">*</span></label>
                                   <input
                                     className="form-control"
                                     maxLength={12}
                                     type="text"
                                     style={{ border: errors.rut ? '2px solid red' : '2px solid green' }}
+                                    onKeyDown={(e) => {
+                                      const key = e.key;
+                                      if (
+                                        ['Backspace', 'ArrowLeft', 'ArrowRight', 'Tab', 'Delete'].includes(key)
+                                      ) {
+                                        return;
+                                      }
+                                      const isAllowed = /^[0-9kK]$/.test(key);
+                                      if (!isAllowed) {
+                                        e.preventDefault();
+                                      }
+                                    }}
                                     {...register('rut', {
+                                      required: {
+                                        value: true,
+                                        message: 'Rut es requerido'
+                                      },
                                       validate: (value) => formatAndValidateRUT(value).isValid || "RUT inválido",
                                     })}
                                   />
@@ -457,7 +489,7 @@ const FichaAlumno = ({ params }) => {
 
                               <div className="col-12 col-md-6 col-xl-6">
                                 <div className="form-group local-forms">
-                                  <label>Fecha de nacimiento</label>
+                                  <label>Fecha de nacimiento <span className="login-danger">*</span></label>
                                   <input
                                     className="form-control datetimepicker"
                                     type="date"
@@ -470,6 +502,9 @@ const FichaAlumno = ({ params }) => {
                                     })}
                                     onChange={e => { calcularEdad(e.target.value) }}
                                   />
+                                  {
+                                    errors.fecha_nacimiento && <span><small>{errors.fecha_nacimiento.message}</small></span>
+                                  }
                                 </div>
                               </div>
 
@@ -487,7 +522,7 @@ const FichaAlumno = ({ params }) => {
 
                               <div className="col-12 col-md-6 col-xl-6">
                                 <div className="form-group local-forms">
-                                  <label>Teléfono</label>
+                                  <label>Teléfono <span className="login-danger">*</span></label>
                                   <div className="input-group">
                                     <div className="input-group-prepend">
                                       <span className="input-group-text">+56</span>
@@ -513,13 +548,16 @@ const FichaAlumno = ({ params }) => {
                                       })}
                                     />
                                   </div>
+                                  {
+                                    errors.telefono && <span><small>{errors.telefono.message}</small></span>
+                                  }
                                 </div>
                               </div>
 
 
                               <div className="col-12 col-md-6 col-xl-6">
                                 <div className="form-group local-forms">
-                                  <label>Carrera</label>
+                                  <label>Carrera <span className="login-danger">*</span></label>
                                   <Controller
                                     control={control}
                                     name="carrera"
@@ -574,12 +612,20 @@ const FichaAlumno = ({ params }) => {
 
                               <div className="col-12 col-md-6 col-xl-6">
                                 <div className="form-group local-forms">
-                                  <label>Año de ingreso</label>
+                                  <label>Año de ingreso <span className="login-danger">*</span></label>
                                   <input
                                     type="text"
                                     className="form-control"
-                                    {...register('anoIngresoCarrera')}
+                                    {...register('anoIngresoCarrera', {
+                                      required: {
+                                        value: true,
+                                        message: 'Apellido es requerido'
+                                      },
+                                    })}
                                   />
+                                  {
+                                    errors.anoIngresoCarrera && <span><small>{errors.anoIngresoCarrera.message}</small></span>
+                                  }
                                 </div>
                               </div>
 
@@ -592,7 +638,12 @@ const FichaAlumno = ({ params }) => {
                                   <Controller
                                     control={control}
                                     name="region"
-                                    {...register('region')}
+                                    rules={{
+                                      required: {
+                                        value: true,
+                                        message: 'Región es requerido',
+                                      }
+                                    }}
                                     ref={null}
                                     render={({ field: { onChange, onBlur, value } }) => (
                                       <Select
@@ -633,6 +684,9 @@ const FichaAlumno = ({ params }) => {
                                       />
                                     )}
                                   />
+                                  {
+                                    errors.region && <span><small>{errors.region.message}</small></span>
+                                  }
                                 </div>
                               </div>
                               <div className="col-12 col-sm-6">
@@ -704,6 +758,9 @@ const FichaAlumno = ({ params }) => {
                                       )
                                     }}
                                   />
+                                  {
+                                    errors.comuna && <span><small>{errors.comuna.message}</small></span>
+                                  }
                                 </div>
                               </div>
 
@@ -728,27 +785,44 @@ const FichaAlumno = ({ params }) => {
                             <div className="row">
                               <div className="col-12 col-md-4 col-xl-4">
                                 <div className="form-group local-forms">
-                                  <label>Nombre y apellido</label>
+                                  <label>Nombre y apellido <span className="login-danger">*</span></label>
                                   <input
                                     className="form-control"
                                     type="text"
-                                    {...register('contacto1_nombre')}
+                                    {...register('contacto1_nombre', {
+                                      required: {
+                                        value: true,
+                                        message: 'Nombre de contacto es requerido'
+                                      },
+                                    })}
                                   />
+                                  {
+                                    errors.contacto1_nombre && <span><small>{errors.contacto1_nombre.message}</small></span>
+                                  }
                                 </div>
                               </div>
                               <div className="col-12 col-md-4 col-xl-4">
                                 <div className="form-group local-forms">
-                                  <label>Parentesco o relación</label>
+                                  <label>Parentesco o relación <span className="login-danger">*</span></label>
                                   <input
                                     className="form-control"
                                     type="text"
-                                    {...register('contacto1_relacion')}
+                                    {...register('contacto1_relacion', {
+                                      required: {
+                                        value: true,
+                                        message: 'Parentesco o relación es requerido'
+                                      },
+                                    })}
                                   />
+                                  {
+                                    errors.contacto1_relacion && <span><small>{errors.contacto1_relacion.message}</small></span>
+                                  }
                                 </div>
+
                               </div>
                               <div className="col-12 col-md-4 col-xl-4">
                                 <div className="form-group local-forms">
-                                  <label>Teléfono</label>
+                                  <label>Teléfono <span className="login-danger">*</span></label>
                                   <div className="input-group">
                                     <div className="input-group-prepend">
                                       <span className="input-group-text">+56</span>
@@ -763,6 +837,10 @@ const FichaAlumno = ({ params }) => {
                                         }
                                       }}
                                       {...register('contacto1_numero', {
+                                        required: {
+                                          value: true,
+                                          message: 'Teléfono de contacto es requerido'
+                                        },
                                         validate: (value) =>
                                           value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
                                       })}
@@ -770,6 +848,9 @@ const FichaAlumno = ({ params }) => {
                                       minLength={9}
                                     />
                                   </div>
+                                  {
+                                    errors.contacto1_numero && <span><small>{errors.contacto1_numero.message}</small></span>
+                                  }
                                 </div>
                               </div>
 
@@ -810,8 +891,12 @@ const FichaAlumno = ({ params }) => {
                                         }
                                       }}
                                       {...register('contacto2_numero', {
-                                        validate: (value) =>
-                                          value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
+                                        validate: (value) => {
+                                          if (value.length === 0) {
+                                            return true; // Permitir valores vacíos
+                                          }
+                                          return value.length === 9 || "Cantidad de caracteres debe ser igual a 9, o dejar vacío."; // Validar longitud
+                                        },
                                       })}
                                       maxLength={9}
                                       minLength={9}
@@ -1307,6 +1392,14 @@ const FichaAlumno = ({ params }) => {
                 // spacing={2}
                 >
                   <h4>{message}</h4>
+                  <h5>
+                    {
+                      Object.keys(errors).length > 0
+                        ? <span><small>** Quedan campos sin rellenar</small></span>
+                        : ''
+                    }
+                  </h5>
+
                   <Button variant="primary" onClick={(e) => { handleUpdate(e) }}> Confirmar </Button>
                 </Alert>
               </div>
