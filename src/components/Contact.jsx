@@ -80,6 +80,12 @@ const Contact = forwardRef(({ index, deleteContact, datosPrecargados }, ref) => 
             <input
               className="form-control" type="tel"
               defaultValue={""}
+              onKeyDown={(e) => {
+                // Solo permite números, '+', '-', '(', ')' y teclas de control
+                if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                  e.preventDefault();
+                }
+              }}
               {...register('celular_contacto_emergencia2', {
                 validate: (value) =>
                   value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
@@ -93,7 +99,7 @@ const Contact = forwardRef(({ index, deleteContact, datosPrecargados }, ref) => 
       <div className="col-12 col-sm-6">
         <div className="form-group local-forms">
           <label>
-            Correo electrónico <span className="login-danger">*</span>
+            Correo electrónico
           </label>
           <input
             className="form-control" type="text"

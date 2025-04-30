@@ -1134,6 +1134,12 @@ const AddFirstAppoinments = () => {
                                     className="form-control"
                                     type="tel"
                                     defaultValue={""}
+                                    onKeyDown={(e) => {
+                                      // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                      if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                        e.preventDefault();
+                                      }
+                                    }}
                                     {...register('celular_contacto_emergencia1', {
                                       required: {
                                         value: true,
@@ -1145,10 +1151,10 @@ const AddFirstAppoinments = () => {
                                     maxLength={9}
                                     minLength={9}
                                   />
-                                  {
-                                    errors.celular_contacto_emergencia1 && <span><small>{errors.celular_contacto_emergencia1.message}</small></span>
-                                  }
                                 </div>
+                                {
+                                  errors.celular_contacto_emergencia1 && <span><small>{errors.celular_contacto_emergencia1.message}</small></span>
+                                }
                               </div>
                             </div>
                             <div className="col-12 col-sm-6">
@@ -1354,7 +1360,7 @@ const AddFirstAppoinments = () => {
                                   </label>
                                 </div>
                                 {
-                                  errors.modalidad && <span><small>{errors.modalidad.message}</small></span>
+                                  errors.modalidad && <span style={{ display: 'block' }}><small>{errors.modalidad.message}</small></span>
                                 }
                               </div>
                             </div>
