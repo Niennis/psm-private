@@ -22,6 +22,7 @@ import withAuth from '@/components/withAuth';
 import CustomizedTooltips from '@/components/Tooltip';
 import SimpleBackdrop from '@/components/Backdrop';
 import { useDisponibilidadContext } from '@/context/DisponibilidadContext';
+import { asegurarSegundos } from '@/utils/managedata';
 
 const obtenerRangoHorarioOptimizado = bloques => {
   if (!bloques || bloques.length === 0) return null;
@@ -53,13 +54,6 @@ const obtenerRangoHorarioOptimizado = bloques => {
   };
 }
 
-const asegurarSegundos = horaStr => {
-  const partes = horaStr.split(':');
-  if (partes.length === 2) {
-    return `${horaStr}:00`;
-  }
-  return horaStr;
-}
 
 const hayChoqueDeHorarios = (bloques, editado) => {
   const bloquesFiltrados = bloques.filter(item => item.fechaInicio === editado.fechaInicio)
@@ -122,7 +116,7 @@ const ScheduleByProfessional = ({ params }) => {
     });
   }, [setProps]);
 
-  
+
   useEffect(() => {
     const vistaGuardada = localStorage.getItem('cal-vista');
     if (vistaGuardada) setVista(vistaGuardada);
@@ -135,6 +129,7 @@ const ScheduleByProfessional = ({ params }) => {
       setProfesional(user[0])
     }
     fetchProfesional()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const duracion = [
@@ -153,8 +148,9 @@ const ScheduleByProfessional = ({ params }) => {
       // const { especialidades: user } = await fetchSpecialityById(params.id)
       const { especialidades: user } = await fetchSpecialityById(params.id)
 
-      const { bloques: bloque_completo } = await fetchScheduleByDate(dataInicial.id_user, dataInicial.fechaInicio)
-      const horaInicioFin = obtenerRangoHorarioOptimizado(bloque_completo)
+      // const { bloques: bloque_completo } = await fetchScheduleByDate(dataInicial.id_user, dataInicial.fechaInicio)
+      // const horaInicioFin = obtenerRangoHorarioOptimizado(bloque_completo)
+      // console.log('BLOQUE COMPLETO', bloque_completo);
 
       const obj = {
         id: dataInicial.id,
@@ -166,8 +162,8 @@ const ScheduleByProfessional = ({ params }) => {
         especialidad: user[0]?.especialidad || 'No registrada',
         fecha_inicio: dataInicial.fechaInicio,
         frecuencia: dataInicial.frecuencia,
-        horaIni: horaInicioFin?.hora_inicio || '00:00',
-        horaFin: horaInicioFin?.hora_fin || '00:00',
+        horaIni: dataInicial?.horaIni || '00:00',
+        horaFin: dataInicial?.horaFin || '00:00',
         modalidad: dataInicial.modalidad,
         nombre: `${user[0]?.nombre} ${user[0]?.apellido}` || session?.user?.name,
         semanal: { dia: [] },
@@ -176,6 +172,7 @@ const ScheduleByProfessional = ({ params }) => {
       }
       setDisponibilidad(obj)
       setProfesional(obj)
+
       return obj
     }
   })
@@ -220,39 +217,39 @@ const ScheduleByProfessional = ({ params }) => {
   }
 
 
-  const getProfessionals = async () => {
-    try {
-      const response = await fetchProfessionals()
+  // const getProfessionals = async () => {
+  //   try {
+  //     const response = await fetchProfessionals()
 
-      const responseWithSpeciality = response.map(async item => {
-        const { especialidades } = await fetchSpecialityById(item.id)
-        return ({
-          ...item,
-          especialidad: especialidades[0]?.especialidad || 'No informada',
-        })
-      })
-      const promises = await Promise.all(responseWithSpeciality)
+  //     const responseWithSpeciality = response.map(async item => {
+  //       const { especialidades } = await fetchSpecialityById(item.id)
+  //       return ({
+  //         ...item,
+  //         especialidad: especialidades[0]?.especialidad || 'No informada',
+  //       })
+  //     })
+  //     const promises = await Promise.all(responseWithSpeciality)
 
-      const docs = promises.map((doc, i) => {
-        return {
-          value: i + 2,
-          label: doc.nombre + ' ' + doc.apellido,
-          id: doc.id,
-          email: doc.email,
-          name: doc.nombre,
-          especialidad: doc.especialidad
-        }
-      })
+  //     const docs = promises.map((doc, i) => {
+  //       return {
+  //         value: i + 2,
+  //         label: doc.nombre + ' ' + doc.apellido,
+  //         id: doc.id,
+  //         email: doc.email,
+  //         name: doc.nombre,
+  //         especialidad: doc.especialidad
+  //       }
+  //     })
 
-      if (docs.length > 0) {
-        setProfesional(docs)
-      }
+  //     if (docs.length > 0) {
+  //       setProfesional(docs)
+  //     }
 
-      return promises
-    } catch (error) {
-      console.log('Error', error)
-    }
-  }
+  //     return promises
+  //   } catch (error) {
+  //     console.log('Error', error)
+  //   }
+  // }
 
 
   useEffect(() => {
@@ -261,12 +258,14 @@ const ScheduleByProfessional = ({ params }) => {
       fetchData(params.id)
       :
       fetchData(session?.user?.id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
 
   const datesToTimestamp = (fecha, hora) => {
     // Combinar fecha y hora en un formato ISO 8601 compatible con `Date`
+
     const fechaHora = `${fecha} ${hora}`;
     const timestamp = Date.parse(fechaHora); // Obtiene el tiempo en milisegundos
     return timestamp;
@@ -340,12 +339,16 @@ const ScheduleByProfessional = ({ params }) => {
 
   /*  EDITA EL BLOQUE */
   const onSubmit = handleSubmit(async data => {
+    // const currentHoraFin = watch('horaFin')
+    // console.log('currentHoraFin', currentHoraFin);
+    // data.horaFin = currentHoraFin;
+
     const parseHora = (hora) => {
       const [h, m] = hora.split(":").map(Number);
       return h * 60 + m;
     };
 
-    function minutosAHora(minutos) {
+    const minutosAHora = minutos => {
       const horas = Math.floor(minutos / 60);
       const mins = minutos % 60;
       return `${String(horas).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
@@ -356,7 +359,6 @@ const ScheduleByProfessional = ({ params }) => {
       const nuevoFin = horaFin + parseInt(data.duracion.label)
       data.horaFin = minutosAHora(nuevoFin)
     }
-
 
     const body = {
       "id_user": disponibilidad.id_user,
@@ -394,7 +396,7 @@ const ScheduleByProfessional = ({ params }) => {
 
       } catch (error) {
         console.log('error', error)
-      } finally{
+      } finally {
         handleRefresh()
       }
     }
@@ -437,7 +439,6 @@ const ScheduleByProfessional = ({ params }) => {
     }
   }
 
-
   const handleOnClose = () => {
     setSuccess('initial')
   }
@@ -452,7 +453,7 @@ const ScheduleByProfessional = ({ params }) => {
     }, 300);
   }
 
-  
+
   const manejarCambioVista = (nuevaVista) => {
     setVista(nuevaVista);
     localStorage.setItem('cal-vista', nuevaVista);
@@ -836,6 +837,7 @@ const ScheduleByProfessional = ({ params }) => {
                           <Controller
                             control={control}
                             defaultValue='00:00:00'
+                            name="horaIni"
                             rules={{
                               required: {
                                 value: true,
@@ -844,21 +846,18 @@ const ScheduleByProfessional = ({ params }) => {
                             }}
                             render={({ field: { onChange, onBlur, value } }) => (
                               <TextField
-                                // className="form-control"
-                                // id="outlined-controlled"
                                 disabled
                                 type="time"
                                 onBlur={onBlur}
                                 onChange={(e) => {
                                   onChange(e);
-                                  setValue("horaFin", e.target.value); // Ajusta automáticamente horaFin si es menor
+                                  // setValue("horaFin", e.target.value); // Ajusta automáticamente horaFin si es menor
                                 }}
                                 value={value}
                                 InputLabelProps={{ shrink: true }}
                                 fullWidth
                               />
                             )}
-                            name="horaIni"
                           />
                           <span><small>* Hora no editable</small></span>
                           {errors.horaIni && <span> <small>{errors.horaIni.message}</small></span>}
@@ -874,32 +873,28 @@ const ScheduleByProfessional = ({ params }) => {
                             <Controller
                               control={control}
                               defaultValue='00:00:00'
+                              name="horaFin"
                               rules={{
                                 validate: validateHoraFin,
                                 required: {
                                   value: true,
-                                  message: 'Hora inicio es requerida',
+                                  message: 'Hora fin es requerida',
                                 }
                               }}
                               render={({ field: { onChange, onBlur, value } }) => (
                                 <TextField
-                                  // className="form-control"
-                                  // id="outlined-controlled"
+                                  disabled
                                   type="time"
                                   onBlur={onBlur}
-                                  onChange={onChange}
-                                  disabled
-                                  InputProps={{
-                                    inputProps: {
-                                      min: horaIni, // Configura el mínimo como la hora de inicio seleccionada
-                                    },
+                                  onChange={(e) => {
+                                    onChange(e);
+                                    // setValue("horaFin", e.target.value); // Ajusta automáticamente horaFin si es menor
                                   }}
-                                  InputLabelProps={{ shrink: true }}
                                   value={value}
+                                  InputLabelProps={{ shrink: true }}
                                   fullWidth
                                 />
                               )}
-                              name="horaFin"
                             />
                             {errors.horaFin && <span> <small>{errors.horaFin.message}</small></span>}
                           </div>

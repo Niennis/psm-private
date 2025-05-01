@@ -74,6 +74,7 @@ const AddSchedule = () => {
   const fetchData = async (id) => {
     try {
       const response = await generarHorasMedicas(id)
+
       const processed = response.map(item => {
         // Determinar la clase según disponibilidad y modalidad
         let className;
@@ -97,6 +98,7 @@ const AddSchedule = () => {
         };
       });
       setCalendario([...processed])
+      return processed
 
     } catch (error) {
       console.log('Error:', error)
@@ -139,7 +141,6 @@ const AddSchedule = () => {
   }
 
   useEffect(() => {
-
     const getIdProfesional = async () => {
       const profId = await getServerData()
       setIdProfesional(profId)
@@ -152,6 +153,7 @@ const AddSchedule = () => {
       getProfessionals()
       :
       fetchData(id_prof)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const { register, handleSubmit, watch, control, setValue, reset, formState: { errors } } = useForm();
@@ -181,6 +183,7 @@ const AddSchedule = () => {
 
       fetchDefaults();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.rol, reset]);
 
   const frecuencia = watch('frecuencia')
@@ -216,7 +219,7 @@ const AddSchedule = () => {
       dias: data.frecuencia === "semanal" ? data.semanal.dia : semana,
       fecha_inicio: data.fecha_inicio,
     }
-    
+
     const dates = getDates(newData, fechas)
     let esValido = []
     if (dates.length === 0) {
@@ -230,7 +233,7 @@ const AddSchedule = () => {
     })
     Promise.all(promesas)
       .then(async (values) => {
-        
+
         if (values.includes(true)) {
           setSuccess('fail')
           setError('Hay choque de horario.')

@@ -54,3 +54,11 @@ export const formatDateToDDMMYYYY = (dateString) => {
   const year = date.getFullYear()
   return `${day}-${month}-${year}`
 }
+
+export const asegurarSegundos = horaStr => {
+  const partes = horaStr.split(':');
+  if (partes.length === 2) {
+    return `${horaStr}:00`;
+  }
+  return horaStr;
+}
