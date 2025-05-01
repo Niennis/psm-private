@@ -91,7 +91,8 @@ export const generarHorasMedicas = async (id) => {
   // Obtener los bloques disponibles para cada fecha
   const bloquesPromesas = fechasUnicas.map(async (date) => {
     const { bloques } = await fetchBlocksAvailables(id, date);
-    return bloques.map(bloque => ({ ...bloque, fecha: date }));
+    
+    return bloques?.map(bloque => ({ ...bloque, fecha: date }));
   });
 
   const bloquesDisponibles = (await Promise.all(bloquesPromesas)).flat();
@@ -109,11 +110,12 @@ export const generarHorasMedicas = async (id) => {
 
     // Buscar bloques que coincidan con este horario
     const bloquesEnEsteHorario = bloquesDisponibles.filter(bloque => {
-      if (bloque.fecha !== schedule.fechaInicio) return false;
+      
+      if (bloque?.fecha !== schedule.fechaInicio) return false;
 
       const inicioBloque = horaAMinutos(bloque.hora_inicio);
       const finBloque = horaAMinutos(bloque.hora_fin);
-
+      
       // Verificar si el bloque está dentro del horario del schedule
       return (
         (inicioBloque >= inicioSchedule && finBloque <= finSchedule) &&
