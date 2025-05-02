@@ -150,6 +150,7 @@ const AddInterviewRecord = ({ params }) => {
         setData(JSON.parse(savedData));
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const validateRUT = (rut) => {
@@ -534,7 +535,7 @@ const AddInterviewRecord = ({ params }) => {
     }
     try {
       const response = await darAlta(body)
-      
+
     } catch (error) {
       console.log('Error', error)
       setSuccess('fail')
@@ -884,8 +885,16 @@ const AddInterviewRecord = ({ params }) => {
                                       cols={30}
                                       defaultValue={""}
                                       style={{ resize: 'none' }}
-                                      {...register('observaciones')}
+                                      {...register('observaciones', {
+                                        required: {
+                                          value: true,
+                                          message: 'Observaciones es requerido'
+                                        }
+                                      })}
                                     />
+                                    {errors.observaciones && <span className="login-danger">
+                                      <small>{errors.observaciones.message}</small>
+                                    </span>}
                                   </div>
                                 </div>
 
@@ -1391,6 +1400,9 @@ const AddInterviewRecord = ({ params }) => {
                                         minLength={0}
                                       />
                                     </div>
+                                    {errors.celular_contacto_emergencia2 && <span className="login-danger">
+                                      <small>{errors.celular_contacto_emergencia2.message}</small>
+                                    </span>}
                                   </div>
                                 </div>
                               </div>
@@ -2650,8 +2662,16 @@ const AddInterviewRecord = ({ params }) => {
                                       cols={30}
                                       defaultValue={""}
                                       style={{ resize: 'none' }}
-                                      {...register('observaciones')}
+                                      {...register('observaciones', {
+                                        required: {
+                                          value: true,
+                                          message: 'Observaciones es requerido'
+                                        }
+                                      })}
                                     />
+                                    {errors.observaciones && <span className="login-danger">
+                                      <small>{errors.observaciones.message}</small>
+                                    </span>}
                                   </div>
                                 </div>
                               </div>

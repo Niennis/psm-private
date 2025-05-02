@@ -143,6 +143,7 @@ const EditAppoinments = ({ params }) => {
     // console.log('selected', selected);
     getAppointmentById()
     // fetchScheduleByAvailability(selected)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const {
@@ -256,6 +257,7 @@ const EditAppoinments = ({ params }) => {
 
     setLoadingDays(false)
     setDays(uniqueFiltered);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalidad, campus, doctor]);
 
   const obtenerDias = (objetos) => {

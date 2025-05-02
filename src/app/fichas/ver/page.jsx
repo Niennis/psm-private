@@ -82,6 +82,7 @@ const FichaAlumno = ({ params }) => {
 
     const formattedAge = patient?.fecha_nacimiento ? calcularEdad(patient.fecha_nacimiento) : ''
     setEdad(formattedAge)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rutValue, setValue]);
 
   const getRecords = async () => {
@@ -154,6 +155,7 @@ const FichaAlumno = ({ params }) => {
   useEffect(() => {
     getRecords()
     getStudent()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
