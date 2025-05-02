@@ -95,6 +95,7 @@ const AddFirstAppoinments = () => {
   const fetchInitialData = async (id) => {
     try {
       const { users: response } = await fetchUser(id);
+console.log('response', response);
 
       const patient = {
         id: response[0].id,
@@ -121,6 +122,8 @@ const AddFirstAppoinments = () => {
         nombre_contacto_emergencia2: response[0].contacto2_nombre === 'NA' ? '' : response[0].contacto2_nombre,
         celular_contacto_emergencia2: response[0].contacto2_numero === 'NA' ? '' : response[0].contacto2_numero,
         parentesco_contacto_emergencia2: response[0].contacto2_relacion === 'NA' ? '' : response[0].contacto2_relacion,
+        status: response[0].status,
+        tipo_usuario: response[0].tipo_usuario
       };
 
       const datosFormateados = {
@@ -129,6 +132,7 @@ const AddFirstAppoinments = () => {
         celular_contacto_emergencia2: response[0].contacto2_numero === 'NA' ? '' : response[0].contacto2_numero,
         email_contacto_emergencia2: response[0].contacto2_email === 'NA' ? '' : response[0].contacto2_email,
       };
+console.log('patient', patient);
 
       setDatosPreCargados(datosFormateados);
       setDataPatient(patient)
@@ -154,6 +158,7 @@ const AddFirstAppoinments = () => {
     };
 
     setDefaultValues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.rol, reset]);
 
   const rutValue = useWatch({ control, name: 'rut' });
@@ -490,6 +495,7 @@ const AddFirstAppoinments = () => {
           createInterview(bodyInterview),
           updateUser({ ...bodyUpdate, "id_emergencia": id_contact_1, "id_emergencia_2": id_contact_2 })
         ]);
+        console.log('updateUser', updateUser);
         
         if (appointment.estado === false && update.estado === false) {
           setSuccess('fail')
