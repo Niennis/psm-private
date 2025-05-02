@@ -60,8 +60,6 @@ export const createInterview = async (appointment) => {
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
   }
-console.log('BODY', body);
-
   try {
     const data = await fetch(APPOINTMENT_API, {
       method: "POST",
@@ -346,7 +344,6 @@ export const createContact = async (input) => {
     mail: input.mail,
     parentesco: input.parentesco
   }
-
   try {
     const data = await fetch(URL, {
       method: "POST",

@@ -95,8 +95,6 @@ const AddFirstAppoinments = () => {
   const fetchInitialData = async (id) => {
     try {
       const { users: response } = await fetchUser(id);
-console.log('response', response);
-
       const patient = {
         id: response[0].id,
         name: response[0].nombre,
@@ -132,7 +130,6 @@ console.log('response', response);
         celular_contacto_emergencia2: response[0].contacto2_numero === 'NA' ? '' : response[0].contacto2_numero,
         email_contacto_emergencia2: response[0].contacto2_email === 'NA' ? '' : response[0].contacto2_email,
       };
-console.log('patient', patient);
 
       setDatosPreCargados(datosFormateados);
       setDataPatient(patient)
@@ -144,9 +141,9 @@ console.log('patient', patient);
     }
   };
 
-  const { register, handleSubmit, watch, control, setValue, getValues, clearErrors,
-    formState: { errors }, reset
-  } = useForm();
+  const { register, handleSubmit, watch, control, setValue, getValues, clearErrors, trigger,
+    formState: { errors, isValid }, reset
+  } = useForm({mode: 'onChange'});
 
   // Efecto para manejar valores predeterminados condicionalmente
   useEffect(() => {
@@ -327,9 +324,11 @@ console.log('patient', patient);
     return resultado;
   };
 
-  const handleOpen = (e) => {
+  const handleOpen = async (e) => {
     e.preventDefault()
-    setOpen(true)
+    setOpen(true) 
+    const isValid = await trigger();
+    console.log("¿Formulario válido?:", isValid);
   };
 
   const handleCloseModal = () => {
@@ -495,7 +494,6 @@ console.log('patient', patient);
           createInterview(bodyInterview),
           updateUser({ ...bodyUpdate, "id_emergencia": id_contact_1, "id_emergencia_2": id_contact_2 })
         ]);
-        console.log('updateUser', updateUser);
         
         if (appointment.estado === false && update.estado === false) {
           setSuccess('fail')
@@ -1557,6 +1555,7 @@ console.log('patient', patient);
                             <div className="doctor-submit text-end mt-3">
                               <button
                                 disabled={Object.keys(errors).length > 0}
+                                // disabled={!isValid}
                                 className="btn btn-primary submit-form me-2"
                                 onClick={handleOpen}
                               >
