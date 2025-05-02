@@ -116,6 +116,7 @@ const AppoinmentList = () => {
 
   useEffect(() => {
     loadAppointments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   // if ( loading) {

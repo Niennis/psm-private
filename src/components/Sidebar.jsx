@@ -63,6 +63,7 @@ const Sidebar = () => {
     if (session?.user?.rol === 'alumno') {
       patientLoggedIn()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
   
   if (status === "loading") {

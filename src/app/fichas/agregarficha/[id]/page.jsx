@@ -129,7 +129,7 @@ const AddInterviewRecord = ({ params }) => {
     }
   }
 
-  const { register, handleSubmit, watch, control, setValue,
+  const { register, handleSubmit, watch, control, setValue, trigger,
     formState: { errors }
   } = useForm({
     defaultValues: async () => {
@@ -542,10 +542,27 @@ const AddInterviewRecord = ({ params }) => {
     }
   }
 
-  const openWarning = (e) => {
+  const openWarningWithAlta = async (e) => {
     e.preventDefault()
-    setSuccess('warning')
+    setSuccess('citaConAlta')
     setMessage('¿Desea confirmar la alta del servicio?')
+    const isValid = await trigger();
+  }
+
+  const openWarningInterview = async (e) => {
+    e.preventDefault()
+    setSuccess('despeje')
+    setMessage('¿Desea confirmar el envío de datos')
+
+    const isValid = await trigger();
+  }
+
+  const openWarningAppointment = async (e) => {
+    e.preventDefault()
+    setSuccess('cita')
+    setMessage('¿Desea confirmar el envío de datos')
+
+    const isValid = await trigger();
   }
 
   const handleClose = () => {
@@ -597,7 +614,7 @@ const AddInterviewRecord = ({ params }) => {
                             <div className="col-12 col-md-4 col-xl-4">
                               <div className="form-group local-forms">
                                 <label>
-                                  Profesional que realiza evaluación
+                                  Profesional que realiza evaluación <span className="login-danger">*</span>
                                 </label>
                                 <input
                                   className="form-control"
@@ -618,7 +635,7 @@ const AddInterviewRecord = ({ params }) => {
                             <div className="col-12 col-md-4 col-xl-4">
                               <div className="form-group local-forms">
                                 <label>
-                                  Fecha
+                                  Fecha <span className="login-danger">*</span>
                                 </label>
                                 <input
                                   className="form-control"
@@ -639,7 +656,7 @@ const AddInterviewRecord = ({ params }) => {
                             <div className="col-12 col-md-4 col-xl-4">
                               <div className="form-group local-forms">
                                 <label>
-                                  Número de ficha
+                                  Número de ficha <span className="login-danger">*</span>
                                 </label>
                                 <input
                                   className="form-control"
@@ -696,13 +713,7 @@ const AddInterviewRecord = ({ params }) => {
                                       defaultValue={""}
                                       maxLength={12}
                                       minLength={8}
-                                      {...register('rut', {
-                                        required: {
-                                          value: true,
-                                          message: 'Rut es requerido'
-                                        },
-                                        validate: validateRUT
-                                      })}
+                                      {...register('rut')}
                                     />
                                     {errors.rut && <span className="login-danger">
                                       <small>{errors.rut.message}</small>
@@ -725,17 +736,17 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Año de ingreso</label>
+                                    <label>Año de ingreso </label>
                                     <input
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('ano_ingreso')} />
+                                      {...register('ano_ingreso')}
+                                    />
                                     {errors.ano_ingreso && <span className="login-danger">
                                       <small>{errors.ano_ingreso.message}</small>
                                     </span>}
                                   </div>
                                 </div>
-
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
                                     <label>Fecha de nacimiento</label>
@@ -830,38 +841,6 @@ const AddInterviewRecord = ({ params }) => {
                             </AccordionDetails>
                           </Accordion>
 
-                          {/* 2. Motivo de consulta */}
-                          {/* <Accordion>
-                            <AccordionSummary
-                              expandIcon={<ExpandMoreIcon />}
-                              aria-controls="panel1-content"
-                              id="panel1-header">
-                              <div className="col-12">
-                                <div className="form-heading">
-                                  <h4>2. Motivo de consulta</h4>
-                                </div>
-                              </div>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                              <div className="row">
-                                <div className="col-12 col-md-12 col-xl-12">
-                                  <div className="form-group local-forms">
-
-                                    <textarea
-                                      className="form-control"
-                                      rows={2}
-                                      cols={30}
-                                      defaultValue={""}
-                                      style={{ resize: 'none' }}
-                                      {...register('motivo_consulta')}
-                                    />
-                                  </div>
-                                </div>
-
-                              </div>
-                            </AccordionDetails>
-                          </Accordion> */}
-
                           {/* 2. Antecedentes generales */}
                           <Accordion>
                             <AccordionSummary
@@ -870,7 +849,7 @@ const AddInterviewRecord = ({ params }) => {
                               id="panel1-header">
                               <div className="col-12">
                                 <div className="form-heading">
-                                  <h4>2. Antecedentes Generales</h4>
+                                  <h4>2. Antecedentes Generales <span className="login-danger">*</span></h4>
                                 </div>
                               </div>
                             </AccordionSummary>
@@ -888,7 +867,7 @@ const AddInterviewRecord = ({ params }) => {
                                       {...register('observaciones', {
                                         required: {
                                           value: true,
-                                          message: 'Observaciones es requerido'
+                                          message: 'Antecedentes generales es requerido'
                                         }
                                       })}
                                     />
@@ -910,13 +889,12 @@ const AddInterviewRecord = ({ params }) => {
                               id="panel1-header">
                               <div className="col-12">
                                 <div className="form-heading">
-                                  <h4>3. Acuerdos</h4>
+                                  <h4>3. Acuerdos <span className="login-danger">*</span></h4>
                                 </div>
                               </div>
                             </AccordionSummary>
                             <AccordionDetails>
                               <div className="row">
-
 
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <div className="form-group local-forms">
@@ -926,8 +904,16 @@ const AddInterviewRecord = ({ params }) => {
                                       cols={30}
                                       defaultValue={""}
                                       style={{ resize: 'none' }}
-                                      {...register('acuerdos')}
+                                      {...register('acuerdos', {
+                                        required: {
+                                          value: true,
+                                          message: 'Acuerdos es requerido'
+                                        }
+                                      })}
                                     />
+                                    {errors.acuerdos && <span className="login-danger">
+                                      <small>{errors.acuerdos.message}</small>
+                                    </span>}
                                   </div>
                                 </div>
 
@@ -1026,14 +1012,14 @@ const AddInterviewRecord = ({ params }) => {
                               <button
                                 // type="submit"
                                 className="btn btn-primary btn-success submit-form me-2"
-                                onClick={openWarning}
+                                onClick={(e) => { openWarningWithAlta(e) }}
                               >
                                 Dar de alta
                               </button>
                               <button
                                 // type="submit"
                                 className="btn btn-primary submit-form me-2"
-                                onClick={(e) => { handleAppointment(e) }}
+                                onClick={(e) => { openWarningAppointment(e) }}
                               >
                                 Registrar cita
                               </button>
@@ -1061,7 +1047,7 @@ const AddInterviewRecord = ({ params }) => {
                             <div className="col-12 col-md-4 col-xl-4">
                               <div className="form-group local-forms">
                                 <label>
-                                  Profesional que realiza evaluación
+                                  Profesional que realiza evaluación <span className="login-danger">*</span>
                                 </label>
                                 <input
                                   className="form-control"
@@ -1073,7 +1059,7 @@ const AddInterviewRecord = ({ params }) => {
                             <div className="col-12 col-md-4 col-xl-4">
                               <div className="form-group local-forms">
                                 <label>
-                                  Fecha
+                                  Fecha <span className="login-danger">*</span>
                                 </label>
                                 <input
                                   className="form-control"
@@ -1093,7 +1079,7 @@ const AddInterviewRecord = ({ params }) => {
                             <div className="col-12 col-md-4 col-xl-4">
                               <div className="form-group local-forms">
                                 <label>
-                                  Número de ficha
+                                  Número de ficha <span className="login-danger">*</span>
                                 </label>
                                 <input
                                   className="form-control"
@@ -1167,11 +1153,17 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Carrera</label>
+                                    <label>Carrera <span className="login-danger">*</span></label>
                                     <input
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('carrera')} />
+                                      {...register('carrera', {
+                                        required: {
+                                          value: true,
+                                          message: 'Carrera es requerida'
+                                        }
+                                      })}
+                                    />
                                     {errors.carrera && <span className="login-danger">
                                       <small>{errors.carrera.message}</small>
                                     </span>}
@@ -1180,11 +1172,17 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Año de ingreso</label>
+                                    <label>Año de ingreso <span className="login-danger">*</span></label>
                                     <input
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('ano_ingreso')} />
+                                      {...register('ano_ingreso', {
+                                        required: {
+                                          value: true,
+                                          message: 'Año de ingreso es requerido'
+                                        }
+                                      })}
+                                    />
                                     {errors.ano_ingreso && <span className="login-danger">
                                       <small>{errors.ano_ingreso.message}</small>
                                     </span>}
@@ -1193,11 +1191,17 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Fecha de nacimiento</label>
+                                    <label>Fecha de nacimiento <span className="login-danger">*</span></label>
                                     <input
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('fecha_nacimiento')} />
+                                      {...register('fecha_nacimiento', {
+                                        required: {
+                                          value: true,
+                                          message: 'Fecha es requerida'
+                                        }
+                                      })}
+                                    />
                                     {errors.fecha_nacimiento && <span className="login-danger">
                                       <small>{errors.fecha_nacimiento.message}</small>
                                     </span>}
@@ -1219,11 +1223,17 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <div className="form-group local-forms">
-                                    <label>Dirección</label>
+                                    <label>Dirección <span className="login-danger">*</span></label>
                                     <input
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('direccion')} />
+                                      {...register('direccion', {
+                                        required: {
+                                          value: true,
+                                          message: 'Dirección es requerido'
+                                        }
+                                      })}
+                                    />
                                     {errors.direccion && <span className="login-danger">
                                       <small>{errors.direccion.message}</small>
                                     </span>}
@@ -1257,7 +1267,7 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Teléfono</label>
+                                    <label>Teléfono <span className="login-danger">*</span></label>
                                     <div className="input-group">
                                       <div className="input-group-prepend">
                                         <span className="input-group-text">+56</span>
@@ -1303,12 +1313,17 @@ const AddInterviewRecord = ({ params }) => {
                                 <div className="col-12 col-md-4 col-xl-4">
                                   <div className="form-group local-forms">
                                     <label>
-                                      Nombre y apellido
+                                      Nombre y apellido <span className="login-danger">*</span>
                                     </label>
                                     <input
                                       className="form-control"
                                       type="text"
-                                      {...register('nombre_contacto_emergencia1')}
+                                      {...register('nombre_contacto_emergencia1', {
+                                        required: {
+                                          value: true,
+                                          message: 'Nombre de contacto es requerido'
+                                        }
+                                      })}
                                     />
                                     {errors.nombre_contacto_emergencia1 && <span className="login-danger">
                                       <small>{errors.nombre_contacto_emergencia1.message}</small>
@@ -1318,12 +1333,17 @@ const AddInterviewRecord = ({ params }) => {
                                 <div className="col-12 col-md-4 col-xl-4">
                                   <div className="form-group local-forms">
                                     <label>
-                                      Parentesco o relación
+                                      Parentesco o relación <span className="login-danger">*</span>
                                     </label>
                                     <input
                                       className="form-control"
                                       type="text"
-                                      {...register('parentesco_contacto_emergencia1')}
+                                      {...register('parentesco_contacto_emergencia1', {
+                                        required: {
+                                          value: true,
+                                          message: 'Parentesco de contacto es requerido'
+                                        }
+                                      })}
                                     />
                                     {errors.parentesco_contacto_emergencia1 && <span className="login-danger">
                                       <small>{errors.parentesco_contacto_emergencia1.message}</small>
@@ -1333,7 +1353,7 @@ const AddInterviewRecord = ({ params }) => {
                                 <div className="col-12 col-md-4 col-xl-4">
                                   <div className="form-group local-forms">
                                     <label>
-                                      Teléfono
+                                      Teléfono <span className="login-danger">*</span>
                                     </label>
                                     <div className="input-group">
                                       <div className="input-group-prepend">
@@ -1343,16 +1363,20 @@ const AddInterviewRecord = ({ params }) => {
                                         className="form-control"
                                         type="tel"
                                         {...register('celular_contacto_emergencia1', {
+                                          required: {
+                                            value: true,
+                                            message: 'Número de contacto es requerido'
+                                          },
                                           validate: (value) =>
                                             value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
                                         })}
                                         maxLength={9}
                                         minLength={9}
                                       />
-                                      {errors.celular_contacto_emergencia1 && <span className="login-danger">
-                                        <small>{errors.celular_contacto_emergencia1.message}</small>
-                                      </span>}
                                     </div>
+                                    {errors.celular_contacto_emergencia1 && <span className="login-danger">
+                                      <small>{errors.celular_contacto_emergencia1.message}</small>
+                                    </span>}
                                   </div>
                                 </div>
 
@@ -1393,6 +1417,7 @@ const AddInterviewRecord = ({ params }) => {
                                         className="form-control"
                                         type="tel"
                                         {...register('celular_contacto_emergencia2', {
+                                          required: { value: false },
                                           validate: (value) =>
                                             value.length === 9 || value.length === 0 || "Cantidad de caracteres debe ser igual a 9",
                                         })}
@@ -2770,7 +2795,7 @@ const AddInterviewRecord = ({ params }) => {
                               <button
                                 // type="submit"
                                 className="btn btn-primary submit-form me-2"
-                                onClick={(e) => { handleInterview(e) }}
+                                onClick={(e) => { openWarningInterview(e) }}
                               >
                                 Registrar entrevista
                               </button>
@@ -2796,7 +2821,7 @@ const AddInterviewRecord = ({ params }) => {
           </div>
 
           {success === 'success'
-            ?
+            &&
             <div style={{
               height: '100%',
               position: 'fixed',
@@ -2805,7 +2830,6 @@ const AddInterviewRecord = ({ params }) => {
               zIndex: 99999,
               background: '#00000080'
             }}>
-              {/* <div className="col-sm-12 col-lg-6"> */}
               <Alert
                 severity="success"
                 onClose={handleClose}
@@ -2821,67 +2845,129 @@ const AddInterviewRecord = ({ params }) => {
               >
                 Acción exitosa. Revisa los detalles en la sección Lista de citas.
               </Alert>
-              {/* </div> */}
             </div>
-
-            : success === 'fail'
-              ?
-              <div className="row" style={{
-                height: '100%',
-                position: 'fixed',
-                top: '0',
-                width: '100%',
-                zIndex: 99999,
-                background: '#00000080'
-              }}>
-                <div className="col-sm-12 col-lg-6">
-                  <Alert
-                    severity="error"
-                    onClose={() => { setSuccess('initial') }}
-                    sx={{
-                      zIndex: 'tooltip',
-                      position: 'absolute',
-                      left: '30%',
-                      width: '50%',
-                      padding: '50px',
-                      bottom: '50vh'
-                    }}
-                    spacing={2}
-                  >
-                    Ha ocurrido un problema. {error}
-                  </Alert>
-                </div>
+          } {
+            success === 'fail'
+            &&
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
+                <Alert
+                  severity="error"
+                  onClose={() => { setSuccess('initial') }}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                  spacing={2}
+                >
+                  Ha ocurrido un problema. {error}
+                </Alert>
               </div>
-              : success === 'warning'
-                ?
-                <div className="row" style={{
-                  height: '100%',
-                  position: 'fixed',
-                  top: '0',
-                  width: '100%',
-                  zIndex: 99999,
-                  background: '#00000080'
-                }}>
-                  <div className="col-sm-12 col-lg-6">
-                    <Alert
-                      severity="warning"
-                      onClose={handleClose}
-                      sx={{
-                        zIndex: 'tooltip',
-                        position: 'absolute',
-                        left: '30%',
-                        width: '50%',
-                        padding: '50px',
-                        bottom: '50vh'
-                      }}
-                    // spacing={2}
-                    >
-                      <h4>{message}</h4>
-                      <Button variant="primary" onClick={(e) => { handleAlta(e); handleAppointment(e) }}> Confirmar </Button>
-                    </Alert>
-                  </div>
-                </div>
-                : ""
+            </div>
+          }
+          {
+            success === 'citaConAlta' &&
+
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
+                <Alert
+                  severity="warning"
+                  onClose={() => { setSuccess('initial') }}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                >
+                  {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
+                  <h4>{message}</h4>
+                  <Button variant="primary" onClick={(e) => { handleAlta(e); handleAppointment(e) }}> Confirmar </Button>
+                </Alert>
+              </div>
+            </div>
+          }
+
+          {success === 'cita' 
+            &&
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
+                <Alert
+                  severity="warning"
+                  onClose={() => { setSuccess('initial') }}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                >
+                  {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
+                  <h4>{message}</h4>
+                  <Button variant="primary" onClick={(e) => { handleInterview(e) }}> Confirmar </Button>
+                </Alert>
+              </div>
+            </div>
+          }
+
+          {success === 'despeje'
+            &&
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
+                <Alert
+                  severity="warning"
+                  onClose={() => { setSuccess('initial') }}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                >
+                  {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
+                  <h4>{message}</h4>
+                  <Button variant="primary" onClick={(e) => { handleInterview(e) }}> Confirmar </Button>
+                </Alert>
+              </div>
+            </div>
           }
         </>
       }
