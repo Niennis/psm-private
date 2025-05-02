@@ -35,6 +35,7 @@ const ModalConsent = ({ open, handleClose, onClick, errors }) => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
+          {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Consentimiento Informado
           </Typography>
