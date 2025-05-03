@@ -23,7 +23,7 @@ export default function PasswordAlert() {
 
   useEffect(() => {
     hadChangedPassword()
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRedirect = () => {

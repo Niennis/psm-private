@@ -74,6 +74,7 @@ const AddProfessional = () => {
       // reset()
       setValue('genero.value', 0)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSubmitSuccessful, reset])
 
   const onChange = (date, dateString) => {

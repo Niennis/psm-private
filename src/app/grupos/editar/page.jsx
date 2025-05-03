@@ -129,6 +129,7 @@ const EditGroup = () => {
     } else {
       router.push('/grupos');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroupId]);
 
 

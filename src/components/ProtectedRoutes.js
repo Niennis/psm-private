@@ -55,7 +55,7 @@ const ProtectedPage = ({ children, level }) => {
         }
         break;
     }
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, pathname, router]);
 
   return session ? children : null;

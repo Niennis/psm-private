@@ -148,6 +148,7 @@ const Blogdetails = ({ params }) => {
     }
     fetchData()
     // setBlog(blogs[params.id])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

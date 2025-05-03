@@ -134,6 +134,7 @@ const Editblog = ({ params }) => {
 
     // https://reposaludmental.blob.core.windows.net/publicsite/prueba-pa-editar2.jpg?sp=rl&st=2024-10-02T00:13:39Z&se=2099-10-02T08:13:39Z&spr=https&sv=2022-11-02&sr=c&sig=GotHrZkZjeRQpnGTT1OxRvuCvwqj%2BJSQkS7Tn5yz8qk%3D
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset]);
 
   const handleEditorChange = (data) => {

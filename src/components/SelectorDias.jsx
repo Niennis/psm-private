@@ -20,6 +20,7 @@ function SelectorDeDias({
       setTime('');
       // No activamos el loading aquí, solo limpiamos datos
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profesional]);
 
   // Nuevo useEffect para resetear horas cuando cambia el campus

@@ -212,6 +212,7 @@ const TextEditor = ({ onEditorChange, texto }) => {
         }
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLayoutReady]);
 
   if (!editorLoaded) {
