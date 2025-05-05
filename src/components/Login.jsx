@@ -13,7 +13,7 @@ import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
 import { logInAction } from "@/app/actions";
 import SimpleBackdrop from "./Backdrop";
 import { useSession } from "next-auth/react";
-import { ReCAPTCHA } from "react-google-recaptcha";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(true);
