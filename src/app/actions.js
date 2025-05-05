@@ -1,6 +1,6 @@
 "use server"
 
-import { verifyCaptchaToken } from "@/utils/captcha"
+import { verifyCaptchaToken } from '@/utils/verifyCaptchaToken'
 
 export async function logInAction(token, formData) {
   if (!token) {
@@ -11,22 +11,21 @@ export async function logInAction(token, formData) {
   }
 
   const captchaData = await verifyCaptchaToken(token)
-console.log('captchaData:', captchaData.score);
 
-  if (!captchaData || !captchaData.success || captchaData.score < 0.5) {
+  if (!captchaData || !captchaData.success) {
     return {
       success: false,
       message: "Captcha falló",
-      errors: !captchaData?.success ? captchaData?.["error-codes"] : undefined,
+      errors: captchaData?.["error-codes"],
     }
   }
 
   return {
     success: true,
-    message: "Verificado",
-    score: captchaData.score
+    message: "Captcha verificado correctamente",
   }
 }
+
 
 let serverData;
 export const setServerData = data => {

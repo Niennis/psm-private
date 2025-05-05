@@ -10,12 +10,10 @@ import { signOut } from "next-auth/react";
 import { useMediaQuery } from "@mui/material";
 import { logo } from "@/components/imagepath";
 import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
-import { getCaptchaToken } from "@/utils/captcha";
 import { logInAction } from "@/app/actions";
 import SimpleBackdrop from "./Backdrop";
 import { useSession } from "next-auth/react";
-import { useReCaptchaReady } from "../../hooks/useReCaptchaReady";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import ReCAPTCHA from 'react-google-recaptcha'
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(true);
@@ -28,30 +26,13 @@ const Login = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
-  const isCaptchaReady = useReCaptchaReady()
-  const { executeRecaptcha } = useGoogleReCaptcha();
-  const [token, setToken] = useState(null);
+  const [captchaToken, setCaptchaToken] = useState(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setHash(window.location.hash.substring(1));
     }
   }, []);
-
-  useEffect(() => {
-    const getRecaptchaToken = async () => {
-      if (!executeRecaptcha) return;
-
-      try {
-        const newToken = await executeRecaptcha('login');
-        setToken(newToken);
-      } catch (err) {
-        console.error("Error ejecutando reCAPTCHA:", err);
-      }
-    };
-
-    getRecaptchaToken();
-  }, [executeRecaptcha]);
 
   useEffect(() => {
     if (session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador') {
@@ -77,19 +58,17 @@ const Login = () => {
     setSubmit('')
     setError('')
 
-    if (!isCaptchaReady) {
-      setError("Captcha aún no está listo. Espera unos segundos e intenta de nuevo.")
+    if (!captchaToken) {
+      setError("Por favor completa el reCAPTCHA.")
       setIsLoading(false)
       return
     }
-
     try {
-      const token = await getCaptchaToken()
-      const response = await logInAction(token, data)
-      console.log('RESPONSE logInAction', response);
+      const response = await logInAction(captchaToken, data)
 
       if (!response?.success) {
         setError("Captcha inválido")
+        setIsLoading(false)
         return
       }
 
@@ -103,8 +82,9 @@ const Login = () => {
       if (res?.ok) {
         setIsLoggedIn(true)
       } else {
-        if (res.error === 'cuenta-no-validada')
+        if (res.error === 'cuenta-no-validada') {
           setError("El mail y la contraseña no coinciden")
+        }
       }
 
     } catch (err) {
@@ -113,6 +93,7 @@ const Login = () => {
     } finally {
       setIsLoading(false)
     }
+
   });
 
   const handleTabClick = (tabId) => {
@@ -237,7 +218,7 @@ const Login = () => {
                                       </a>
                                     </li>
                                   </ul>
-                                  <div className="tab-content" style={{ height: '250px' }}>
+                                  <div className="tab-content" style={{ minHeight: '200px' }}>
 
 
                                     {/* LOGIN ESTUDIANTES */}
@@ -331,7 +312,7 @@ const Login = () => {
                                         {/* <GoogleReCaptchaProvider
                                         reCaptchaKey={siteKey} /> */}
 
-                                        <div className="forgotpass">
+                                        <div className="forgotpass" >
                                           <div className="remember-me">
                                             {/* <label className="custom_check mr-2 mb-0 d-inline-flex remember-me">
                                               {" "}
@@ -343,9 +324,18 @@ const Login = () => {
                                           <Link href="/olvido-contrasena">¿Olvidaste la contraseña?</Link>
                                         </div>
 
-                                        <input type="hidden" name="recaptcha_token" value={token || ''} />
-                                        <div className="form-group login-btn">
-                                          <button disabled={!token}
+                                        {/* <input type="hidden" name="recaptcha_token" value={token || ''} /> */}
+                                        <div className="form-group login-btn" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                          <ReCAPTCHA
+                                            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                                            onChange={(token) => {
+                                              setCaptchaToken(token)
+                                              setError('') // Limpia errores anteriores si hay
+                                            }}
+                                            style={{ margin: '5px'}}
+                                          />
+
+                                          <button disabled={!captchaToken}
                                             className="btn btn-primary btn-block sailec-medium"
                                             onClick={handleOnSubmit}
                                           >

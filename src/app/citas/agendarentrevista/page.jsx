@@ -328,7 +328,6 @@ const AddFirstAppoinments = () => {
     e.preventDefault()
     setOpen(true) 
     const isValid = await trigger();
-    console.log("¿Formulario válido?:", isValid);
   };
 
   const handleCloseModal = () => {

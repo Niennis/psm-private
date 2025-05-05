@@ -1,6 +1,5 @@
 'use client'
 import Login from "@/components/Login";
-import GoogleReCaptchaWrapper from "@/providers/GoogleCaptchaWrapper";
 import { getServerSession } from 'next-auth/next'
 import { redirect } from 'next/navigation'
 import { useSession } from "next-auth/react";
@@ -16,9 +15,7 @@ const Home = () => {
   }
 
   return (
-    // <GoogleReCaptchaWrapper>
       <Login />
-    // </GoogleReCaptchaWrapper>
 
   );
 };

@@ -255,8 +255,6 @@ const AddProfessional = () => {
                                 <Select
                                   value={genero.find(option => option.value === value) || null}
                                   onChange={(option) => {
-                                    // console.log(option);
-
                                     onChange(option.value)
                                   }}
                                   options={genero}

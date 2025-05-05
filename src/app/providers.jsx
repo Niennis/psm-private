@@ -5,12 +5,10 @@ import { SectionProvider } from "@/context/SectionContext"
 import { SidebarProvider } from "@/context/SidebarContext"
 import UserWrapper from "@/providers/UseProvider"
 import { DisponibilidadProvider } from "@/context/DisponibilidadContext"
-import GoogleReCaptchaWrapper from "@/providers/GoogleCaptchaWrapper"
 
 export default function AppProviders({ children, session }) {
   return (
     <AuthProvider session={session} >
-      <GoogleReCaptchaWrapper>
         <SectionProvider>
           <SidebarProvider  >
             <UserWrapper>
@@ -20,7 +18,6 @@ export default function AppProviders({ children, session }) {
             </UserWrapper>
           </SidebarProvider>
         </SectionProvider>
-      </GoogleReCaptchaWrapper>
     </AuthProvider>
   )
 }
