@@ -210,8 +210,8 @@ const AppoinmentList = () => {
       "status": alumno[0].status,
       "telefono": alumno[0].telefono || 'No informado',
       "tipo_usuario": alumno[0].tipo_usuario,
-      "id_emergencia": alumno[0].id_emergencia || 0,
-      "id_emergencia_2": alumno[0].id_emergencia_2 || 0,
+      "id_emergencia": alumno[0].contacto1_id || 0,
+      "id_emergencia_2": alumno[0].contacto2_id || 0,
     }
 
     try {

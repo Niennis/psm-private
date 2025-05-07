@@ -128,12 +128,12 @@ const FichaAlumno = ({ params }) => {
         region: student[0].region,
         comuna: student[0].comuna,
         direccion: student[0].direccion,
-        contacto1_id: student[0].contacto1_id || '',
+        contacto1_id: student[0].contacto1_id > 0 ? student[0].contacto1_id : 0,
         contacto1_email: student[0].contacto1_email === 'NA' ? '' : student[0].contacto1_email,
         contacto1_nombre: student[0].contacto1_nombre === 'NA' ? '' : student[0].contacto1_nombre,
         contacto1_numero: student[0].contacto1_numero === 'NA' ? '' : student[0].contacto1_numero,
         contacto1_relacion: student[0].contacto1_relacion === 'NA' ? '' : student[0].contacto1_relacion,
-        contacto2_id: student[0].contacto2_id || '',
+        contacto2_id: student[0].contacto2_id > 0 ? student[0].contacto2_id : 0,
         contacto2_email: student[0].contacto2_email === 'NA' ? '' : student[0].contacto2_email,
         contacto2_nombre: student[0].contacto2_nombre === 'NA' ? '' : student[0].contacto2_nombre,
         contacto2_numero: student[0].contacto2_numero === 'NA' ? '' : student[0].contacto2_numero,
@@ -186,7 +186,7 @@ const FichaAlumno = ({ params }) => {
 
     const bodyUpdateUser = {
       "apellido": data.lastName || patient?.apellido,
-      "aplica_despeje": 0,  // el único q debiera cambiar
+      "aplica_despeje": data.aplica_despeje,
       "anoIngresoCarrera": data.anoIngresoCarrera || patient?.anoIngresoCarrera,
       "campus": data.campus || 'No aplica',
       "comuna": data.comuna.label || patient?.comuna,
@@ -256,8 +256,10 @@ const FichaAlumno = ({ params }) => {
       const detail2 = `${response2?.message}.` || ''
       setMessage(`${detail1}${detail2}`)
     }
+    bodyUpdateUser.id_emergencia = id_contact_1
+    bodyUpdateUser.id_emergencia_2 = id_contact_2
 
-    if (id_contact_1 || id_contact_2) {
+    if (id_contact_1 > 0 || id_contact_2 > 0) {
       try {
         const response = await updateUser(bodyUpdateUser)
         if (response.validacion === true) {
@@ -317,6 +319,7 @@ const FichaAlumno = ({ params }) => {
 
   const handleClose = () => {
     setSuccess('initial')
+    router.push('/citas')
   }
 
   const handleCloseModal = () => {
@@ -1394,15 +1397,19 @@ const FichaAlumno = ({ params }) => {
                 // spacing={2}
                 >
                   <h4>{message}</h4>
-                  <h5>
-                    {
-                      Object.keys(errors).length > 0
-                        ? <span><small>** Quedan campos sin rellenar</small></span>
-                        : ''
-                    }
-                  </h5>
 
-                  <Button variant="primary" onClick={(e) => { handleUpdate(e) }}> Confirmar </Button>
+                  {
+                    Object.keys(errors).length > 0
+                      ?
+                      <> <h5>
+                        <span><small>** Quedan campos sin rellenar</small></span>
+                      </h5>
+                      </>
+                      :
+                      <Button variant="primary" onClick={(e) => { handleUpdate(e) }}> Confirmar </Button>
+                  }
+
+
                 </Alert>
               </div>
             </div>

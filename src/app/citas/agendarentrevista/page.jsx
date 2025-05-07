@@ -95,6 +95,7 @@ const AddFirstAppoinments = () => {
   const fetchInitialData = async (id) => {
     try {
       const { users: response } = await fetchUser(id);
+
       const patient = {
         id: response[0].id,
         name: response[0].nombre,
@@ -110,12 +111,12 @@ const AddFirstAppoinments = () => {
         address: response[0].direccion,
         region: response[0].region,
         comuna: response[0].comuna,
-        contacto1_id: response[0].contacto1_id || '',
+        contacto1_id: response[0].contacto1_id > 0 ? response[0].contacto1_id : 0,
         email_contacto_emergencia1: response[0].contacto1_email === 'NA' ? '' : response[0].contacto1_email,
         nombre_contacto_emergencia1: response[0].contacto1_nombre === 'NA' ? '' : response[0].contacto1_nombre,
         celular_contacto_emergencia1: response[0].contacto1_numero === 'NA' ? '' : response[0].contacto1_numero,
         parentesco_contacto_emergencia1: response[0].contacto1_relacion === 'NA' ? '' : response[0].contacto1_relacion,
-        contacto2_id: response[0].contacto2_id || '',
+        contacto2_id: response[0].contacto2_id > 0 ? response[0].contacto2_id : 0,
         email_contacto_emergencia2: response[0].contacto2_email === 'NA' ? '' : response[0].contacto2_email,
         nombre_contacto_emergencia2: response[0].contacto2_nombre === 'NA' ? '' : response[0].contacto2_nombre,
         celular_contacto_emergencia2: response[0].contacto2_numero === 'NA' ? '' : response[0].contacto2_numero,
@@ -143,7 +144,7 @@ const AddFirstAppoinments = () => {
 
   const { register, handleSubmit, watch, control, setValue, getValues, clearErrors, trigger,
     formState: { errors, isValid }, reset
-  } = useForm({mode: 'onChange'});
+  } = useForm({ mode: 'onChange' });
 
   // Efecto para manejar valores predeterminados condicionalmente
   useEffect(() => {
@@ -326,7 +327,7 @@ const AddFirstAppoinments = () => {
 
   const handleOpen = async (e) => {
     e.preventDefault()
-    setOpen(true) 
+    setOpen(true)
     const isValid = await trigger();
   };
 
@@ -493,7 +494,7 @@ const AddFirstAppoinments = () => {
           createInterview(bodyInterview),
           updateUser({ ...bodyUpdate, "id_emergencia": id_contact_1, "id_emergencia_2": id_contact_2 })
         ]);
-        
+
         if (appointment.estado === false && update.estado === false) {
           setSuccess('fail')
         } else if (appointment.estado === true && update.estado === false) {

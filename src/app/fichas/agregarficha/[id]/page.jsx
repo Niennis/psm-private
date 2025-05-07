@@ -7,8 +7,6 @@ import Select from "react-select";
 import Link from "next/link";
 import { useForm, Controller } from 'react-hook-form';
 
-import Sidebar from "@/components/Sidebar";
-
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/material";
 import { Modal, Button } from 'react-bootstrap'
@@ -24,8 +22,6 @@ import timezone from 'dayjs/plugin/timezone';
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SimpleBackdrop from "@/components/Backdrop";
-
-// import { carreras } from "@/utils/selects";
 
 import { useSidebar } from "@/context/SidebarContext";
 import { useSession } from "next-auth/react";
@@ -153,21 +149,6 @@ const AddInterviewRecord = ({ params }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const validateRUT = (rut) => {
-    const cleanRUT = rut.replace(/[.-]/g, "");
-
-    if (cleanRUT.length < 8 || cleanRUT.length > 10) {
-      return "El RUT debe tener entre 8 y 10 caracteres.";
-    }
-
-    if (!/^\d+k?$/i.test(cleanRUT)) {
-      return "El RUT solo puede contener números y la letra K.";
-    }
-
-    return true; // RUT válido
-  };
-
-
   const getProfessionals = async () => {
     try {
       const response = await fetchProfessionals()
@@ -191,6 +172,7 @@ const AddInterviewRecord = ({ params }) => {
       console.log('Error', error)
     }
   }
+  
   const isChecked = watch('derivacion_interna')
   useEffect(() => {
     if (isChecked) {
