@@ -6,9 +6,10 @@ import { Form, Table } from 'antd';
 import { useUserContext } from '@/context/UserContext';
 // import Headerudp from '../Headerudp';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
-import { fetchUser, fetchUsers } from '../../services/UsersServices'
+import { fetchUser, fetchUsers, updateUser } from '../../services/UsersServices'
 import { changeStatusAppointment, search } from '../../services/AppointmentsServices'
 import { fetchAppointments } from '../../services/AppointmentsServices';
+import { hasRecords } from '../../services/RecordServices'
 import {
   imagesend, refreshicon, searchnormal,
 } from '../../components/imagepath';
@@ -21,7 +22,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { Button } from 'react-bootstrap'
+import { Button } from 'react-bootstrap';
+import { formatDateUTC } from '@/utils/managedata';
+import SimpleBackdrop from '@/components/Backdrop';
 
 const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
   const hoy = new Date();
@@ -452,7 +455,13 @@ const PatientsList = () => {
                     <Link
                       className="dropdown-item"
                       href={`/fichas/agregarficha/${record.id_cita}`}
-                      onClick={() => {
+                      onClick={(e) => {
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida');
+                        if (isDisabled) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          return;
+                        }
                         setLoading(true)
                         const estado = record.estado
                         if (estado.includes('Cancelada') || estado.includes('cancelada')) {
@@ -476,6 +485,13 @@ const PatientsList = () => {
                         cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
                         opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
                       }}
+                      onClick={(e) => {
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida');
+                        if (isDisabled) {
+                          e.preventDefault(); // Bloquea la navegación
+                          e.stopPropagation(); // Evita que otros eventos se disparen
+                        }
+                      }}
                     >
                       <i className="far fa-edit me-2" />
                       Editar
@@ -484,7 +500,15 @@ const PatientsList = () => {
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
-                      onClick={() => { openWarning(record.id_cita) }}
+                      onClick={(e) => {
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida');
+                        if (isDisabled) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          return;
+                        }
+                        openWarning(record.id_cita);
+                      }}
                       style={{
                         cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
                         opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
@@ -500,7 +524,16 @@ const PatientsList = () => {
                       className="dropdown-item"
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
-                      onClick={() => { openWarning(record.id_cita) }}>
+                      onClick={(e) => {
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida');
+                        if (isDisabled) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          return;
+                        }
+                        openWarning(record.id_cita);
+                      }}
+                    >
                       <i className="fa fa-trash-alt m-r-5"></i>
                       Cancelar cita
                     </span>
@@ -520,6 +553,7 @@ const PatientsList = () => {
   };
 
   const changeStatusToCancel = async (id) => {
+    setLoading(true)
     const citaSelected = appointments.find(item => item?.id_cita == id)
     const { users: alumno } = await fetchUser(citaSelected.id_paciente)
 
@@ -543,19 +577,61 @@ const PatientsList = () => {
       tipo_cita: citaSelected.tipo_cita || '',
     }
 
+    const responseHasRecords = await hasRecords(citaSelected.id_paciente)
+
+    const bodyUpdateUser = {
+      "aplica_despeje": 1, // Cambiar a 1 si cancela la cita y el estudiante NO tiene registros
+      "apellido": alumno[0].apellido || 'No informado',
+      "anoIngresoCarrera": alumno[0].anoIngresoCarrera || 'No aplica',
+      "campus": alumno[0].campus || 'No aplica',
+      "comuna": alumno[0].comuna || 'No informado',
+      "carrera": alumno[0].carrera || 'No informado',
+      "contrasena": 'No aplica',
+      "direccion": alumno[0].direccion,
+      "email": alumno[0].email,
+      "entrevistador": 0,
+      "fecha_nacimiento": formatDateUTC(alumno[0].fecha_nacimiento) || 'No informado',
+      "genero": alumno[0].genero || 'No informado',
+      "id": alumno[0].id,
+      "jornada": 'No aplica',
+      "mustChangePassword": 0,
+      "nombre": alumno[0].nombre || 'No informado',
+      "nombre_social": alumno[0].nombre_social || 'No informado',
+      "region": alumno[0].region || 'No informado',
+      "rut": alumno[0].rut || 'No informado',
+      "status": alumno[0].status,
+      "telefono": alumno[0].telefono || 'No informado',
+      "tipo_usuario": alumno[0].tipo_usuario,
+      "id_emergencia": alumno[0].id_emergencia || 0,
+      "id_emergencia_2": alumno[0].id_emergencia_2 || 0,
+    }
+
     try {
       const response = await changeStatusAppointment(bodyUpdate)
-      if (!response['resultado_mail_estudiante'].validacion || !response['resultado_mail_profesional'].validacion) {
-        setSuccess('fail')
-        setMessage('No se pudo cancelar la cita')
-      } else if (response['resultado_mail_estudiante'].validacion && response['resultado_mail_profesional'].validacion) {
-        setSuccess('success')
-        setMessage('Cita cancelada con éxito')
+
+      const validacionEstudiante = response?.resultado_mail_estudiante?.validacion;
+      const validacionProfesional = response?.resultado_mail_profesional?.validacion;
+    
+      const validacionExitosa = validacionEstudiante && validacionProfesional;
+
+      if (!validacionExitosa) {
+        setSuccess('fail');
+        setMessage('No se pudo cancelar la cita');
+        return;
+      }
+    
+      setSuccess('success');
+      setMessage('Cita cancelada con éxito');
+    
+      if (!responseHasRecords) {
+        const updateUserResponse = await updateUser(bodyUpdateUser);
       }
     } catch (error) {
       console.log('Error', error)
       setSuccess('fail')
       setMessage('No se pudo cancelar la cita', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -584,9 +660,7 @@ const PatientsList = () => {
           height: 0,
         }}
       >
-        {/* <Form.Item label="loading">
-          <Switch checked={loading} onChange={handleLoadingChange} />
-        </Form.Item> */}
+      {loading && <SimpleBackdrop />}
       </Form>
       {/* <Headerudp /> */}
       {/* <Sidebar id='menu-item2' id1='menu-items2' activeClassName='patient-list' /> */}

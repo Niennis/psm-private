@@ -92,3 +92,13 @@ export const showRecords = async id_alumno => {
   const response = await data.json()
   return response
 }
+
+export const hasRecords = async id_alumno => {
+  const {entrevista : records} = await showRecords(id_alumno)
+  
+  if (records.length > 0) {
+    return true
+  } else {
+    return false
+  }
+}

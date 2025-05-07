@@ -196,6 +196,7 @@ export const changeStatusAppointment = async (data) => {
     estado: data.status,
     tipo_cita: data.tipo_cita || '',
   }
+  
   try {
     const data = await fetch(APPOINMENT_API, {
       method: 'POST',

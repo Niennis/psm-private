@@ -55,6 +55,17 @@ export const formatDateToDDMMYYYY = (dateString) => {
   return `${day}-${month}-${year}`
 }
 
+export const formatDateUTC = dateString => {
+  const date = new Date(dateString);
+  
+  // Obtener valores en UTC
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
 export const asegurarSegundos = horaStr => {
   const partes = horaStr.split(':');
   if (partes.length === 2) {
