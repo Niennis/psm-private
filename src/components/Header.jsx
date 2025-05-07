@@ -411,7 +411,7 @@ const Header = () => {
                     </Link>
                     <small style={{ display: 'block', textAlign: 'right', width: 'min-content' }}>
                       {`Bienvenido, 
-                      ${(session.user?.name).split(' ')[0]}`}
+                      ${(session.user?.nombre_social)}`}
                     </small>
                   </button>
                   :
@@ -419,7 +419,7 @@ const Header = () => {
                     <i className="fas fa-user-circle" style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} ></i>
                     <small style={{ display: 'block', textAlign: 'right', width: 'min-content' }}>
                       {`Bienvenido, 
-                      ${(session.user?.name).split(' ')[0]}`}
+                      ${(session.user?.nombre_social)}`}
                     </small>
                   </Link>
             }

@@ -74,7 +74,6 @@ const authOptions = {
           if (user?.validacion === false) {
             throw new Error("cuenta-no-validada");
           }
-
           return user; // éxito
         } catch (error) {
           console.error('ERROR en authorize:', error);
@@ -126,7 +125,6 @@ const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         const profile = await searchUser(user.email);
-
         // if (profile?.validacion === false) {
         //   throw new Error("Usuario no encontrado.");
         // }
@@ -134,6 +132,7 @@ const authOptions = {
         token.name = profile.nombre || user.name;
         token.rol = profile.tipo_usuario;
         token.email = profile.email;
+        token.nombre_social = profile?.nombre_social || profile?.nombre;
       }
       return token;
     },
@@ -151,11 +150,14 @@ const authOptions = {
       return baseUrl;
     },
     async session({ session, token }) {
+      
       session.user = {
         id: token.id,
         name: token.name,
         rol: token.rol,
         email: token.email,
+        nombre_social: token.nombre_social,
+        picture: token.picture,
       };
       return session;
     },

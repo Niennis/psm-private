@@ -35,7 +35,7 @@ const Welcome = ({ children }) => {
                 <div className="col-md-6">
                   <div className="morning-user">
                     <h2>
-                      Buen día, <span>{session?.user?.name}</span>
+                      Buen día, <span>{session?.user?.nombre_social}</span>
                     </h2>
                     {
                       session?.user?.rol === 'alumno' ?
