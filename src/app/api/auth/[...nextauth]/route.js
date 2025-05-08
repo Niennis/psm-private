@@ -123,11 +123,16 @@ const authOptions = {
     },
 
     async jwt({ token, user }) {
+      if (token.email) {
+        const profile = await searchUser(token.email);
+        token.name = profile.nombre || token.name;
+        token.rol = profile.tipo_usuario;
+        token.email = profile.email;
+        token.nombre_social = profile?.nombre_social || profile?.nombre;
+      }
+      
       if (user) {
         const profile = await searchUser(user.email);
-        // if (profile?.validacion === false) {
-        //   throw new Error("Usuario no encontrado.");
-        // }
         token.id = profile.id;
         token.name = profile.nombre || user.name;
         token.rol = profile.tipo_usuario;
