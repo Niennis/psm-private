@@ -30,8 +30,8 @@ import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 import { Button } from 'react-bootstrap'
 import SimpleBackdrop from "@/components/Backdrop";
 
-const FichaAlumno = ({ params }) => {
-  const { data: session } = useSession()
+const FichaAlumno = () => {
+  const { data: session, update } = useSession()
   const { setProps } = useSidebar();
   const [records, setRecords] = useState()
   const [patient, setPatient] = useState()
@@ -62,6 +62,7 @@ const FichaAlumno = ({ params }) => {
   const { register, handleSubmit, watch, control, setValue,
     formState: { errors }
   } = useForm({
+    mode: "onChange",
     defaultValues: async () => {
       try {
         const data = await getStudent();
@@ -88,7 +89,7 @@ const FichaAlumno = ({ params }) => {
   const getRecords = async () => {
     try {
       const { entrevista: response } = await showRecords(selectedUserId)
-      const motivo_consulta = response[0].motivo_consulta
+      const motivo_consulta = response[0]?.motivo_consulta || ''
       const recordsProcesados = response.map((record) => {
         return {
           ...record,
@@ -111,10 +112,10 @@ const FichaAlumno = ({ params }) => {
       const { users: student } = await fetchUser(selectedUserId)
 
       const patient = {
-        anoIngresoCarrera: student[0].anoIngresoCarrera,
+        anoIngresoCarrera: student[0].anoIngresoCarrera < 1900 || typeof parseInt(student[0].anoIngresoCarrera) != 'number' ? '' : student[0].anoIngresoCarrera,
         name: student[0].nombre,
         apellido: student[0].apellido,
-        nombre_social: student[0].nombre_social || ' ',
+        nombre_social: student[0]?.nombre_social || '',
         email: session.user?.email,
         fecha_nacimiento: student[0].fecha_nacimiento
           ? convertirAInputDate(student[0].fecha_nacimiento)
@@ -141,7 +142,6 @@ const FichaAlumno = ({ params }) => {
         tipo_usuario: student[0].tipo_usuario,
         status: student[0].status,
         nombre: student[0].nombre,
-        nombre_social: student[0].nombre_social,
         id: student[0].id
       };
 
@@ -201,7 +201,7 @@ const FichaAlumno = ({ params }) => {
       "jornada": 'No aplica',
       "mustChangePassword": 0,
       "nombre": patient?.nombre,
-      "nombre_social": patient?.nombre_social,
+      "nombre_social": data.nombre_social || patient?.nombre_social,
       "region": data.region.label || patient?.region,
       "rut": data.rut || patient?.rut || ' ',
       "status": patient?.status,
@@ -210,6 +210,8 @@ const FichaAlumno = ({ params }) => {
       "id_emergencia": patient?.contacto1_id || 0,
       "id_emergencia_2": patient?.contacto2_id || 0,
     }
+
+console.log('bodyUpdateUser', bodyUpdateUser);
 
     const bodyContactOne = {
       "nombre": data?.contacto1_nombre || patient?.contacto1_nombre || '',
@@ -262,6 +264,7 @@ const FichaAlumno = ({ params }) => {
     if (id_contact_1 > 0 || id_contact_2 > 0) {
       try {
         const response = await updateUser(bodyUpdateUser)
+        await update();
         if (response.validacion === true) {
           setSuccess('success')
           setMessage('Datos actualizados con éxito.')
@@ -326,6 +329,15 @@ const FichaAlumno = ({ params }) => {
     setSuccess('initial')
   }
 
+
+
+  //  --------------- CÓDIGO PARA VALIDAR COMUNA
+ 
+ 
+
+
+  //  --------------- FIN CÓDIGO PARA VALIDAR COMUNA
+
   return (
     <>
       {loading && <SimpleBackdrop />}
@@ -371,6 +383,7 @@ const FichaAlumno = ({ params }) => {
                           </label>
                           <div className="col-md-12">
                             <input
+                              disabled={patient?.nombre ? true : false}
                               type="text"
                               className="form-control"
                               {...register('nombre', {
@@ -398,6 +411,7 @@ const FichaAlumno = ({ params }) => {
                               type="text"
                               className="form-control"
                               {...register('nombre_social')}
+                              disabled={patient?.nombre_social ? true : false}
                             />
                           </div>
                         </div>
@@ -410,6 +424,7 @@ const FichaAlumno = ({ params }) => {
                           </label>
                           <div className="col-md-12">
                             <input
+                              disabled={patient?.apellido ? true : false}
                               type="text"
                               className="form-control"
                               {...register('apellido', {
@@ -462,6 +477,7 @@ const FichaAlumno = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Rut <span className="login-danger">*</span></label>
                                   <input
+                                    disabled={patient?.rut ? true : false}
                                     className="form-control"
                                     maxLength={12}
                                     type="text"
@@ -496,6 +512,7 @@ const FichaAlumno = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Fecha de nacimiento <span className="login-danger">*</span></label>
                                   <input
+                                    disabled={patient?.fecha_nacimiento ? true : false}
                                     className="form-control datetimepicker"
                                     type="date"
                                     placeholder=""
@@ -533,6 +550,7 @@ const FichaAlumno = ({ params }) => {
                                       <span className="input-group-text">+56</span>
                                     </div>
                                     <input
+                                      disabled={patient?.telefono && patient?.telefono != 0 ? true : false}
                                       type="tel"
                                       className="form-control"
                                       maxLength={9}
@@ -567,48 +585,85 @@ const FichaAlumno = ({ params }) => {
                                     control={control}
                                     name="carrera"
                                     rules={{
-                                      required: {
-                                        value: true,
-                                        message: 'Carrera es requerido',
-                                      }
+                                      validate: (value) => {
+                                        if (!value) return 'Carrera es requerida';
+
+                                        if (typeof value === 'string') {
+                                          return (
+                                            carreras.some(opt => opt.value === value || opt.label === value) ||
+                                            'Carrera inválida'
+                                          );
+                                        }
+
+                                        return (value.value || value.label) ? true : 'Carrera inválida';
+                                      },
                                     }}
-                                    ref={null}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <Select
-                                        instanceId="carrera"
-                                        onChange={onChange}
-                                        value={carreras.find(option => option.label === value) || value}
+                                    render={({ field }) => {
+                                      let selectedCarrera = null;
 
-                                        options={carreras}
-                                        menuPortalTarget={menuPortalTarget}
-                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                        id="carrera"
-                                        components={{
-                                          IndicatorSeparator: () => null
-                                        }}
+                                      // Si hay un valor en el paciente que viene de la base de datos
+                                      if (patient?.carrera) {
+                                        selectedCarrera = carreras.find(c =>
+                                          c.label === patient.carrera || c.value === patient.carrera
+                                        );
+                                      }
 
-                                        styles={{
-                                          control: (baseStyles, state) => ({
-                                            ...baseStyles,
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                            '&:hover': {
-                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                            },
-                                            borderRadius: '10px',
-                                            fontSize: "14px",
-                                            minHeight: "45px",
-                                          }),
-                                          dropdownIndicator: (base, state) => ({
-                                            ...base,
-                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                            transition: '250ms',
-                                            width: '35px',
-                                            height: '35px',
-                                          }),
-                                        }}
-                                      />
-                                    )}
+                                      // Si ya tenemos un valor en el campo del formulario, priorizamos ese
+                                      if (field.value) {
+                                        if (typeof field.value === 'string') {
+                                          selectedCarrera = carreras.find(c =>
+                                            c.label === field.value || c.value === field.value
+                                          );
+                                        } else {
+                                          selectedCarrera = field.value;
+                                        }
+                                      }
+
+                                      const isDisabled = !!patient?.carrera && carreras.some(opt =>
+                                        opt.label === patient.carrera ||
+                                        opt.value === patient.carrera
+                                      );
+
+                                      return (
+                                        <Select
+                                          instanceId="select-carrera"
+                                          value={selectedCarrera}
+                                          onChange={(selectedOption) => {
+                                            field.onChange(selectedOption);
+                                          }}
+                                          onBlur={field.onBlur}
+                                          options={carreras}
+                                          isDisabled={isDisabled}
+                                          menuPortalTarget={menuPortalTarget}
+                                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                          id="carrera"
+                                          components={{
+                                            IndicatorSeparator: () => null
+                                          }}
+
+                                          styles={{
+                                            control: (baseStyles, state) => ({
+                                              ...baseStyles,
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                              boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                              '&:hover': {
+                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                              },
+                                              borderRadius: '10px',
+                                              fontSize: "14px",
+                                              minHeight: "45px",
+                                            }),
+                                            dropdownIndicator: (base, state) => ({
+                                              ...base,
+                                              transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                              transition: '250ms',
+                                              width: '35px',
+                                              height: '35px',
+                                            }),
+                                          }}
+                                        />
+                                      )
+                                    }}
                                   />
                                   {errors.carrera && <span><small>{errors.carrera.message}</small></span>}
 
@@ -621,10 +676,11 @@ const FichaAlumno = ({ params }) => {
                                   <input
                                     type="text"
                                     className="form-control"
+                                    disabled={patient?.anoIngresoCarrera ? true : false}
                                     {...register('anoIngresoCarrera', {
                                       required: {
                                         value: true,
-                                        message: 'Apellido es requerido'
+                                        message: 'Año de ingreso es requerido'
                                       },
                                     })}
                                   />
@@ -644,93 +700,65 @@ const FichaAlumno = ({ params }) => {
                                     control={control}
                                     name="region"
                                     rules={{
-                                      required: {
-                                        value: true,
-                                        message: 'Región es requerido',
-                                      }
+                                      validate: (value) => {
+                                        // Aceptamos tanto string como objeto
+                                        if (!value) return 'Región es requerida';
+
+                                        // Si es string, puede ser label o value
+                                        if (typeof value === 'string') {
+                                          return regiones.some(opt => opt.value === value || opt.label === value) || 'Región es requerida';
+                                        }
+
+                                        // Si es objeto, debe tener value o label
+                                        return (value.value || value.label) ? true : 'Región es requerida';
+                                      },
                                     }}
-                                    ref={null}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <Select
-                                        instanceId="select-region"
-                                        onChange={onChange}
-                                        options={regiones}
-                                        value={regiones.find(option => option.label === value) || value}
+                                    render={({ field }) => {
+                                      // Determinar el valor seleccionado para el Select
+                                      let selectedRegion = null;
 
-                                        // isDisabled={true}
-                                        menuPortalTarget={menuPortalTarget}
-                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                        id="select-region"
-                                        components={{
-                                          IndicatorSeparator: () => null
-                                        }}
-
-                                        styles={{
-                                          control: (baseStyles, state) => ({
-                                            ...baseStyles,
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                            '&:hover': {
-                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                            },
-                                            borderRadius: '10px',
-                                            fontSize: "14px",
-                                            minHeight: "45px",
-                                          }),
-                                          dropdownIndicator: (base, state) => ({
-                                            ...base,
-                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                            transition: '250ms',
-                                            width: '35px',
-                                            height: '35px',
-
-                                          }),
-                                        }}
-                                      />
-                                    )}
-                                  />
-                                  {
-                                    errors.region && <span><small>{errors.region.message}</small></span>
-                                  }
-                                </div>
-                              </div>
-                              <div className="col-12 col-sm-6">
-                                <div className="form-group local-forms">
-                                  <label>
-                                    Comuna <span className="login-danger">*</span>
-                                  </label>
-                                  <Controller
-                                    control={control}
-                                    name="comuna"
-                                    rules={{
-                                      required: {
-                                        value: true,
-                                        message: 'Comuna es requerido',
+                                      // Si hay un valor en el paciente que viene de la base de datos
+                                      if (patient?.region) {
+                                        // Buscamos el objeto completo que corresponde al LABEL de la base de datos
+                                        // (por ejemplo, "Arica y Parinacota")
+                                        selectedRegion = regiones.find(r =>
+                                          r.label === patient.region || // Busca por label exacto
+                                          r.value === patient.region    // O por value exacto
+                                        );
                                       }
-                                    }}
-                                    ref={null}
-                                    render={({ field: { onChange, onBlur, value, ref } }) => {
-                                      const regionKey = watch('region')?.value || patient?.region?.toLowerCase()
-                                        .normalize("NFD") // Descompone caracteres con acentos
-                                        .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
-                                        .replace(/\s+/g, "_") // Reemplaza espacios por "_" 
 
-                                      const opcionesComunas = regionKey ? comunas[regionKey] : [];
+                                      // Si ya tenemos un valor en el campo del formulario, priorizamos ese
+                                      if (field.value) {
+                                        if (typeof field.value === 'string') {
+                                          // Busca por label o value
+                                          selectedRegion = regiones.find(r =>
+                                            r.label === field.value ||
+                                            r.value === field.value
+                                          );
+                                        } else {
+                                          // Si ya es un objeto, lo usamos directamente
+                                          selectedRegion = field.value;
+                                        }
+                                      }
 
-                                      const selectedComuna = opcionesComunas?.find(comuna => comuna.label === value || comuna.label === value?.label) || null;
+                                      // Determinar si el campo debe estar deshabilitado
+                                      // Solo deshabilitar si existe un valor válido en patient.region
+                                      const isDisabled = !!patient?.region && regiones.some(opt =>
+                                        opt.label === patient.region ||
+                                        opt.value === patient.region
+                                      );
 
                                       return (
                                         <Select
                                           instanceId="select-region"
-                                          value={selectedComuna}
-
+                                          value={selectedRegion}
                                           onChange={(selectedOption) => {
-                                            // Guarda el valor (no el objeto completo) en el formulario
-
-                                            onChange(selectedOption || null);
+                                            // Guardamos el objeto completo del select
+                                            field.onChange(selectedOption);
                                           }}
-                                          onBlur={onBlur}
-                                          options={opcionesComunas}
+                                          onBlur={field.onBlur}
+                                          options={regiones}
+                                          isDisabled={isDisabled}
                                           menuPortalTarget={menuPortalTarget}
                                           styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                           id="select-region"
@@ -761,6 +789,160 @@ const FichaAlumno = ({ params }) => {
                                           }}
                                         />
                                       )
+                                    }}
+                                  />
+                                  {
+                                    errors.region && <span><small>{errors.region.message}</small></span>
+                                  }
+                                </div>
+                              </div>
+                              <div className="col-12 col-sm-6">
+                                <div className="form-group local-forms">
+                                  <label>
+                                    Comuna <span className="login-danger">*</span>
+                                  </label>
+                                  <Controller
+      control={control}
+      name="comuna"
+      rules={{
+        validate: (value) => {
+          if (!value) return 'Comuna es requerida';
+          
+          // Si es string, puede ser label o value
+          if (typeof value === 'string') {
+            const todasLasComunas = Object.values(comunas).flat();
+            return todasLasComunas.some(opt => 
+              opt.value === value || 
+              opt.label === value
+            ) || 'Comuna es requerida';
+          }
+          
+          // Si es objeto, debe tener value o label
+          return (value.value || value.label) ? true : 'Comuna es requerida';
+        }
+      }}
+      render={({ field }) => {
+        // Obtener la región actual (manejando tanto string como objeto)
+        const currentRegion = watch('region');
+        
+        // Función para encontrar la clave de comunas a partir de una región
+        const getRegionKey = (regionData) => {
+          if (!regionData) return null;
+          
+          let regionObj;
+          
+          if (typeof regionData === 'string') {
+            // Buscar la región por label o value
+            regionObj = regiones.find(r => 
+              r.label === regionData || 
+              r.value === regionData
+            );
+          } else {
+            // Si ya es un objeto, usarlo directamente
+            regionObj = regionData;
+          }
+          
+          return regionObj?.value?.toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, "_");
+        };
+        
+        // Primero intentamos con el valor seleccionado en el formulario
+        let normalizedRegionKey = getRegionKey(currentRegion);
+        
+        // Si no hay una región seleccionada en el formulario, usamos la del paciente
+        if (!normalizedRegionKey && patient?.region) {
+          normalizedRegionKey = getRegionKey(patient.region);
+        }
+
+        // Obtener las opciones de comunas para la región actual
+        const opcionesComunas = normalizedRegionKey ? comunas[normalizedRegionKey] || [] : [];
+
+        // Determinar el valor seleccionado para el Select
+        let selectedComuna = null;
+        
+        // Si hay un valor en el paciente que viene de la base de datos
+        if (patient?.comuna) {
+          // Buscamos el objeto completo que corresponde al label o value de la base de datos
+          selectedComuna = opcionesComunas.find(c => 
+            c.label === patient.comuna || 
+            c.value === patient.comuna
+          );
+        }
+        
+        // Si hay un valor en el campo del formulario, priorizamos ese
+        if (field.value) {
+          if (typeof field.value === 'string') {
+            // Si es string, buscamos el objeto correspondiente (puede ser label o value)
+            selectedComuna = opcionesComunas.find(c => 
+              c.label === field.value || 
+              c.value === field.value
+            );
+          } else {
+            // Si ya es un objeto, lo usamos directamente
+            selectedComuna = field.value;
+          }
+        }
+
+        // Determinar si el campo debe estar deshabilitado
+        // Solo deshabilitar si existe un valor válido en patient.comuna
+        const isDisabled = !!patient?.comuna && 
+          opcionesComunas.some(opt => 
+            opt.label === patient.comuna || 
+            opt.value === patient.comuna
+          );
+
+        // En lugar de useEffect, actualizamos el valor inmediatamente si es necesario
+        // Esto se ejecutará durante el renderizado, antes de devolver el JSX
+        if (selectedComuna && !field.value) {
+          // Usamos setTimeout para asegurarnos de que esto ocurra después del ciclo de renderizado actual
+          setTimeout(() => {
+            field.onChange(selectedComuna);
+          }, 0);
+        }
+
+        return (
+          <Select
+            instanceId="select-comuna"
+            value={selectedComuna}
+            onChange={(selectedOption) => {
+              // Guardamos el objeto completo del select
+              field.onChange(selectedOption);
+            }}
+            onBlur={field.onBlur}
+            options={opcionesComunas}
+            isDisabled={isDisabled}
+                                        menuPortalTarget={menuPortalTarget}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="select-region"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
+
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+
+                                          }),
+                                        }}
+                                      />
+                                    )
                                     }}
                                   />
                                   {
@@ -863,6 +1045,7 @@ const FichaAlumno = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Nombre y apellido</label>
                                   <input
+                                    autoComplete="off"
                                     className="form-control"
                                     type="text"
                                     {...register('contacto2_nombre')}
@@ -873,6 +1056,7 @@ const FichaAlumno = ({ params }) => {
                                 <div className="form-group local-forms">
                                   <label>Parentesco o relación</label>
                                   <input
+                                    autoComplete="off"
                                     className="form-control"
                                     type="text"
                                     {...register('contacto2_relacion')}
@@ -887,6 +1071,7 @@ const FichaAlumno = ({ params }) => {
                                       <span className="input-group-text">+56</span>
                                     </div>
                                     <input
+                                      autoComplete="off"
                                       className="form-control"
                                       type="tel"
                                       onKeyDown={(e) => {
@@ -896,15 +1081,15 @@ const FichaAlumno = ({ params }) => {
                                         }
                                       }}
                                       {...register('contacto2_numero', {
+                                        required: {
+                                          value: false,
+                                        },
                                         validate: (value) => {
-                                          if (value.length === 0) {
-                                            return true; // Permitir valores vacíos
-                                          }
-                                          return value.length === 9 || "Cantidad de caracteres debe ser igual a 9, o dejar vacío."; // Validar longitud
+                                          value?.length === 0 || value?.length === 9 || "La cantidad de caracteres debe ser igual a 0 o 9."
                                         },
                                       })}
                                       maxLength={9}
-                                      minLength={9}
+                                      minLength={0}
                                     />
                                   </div>
                                 </div>
@@ -1397,7 +1582,6 @@ const FichaAlumno = ({ params }) => {
                 // spacing={2}
                 >
                   <h4>{message}</h4>
-
                   {
                     Object.keys(errors).length > 0
                       ?
