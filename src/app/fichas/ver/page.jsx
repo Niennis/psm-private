@@ -112,7 +112,11 @@ const FichaAlumno = () => {
       const { users: student } = await fetchUser(selectedUserId)
 
       const patient = {
-        anoIngresoCarrera: student[0].anoIngresoCarrera < 1900 || typeof parseInt(student[0].anoIngresoCarrera) != 'number' ? '' : student[0].anoIngresoCarrera,
+        anoIngresoCarrera: (() => {
+          const valor = student[0].anoIngresoCarrera;
+          const valorNumerico = parseInt(valor);
+          return isNaN(valorNumerico) || valorNumerico < 1900 || valorNumerico.toString() !== valor.toString() ? '' : valor;
+        })(),
         name: student[0].nombre,
         apellido: student[0].apellido,
         nombre_social: student[0]?.nombre_social || '',
@@ -210,8 +214,6 @@ const FichaAlumno = () => {
       "id_emergencia": patient?.contacto1_id || 0,
       "id_emergencia_2": patient?.contacto2_id || 0,
     }
-
-console.log('bodyUpdateUser', bodyUpdateUser);
 
     const bodyContactOne = {
       "nombre": data?.contacto1_nombre || patient?.contacto1_nombre || '',
@@ -332,8 +334,8 @@ console.log('bodyUpdateUser', bodyUpdateUser);
 
 
   //  --------------- CÓDIGO PARA VALIDAR COMUNA
- 
- 
+
+
 
 
   //  --------------- FIN CÓDIGO PARA VALIDAR COMUNA
@@ -802,147 +804,147 @@ console.log('bodyUpdateUser', bodyUpdateUser);
                                     Comuna <span className="login-danger">*</span>
                                   </label>
                                   <Controller
-      control={control}
-      name="comuna"
-      rules={{
-        validate: (value) => {
-          if (!value) return 'Comuna es requerida';
-          
-          // Si es string, puede ser label o value
-          if (typeof value === 'string') {
-            const todasLasComunas = Object.values(comunas).flat();
-            return todasLasComunas.some(opt => 
-              opt.value === value || 
-              opt.label === value
-            ) || 'Comuna es requerida';
-          }
-          
-          // Si es objeto, debe tener value o label
-          return (value.value || value.label) ? true : 'Comuna es requerida';
-        }
-      }}
-      render={({ field }) => {
-        // Obtener la región actual (manejando tanto string como objeto)
-        const currentRegion = watch('region');
-        
-        // Función para encontrar la clave de comunas a partir de una región
-        const getRegionKey = (regionData) => {
-          if (!regionData) return null;
-          
-          let regionObj;
-          
-          if (typeof regionData === 'string') {
-            // Buscar la región por label o value
-            regionObj = regiones.find(r => 
-              r.label === regionData || 
-              r.value === regionData
-            );
-          } else {
-            // Si ya es un objeto, usarlo directamente
-            regionObj = regionData;
-          }
-          
-          return regionObj?.value?.toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/\s+/g, "_");
-        };
-        
-        // Primero intentamos con el valor seleccionado en el formulario
-        let normalizedRegionKey = getRegionKey(currentRegion);
-        
-        // Si no hay una región seleccionada en el formulario, usamos la del paciente
-        if (!normalizedRegionKey && patient?.region) {
-          normalizedRegionKey = getRegionKey(patient.region);
-        }
+                                    control={control}
+                                    name="comuna"
+                                    rules={{
+                                      validate: (value) => {
+                                        if (!value) return 'Comuna es requerida';
 
-        // Obtener las opciones de comunas para la región actual
-        const opcionesComunas = normalizedRegionKey ? comunas[normalizedRegionKey] || [] : [];
+                                        // Si es string, puede ser label o value
+                                        if (typeof value === 'string') {
+                                          const todasLasComunas = Object.values(comunas).flat();
+                                          return todasLasComunas.some(opt =>
+                                            opt.value === value ||
+                                            opt.label === value
+                                          ) || 'Comuna es requerida';
+                                        }
 
-        // Determinar el valor seleccionado para el Select
-        let selectedComuna = null;
-        
-        // Si hay un valor en el paciente que viene de la base de datos
-        if (patient?.comuna) {
-          // Buscamos el objeto completo que corresponde al label o value de la base de datos
-          selectedComuna = opcionesComunas.find(c => 
-            c.label === patient.comuna || 
-            c.value === patient.comuna
-          );
-        }
-        
-        // Si hay un valor en el campo del formulario, priorizamos ese
-        if (field.value) {
-          if (typeof field.value === 'string') {
-            // Si es string, buscamos el objeto correspondiente (puede ser label o value)
-            selectedComuna = opcionesComunas.find(c => 
-              c.label === field.value || 
-              c.value === field.value
-            );
-          } else {
-            // Si ya es un objeto, lo usamos directamente
-            selectedComuna = field.value;
-          }
-        }
+                                        // Si es objeto, debe tener value o label
+                                        return (value.value || value.label) ? true : 'Comuna es requerida';
+                                      }
+                                    }}
+                                    render={({ field }) => {
+                                      // Obtener la región actual (manejando tanto string como objeto)
+                                      const currentRegion = watch('region');
 
-        // Determinar si el campo debe estar deshabilitado
-        // Solo deshabilitar si existe un valor válido en patient.comuna
-        const isDisabled = !!patient?.comuna && 
-          opcionesComunas.some(opt => 
-            opt.label === patient.comuna || 
-            opt.value === patient.comuna
-          );
+                                      // Función para encontrar la clave de comunas a partir de una región
+                                      const getRegionKey = (regionData) => {
+                                        if (!regionData) return null;
 
-        // En lugar de useEffect, actualizamos el valor inmediatamente si es necesario
-        // Esto se ejecutará durante el renderizado, antes de devolver el JSX
-        if (selectedComuna && !field.value) {
-          // Usamos setTimeout para asegurarnos de que esto ocurra después del ciclo de renderizado actual
-          setTimeout(() => {
-            field.onChange(selectedComuna);
-          }, 0);
-        }
+                                        let regionObj;
 
-        return (
-          <Select
-            instanceId="select-comuna"
-            value={selectedComuna}
-            onChange={(selectedOption) => {
-              // Guardamos el objeto completo del select
-              field.onChange(selectedOption);
-            }}
-            onBlur={field.onBlur}
-            options={opcionesComunas}
-            isDisabled={isDisabled}
-                                        menuPortalTarget={menuPortalTarget}
-                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                        id="select-region"
-                                        components={{
-                                          IndicatorSeparator: () => null
-                                        }}
+                                        if (typeof regionData === 'string') {
+                                          // Buscar la región por label o value
+                                          regionObj = regiones.find(r =>
+                                            r.label === regionData ||
+                                            r.value === regionData
+                                          );
+                                        } else {
+                                          // Si ya es un objeto, usarlo directamente
+                                          regionObj = regionData;
+                                        }
 
-                                        styles={{
-                                          control: (baseStyles, state) => ({
-                                            ...baseStyles,
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                            '&:hover': {
-                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                            },
-                                            borderRadius: '10px',
-                                            fontSize: "14px",
-                                            minHeight: "45px",
-                                          }),
-                                          dropdownIndicator: (base, state) => ({
-                                            ...base,
-                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                            transition: '250ms',
-                                            width: '35px',
-                                            height: '35px',
+                                        return regionObj?.value?.toLowerCase()
+                                          .normalize("NFD")
+                                          .replace(/[\u0300-\u036f]/g, "")
+                                          .replace(/\s+/g, "_");
+                                      };
 
-                                          }),
-                                        }}
-                                      />
-                                    )
+                                      // Primero intentamos con el valor seleccionado en el formulario
+                                      let normalizedRegionKey = getRegionKey(currentRegion);
+
+                                      // Si no hay una región seleccionada en el formulario, usamos la del paciente
+                                      if (!normalizedRegionKey && patient?.region) {
+                                        normalizedRegionKey = getRegionKey(patient.region);
+                                      }
+
+                                      // Obtener las opciones de comunas para la región actual
+                                      const opcionesComunas = normalizedRegionKey ? comunas[normalizedRegionKey] || [] : [];
+
+                                      // Determinar el valor seleccionado para el Select
+                                      let selectedComuna = null;
+
+                                      // Si hay un valor en el paciente que viene de la base de datos
+                                      if (patient?.comuna) {
+                                        // Buscamos el objeto completo que corresponde al label o value de la base de datos
+                                        selectedComuna = opcionesComunas.find(c =>
+                                          c.label === patient.comuna ||
+                                          c.value === patient.comuna
+                                        );
+                                      }
+
+                                      // Si hay un valor en el campo del formulario, priorizamos ese
+                                      if (field.value) {
+                                        if (typeof field.value === 'string') {
+                                          // Si es string, buscamos el objeto correspondiente (puede ser label o value)
+                                          selectedComuna = opcionesComunas.find(c =>
+                                            c.label === field.value ||
+                                            c.value === field.value
+                                          );
+                                        } else {
+                                          // Si ya es un objeto, lo usamos directamente
+                                          selectedComuna = field.value;
+                                        }
+                                      }
+
+                                      // Determinar si el campo debe estar deshabilitado
+                                      // Solo deshabilitar si existe un valor válido en patient.comuna
+                                      const isDisabled = !!patient?.comuna &&
+                                        opcionesComunas.some(opt =>
+                                          opt.label === patient.comuna ||
+                                          opt.value === patient.comuna
+                                        );
+
+                                      // En lugar de useEffect, actualizamos el valor inmediatamente si es necesario
+                                      // Esto se ejecutará durante el renderizado, antes de devolver el JSX
+                                      if (selectedComuna && !field.value) {
+                                        // Usamos setTimeout para asegurarnos de que esto ocurra después del ciclo de renderizado actual
+                                        setTimeout(() => {
+                                          field.onChange(selectedComuna);
+                                        }, 0);
+                                      }
+
+                                      return (
+                                        <Select
+                                          instanceId="select-comuna"
+                                          value={selectedComuna}
+                                          onChange={(selectedOption) => {
+                                            // Guardamos el objeto completo del select
+                                            field.onChange(selectedOption);
+                                          }}
+                                          onBlur={field.onBlur}
+                                          options={opcionesComunas}
+                                          isDisabled={isDisabled}
+                                          menuPortalTarget={menuPortalTarget}
+                                          styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                          id="select-region"
+                                          components={{
+                                            IndicatorSeparator: () => null
+                                          }}
+
+                                          styles={{
+                                            control: (baseStyles, state) => ({
+                                              ...baseStyles,
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                              boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                              '&:hover': {
+                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                              },
+                                              borderRadius: '10px',
+                                              fontSize: "14px",
+                                              minHeight: "45px",
+                                            }),
+                                            dropdownIndicator: (base, state) => ({
+                                              ...base,
+                                              transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                              transition: '250ms',
+                                              width: '35px',
+                                              height: '35px',
+
+                                            }),
+                                          }}
+                                        />
+                                      )
                                     }}
                                   />
                                   {
