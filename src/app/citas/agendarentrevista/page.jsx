@@ -30,7 +30,7 @@ import 'dayjs/locale/es-mx'
 import ConsentimientoInformado from "@/components/ConsentimientoInformado";
 import Contact from "@/components/Contact"
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
-import { validarRut } from "@/utils/managedata";
+import { esFechaValida } from "@/utils/managedata";
 import { formatAndValidateRUT } from "@/utils/rutFormat";
 import SelectorDeDias from "@/components/SelectorDias";
 
@@ -102,11 +102,11 @@ const AddFirstAppoinments = () => {
         lastName: response[0].apellido,
         nombre_social: response[0].nombre_social || ' ',
         email: session.user?.email,
-        birthday: dayjs(response[0].fecha_nacimiento).format('YYYY-MM-DD'),
+        birthday: esFechaValida(response[0].fecha_nacimiento) ? dayjs(response[0].fecha_nacimiento).format('YYYY-MM-DD') : '',
         genero: response[0].genero === 'personalizado' ? 'No binarie' : response[0].genero,
         mobile: response[0].telefono,
         aplica_despeje: response[0].aplica_despeje,
-        rut: response[0].rut,
+        rut: response[0].rut == 'NA' || response[0].rut == '0' || !response[0].rut ? '' : response[0].rut,
         carrera: response[0].carrera,
         address: response[0].direccion,
         region: response[0].region,
@@ -369,29 +369,6 @@ const AddFirstAppoinments = () => {
     { value: "Mujer trans", label: "Mujer trans" },
     { value: "No binarie", label: "No binarie" }
   ]
-  // Función para validar el formato y largo del RUT
-  const validateRUT = (rut) => {
-    const cleanedRUT = rutInput.replace(/[^0-9kK]/g, '').toUpperCase();
-
-    if (cleanedRUT.length < 8) return "RUT demasiado corto";
-
-    // Algoritmo de validación
-    const body = cleanedRUT.slice(0, -1);
-    const dv = cleanedRUT.slice(-1);
-
-    let sum = 0;
-    let multiplier = 2;
-
-    for (let i = body.length - 1; i >= 0; i--) {
-      sum += parseInt(body[i]) * multiplier;
-      multiplier = multiplier === 7 ? 2 : multiplier + 1;
-    }
-
-    const calculatedDV = (11 - (sum % 11)).toString();
-    const expectedDV = calculatedDV === '10' ? 'K' : calculatedDV === '11' ? '0' : calculatedDV;
-
-    return expectedDV === dv || "RUT inválido";
-  };
 
   const handleFirstInterview = handleSubmit(async (data, e) => {
     setOpenBackdrop(true)
@@ -631,6 +608,7 @@ const AddFirstAppoinments = () => {
                                   Nombre legal <span className="login-danger">*</span>
                                 </label>
                                 <input
+                                  disabled
                                   className="form-control"
                                   type="text"
                                   {...register('name', {
@@ -655,6 +633,7 @@ const AddFirstAppoinments = () => {
                                   Apellido <span className="login-danger">*</span>
                                 </label>
                                 <input
+                                  disabled
                                   className="form-control"
                                   type="text"
                                   {...register('lastName', {
@@ -679,12 +658,20 @@ const AddFirstAppoinments = () => {
                                   Nombre social
                                 </label>
                                 <input
+                                  disabled={!!(dataPatient?.nombre_social && dataPatient?.nombre_social.trim() !== "")}
                                   className="form-control"
                                   type="text"
                                   {...register('nombre_social', {
-                                    minLength: {
-                                      value: 2,
-                                      message: 'Nombre debe tener al menos 2 caracteres'
+                                    validate: (value) => {
+                                      // Si el campo está vacío (valor opcional), retorna true inmediatamente
+                                      if (!value || value.trim().length === 0) {
+                                        return true;
+                                      }
+                                      // Solo aplica validaciones si el usuario ingresó algo
+                                      if (value.length < 2) {
+                                        return 'Nombre debe tener al menos 2 caracteres';
+                                      }
+                                      return true;
                                     }
                                   })}
                                 />
@@ -699,6 +686,7 @@ const AddFirstAppoinments = () => {
                                   Rut <span className="login-danger">*</span>
                                 </label>
                                 <input
+                                  disabled={dataPatient?.rut ? true : false}
                                   className="form-control"
                                   maxLength={12}
                                   type="text"
@@ -735,6 +723,7 @@ const AddFirstAppoinments = () => {
                                 </label>
 
                                 <input
+                                  disabled={esFechaValida(dataPatient?.birthday)}
                                   className="form-control datetimepicker"
                                   type="date"
                                   placeholder=""
@@ -766,6 +755,7 @@ const AddFirstAppoinments = () => {
                                   render={({ field: { onChange, onBlur, value } }) => {
                                     return (
                                       <Select
+                                        isDisabled={dataPatient?.genero ? true : false}
                                         // instanceId="genero"
                                         value={gender.find(option => option.value === value) || null}
                                         onChange={(option) => onChange(option.value)}
@@ -840,6 +830,7 @@ const AddFirstAppoinments = () => {
                                     <span className="input-group-text">+56</span>
                                   </div>
                                   <input
+                                    disabled={dataPatient?.mobile ? true : false}
                                     className="form-control"
                                     type="tel"
                                     onKeyDown={(e) => {
@@ -873,50 +864,86 @@ const AddFirstAppoinments = () => {
                                 <Controller
                                   control={control}
                                   name="carrera"
-                                  {...register('carrera', {
-                                    required: {
-                                      value: true,
-                                      message: 'Carrera es requerido',
+                                  rules={{
+                                    validate: (value) => {
+                                      if (!value) return 'Carrera es requerida';
+
+                                      if (typeof value === 'string') {
+                                        return (
+                                          carreras.some(opt => opt.value === value || opt.label === value) ||
+                                          'Carrera inválida'
+                                        );
+                                      }
+
+                                      return (value.value || value.label) ? true : 'Carrera inválida';
+                                    },
+                                  }}
+                                  render={({ field }) => {
+                                    let selectedCarrera = null;
+
+                                    // Si hay un valor en el paciente que viene de la base de datos
+                                    if (dataPatient?.carrera) {
+                                      selectedCarrera = carreras.find(c =>
+                                        c.label === dataPatient.carrera || c.value === dataPatient.carrera
+                                      );
                                     }
-                                  })}
-                                  ref={null}
-                                  render={({ field: { onChange, onBlur, value } }) => (
-                                    <Select
-                                      instanceId="carrera"
-                                      defaultValue={selectedOption}
-                                      onChange={onChange}
-                                      value={carreras.find(option => option.label === value) || value}
 
-                                      options={carreras}
-                                      menuPortalTarget={menuPortalTarget}
-                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                      id="carrera"
-                                      components={{
-                                        IndicatorSeparator: () => null
-                                      }}
+                                    // Si ya tenemos un valor en el campo del formulario, priorizamos ese
+                                    if (field.value) {
+                                      if (typeof field.value === 'string') {
+                                        selectedCarrera = carreras.find(c =>
+                                          c.label === field.value || c.value === field.value
+                                        );
+                                      } else {
+                                        selectedCarrera = field.value;
+                                      }
+                                    }
 
-                                      styles={{
-                                        control: (baseStyles, state) => ({
-                                          ...baseStyles,
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                          '&:hover': {
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                          },
-                                          borderRadius: '10px',
-                                          fontSize: "14px",
-                                          minHeight: "45px",
-                                        }),
-                                        dropdownIndicator: (base, state) => ({
-                                          ...base,
-                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                          transition: '250ms',
-                                          width: '35px',
-                                          height: '35px',
-                                        }),
-                                      }}
-                                    />
-                                  )}
+                                    const isDisabled = !!dataPatient?.carrera && carreras.some(opt =>
+                                      opt.label === dataPatient.carrera ||
+                                      opt.value === dataPatient.carrera
+                                    );
+
+                                    return (
+                                      <Select
+                                        instanceId="select-carrera"
+                                        value={selectedCarrera}
+                                        onChange={(selectedOption) => {
+                                          field.onChange(selectedOption);
+                                        }}
+                                        onBlur={field.onBlur}
+                                        options={carreras}
+                                        isDisabled={isDisabled}
+                                        menuPortalTarget={menuPortalTarget}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="carrera"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
+
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+                                          }),
+                                        }}
+                                      />
+                                    )
+                                  }}
                                 />
                                 {errors.carrera && <span><small>{errors.carrera.message}</small></span>}
                               </div>
@@ -927,13 +954,8 @@ const AddFirstAppoinments = () => {
                                 <label>
                                   Dirección <span className="login-danger">*</span>
                                 </label>
-                                {/* <textarea
-                              className="form-control"
-                              rows={3}
-                              cols={30}
-                            /> */}
-
                                 <input
+                                  disabled={dataPatient?.address ? true : false}
                                   className="form-control" type="text"
                                   defaultValue={""}
                                   {...register('address')} />
@@ -947,47 +969,97 @@ const AddFirstAppoinments = () => {
                                 <Controller
                                   control={control}
                                   name="region"
-                                  {...register('region')}
-                                  ref={null}
-                                  render={({ field: { onChange, onBlur, value } }) => (
-                                    <Select
-                                      instanceId="select-region"
-                                      // defaultValue={{ value: 13, label: "Región Metropolitana", name: "metropolitana" }}
-                                      onChange={onChange}
-                                      options={regiones}
-                                      value={regiones.find(option => option.label === value) || value}
+                                  rules={{
+                                    validate: (value) => {
+                                      // Aceptamos tanto string como objeto
+                                      if (!value) return 'Región es requerida';
 
-                                      // isDisabled={true}
-                                      menuPortalTarget={menuPortalTarget}
-                                      styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                                      id="select-region"
-                                      components={{
-                                        IndicatorSeparator: () => null
-                                      }}
+                                      // Si es string, puede ser label o value
+                                      if (typeof value === 'string') {
+                                        return regiones.some(opt => opt.value === value || opt.label === value) || 'Región es requerida';
+                                      }
 
-                                      styles={{
-                                        control: (baseStyles, state) => ({
-                                          ...baseStyles,
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                          boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                          '&:hover': {
-                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                          },
-                                          borderRadius: '10px',
-                                          fontSize: "14px",
-                                          minHeight: "45px",
-                                        }),
-                                        dropdownIndicator: (base, state) => ({
-                                          ...base,
-                                          transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                          transition: '250ms',
-                                          width: '35px',
-                                          height: '35px',
+                                      // Si es objeto, debe tener value o label
+                                      return (value.value || value.label) ? true : 'Región es requerida';
+                                    },
+                                  }}
+                                  render={({ field }) => {
+                                    // Determinar el valor seleccionado para el Select
+                                    let selectedRegion = null;
 
-                                        }),
-                                      }}
-                                    />
-                                  )}
+                                    // Si hay un valor en el paciente que viene de la base de datos
+                                    if (dataPatient?.region) {
+                                      // Buscamos el objeto completo que corresponde al LABEL de la base de datos
+                                      // (por ejemplo, "Arica y Parinacota")
+                                      selectedRegion = regiones.find(r =>
+                                        r.label === dataPatient.region || // Busca por label exacto
+                                        r.value === dataPatient.region    // O por value exacto
+                                      );
+                                    }
+
+                                    // Si ya tenemos un valor en el campo del formulario, priorizamos ese
+                                    if (field.value) {
+                                      if (typeof field.value === 'string') {
+                                        // Busca por label o value
+                                        selectedRegion = regiones.find(r =>
+                                          r.label === field.value ||
+                                          r.value === field.value
+                                        );
+                                      } else {
+                                        // Si ya es un objeto, lo usamos directamente
+                                        selectedRegion = field.value;
+                                      }
+                                    }
+
+                                    // Determinar si el campo debe estar deshabilitado
+                                    // Solo deshabilitar si existe un valor válido en dataPatient.region
+                                    const isDisabled = !!dataPatient?.region && regiones.some(opt =>
+                                      opt.label === dataPatient.region ||
+                                      opt.value === dataPatient.region
+                                    );
+
+                                    return (
+                                      <Select
+                                        instanceId="select-region"
+                                        value={selectedRegion}
+                                        onChange={(selectedOption) => {
+                                          // Guardamos el objeto completo del select
+                                          field.onChange(selectedOption);
+                                        }}
+                                        onBlur={field.onBlur}
+                                        options={regiones}
+                                        isDisabled={isDisabled}
+                                        menuPortalTarget={menuPortalTarget}
+                                        styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                        id="select-region"
+                                        components={{
+                                          IndicatorSeparator: () => null
+                                        }}
+
+                                        styles={{
+                                          control: (baseStyles, state) => ({
+                                            ...baseStyles,
+                                            borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                            boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                            '&:hover': {
+                                              borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                            },
+                                            borderRadius: '10px',
+                                            fontSize: "14px",
+                                            minHeight: "45px",
+                                          }),
+                                          dropdownIndicator: (base, state) => ({
+                                            ...base,
+                                            transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                            transition: '250ms',
+                                            width: '35px',
+                                            height: '35px',
+
+                                          }),
+                                        }}
+                                      />
+                                    )
+                                  }}
                                 />
                               </div>
                             </div>
@@ -999,36 +1071,115 @@ const AddFirstAppoinments = () => {
                                 <Controller
                                   control={control}
                                   name="comuna"
-                                  {...register('comuna', {
-                                    required: {
-                                      value: true,
-                                      message: 'Comuna es requerida',
+                                  rules={{
+                                    validate: (value) => {
+                                      if (!value) return 'Comuna es requerida';
+
+                                      // Si es string, puede ser label o value
+                                      if (typeof value === 'string') {
+                                        const todasLasComunas = Object.values(comunas).flat();
+                                        return todasLasComunas.some(opt =>
+                                          opt.value === value ||
+                                          opt.label === value
+                                        ) || 'Comuna es requerida';
+                                      }
+
+                                      // Si es objeto, debe tener value o label
+                                      return (value.value || value.label) ? true : 'Comuna es requerida';
                                     }
-                                  })}
-                                  ref={null}
-                                  render={({ field: { onChange, onBlur, value, ref } }) => {
-                                    const regionKey = watch('region')?.value || dataPatient?.region?.toLowerCase()
-                                      .normalize("NFD") // Descompone caracteres con acentos
-                                      .replace(/[\u0300-\u036f]/g, "") // Elimina marcas de acentos
-                                      .replace(/\s+/g, "_") // Reemplaza espacios por "_" 
+                                  }}
+                                  render={({ field }) => {
+                                    // Obtener la región actual (manejando tanto string como objeto)
+                                    const currentRegion = watch('region');
 
-                                    const opcionesComunas = regionKey ? comunas[regionKey] : [];
+                                    // Función para encontrar la clave de comunas a partir de una región
+                                    const getRegionKey = (regionData) => {
+                                      if (!regionData) return null;
 
-                                    const selectedComuna = opcionesComunas?.find(comuna => comuna.label === value || comuna.label === value?.label) || null;
+                                      let regionObj;
+
+                                      if (typeof regionData === 'string') {
+                                        // Buscar la región por label o value
+                                        regionObj = regiones.find(r =>
+                                          r.label === regionData ||
+                                          r.value === regionData
+                                        );
+                                      } else {
+                                        // Si ya es un objeto, usarlo directamente
+                                        regionObj = regionData;
+                                      }
+
+                                      return regionObj?.value?.toLowerCase()
+                                        .normalize("NFD")
+                                        .replace(/[\u0300-\u036f]/g, "")
+                                        .replace(/\s+/g, "_");
+                                    };
+
+                                    // Primero intentamos con el valor seleccionado en el formulario
+                                    let normalizedRegionKey = getRegionKey(currentRegion);
+
+                                    // Si no hay una región seleccionada en el formulario, usamos la del paciente
+                                    if (!normalizedRegionKey && dataPatient?.region) {
+                                      normalizedRegionKey = getRegionKey(dataPatient.region);
+                                    }
+
+                                    // Obtener las opciones de comunas para la región actual
+                                    const opcionesComunas = normalizedRegionKey ? comunas[normalizedRegionKey] || [] : [];
+
+                                    // Determinar el valor seleccionado para el Select
+                                    let selectedComuna = null;
+
+                                    // Si hay un valor en el paciente que viene de la base de datos
+                                    if (dataPatient?.comuna) {
+                                      // Buscamos el objeto completo que corresponde al label o value de la base de datos
+                                      selectedComuna = opcionesComunas.find(c =>
+                                        c.label === dataPatient.comuna ||
+                                        c.value === dataPatient.comuna
+                                      );
+                                    }
+
+                                    // Si hay un valor en el campo del formulario, priorizamos ese
+                                    if (field.value) {
+                                      if (typeof field.value === 'string') {
+                                        // Si es string, buscamos el objeto correspondiente (puede ser label o value)
+                                        selectedComuna = opcionesComunas.find(c =>
+                                          c.label === field.value ||
+                                          c.value === field.value
+                                        );
+                                      } else {
+                                        // Si ya es un objeto, lo usamos directamente
+                                        selectedComuna = field.value;
+                                      }
+                                    }
+
+                                    // Determinar si el campo debe estar deshabilitado
+                                    // Solo deshabilitar si existe un valor válido en dataPatient.comuna
+                                    const isDisabled = !!dataPatient?.comuna &&
+                                      opcionesComunas.some(opt =>
+                                        opt.label === dataPatient.comuna ||
+                                        opt.value === dataPatient.comuna
+                                      );
+
+                                    // En lugar de useEffect, actualizamos el valor inmediatamente si es necesario
+                                    // Esto se ejecutará durante el renderizado, antes de devolver el JSX
+                                    if (selectedComuna && !field.value) {
+                                      // Usamos setTimeout para asegurarnos de que esto ocurra después del ciclo de renderizado actual
+                                      setTimeout(() => {
+                                        field.onChange(selectedComuna);
+                                      }, 0);
+                                    }
 
                                     return (
                                       <Select
-                                        instanceId="select-region"
-                                        // defaultValue={selectedOption}
+                                        instanceId="select-comuna"
                                         value={selectedComuna}
-
                                         onChange={(selectedOption) => {
-                                          // Guarda el valor (no el objeto completo) en el formulario
-
-                                          onChange(selectedOption || null);
+                                          // Guardamos el objeto completo del select
+                                          field.onChange(selectedOption);
                                         }}
-                                        onBlur={onBlur}
+                                        onBlur={field.onBlur}
                                         options={opcionesComunas}
+                                        isDisabled={isDisabled}
                                         menuPortalTarget={menuPortalTarget}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         id="select-region"

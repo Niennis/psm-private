@@ -102,14 +102,17 @@ const EditGroup = () => {
       });
 
       const alumnosProcessed = noCoincidentes.map((alumno, i) => {
+        const nombre_social = !alumno.nombre_social || alumno.nombre_social == 'NA' || alumno.nombre_social == '0' ? alumno.nombre : alumno.nombre_social
+
         return {
           value: i + 2,
           label: alumno.email,
           name: alumno.nombre,
           lastName: alumno.apellido,
           id: alumno.id,
-          fullName: `${alumno.nombre} ${alumno.apellido}`,
+          fullName: `${nombre_social} ${alumno.apellido}`,
           email: alumno.email,
+          nombre_social: nombre_social,
         }
       })
 

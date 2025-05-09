@@ -73,3 +73,9 @@ export const asegurarSegundos = horaStr => {
   }
   return horaStr;
 }
+
+export const esFechaValida = str => {
+  const fecha = new Date(str);
+  return !isNaN(fecha.getTime());
+}
+

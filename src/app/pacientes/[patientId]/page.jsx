@@ -54,10 +54,10 @@ const EditPatients = ({ params }) => {
   const fetchInitialData = async () => {
     try {
       const { users: user } = await fetchUser(params.patientId)
-      
       const obj = {
         anoIngresoCarrera: user[0].anoIngresoCarrera,
         address: user[0].direccion,
+        aplica_despeje: user[0].aplica_despeje,
         carrera: user[0].carrera,
         comuna: user[0].comuna,
         date: formatoAAAAMMDD(user[0].fecha_nacimiento),
@@ -130,7 +130,7 @@ const EditPatients = ({ params }) => {
 
     const bodyUpdate = {
       "apellido": data.lastName || initial.lastName,
-      "aplica_despeje": 1,
+      "aplica_despeje": initial.aplica_despeje,
       "anoIngresoCarrera": initial.anoIngresoCarrera || 0,
       "campus": data.campus || 'No aplica',
       "comuna": data.comuna.label || initial.comuna,

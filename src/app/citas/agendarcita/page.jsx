@@ -125,6 +125,7 @@ const AddAppoinments = () => {
           value: `1-${i}`,
           label: alumno.email,
           name: alumno.nombre,
+          social_name: alumno.nombre_social === 'NA' || alumno.nombre_social == '0' || alumno.nombre_social == '' || alumno.nombre_social == ' ' ? alumno.nombre : alumno.nombre_social,
           lastName: alumno.apellido,
           id: alumno.id,
           type: 'alumno'
@@ -161,6 +162,7 @@ const AddAppoinments = () => {
           label: group.nota,
           name: 'No aplica',
           lastName: 'No aplica',
+          social_name: 'No aplica',
           id: group.uuid,
           type: 'grupo'
         }
@@ -495,7 +497,7 @@ const AddAppoinments = () => {
 
   const handleSelectedalumno = async (e) => {
     setSelectedPatient(e)
-    setValue('patientName', e?.name);
+    setValue('patientName', e?.social_name);
     setValue('patientLastname', e?.lastName);
   }
 
@@ -684,7 +686,7 @@ const AddAppoinments = () => {
                               <input
                                 className="form-control"
                                 type="text"
-                                value={selectedPatient?.name || ''}
+                                value={selectedPatient?.social_name || ''}
                                 disabled
                                 {...register('patientName', {
                                   // required: {

@@ -127,7 +127,7 @@ const FichaAlumno = () => {
         genero: student[0].genero === 'personalizado' ? 'No binarie' : student[0].genero,
         telefono: student[0].telefono,
         aplica_despeje: student[0].aplica_despeje,
-        rut: student[0].rut,
+        rut: student[0].rut == 'NA' || student[0].rut == '0' || !student[0].rut ? '' : student[0].rut,
         carrera: student[0].carrera,
         address: student[0].direccion,
         region: student[0].region,
@@ -413,7 +413,7 @@ const FichaAlumno = () => {
                               type="text"
                               className="form-control"
                               {...register('nombre_social')}
-                              disabled={patient?.nombre_social ? true : false}
+                              disabled={!!(patient?.nombre_social && patient?.nombre_social.trim() !== "")}
                             />
                           </div>
                         </div>
@@ -1155,7 +1155,7 @@ const FichaAlumno = () => {
 
 
                                       <h3><span>Observaciones: {item.observaciones || ''}</span></h3>
-                                      <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3>
+                                      {/* <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3> */}
 
                                       <button
                                         className="btn btn-primary"
@@ -1463,7 +1463,7 @@ const FichaAlumno = () => {
 
 
                                       <h3><span>Observaciones: {item.observaciones || ''}</span></h3>
-                                      <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3>
+                                      {/* <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3> */}
 
                                     </div>
                                   </div>

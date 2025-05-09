@@ -76,7 +76,7 @@ const AddInterviewRecord = ({ params }) => {
       const obj = {
         id_alumno: date[0].id_paciente,
         id_profesional: date[0].id_profesional,
-        ano_ingreso: response[0].anoIngresoCarrera || '',
+        ano_ingreso: response[0].anoIngresoCarrera === 'No aplica' || response[0].anoIngresoCarrera === null ? '' : response[0].anoIngresoCarrera,
         apellido: response[0].apellido,
         aplica_despeje: responsePatient.aplica_despeje,
         campus: date[0].campus,
@@ -94,7 +94,8 @@ const AddInterviewRecord = ({ params }) => {
         motivo_consulta: records[0]?.motivo_consulta || '',
         nombre_social: response[0].nombre_social,
         nombre: responsePatient.nombre,
-        nombre_completo: date[0].nombre_alumno,
+        nombre_completo: !!(response[0]?.nombre_social && response[0]?.nombre_social.trim() !== "") ? response[0].nombre_social + ' ' + response[0].apellido : response[0].nombre + ' ' + response[0].apellido,
+        // nombre_completo: date[0].nombre_alumno,
         profesional_evaluador: date[0].nombre_profesional,
         region: response[0].region,
         rut: response[0].rut,
@@ -149,6 +150,21 @@ const AddInterviewRecord = ({ params }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const validateRUT = (rut) => {
+    const cleanRUT = rut.replace(/[.-]/g, "");
+
+    if (cleanRUT.length < 8 || cleanRUT.length > 10) {
+      return "El RUT debe tener entre 8 y 10 caracteres.";
+    }
+
+    if (!/^\d+k?$/i.test(cleanRUT)) {
+      return "El RUT solo puede contener números y la letra K.";
+    }
+
+    return true; // RUT válido
+  };
+
+
   const getProfessionals = async () => {
     try {
       const response = await fetchProfessionals()
@@ -172,7 +188,6 @@ const AddInterviewRecord = ({ params }) => {
       console.log('Error', error)
     }
   }
-  
   const isChecked = watch('derivacion_interna')
   useEffect(() => {
     if (isChecked) {
@@ -641,8 +656,8 @@ const AddInterviewRecord = ({ params }) => {
                                   Número de ficha <span className="login-danger">*</span>
                                 </label>
                                 <input
+                                  disabled
                                   className="form-control"
-                                  // value={rut}
                                   type="text"
                                   {...register('numero_ficha', {
                                     required: {
@@ -691,6 +706,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Rut</label>
                                     <input
+                                      disabled={patient?.rut ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       maxLength={12}
@@ -707,6 +723,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Carrera</label>
                                     <input
+                                      disabled={patient?.carrera ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('carrera')} />
@@ -720,6 +737,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Año de ingreso </label>
                                     <input
+                                      disabled={patient?.ano_ingreso ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('ano_ingreso')}
@@ -733,6 +751,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Fecha de nacimiento</label>
                                     <input
+                                      disabled={patient?.fecha_nacimiento ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('fecha_nacimiento')} />
@@ -746,6 +765,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Edad</label>
                                     <input
+                                      disabled={patient?.edad ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('edad')} />
@@ -759,6 +779,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Comuna</label>
                                     <input
+                                      disabled={patient?.comuna ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('comuna')} />
@@ -800,6 +821,7 @@ const AddInterviewRecord = ({ params }) => {
                                         <span className="input-group-text">+56</span>
                                       </div>
                                       <input
+                                        disabled={patient?.telefono ? true : false}
                                         className="form-control" type="tel"
                                         defaultValue={""}
                                         {...register('telefono', {
@@ -1124,6 +1146,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Rut</label>
                                     <input
+                                      disabled={patient?.rut ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('rut')} />
@@ -1137,6 +1160,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Carrera <span className="login-danger">*</span></label>
                                     <input
+                                      disabled={patient?.carrera ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('carrera', {
@@ -1156,6 +1180,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Año de ingreso <span className="login-danger">*</span></label>
                                     <input
+                                      disabled={patient?.ano_ingreso ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('ano_ingreso', {
@@ -1175,6 +1200,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Fecha de nacimiento <span className="login-danger">*</span></label>
                                     <input
+                                      disabled={patient?.fecha_nacimiento ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('fecha_nacimiento', {
@@ -1194,6 +1220,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Edad</label>
                                     <input
+                                      disabled
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('edad')} />
@@ -1207,6 +1234,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Dirección <span className="login-danger">*</span></label>
                                     <input
+                                      disabled={patient?.direccion ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('direccion', {
@@ -1255,6 +1283,7 @@ const AddInterviewRecord = ({ params }) => {
                                         <span className="input-group-text">+56</span>
                                       </div>
                                       <input
+                                        disabled={patient?.telefono ? true : false}
                                         className="form-control" type="tel"
                                         defaultValue={""}
                                         {...register('telefono', {
@@ -2884,13 +2913,13 @@ const AddInterviewRecord = ({ params }) => {
                 >
                   {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
                   <h4>{message}</h4>
-                  <Button variant="primary" onClick={(e) => { handleAlta(e); handleAppointment(e) }}> Confirmar </Button>
+                  <Button variant="primary" onClick={(e) => { handleAlta(e); handleAppointment(e); console.log('ENTRÓ') }}> Confirmar </Button>
                 </Alert>
               </div>
             </div>
           }
 
-          {success === 'cita' 
+          {success === 'cita'
             &&
             <div className="row" style={{
               height: '100%',
@@ -2915,7 +2944,7 @@ const AddInterviewRecord = ({ params }) => {
                 >
                   {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
                   <h4>{message}</h4>
-                  <Button variant="primary" onClick={(e) => { handleInterview(e) }}> Confirmar </Button>
+                  <Button variant="primary" onClick={(e) => { handleAppointment(e) }}> Confirmar </Button>
                 </Alert>
               </div>
             </div>
