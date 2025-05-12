@@ -150,21 +150,6 @@ const AddInterviewRecord = ({ params }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const validateRUT = (rut) => {
-    const cleanRUT = rut.replace(/[.-]/g, "");
-
-    if (cleanRUT.length < 8 || cleanRUT.length > 10) {
-      return "El RUT debe tener entre 8 y 10 caracteres.";
-    }
-
-    if (!/^\d+k?$/i.test(cleanRUT)) {
-      return "El RUT solo puede contener números y la letra K.";
-    }
-
-    return true; // RUT válido
-  };
-
-
   const getProfessionals = async () => {
     try {
       const response = await fetchProfessionals()
@@ -300,7 +285,7 @@ const AddInterviewRecord = ({ params }) => {
       "nombre": patient.nombre,
       "nombre_social": patient.nombre_social,
       "region": data.region || patient.region,
-      "rut": data.rut || patient.rut || ' ',
+      "rut": data.rut || patient.rut || '',
       "status": patient.status,
       "telefono": data.telefono || patient.telefono,
       "tipo_usuario": patient.tipo_usuario,
@@ -390,6 +375,7 @@ const AddInterviewRecord = ({ params }) => {
   /* ------- ENTREVISTA DE DESPEJE ----------- */
   const handleInterview = handleSubmit(async (data, e) => {
     e.preventDefault()
+    setIsLoading(true)
     setSuccess('initial')
     const derivacion_interna = watch("derivacion_interna")
     // setValue('numero_ficha', 1)
@@ -425,7 +411,7 @@ const AddInterviewRecord = ({ params }) => {
       "nombre": patient.nombre,
       "nombre_social": patient.nombre_social,
       "region": data.region || patient.region,
-      "rut": data.rut || patient.rut || ' ',
+      "rut": data.rut || patient.rut || '',
       "status": patient.status,
       "telefono": data.telefono || patient.telefono,
       "tipo_usuario": patient.tipo_usuario,
@@ -512,6 +498,8 @@ const AddInterviewRecord = ({ params }) => {
       } catch (error) {
         console.log('Error: ', error);
         setSuccess('success')
+      } finally {
+        setIsLoading(false)
       }
     }
   })
@@ -765,7 +753,7 @@ const AddInterviewRecord = ({ params }) => {
                                   <div className="form-group local-forms">
                                     <label>Edad</label>
                                     <input
-                                      disabled={patient?.edad ? true : false}
+                                      disabled
                                       className="form-control" type="text"
                                       defaultValue={""}
                                       {...register('edad')} />
@@ -1149,6 +1137,8 @@ const AddInterviewRecord = ({ params }) => {
                                       disabled={patient?.rut ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
+                                      maxLength={12}
+                                      minLength={8}
                                       {...register('rut')} />
                                     {errors.rut && <span className="login-danger">
                                       <small>{errors.rut.message}</small>
@@ -2911,9 +2901,14 @@ const AddInterviewRecord = ({ params }) => {
                     bottom: '50vh'
                   }}
                 >
-                  {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
-                  <h4>{message}</h4>
-                  <Button variant="primary" onClick={(e) => { handleAlta(e); handleAppointment(e); console.log('ENTRÓ') }}> Confirmar </Button>
+                  {Object.keys(errors).length !== 0
+                    ? <h4 className='font-red'>Faltan campos por completar</h4>
+                    :
+                    <>
+                      <h4>{message}</h4>
+                      <Button variant="primary" onClick={(e) => { handleAlta(e); handleAppointment(e) }}> Confirmar </Button>
+                    </>
+                  }
                 </Alert>
               </div>
             </div>
@@ -2942,9 +2937,14 @@ const AddInterviewRecord = ({ params }) => {
                     bottom: '50vh'
                   }}
                 >
-                  {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
-                  <h4>{message}</h4>
-                  <Button variant="primary" onClick={(e) => { handleAppointment(e) }}> Confirmar </Button>
+                  {Object.keys(errors).length !== 0
+                    ? <h4 className='font-red'>Faltan campos por completar</h4>
+                    :
+                    <>
+                      <h4>{message}</h4>
+                      <Button variant="primary" onClick={(e) => { handleAppointment(e) }}> Confirmar </Button>
+                    </>
+                  }
                 </Alert>
               </div>
             </div>
@@ -2973,9 +2973,13 @@ const AddInterviewRecord = ({ params }) => {
                     bottom: '50vh'
                   }}
                 >
-                  {Object.keys(errors).length !== 0 && <p className='font-red'>Faltan campos por completar</p>}
-                  <h4>{message}</h4>
-                  <Button variant="primary" onClick={(e) => { handleInterview(e) }}> Confirmar </Button>
+                  {Object.keys(errors).length !== 0
+                    ? <h4 className='font-red'>Faltan campos por completar</h4>
+                    :
+                    <>                 <h4>{message}</h4>
+                      <Button variant="primary" onClick={(e) => { handleInterview(e) }}> Confirmar </Button>
+                    </>
+                  }
                 </Alert>
               </div>
             </div>
