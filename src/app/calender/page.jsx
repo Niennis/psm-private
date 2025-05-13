@@ -102,7 +102,6 @@ const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendar
     setevent_title(clickInfo.event.title);
     setcalenderevent(clickInfo.event);
     setShowModal(true);
-
   };
 
   const handleEdit = async () => {
@@ -385,7 +384,7 @@ const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendar
                             {eventosDelDia.map((evento, i) => (
                               <div
                                 key={i}
-                                className={evento.classNames?.join(" ")} // Usa clases del evento para el color
+                                className={evento.classNames?.join(" ")} // clases del evento para el color
                                 style={{
                                   display: "flex",
                                   alignItems: "center",
@@ -431,7 +430,8 @@ const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendar
                     <Modal
                       show={showModal}
                       onHide={handleClose}
-                      style={{ alignContent: 'center' }}
+                      style={{ alignContent: 'center', zIndex: 99999 }}
+                      title="Cerrar"
                     >
                       <Modal.Header closeButton>
                         <Modal.Title>{event_title}</Modal.Title>
@@ -442,10 +442,10 @@ const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendar
                         <p>Tipo de servicio:  </p> {calenderevent && formatToBullets(calenderevent?.extendedProps?.tipoServicio)}
                       </Modal.Body>
                       <Modal.Footer>
-                        <Button variant="secondary" onClick={handleClose}> Cerrar </Button>
-                        <Button variant="secondary" onClick={handleEdit}> Editar </Button>
-                        <Button variant="secondary" onClick={openWarning}> Eliminar </Button>
-                        <Button variant="secondary" onClick={openWarningGrupal}> Eliminar disponibilidad agrupada</Button>
+                        <Button variant="secondary" onClick={handleEdit}>Editar bloque</Button>
+                        <Button variant="secondary" onClick={openWarning}>Eliminar bloque</Button>
+                        <Button variant="secondary" onClick={openWarningGrupal}>Eliminar en serie</Button>
+                        {/* <Button variant="secondary" onClick={handleClose}>Cerrar</Button> */}
                       </Modal.Footer>
                     </Modal>
                   </div>
