@@ -45,7 +45,11 @@ export const createInterview = async (appointment) => {
   const body = {
     ...appointment,
     alumno_id: appointment.patient_id,
-    campus: appointment.campus,
+    campus: appointment.campus === 'centro'
+      ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
+      : citaSelected.campus === 'huechuraba'
+        ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
+        : '',
     carrera: appointment.carrera,
     como: 'como se entero',
     derivado_desde: 'derivado',
@@ -60,6 +64,7 @@ export const createInterview = async (appointment) => {
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
   }
+
   try {
     const data = await fetch(APPOINTMENT_API, {
       method: "POST",
@@ -81,7 +86,11 @@ export const createAppointment = async (appointment) => {
   const APPOINTMENT_API = `${process.env.NEXT_PUBLIC_CREATE_APPOINTMENT}/insertcitas`
   const body = {
     alumno_id: appointment.patient_id,
-    campus: appointment.campus,
+    campus: appointment.campus === 'centro'
+      ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
+      : appointment.campus === 'huechuraba'
+        ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
+        : '',
     como: 'como se entero',
     derivado_desde: 'derivado',
     diagnostico_previo: 'diagnosticos',
@@ -122,8 +131,11 @@ export const createAppointmentForGroup = async (input) => {
     fechaInicio: input.fecha,
     hora: input.hora,
     modalidad: input.modalidad,
-
-    campus: input.campus,
+    campus: input.campus === 'centro'
+      ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
+      : input.campus === 'huechuraba'
+        ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
+        : '',
     como: 'como se entero',
     derivado_desde: 'derivado',
     diagnostico_previo: 'diagnosticos',
@@ -150,7 +162,6 @@ export const createAppointmentForGroup = async (input) => {
     console.log('Error:', error)
   }
 }
-
 
 
 export const updateAppointment = async (appointment) => {
@@ -196,7 +207,7 @@ export const changeStatusAppointment = async (data) => {
     estado: data.status,
     tipo_cita: data.tipo_cita || '',
   }
-  
+
   try {
     const data = await fetch(APPOINMENT_API, {
       method: 'POST',
@@ -249,7 +260,7 @@ export const fetchAppointmentById = async (id) => {
     })
 
     const response = await data.json()
-    
+
     return response
   } catch (error) {
     console.log('Error:', error)
@@ -353,7 +364,7 @@ export const createContact = async (input) => {
       },
       body: JSON.stringify(body)
     })
-    
+
     const response = await data.json()
     return response
   } catch (error) {
