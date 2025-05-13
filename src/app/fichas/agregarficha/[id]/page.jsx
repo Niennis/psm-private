@@ -87,7 +87,7 @@ const AddInterviewRecord = ({ params }) => {
         direccion: response[0].direccion,
         edad: dayjs().diff(dayjs.utc(responsePatient.fecha_nacimiento), 'year'),
         email: date[0].email_estudiante,
-        fecha_nacimiento: dayjs.utc(responsePatient.fecha_nacimiento).format('DD-MM-YYYY'),
+        fecha_nacimiento: dayjs.utc(responsePatient.fecha_nacimiento).format('DD-MM-YYYY') === 'Invalid Date' ? '' : dayjs.utc(responsePatient.fecha_nacimiento).format('DD-MM-YYYY'),
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         hora_cita: date[0].hora,
@@ -779,7 +779,7 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Correo electrónico</label>
+                                    <label>Correo electrónico <span className="login-danger">*</span></label>
                                     <input
                                       disabled
                                       className="form-control" type="email"
@@ -803,7 +803,7 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Teléfono</label>
+                                    <label>Teléfono <span className="login-danger">*</span></label>
                                     <div className="input-group">
                                       <div className="input-group-prepend">
                                         <span className="input-group-text">+56</span>
@@ -1029,6 +1029,7 @@ const AddInterviewRecord = ({ params }) => {
                         </form>
                       </div>
                       :
+
                       /* ----- FORMULARIO ENTREVISTA DE DESPEJE ------ */
                       <div className="card-body">
                         <h4>Entrevista de evaluación</h4>
@@ -1148,17 +1149,12 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Carrera <span className="login-danger">*</span></label>
+                                    <label>Carrera</label>
                                     <input
                                       disabled={patient?.carrera ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('carrera', {
-                                        required: {
-                                          value: true,
-                                          message: 'Carrera es requerida'
-                                        }
-                                      })}
+                                      {...register('carrera')}
                                     />
                                     {errors.carrera && <span className="login-danger">
                                       <small>{errors.carrera.message}</small>
@@ -1168,17 +1164,12 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Año de ingreso <span className="login-danger">*</span></label>
+                                    <label>Año de ingreso</label>
                                     <input
                                       disabled={patient?.ano_ingreso ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('ano_ingreso', {
-                                        required: {
-                                          value: true,
-                                          message: 'Año de ingreso es requerido'
-                                        }
-                                      })}
+                                      {...register('ano_ingreso')}
                                     />
                                     {errors.ano_ingreso && <span className="login-danger">
                                       <small>{errors.ano_ingreso.message}</small>
@@ -1188,17 +1179,12 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Fecha de nacimiento <span className="login-danger">*</span></label>
+                                    <label>Fecha de nacimiento</label>
                                     <input
                                       disabled={patient?.fecha_nacimiento ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('fecha_nacimiento', {
-                                        required: {
-                                          value: true,
-                                          message: 'Fecha es requerida'
-                                        }
-                                      })}
+                                      {...register('fecha_nacimiento')}
                                     />
                                     {errors.fecha_nacimiento && <span className="login-danger">
                                       <small>{errors.fecha_nacimiento.message}</small>
@@ -1222,17 +1208,12 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <div className="form-group local-forms">
-                                    <label>Dirección <span className="login-danger">*</span></label>
+                                    <label>Dirección</label>
                                     <input
                                       disabled={patient?.direccion ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('direccion', {
-                                        required: {
-                                          value: true,
-                                          message: 'Dirección es requerido'
-                                        }
-                                      })}
+                                      {...register('direccion')}
                                     />
                                     {errors.direccion && <span className="login-danger">
                                       <small>{errors.direccion.message}</small>
@@ -1242,7 +1223,7 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Correo electrónico</label>
+                                    <label>Correo electrónico <span className="login-danger">*</span></label>
                                     <input
                                       disabled
 
@@ -1278,8 +1259,7 @@ const AddInterviewRecord = ({ params }) => {
                                         defaultValue={""}
                                         {...register('telefono', {
                                           required: {
-                                            value: true,
-                                            message: 'Teléfono es requerido'
+                                            value: false,
                                           },
                                           validate: (value) =>
                                             value.length === 9 || "Cantidad de caracteres debe ser igual a 9",
@@ -2679,7 +2659,7 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <label>
-                                    Observaciones
+                                    Observaciones <span className="login-danger">*</span>
                                   </label>
                                   <div className="form-group local-forms">
                                     <textarea
