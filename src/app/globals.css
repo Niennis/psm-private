@@ -15,7 +15,6 @@
 /*-----------------
 	1. General
 -----------------------*/
-
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600");
 
 html {
@@ -1557,7 +1556,7 @@ textarea.form-control {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  margin-bottom: 40px;
+  /* margin-bottom: 40px; */
 }
 
 .remember-me .custom_check {
@@ -13751,4 +13750,16 @@ td.ant-table-cell.ant-table-cell-fix-left {
 .busy {
   background-color: grey;
   color: darkgray;
+}
+
+/*  POP OVER CALENDARIO */
+.fc-popover {
+  z-index: 9999 !important;
+  transform: none !important;
+  border: 1px solid red !important;
+}
+
+.fc-popover .fc-popover-body {
+  max-height: 300px;
+  overflow-y: auto;
 }
