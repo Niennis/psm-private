@@ -223,7 +223,7 @@ const Login = () => {
 
                                     {/* LOGIN ESTUDIANTES */}
                                     {
-                                      URL_RESERVAR.includes('agendaelectronica') && <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', }}>
+                                      URL_RESERVAR.includes('agendaelectronica') && <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', padding: 'inherit'}}>
                                         <p>Ingresa con tu mail UDP para poder realizar una reserva.</p>
                                         <div>
                                           <button className="gsi-material-button btn btn-primary btn-block"
