@@ -28,6 +28,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
+import { carreras } from "@/utils/selects";
+import { esFechaValida } from "@/utils/managedata";
 
 const cacheHandler = new CacheHandler();
 
@@ -45,6 +47,7 @@ const AddInterviewRecord = ({ params }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [data, setData] = useState(null);
   const [profesionales, setProfesionales] = useState([])
+  const [menuPortalTarget, setMenuPortalTarget] = useState(null);
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
@@ -64,6 +67,15 @@ const AddInterviewRecord = ({ params }) => {
     });
   }, [setProps]);
 
+  useEffect(() => {
+    setMenuPortalTarget(document.body);
+  }, [])
+
+  const convertirAInputDate = fechaTexto => {
+    const fecha = dayjs.utc(fechaTexto).tz('America/Santiago', true);
+    return fecha.format('YYYY-MM-DD');
+  }
+  
   const getData = async () => {
     setIsLoading(true)
     try {
@@ -87,7 +99,9 @@ const AddInterviewRecord = ({ params }) => {
         direccion: response[0].direccion,
         edad: dayjs().diff(dayjs.utc(responsePatient.fecha_nacimiento), 'year'),
         email: date[0].email_estudiante,
-        fecha_nacimiento: dayjs.utc(responsePatient.fecha_nacimiento).format('DD-MM-YYYY') === 'Invalid Date' ? '' : dayjs.utc(responsePatient.fecha_nacimiento).format('DD-MM-YYYY'),
+        fecha_nacimiento: response[0].fecha_nacimiento
+        ? convertirAInputDate(response[0].fecha_nacimiento)
+        : '',
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         hora_cita: date[0].hora,
@@ -709,12 +723,91 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Carrera</label>
-                                    <input
-                                      disabled={patient?.carrera ? true : false}
-                                      className="form-control" type="text"
-                                      defaultValue={""}
-                                      {...register('carrera')} />
+                                    <label>Carrera <span className="login-danger">*</span></label>
+                                    <Controller
+                                      control={control}
+                                      name="carrera"
+                                      rules={{
+                                        validate: (value) => {
+                                          if (!value) return 'Carrera es requerida';
+
+                                          if (typeof value === 'string') {
+                                            return (
+                                              carreras.some(opt => opt.value === value || opt.label === value) ||
+                                              'Carrera inválida'
+                                            );
+                                          }
+
+                                          return (value.value || value.label) ? true : 'Carrera inválida';
+                                        },
+                                      }}
+                                      render={({ field }) => {
+                                        let selectedCarrera = null;
+
+                                        // Si hay un valor en el paciente que viene de la base de datos
+                                        if (patient?.carrera) {
+                                          selectedCarrera = carreras.find(c =>
+                                            c.label === patient.carrera || c.value === patient.carrera
+                                          );
+                                        }
+
+                                        // Si ya tenemos un valor en el campo del formulario, priorizamos ese
+                                        if (field.value) {
+                                          if (typeof field.value === 'string') {
+                                            selectedCarrera = carreras.find(c =>
+                                              c.label === field.value || c.value === field.value
+                                            );
+                                          } else {
+                                            selectedCarrera = field.value;
+                                          }
+                                        }
+
+                                        const isDisabled = !!patient?.carrera && carreras.some(opt =>
+                                          opt.label === patient.carrera ||
+                                          opt.value === patient.carrera
+                                        );
+
+                                        return (
+                                          <Select
+                                            instanceId="select-carrera"
+                                            value={selectedCarrera}
+                                            onChange={(selectedOption) => {
+                                              field.onChange(selectedOption);
+                                            }}
+                                            onBlur={field.onBlur}
+                                            options={carreras}
+                                            isDisabled={isDisabled}
+                                            menuPortalTarget={menuPortalTarget}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                            id="carrera"
+                                            components={{
+                                              IndicatorSeparator: () => null
+                                            }}
+
+                                            styles={{
+                                              control: (baseStyles, state) => ({
+                                                ...baseStyles,
+                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                                boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                                '&:hover': {
+                                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                                },
+                                                borderRadius: '10px',
+                                                fontSize: "14px",
+                                                minHeight: "45px",
+                                              }),
+                                              dropdownIndicator: (base, state) => ({
+                                                ...base,
+                                                transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                                transition: '250ms',
+                                                width: '35px',
+                                                height: '35px',
+                                              }),
+                                            }}
+                                          />
+                                        )
+                                      }}
+                                    />
                                     {errors.carrera && <span className="login-danger">
                                       <small>{errors.carrera.message}</small>
                                     </span>}
@@ -723,12 +816,17 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Año de ingreso </label>
+                                    <label>Año de ingreso <span className="login-danger">*</span></label>
                                     <input
                                       disabled={patient?.ano_ingreso ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('ano_ingreso')}
+                                      {...register('ano_ingreso', {
+                                        required: {
+                                          value: true,
+                                          message: 'Año de ingreso es requerida'
+                                        }
+                                      })}
                                     />
                                     {errors.ano_ingreso && <span className="login-danger">
                                       <small>{errors.ano_ingreso.message}</small>
@@ -737,12 +835,19 @@ const AddInterviewRecord = ({ params }) => {
                                 </div>
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Fecha de nacimiento</label>
+                                    <label>Fecha de nacimiento <span className="login-danger">*</span></label>
                                     <input
-                                      disabled={patient?.fecha_nacimiento ? true : false}
-                                      className="form-control" type="text"
-                                      defaultValue={""}
-                                      {...register('fecha_nacimiento')} />
+                                      disabled={esFechaValida(patient?.fecha_nacimiento)}
+                                      className="form-control datetimepicker"
+                                      type="date"
+                                      placeholder=""
+                                      {...register('fecha_nacimiento', {
+                                        required: {
+                                          value: true,
+                                          message: 'Fecha de nacimiento es requerida'
+                                        }
+                                      })}
+                                    />
                                     {errors.fecha_nacimiento && <span className="login-danger">
                                       <small>{errors.fecha_nacimiento.message}</small>
                                     </span>}
@@ -765,14 +870,15 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-12 col-xl-12">
                                   <div className="form-group local-forms">
-                                    <label>Comuna</label>
+                                    <label>Dirección</label>
                                     <input
-                                      disabled={patient?.comuna ? true : false}
+                                      disabled={patient?.direccion ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('comuna')} />
-                                    {errors.comuna && <span className="login-danger">
-                                      <small>{errors.comuna.message}</small>
+                                      {...register('direccion')}
+                                    />
+                                    {errors.direccion && <span className="login-danger">
+                                      <small>{errors.direccion.message}</small>
                                     </span>}
                                   </div>
                                 </div>
@@ -809,8 +915,15 @@ const AddInterviewRecord = ({ params }) => {
                                         <span className="input-group-text">+56</span>
                                       </div>
                                       <input
-                                        disabled={patient?.telefono ? true : false}
-                                        className="form-control" type="tel"
+                                        // disabled={patient?.telefono ? true : false}  
+                                        type="tel"
+                                        onKeyDown={(e) => {
+                                          // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                          if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                            e.preventDefault();
+                                          }
+                                        }}
+                                        className="form-control"
                                         defaultValue={""}
                                         {...register('telefono', {
                                           required: {
@@ -1149,12 +1262,90 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Carrera</label>
-                                    <input
-                                      disabled={patient?.carrera ? true : false}
-                                      className="form-control" type="text"
-                                      defaultValue={""}
-                                      {...register('carrera')}
+                                    <label>Carrera <span className="login-danger">*</span></label>
+                                    <Controller
+                                      control={control}
+                                      name="carrera"
+                                      rules={{
+                                        validate: (value) => {
+                                          if (!value) return 'Carrera es requerida';
+
+                                          if (typeof value === 'string') {
+                                            return (
+                                              carreras.some(opt => opt.value === value || opt.label === value) ||
+                                              'Carrera inválida'
+                                            );
+                                          }
+
+                                          return (value.value || value.label) ? true : 'Carrera inválida';
+                                        },
+                                      }}
+                                      render={({ field }) => {
+                                        let selectedCarrera = null;
+
+                                        // Si hay un valor en el paciente que viene de la base de datos
+                                        if (patient?.carrera) {
+                                          selectedCarrera = carreras.find(c =>
+                                            c.label === patient.carrera || c.value === patient.carrera
+                                          );
+                                        }
+
+                                        // Si ya tenemos un valor en el campo del formulario, priorizamos ese
+                                        if (field.value) {
+                                          if (typeof field.value === 'string') {
+                                            selectedCarrera = carreras.find(c =>
+                                              c.label === field.value || c.value === field.value
+                                            );
+                                          } else {
+                                            selectedCarrera = field.value;
+                                          }
+                                        }
+
+                                        const isDisabled = !!patient?.carrera && carreras.some(opt =>
+                                          opt.label === patient.carrera ||
+                                          opt.value === patient.carrera
+                                        );
+
+                                        return (
+                                          <Select
+                                            instanceId="select-carrera"
+                                            value={selectedCarrera}
+                                            onChange={(selectedOption) => {
+                                              field.onChange(selectedOption);
+                                            }}
+                                            onBlur={field.onBlur}
+                                            options={carreras}
+                                            isDisabled={isDisabled}
+                                            menuPortalTarget={menuPortalTarget}
+                                            styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
+                                            id="carrera"
+                                            components={{
+                                              IndicatorSeparator: () => null
+                                            }}
+
+                                            styles={{
+                                              control: (baseStyles, state) => ({
+                                                ...baseStyles,
+                                                borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                                boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                                '&:hover': {
+                                                  borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                                },
+                                                borderRadius: '10px',
+                                                fontSize: "14px",
+                                                minHeight: "45px",
+                                              }),
+                                              dropdownIndicator: (base, state) => ({
+                                                ...base,
+                                                transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                                transition: '250ms',
+                                                width: '35px',
+                                                height: '35px',
+                                              }),
+                                            }}
+                                          />
+                                        )
+                                      }}
                                     />
                                     {errors.carrera && <span className="login-danger">
                                       <small>{errors.carrera.message}</small>
@@ -1164,12 +1355,17 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Año de ingreso</label>
+                                    <label>Año de ingreso <span className="login-danger">*</span></label>
                                     <input
                                       disabled={patient?.ano_ingreso ? true : false}
                                       className="form-control" type="text"
                                       defaultValue={""}
-                                      {...register('ano_ingreso')}
+                                      {...register('ano_ingreso', {
+                                        required: {
+                                          value: true,
+                                          message: 'Año de ingreso es requerida'
+                                        }
+                                      })}
                                     />
                                     {errors.ano_ingreso && <span className="login-danger">
                                       <small>{errors.ano_ingreso.message}</small>
@@ -1179,12 +1375,18 @@ const AddInterviewRecord = ({ params }) => {
 
                                 <div className="col-12 col-md-6 col-xl-6">
                                   <div className="form-group local-forms">
-                                    <label>Fecha de nacimiento</label>
+                                    <label>Fecha de nacimiento <span className="login-danger">*</span></label>
                                     <input
-                                      disabled={patient?.fecha_nacimiento ? true : false}
-                                      className="form-control" type="text"
-                                      defaultValue={""}
-                                      {...register('fecha_nacimiento')}
+                                      disabled={esFechaValida(patient?.fecha_nacimiento)}
+                                      className="form-control datetimepicker"
+                                      type="date"
+                                      placeholder=""
+                                      {...register('fecha_nacimiento', {
+                                        required: {
+                                          value: true,
+                                          message: 'Fecha de nacimiento es requerida'
+                                        }
+                                      })}
                                     />
                                     {errors.fecha_nacimiento && <span className="login-danger">
                                       <small>{errors.fecha_nacimiento.message}</small>
@@ -1254,8 +1456,15 @@ const AddInterviewRecord = ({ params }) => {
                                         <span className="input-group-text">+56</span>
                                       </div>
                                       <input
-                                        disabled={patient?.telefono ? true : false}
-                                        className="form-control" type="tel"
+                                        // disabled={patient?.telefono ? true : false}
+                                        className="form-control"
+                                        type="tel"
+                                        onKeyDown={(e) => {
+                                          // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                          if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                            e.preventDefault();
+                                          }
+                                        }}
                                         defaultValue={""}
                                         {...register('telefono', {
                                           required: {
@@ -1343,6 +1552,12 @@ const AddInterviewRecord = ({ params }) => {
                                       <input
                                         className="form-control"
                                         type="tel"
+                                        onKeyDown={(e) => {
+                                          // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                          if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                            e.preventDefault();
+                                          }
+                                        }}
                                         {...register('celular_contacto_emergencia1', {
                                           required: {
                                             value: true,
@@ -1397,6 +1612,12 @@ const AddInterviewRecord = ({ params }) => {
                                       <input
                                         className="form-control"
                                         type="tel"
+                                        onKeyDown={(e) => {
+                                          // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                          if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                            e.preventDefault();
+                                          }
+                                        }}
                                         {...register('celular_contacto_emergencia2', {
                                           required: { value: false },
                                           validate: (value) =>
