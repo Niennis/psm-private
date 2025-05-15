@@ -279,3 +279,5 @@ export { default as logo02_white } from "../assets/img/logo02_white.png"
 export { default as white_acreditacion } from "../assets/img/Logo_Acreditacion_udp.png"
 
 export { default as bot_icon } from "../assets/img/bot_salud_mental.png"
+export { default as acreditacion } from "../assets/img/SelloAcreditacion_UDP_CNA_Lexend_Blanco_SinBorde.png"
+
