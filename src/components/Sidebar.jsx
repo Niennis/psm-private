@@ -2,7 +2,7 @@
 /* eslint-disable-next-line react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 "use client"
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, use } from 'react'
 import Link from "next/link";
 import Image from 'next/image';
 import { blog, doctor, doctorschedule, logout, menuicon04, patients, dashboard, menuicon06 } from './imagepath';
@@ -17,6 +17,18 @@ import { useSidebar } from '@/context/SidebarContext';
 import SimpleBackdrop from './Backdrop';
 import Scrollbars from "react-custom-scrollbars-2";
 import { useUserContext } from '@/context/UserContext';
+import { fetchAppointments } from '@/services/AppointmentsServices';
+
+const soloPrimeraCitaCanceladaOPerdida = citas => {
+  return citas.every(cita => {
+    // Si alguna cita tiene primera_cita === 0 → false
+    if (cita.primera_cita === 0) return false;
+
+    // Si tiene primera_cita === 1 pero su estado NO es cancelada o perdida → false
+    const estado = cita.estado.toLowerCase();
+    return estado.includes('cancelada') || estado.includes('perdida');
+  });
+}
 
 const Sidebar = () => {
   const { data: session, status } = useSession()
@@ -26,6 +38,7 @@ const Sidebar = () => {
   const [alumno, setAlumno] = useState('')
   const { setSelectedUserId } = useUserContext()
   const [sidebar, setSidebar] = useState("");
+  const [showInterviewMenu, setShowInterviewMenu] = useState(false);
 
   const handleClick = (e, item, item1, item3) => {
     const div = document.querySelector(`#${item}`);
@@ -65,11 +78,27 @@ const Sidebar = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
-  
+
+
+  const fetchAppointmentsData = async () => {
+    const response = await fetchAppointments()
+    const alumnoCitas = response.filter(item => item.id_paciente === session?.user?.id)
+    return soloPrimeraCitaCanceladaOPerdida(alumnoCitas)
+  }
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await fetchAppointmentsData()
+      setShowInterviewMenu(result)
+    }
+    fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id])
+
+
   if (status === "loading") {
     return <SimpleBackdrop />;
   }
-  
+
   if (!session || !props) {
     return null; // o un fallback adecuado
   }
@@ -122,7 +151,7 @@ const Sidebar = () => {
                           Ficha
                         </Link>
                       </li>
-                      {(alumno && alumno?.aplica_despeje) == 1 &&
+                      {(alumno && showInterviewMenu) &&
                         <li>
                           <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
                         </li>

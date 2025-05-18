@@ -75,7 +75,7 @@ const AddInterviewRecord = ({ params }) => {
     const fecha = dayjs.utc(fechaTexto).tz('America/Santiago', true);
     return fecha.format('YYYY-MM-DD');
   }
-  
+
   const getData = async () => {
     setIsLoading(true)
     try {
@@ -100,8 +100,8 @@ const AddInterviewRecord = ({ params }) => {
         edad: dayjs().diff(dayjs.utc(responsePatient.fecha_nacimiento), 'year'),
         email: date[0].email_estudiante,
         fecha_nacimiento: response[0].fecha_nacimiento
-        ? convertirAInputDate(response[0].fecha_nacimiento)
-        : '',
+          ? convertirAInputDate(response[0].fecha_nacimiento)
+          : '',
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         hora_cita: date[0].hora,
@@ -140,7 +140,7 @@ const AddInterviewRecord = ({ params }) => {
     }
   }
 
-  const { register, handleSubmit, watch, control, setValue, trigger,
+  const { register, handleSubmit, watch, control, setValue, trigger, clearErrors,
     formState: { errors }
   } = useForm({
     defaultValues: async () => {
@@ -153,6 +153,17 @@ const AddInterviewRecord = ({ params }) => {
       }
     }
   })
+
+  const fechaNacimiento = watch('fecha_nacimiento');
+  useEffect(() => {
+    if (fechaNacimiento) {
+      setValue('fecha_nacimiento', fechaNacimiento);
+      trigger('fecha_nacimiento').then((isValid) => {
+        if (isValid) clearErrors('fecha_nacimiento');
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fechaNacimiento]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -847,6 +858,10 @@ const AddInterviewRecord = ({ params }) => {
                                           message: 'Fecha de nacimiento es requerida'
                                         }
                                       })}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        setValue('fecha_nacimiento', value, { shouldValidate: true });
+                                      }}
                                     />
                                     {errors.fecha_nacimiento && <span className="login-danger">
                                       <small>{errors.fecha_nacimiento.message}</small>
@@ -1387,6 +1402,10 @@ const AddInterviewRecord = ({ params }) => {
                                           message: 'Fecha de nacimiento es requerida'
                                         }
                                       })}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        setValue('fecha_nacimiento', value, { shouldValidate: true });
+                                      }}
                                     />
                                     {errors.fecha_nacimiento && <span className="login-danger">
                                       <small>{errors.fecha_nacimiento.message}</small>

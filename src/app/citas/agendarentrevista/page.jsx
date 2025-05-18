@@ -29,7 +29,7 @@ import 'dayjs/locale/es-mx'
 
 import ConsentimientoInformado from "@/components/ConsentimientoInformado";
 import Contact from "@/components/Contact"
-import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
+import { regiones, comunas, motivo_consulta, carreras, genero } from "@/utils/selects";
 import { esFechaValida } from "@/utils/managedata";
 import { formatAndValidateRUT } from "@/utils/rutFormat";
 import SelectorDeDias from "@/components/SelectorDias";
@@ -47,6 +47,11 @@ const obtenerFechasUnicas = array => {
     }
   });
   return fechasUnicas;
+}
+
+const normalizarGenero = (value) => {
+  const match = genero.find(g => g.label === value);
+  return match ? match.label : "";
 }
 
 const AddFirstAppoinments = () => {
@@ -95,7 +100,6 @@ const AddFirstAppoinments = () => {
   const fetchInitialData = async (id) => {
     try {
       const { users: response } = await fetchUser(id);
-
       const patient = {
         id: response[0].id,
         name: response[0].nombre,
@@ -103,7 +107,7 @@ const AddFirstAppoinments = () => {
         nombre_social: response[0].nombre_social || ' ',
         email: session.user?.email,
         birthday: esFechaValida(response[0].fecha_nacimiento) ? dayjs(response[0].fecha_nacimiento).format('YYYY-MM-DD') : '',
-        genero: response[0].genero === 'personalizado' ? 'No binarie' : response[0].genero,
+        genero: normalizarGenero(response[0]?.genero),
         mobile: response[0].telefono,
         aplica_despeje: response[0].aplica_despeje,
         rut: response[0].rut == 'NA' || response[0].rut == '0' || !response[0].rut ? '' : response[0].rut,

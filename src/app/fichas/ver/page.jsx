@@ -59,10 +59,11 @@ const FichaAlumno = () => {
     setMenuPortalTarget(document.body);
   }, [])
 
-  const { register, handleSubmit, watch, control, setValue,
+  const { register, handleSubmit, watch, control, setValue, trigger, clearErrors,
     formState: { errors }
   } = useForm({
     mode: "onChange",
+    reValidateMode: 'onChange',
     defaultValues: async () => {
       try {
         const data = await getStudent();
@@ -73,6 +74,17 @@ const FichaAlumno = () => {
       }
     }
   })
+
+  const fechaNacimiento = watch('fecha_nacimiento');
+  useEffect(() => {
+    if (fechaNacimiento) {
+      setValue('fecha_nacimiento', fechaNacimiento);
+      trigger('fecha_nacimiento').then((isValid) => {
+        if (isValid) clearErrors('fecha_nacimiento');
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fechaNacimiento]);
 
   const rutValue = useWatch({ control, name: 'rut' });
   useEffect(() => {
@@ -524,7 +536,11 @@ const FichaAlumno = () => {
                                         message: 'Fecha de nacimiento es requerida'
                                       }
                                     })}
-                                    onChange={e => { calcularEdad(e.target.value) }}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      calcularEdad(value);
+                                      setValue('fecha_nacimiento', value, { shouldValidate: true });
+                                    }}
                                   />
                                   {
                                     errors.fecha_nacimiento && <span><small>{errors.fecha_nacimiento.message}</small></span>

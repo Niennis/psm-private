@@ -95,7 +95,6 @@ const AppoinmentList = () => {
 
       const promises = filtrarFechasAnteriores(dataChangeStatus, "fecha")
       const data = await Promise.all(promises)
-
       if (session.user?.rol === 'profesional') {
         const dataFiltered = data.filter(item => item.id_profesional == session.user?.id);
         setAppointments(dataFiltered);
