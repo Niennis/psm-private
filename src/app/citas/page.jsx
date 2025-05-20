@@ -91,21 +91,27 @@ const AppoinmentList = () => {
     setLoading(true);
     try {
       const response = await fetchAppointments();
-      const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')))
 
-      const promises = filtrarFechasAnteriores(dataChangeStatus, "fecha")
-      const data = await Promise.all(promises)
       if (session.user?.rol === 'profesional') {
+        const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')))
+        const promises = filtrarFechasAnteriores(dataChangeStatus, "fecha")
+        const data = await Promise.all(promises)
         const dataFiltered = data.filter(item => item.id_profesional == session.user?.id);
         setAppointments(dataFiltered);
         setResults(dataFiltered);
-        // setIsValidated(false)
-      } else if (session.user?.rol === 'alumno') {
-        const dataFiltered = data.filter(item => item.id_paciente == session.user?.id);
 
+      } else if (session.user?.rol === 'alumno') {
+        // const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')))
+        const promises = filtrarFechasAnteriores(response, "fecha")
+        const data = await Promise.all(promises)
+        const dataFiltered = data.filter(item => item.id_paciente == session.user?.id);
         setAppointments(dataFiltered);
         setResults(dataFiltered);
-      } else if (session.user?.rol === 'administrador') {
+
+      } else if (session.user?.rol === 'administrador' || session.user?.rol === 'blend') {
+        const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')))
+        const promises = filtrarFechasAnteriores(dataChangeStatus, "fecha")
+        const data = await Promise.all(promises)
         setAppointments(data);
         setResults(data);
       }
@@ -716,5 +722,5 @@ const AppoinmentList = () => {
 }
 
 // export default AppoinmentList;
-export default withAuth(AppoinmentList, ['alumno', 'profesional', 'administrador']);
+export default withAuth(AppoinmentList, ['alumno', 'profesional', 'administrador', 'blend']);
 

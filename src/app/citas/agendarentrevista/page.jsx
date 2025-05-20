@@ -18,7 +18,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import SimpleBackdrop from "@/components/Backdrop";
 
-import { createInterview, createContact, editContact } from "@/services/AppointmentsServices"
+import { createInterview, createContact, editContact, fetchAppointments } from "@/services/AppointmentsServices"
 import { updateUser, fetchUser } from "@/services/UsersServices";
 import { fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
@@ -33,6 +33,7 @@ import { regiones, comunas, motivo_consulta, carreras, genero } from "@/utils/se
 import { esFechaValida } from "@/utils/managedata";
 import { formatAndValidateRUT } from "@/utils/rutFormat";
 import SelectorDeDias from "@/components/SelectorDias";
+import AlertModal from "@/components/Alert";
 
 // Función para obtener fechas únicas
 const obtenerFechasUnicas = array => {
@@ -52,6 +53,18 @@ const obtenerFechasUnicas = array => {
 const normalizarGenero = (value) => {
   const match = genero.find(g => g.label === value);
   return match ? match.label : "";
+}
+
+const soloPrimeraCitaCanceladaOPerdida = citas => {
+  const response = citas.every(cita => {
+    // Si alguna cita tiene primera_cita === 0 → false
+    if (cita.primera_cita === 0) return false;
+
+    // Si tiene primera_cita === 1 pero su estado NO es cancelada o perdida → false
+    const estado = cita.estado.toLowerCase();
+    return estado.includes('cancelada') || estado.includes('perdida');
+  });
+  return !response
 }
 
 const AddFirstAppoinments = () => {
@@ -86,8 +99,8 @@ const AddFirstAppoinments = () => {
   const [disabled, setDisabled] = useState(false)
   const childFormRef = useRef();
   const [datosPreCargados, setDatosPreCargados] = useState(null);
-
   const [cargaCompletada, setCargaCompletada] = useState(false);
+  const [showModalInterview, setShowModalInterview] = useState(false);
 
   useEffect(() => {
     setProps({
@@ -96,6 +109,20 @@ const AddFirstAppoinments = () => {
       activeClassName: "add-first-appoinment",
     });
   }, [setProps]);
+
+  const fetchAppointmentsData = async () => {
+    const response = await fetchAppointments()
+    const alumnoCitas = response.filter(item => item.id_paciente === session?.user?.id)
+    return soloPrimeraCitaCanceladaOPerdida(alumnoCitas)
+  }
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await fetchAppointmentsData()
+      setShowModalInterview(result)
+    }
+    fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id])
 
   const fetchInitialData = async (id) => {
     try {
@@ -541,11 +568,15 @@ const AddFirstAppoinments = () => {
 
   const handleOpenBackdrop = () => setOpenBackdrop(true);
   const handleCloseBackdrop = () => setOpenBackdrop(false);
+  const handleCloseModalInterview = () => {
+    setShowModalInterview(false)
+  }
 
   return (
     < >
       <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <>
+
         <div className="page-wrapper">
           <div className="content">
             {/* Page Header */}
@@ -578,7 +609,7 @@ const AddFirstAppoinments = () => {
                             <h4 >Agendar Entrevista</h4>
 
                             {session?.user?.rol === "alumno"
-                              ? <small className="font-red">* Completa toda la información del formulario para agendar una primera entrevista inicial.</small>
+                              ? <><small className="font-red">* Completa toda la información del formulario para agendar una <strong>primera entrevista</strong> inicial.</small></>
                               : <small className="font-red">* Solo el alumno puede completar este formulario.</small>
                             }
 
@@ -1709,7 +1740,7 @@ const AddFirstAppoinments = () => {
                           <div className="col-12">
                             <div className="doctor-submit text-end mt-3">
                               <button
-                                disabled={Object.keys(errors).length > 0}
+                                disabled={Object.keys(errors).length > 0 || !showModalInterview}
                                 // disabled={!isValid}
                                 className="btn btn-primary submit-form me-2"
                                 onClick={handleOpen}
@@ -1744,7 +1775,7 @@ const AddFirstAppoinments = () => {
         // handleClose={handleCloseBackdrop}
         />}
         {success === 'success'
-          ?
+          &&
           <div style={{
             height: '100%',
             position: 'fixed',
@@ -1771,35 +1802,75 @@ const AddFirstAppoinments = () => {
             </Alert>
             {/* </div> */}
           </div>
-          : success === 'fail'
-            ?
-            <div className="row" style={{
-              height: '100%',
-              position: 'fixed',
-              top: '0',
-              width: '100%',
-              zIndex: 99999,
-              background: '#00000080'
-            }}>
-              <div className="col-sm-12 col-lg-6">
-                <Alert
-                  severity="error"
-                  onClose={() => { setSuccess('initial') }}
-                  sx={{
-                    zIndex: 'tooltip',
-                    position: 'absolute',
-                    left: '30%',
-                    width: '50%',
-                    padding: '50px',
-                    bottom: '50vh'
-                  }}
-                  spacing={2}
-                >
-                  Ha ocurrido un problema.
-                </Alert>
-              </div>
+        }
+        {success === 'fail'
+          &&
+          <div className="row" style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080'
+          }}>
+            <div className="col-sm-12 col-lg-6">
+              <Alert
+                severity="error"
+                onClose={() => { setSuccess('initial') }}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+                spacing={2}
+              >
+                Ha ocurrido un problema.
+              </Alert>
             </div>
-            : ''
+          </div>
+        }
+
+        {showModalInterview
+          &&
+          <div className="row" style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080'
+          }}>
+            <div className="col-sm-12 col-lg-6">
+              <Alert
+                severity="error"
+                onClose={() => { setShowModalInterview(false) }}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+                spacing={2}
+              >
+                <h4>Ya tienes una primera cita agendada</h4>
+                <ul>
+                  <li>
+
+                    <h4>Si deseas agendar una nueva cita, debes cancelar la anterior.</h4>
+                  </li>
+                  <li>
+                    <h4>Luego de tu primera cita, será el profesional quien agende tus citas.</h4>
+
+                  </li>
+                </ul>
+              </Alert>
+            </div>
+          </div>
         }
       </>
     </>
@@ -1807,5 +1878,5 @@ const AddFirstAppoinments = () => {
 };
 
 // export default AddFirstAppoinments;
-export default withAuth(AddFirstAppoinments, ['alumno', 'profesional', 'administrador']);
+export default withAuth(AddFirstAppoinments, ['alumno', 'profesional', 'administrador', 'blend']);
 

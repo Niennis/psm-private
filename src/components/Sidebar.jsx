@@ -17,18 +17,18 @@ import { useSidebar } from '@/context/SidebarContext';
 import SimpleBackdrop from './Backdrop';
 import Scrollbars from "react-custom-scrollbars-2";
 import { useUserContext } from '@/context/UserContext';
-import { fetchAppointments } from '@/services/AppointmentsServices';
+// import { fetchAppointments } from '@/services/AppointmentsServices';
 
-const soloPrimeraCitaCanceladaOPerdida = citas => {
-  return citas.every(cita => {
-    // Si alguna cita tiene primera_cita === 0 → false
-    if (cita.primera_cita === 0) return false;
+// const soloPrimeraCitaCanceladaOPerdida = citas => {
+//   return citas.every(cita => {
+//     // Si alguna cita tiene primera_cita === 0 → false
+//     if (cita.primera_cita === 0) return false;
 
-    // Si tiene primera_cita === 1 pero su estado NO es cancelada o perdida → false
-    const estado = cita.estado.toLowerCase();
-    return estado.includes('cancelada') || estado.includes('perdida');
-  });
-}
+//     // Si tiene primera_cita === 1 pero su estado NO es cancelada o perdida → false
+//     const estado = cita.estado.toLowerCase();
+//     return estado.includes('cancelada') || estado.includes('perdida');
+//   });
+// }
 
 const Sidebar = () => {
   const { data: session, status } = useSession()
@@ -37,8 +37,8 @@ const Sidebar = () => {
   const router = useRouter();
   const [alumno, setAlumno] = useState('')
   const { setSelectedUserId } = useUserContext()
-  const [sidebar, setSidebar] = useState("");
-  const [showInterviewMenu, setShowInterviewMenu] = useState(false);
+  // const [sidebar, setSidebar] = useState("");
+  // const [showInterviewMenu, setShowInterviewMenu] = useState(false);
 
   const handleClick = (e, item, item1, item3) => {
     const div = document.querySelector(`#${item}`);
@@ -80,19 +80,19 @@ const Sidebar = () => {
   }, [session])
 
 
-  const fetchAppointmentsData = async () => {
-    const response = await fetchAppointments()
-    const alumnoCitas = response.filter(item => item.id_paciente === session?.user?.id)
-    return soloPrimeraCitaCanceladaOPerdida(alumnoCitas)
-  }
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await fetchAppointmentsData()
-      setShowInterviewMenu(result)
-    }
-    fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id])
+  // const fetchAppointmentsData = async () => {
+  //   const response = await fetchAppointments()
+  //   const alumnoCitas = response.filter(item => item.id_paciente === session?.user?.id)
+  //   return soloPrimeraCitaCanceladaOPerdida(alumnoCitas)
+  // }
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const result = await fetchAppointmentsData()
+  //     setShowInterviewMenu(result)
+  //   }
+  //   fetchData()
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [session?.user?.id])
 
 
   if (status === "loading") {
@@ -136,8 +136,8 @@ const Sidebar = () => {
             >
               {
                 <ul>
+                  { /* ------ MENU SIDEBAR ALUMNO ------ */}
                   {
-                    /* ------ MENU SIDEBAR ALUMNO */
                     session.user?.rol && session.user?.rol === "alumno" &&
                     <>
                       <li>
@@ -151,16 +151,16 @@ const Sidebar = () => {
                           Ficha
                         </Link>
                       </li>
-                      {(alumno && showInterviewMenu) &&
-                        <li>
-                          <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
-                        </li>
-                      }
+                      {/* {(alumno && showInterviewMenu) && */}
+                      <li>
+                        <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
+                      </li>
+                      {/* } */}
                     </>
                   }
 
+                  {/* ------ MENU SIDEBAR PROFESIONAL ------ */}
                   {
-                    /* ------ MENU SIDEBAR PROFESIONAL */
                     session.user?.rol && session.user?.rol === "profesional" &&
                     <>
                       <li className="submenu">
@@ -266,8 +266,124 @@ const Sidebar = () => {
                     </>
                   }
 
+                  {/* ------ MENU SIDEBAR ADMIN ------ */}
                   {
                     session.user?.rol && session.user?.rol === "administrador" &&
+                    <>
+                      <li className="submenu">
+                        <Link href="#" id="menu-item1" onClick={(e) => {
+                          // setSidebar('Doctors')
+                          handleClick(e, "menu-item1", "menu-items1")
+                        }}>
+                          <span className="menu-side">
+                            <Image src={doctor} alt="" />
+                          </span>{" "}
+                          <span> Profesionales </span> <span className="menu-arrow" />
+                        </Link>
+                        <ul style={{ display: 'none' }} className="menu-items1">
+                          <li>
+                            <Link className={props?.activeClassName === 'doctor-list' ? 'active' : ''} href="/profesionales">Lista de Profesionales</Link>
+                          </li>
+                          <li>
+                            <Link className={props?.activeClassName === 'add-doctor' ? 'active' : ''} href="/profesionales/agregarprofesional">Agregar Profesional</Link>
+                          </li>
+
+
+                          <li>
+                            <Link className={props?.activeClassName === 'edit-doctor' ? 'active' : ''} href={`/profesionales/editar/${session.user?.id}`}>Editar Perfil</Link>
+                          </li>
+                        </ul>
+                      </li>
+                      <li className="submenu">
+                        <Link href="#" id="menu-item2" onClick={(e) => handleClick(e, "menu-item2", "menu-items2")}>
+                          <span className="menu-side">
+                            <Image src={patients} alt="" />
+                          </span>{" "}
+                          <span>Pacientes </span> <span className="menu-arrow" />
+                        </Link>
+                        <ul style={{ display: "none" }} className="menu-items2">
+                          <li>
+                            <Link className={props?.activeClassName === 'patient-list' ? 'active' : ''} href="/pacientes">Lista de Pacientes</Link>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="submenu">
+                        <Link href="#" id="menu-item3" onClick={(e) => handleClick(e, "menu-item3", "menu-items3")}>
+                          <span className="menu-side">
+                            <Image src={menuicon06} alt="" />
+                          </span>{" "}
+                          <span>Grupos </span> <span className="menu-arrow" />
+                        </Link>
+                        <ul style={{ display: "none" }} className="menu-items3">
+                          <li>
+                            <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos">Lista de Grupos</Link>
+                          </li>
+                          <li>
+                            <Link className={props?.activeClassName === 'add-group' ? 'active' : ''} href="/grupos/crear">Crear Grupos</Link>
+                          </li>
+                          <li>
+                            <Link className={props?.activeClassName === 'edit-group' ? 'active' : ''} href="/grupos/editar">Editar Grupos</Link>
+                          </li>
+                        </ul>
+                      </li>
+
+                      <li className="submenu">
+                        <Link href="#" id="menu-item4" onClick={(e) => handleClick(e, "menu-item4", "menu-items4")}>
+                          <span className="menu-side">
+                            <Image src={menuicon04} alt="" />
+                          </span>{" "}
+                          <span> Citas </span> <span className="menu-arrow" />
+                        </Link>
+                        <ul style={{ display: "none" }} className="menu-items4">
+
+                          <li>
+                            <Link className={props?.activeClassName === 'add-appoinment' ? 'active' : ''} href="/citas/agendarcita">Agendar Cita</Link>
+                          </li>
+                          <li>
+                            <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
+                          </li>
+                        </ul>
+                      </li>
+                      <li className="submenu">
+                        <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario`} >
+                          <span className="menu-side">
+                            <Image src={doctorschedule} alt="" />
+                          </span>{" "}
+                          <span>Horario</span> <span className="menu-arrow" />
+                        </Link>
+                      </li>
+                      <li className="submenu">
+                        <Link className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`} href={`/reportes`} >
+                          <span className="menu-side">
+                            <Image src={dashboard} alt="" />
+                          </span>{" "}
+                          <span>Reportes</span> <span className="menu-arrow" />
+                        </Link>
+                      </li>
+                      <li className="submenu">
+                        <Link href="#" id="menu-item11" onClick={(e) => handleClick(e, "menu-item11", "menu-items11")}>
+                          <span className="menu-side">
+                            <Image src={blog} alt="" />
+                          </span>{" "}
+                          <span> Blog</span> <span className="menu-arrow" />
+                        </Link>
+                        <ul style={{ display: "none" }} className="menu-items11">
+                          <li>
+                            <Link className={props?.activeClassName === 'blog-grid' ? 'active' : ''} href="/blog">Blogs</Link>
+                          </li>
+                          <li>
+                            <Link className={props?.activeClassName === 'add-blog' ? 'active' : ''} href="/blog/agregarblog">Agregar Blog</Link>
+                          </li>
+                        </ul>
+                      </li>
+                    </>
+                  }
+
+
+                  {/* ------ MENU SIDEBAR BLEND ------ */}
+                  {
+                    session.user?.rol && session.user?.rol === "blend" &&
                     <>
                       <li className="submenu">
                         <Link href="#" id="menu-item1" onClick={(e) => {
