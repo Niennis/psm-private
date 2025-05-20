@@ -1860,11 +1860,10 @@ const AddFirstAppoinments = () => {
                 <h4>Ya tienes una primera cita agendada</h4>
                 <ul>
                   <li>
-
-                    <h4>Si deseas agendar una nueva cita, debes cancelar la anterior.</h4>
+                    <h4>Para pedir otra, primero debes cancelar la que ya tienes.</h4>
                   </li>
                   <li>
-                    <h4>Luego de tu primera cita, será el profesional quien agende tus citas.</h4>
+                    <h4>Después de tu primera sesión, será el profesional quien coordine las siguientes citas contigo.</h4>
 
                   </li>
                 </ul>
