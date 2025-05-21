@@ -84,7 +84,6 @@ const AddFirstAppoinments = () => {
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [allDays, setAllDays] = useState([])
-  const [checked, setChecked] = useState(true);
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
   // fechas siguiente
   const [indiceDias, setIndiceDias] = useState(0);
@@ -115,6 +114,7 @@ const AddFirstAppoinments = () => {
     const alumnoCitas = response.filter(item => item.id_paciente === session?.user?.id)
     return soloPrimeraCitaCanceladaOPerdida(alumnoCitas)
   }
+  
   useEffect(() => {
     const fetchData = async () => {
       const result = await fetchAppointmentsData()
@@ -1863,7 +1863,7 @@ const AddFirstAppoinments = () => {
                     <h4>Para pedir otra, primero debes cancelar la que ya tienes.</h4>
                   </li>
                   <li>
-                    <h4>Después de tu primera sesión, será el profesional quien coordine las siguientes citas contigo.</h4>
+                    <h4>Después de tu primera sesión, será el profesional quien coordine las siguientes citas contigo.</h4>
 
                   </li>
                 </ul>

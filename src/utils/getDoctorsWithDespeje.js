@@ -1,8 +1,9 @@
-import { fetchProfessionals } from '@/services/DoctorsServices';
+import { fetchProfessionals, fetchProfessionalsAndAdmins } from '@/services/DoctorsServices';
 import { fetchScheduleByAvailability } from '@/services/SchedulesServices';
 
 const fetchProfessionalsByServiceType = async (serviceType) => {
-  const profesionales = await fetchProfessionals();
+  // const profesionales = await fetchProfessionals();
+  const {users: profesionales} = await fetchProfessionalsAndAdmins();
 
   const bloquesPromesas = profesionales.map(profesional =>
     fetchScheduleByAvailability(profesional.id).then(response => ({

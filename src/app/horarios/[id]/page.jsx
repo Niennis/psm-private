@@ -1039,4 +1039,4 @@ const ScheduleByProfessional = ({ params }) => {
 }
 
 // export default ScheduleByProfessional;
-export default withAuth(ScheduleByProfessional, ['administrador', 'profesional']);
+export default withAuth(ScheduleByProfessional, ['administrador', 'profesional', 'blend']);

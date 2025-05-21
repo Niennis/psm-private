@@ -12,7 +12,7 @@ import { useForm, Controller } from 'react-hook-form'
 
 import Select from "react-select";
 
-import { fetchSpecialityById, fetchProfessionalById, fetchProfessionals } from '@/services/DoctorsServices';
+import { fetchSpecialityById, fetchProfessionalById, fetchProfessionals, fetchSpecialities, fetchProfessionalsAndAdmins, professionalsWithSpeciality } from '@/services/DoctorsServices';
 import { createSchedule, getDates, validateDates, generarHorasMedicas, eliminarDisponibilidadPorId, eliminarDisponibilidadCompleta } from '@/services/SchedulesServices';
 import Calender from '../../calender/page';
 
@@ -106,20 +106,16 @@ const AddSchedule = () => {
     }
   }
 
+
   const getProfessionals = async () => {
+      setIsLoading(true);
     try {
-      const response = await fetchProfessionals()
+      const { users } = await fetchProfessionalsAndAdmins();
+      const specialities = await fetchSpecialities()
+      const professionals = await professionalsWithSpeciality(specialities, users);
+      const filteredProfessionals = professionals.filter(item => item.tipo_usuario === 'profesional' || item.tipo_usuario === 'blend')
 
-      const responseWithSpeciality = response.map(async item => {
-        const { especialidades } = await fetchSpecialityById(item.id)
-        return ({
-          ...item,
-          especialidad: especialidades[0]?.especialidad || 'No informada',
-        })
-      })
-      const promises = await Promise.all(responseWithSpeciality)
-
-      const docs = promises.map((doc, i) => {
+      const docs = filteredProfessionals.map((doc, i) => {
         return {
           value: i + 2,
           label: doc.nombre + ' ' + doc.apellido,
@@ -129,16 +125,59 @@ const AddSchedule = () => {
           especialidad: doc.especialidad
         }
       })
-
+      
       if (docs.length > 0) {
         setProfesional(docs)
       }
 
-      return promises
+      return filteredProfessionals
     } catch (error) {
-      console.log('Error', error)
+      console.log('Error: ', error)
+      // setIsLoading(false);
+    } finally {
+      // Cambia isLoading a false cuando termina la carga
+      setIsLoading(false);
     }
   }
+
+
+
+
+
+  // const getProfessionals = async () => {
+  //   try {
+  //     const response = await fetchProfessionals()
+
+  //     const responseWithSpeciality = response.map(async item => {
+  //       const { especialidades } = await fetchSpecialityById(item.id)
+  //       return ({
+  //         ...item,
+  //         especialidad: especialidades[0]?.especialidad || 'No informada',
+  //       })
+  //     })
+  //     const promises = await Promise.all(responseWithSpeciality)
+
+  //     const docs = promises.map((doc, i) => {
+  //       return {
+  //         value: i + 2,
+  //         label: doc.nombre + ' ' + doc.apellido,
+  //         id: doc.id,
+  //         email: doc.email,
+  //         name: doc.nombre,
+  //         especialidad: doc.especialidad
+  //       }
+  //     })
+  //     console.log('DOCS', docs);
+
+  //     if (docs.length > 0) {
+  //       setProfesional(docs)
+  //     }
+
+  //     return promises
+  //   } catch (error) {
+  //     console.log('Error', error)
+  //   }
+  // }
 
   useEffect(() => {
     const getIdProfesional = async () => {
@@ -148,7 +187,7 @@ const AddSchedule = () => {
     getIdProfesional()
 
     const id_prof = session?.user?.id || idProfesional
-    session?.user?.rol === 'administrador'
+    session?.user?.rol === 'administrador' || session?.user?.rol === 'blend'
       ?
       getProfessionals()
       :
@@ -201,6 +240,7 @@ const AddSchedule = () => {
   };
 
   const onSubmit = handleSubmit(async data => {
+    setLoading(true)
     setSuccess('initial')
     const semana = ["lunes", "martes", "miércoles", "jueves", "viernes"]
     const fechas = []
@@ -260,7 +300,10 @@ const AddSchedule = () => {
       .catch((error) => {
         setSuccess('fail')
         setError(`Hubo un problema. Intenta más tarde. ${error}`)
-      });
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   })
 
   const duracion = [
@@ -1362,5 +1405,5 @@ const AddSchedule = () => {
 }
 
 // export default AddSchedule;
-export default withAuth(AddSchedule, ['administrador', 'profesional']);
+export default withAuth(AddSchedule, ['administrador', 'profesional', 'blend']);
 

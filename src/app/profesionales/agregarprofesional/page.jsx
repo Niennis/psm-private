@@ -99,7 +99,7 @@ const AddProfessional = () => {
     //   id_especialidad: data.speciality.id
     // }
     data.email = deleteSpaces(data.email)
-
+    data.tipo_usuario = data.speciality == 'Administrador' ? 'administrador' : data.admin ? 'blend' : 'profesional'
     if (data) {
       try {
         const response = await addProfessional(data)
@@ -456,51 +456,79 @@ const AddProfessional = () => {
                         </div>
 
                         {
-                          session?.user?.rol === "administrador" &&
-                          <div className="col-12 col-md-6 col-xl-6">
-                            <div className="form-group select-gender">
-                              <label className="gen-label">
-                                Estado <span className="login-danger">*</span>
-                              </label>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="radio"
-                                    value="activo"
-                                    name="status"
-                                    className="form-check-input"
-                                    {...register('status', {
-                                      required: {
-                                        value: true,
-                                        message: 'Estado es requerido'
-                                      }
-                                    })}
-                                  />
-                                  Activo
+                          session?.user?.rol === "administrador" || session?.user?.rol === "blend" &&
+                          <>
+                            {/*  ES ADMIN */}
+                            <div className="col-12 col-md-6 col-xl-6">
+                              <div className="form-group select-gender">
+                                <label className="gen-label">
+                                  ¿Es administrador? <span className="login-danger">*</span>
                                 </label>
+                                <div className="form-check-inline">
+                                  <label className="form-check-label">
+                                    <input
+                                      type="checkbox"
+                                      value="activo"
+                                      name="admin"
+                                      className="form-check-input"
+                                      {...register('admin')}
+                                    />
+                                    Sí
+                                  </label>
+                                </div>
+                                {errors.status && <span className="login-danger">
+                                  <small>{errors.status.message}</small>
+                                </span>}
                               </div>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="radio"
-                                    value="inactivo"
-                                    name="status"
-                                    className="form-check-input"
-                                    {...register('status', {
-                                      required: {
-                                        value: true,
-                                        message: 'Estado es requerido'
-                                      }
-                                    })}
-                                  />
-                                  Inactivo
-                                </label>
-                              </div>
-                              {errors.status && <span className="login-danger">
-                                <small>{errors.status.message}</small>
-                              </span>}
                             </div>
-                          </div>}
+
+                            {/* ESTADO */}
+                            <div className="col-12 col-md-6 col-xl-6">
+                              <div className="form-group select-gender">
+                                <label className="gen-label">
+                                  Estado <span className="login-danger">*</span>
+                                </label>
+                                <div className="form-check-inline">
+                                  <label className="form-check-label">
+                                    <input
+                                      type="radio"
+                                      value="activo"
+                                      name="status"
+                                      className="form-check-input"
+                                      {...register('status', {
+                                        required: {
+                                          value: true,
+                                          message: 'Estado es requerido'
+                                        }
+                                      })}
+                                    />
+                                    Activo
+                                  </label>
+                                </div>
+                                <div className="form-check-inline">
+                                  <label className="form-check-label">
+                                    <input
+                                      type="radio"
+                                      value="inactivo"
+                                      name="status"
+                                      className="form-check-input"
+                                      {...register('status', {
+                                        required: {
+                                          value: true,
+                                          message: 'Estado es requerido'
+                                        }
+                                      })}
+                                    />
+                                    Inactivo
+                                  </label>
+                                </div>
+                                {errors.status && <span className="login-danger">
+                                  <small>{errors.status.message}</small>
+                                </span>}
+                              </div>
+                            </div>
+                          </>
+                        }
 
                         <div className="col-12">
                           <div className="doctor-submit text-end">
@@ -596,5 +624,5 @@ const AddProfessional = () => {
 };
 
 // export default AddProfessional;
-export default withAuth(AddProfessional, ['administrador']);
+export default withAuth(AddProfessional, ['administrador', 'blend']);
 

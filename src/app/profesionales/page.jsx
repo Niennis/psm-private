@@ -312,4 +312,4 @@ const DoctorList = () => {
 }
 
 // export default DoctorList;
-export default withAuth(DoctorList, ['administrador', 'profesional']);
+export default withAuth(DoctorList, ['administrador', 'profesional', 'blend']);

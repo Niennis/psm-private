@@ -79,3 +79,41 @@ export const esFechaValida = str => {
   return !isNaN(fecha.getTime());
 }
 
+/* CAMBIAR ESTADO DE CITAS PERDIDAS */
+export const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
+  const DIAS_TOLERANCIA = process.env.NEXT_PUBLIC_DIAS_TOLERANCIA || 0;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Normaliza la fecha actual
+
+    return arrayDeObjetos.map(async (item) => {
+        const bodyUpdate = {
+            id: item.id_cita,
+            id_paciente: item.id_paciente,
+            id_profesional: item.id_profesional,
+            carrera: item.carrera || '',
+            email: item.email_estudiante || '',
+            appointment_date: item.fecha || '',
+            start_time: item.hora || '',
+            campus: item.campus || '',
+            nombre_estudiante: item.nombre_alumno,
+            selected_doctor: item.nombre_profesional || '',
+            quien_cancela: 'perdida',
+            status: item.estado,
+            tipo_cita: item.tipo_cita || '',
+        };
+
+        const fechaItem = new Date(item[claveFecha]);
+        fechaItem.setHours(0, 0, 0, 0);
+
+        // Calcula la fecha límite (fecha de la cita + días de tolerancia)
+        const fechaLimite = new Date(fechaItem);
+        fechaLimite.setDate(fechaLimite.getDate() + DIAS_TOLERANCIA);
+
+        if (hoy > fechaLimite && item["estado"].includes('pendiente')) {
+            const res = await changeStatusAppointment(bodyUpdate);
+            return { ...item, estado: 'perdida' };
+        } else {
+            return item;
+        }
+    });
+};

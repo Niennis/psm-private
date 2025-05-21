@@ -493,5 +493,5 @@ const ScheduleList = () => {
 };
 
 // export default ScheduleList;
-export default withAuth(ScheduleList, ['administrador']);
+export default withAuth(ScheduleList, ['administrador', 'blend']);
 

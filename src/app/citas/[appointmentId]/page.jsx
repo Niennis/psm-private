@@ -1177,4 +1177,4 @@ const EditAppoinments = ({ params }) => {
 };
 
 // export default EditAppoinments;
-export default withAuth(EditAppoinments, ['alumno', 'profesional', 'administrador']);
+export default withAuth(EditAppoinments, ['alumno', 'profesional', 'administrador', 'blend']);

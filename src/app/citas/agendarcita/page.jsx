@@ -288,7 +288,6 @@ const AddAppoinments = () => {
           campus: data.campus || 'No aplica'
         })
 
-
         if (appointment.estado === false) {
           setSuccess('fail')
           setError(appointment.detalle)
@@ -1271,4 +1270,4 @@ const AddAppoinments = () => {
   );
 };
 
-export default withAuth(AddAppoinments, ['profesional', 'administrador']);
+export default withAuth(AddAppoinments, ['profesional', 'administrador', 'blend']);

@@ -33,7 +33,7 @@ const EditDoctor = ({ params }) => {
     redirect('/');
   }
   const userId = params.id;
-  if (session.user.id != userId && session?.user?.rol !== "administrador") {
+  if (session.user.id != userId && session?.user?.rol !== "administrador" && session?.user?.rol !== "blend") {
     redirect('/profesionales');
   }
 
@@ -916,4 +916,4 @@ const EditDoctor = ({ params }) => {
 };
 
 // export default EditDoctor;
-export default withAuth(EditDoctor, ['administrador', 'profesional']);
+export default withAuth(EditDoctor, ['administrador', 'profesional', 'blend']);

@@ -8,7 +8,7 @@ export default withAuth({
   },
   authorized({ token }) {
     // Optimización: Revisa el token sin roles adicionales.
-    return token && ['administrador', 'profesional', 'alumno'].includes(token.rol);
+    return token && ['administrador', 'profesional', 'alumno', 'blend'].includes(token.rol);
   },
 });
 
