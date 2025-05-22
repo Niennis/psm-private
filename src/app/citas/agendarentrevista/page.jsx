@@ -55,17 +55,16 @@ const normalizarGenero = (value) => {
   return match ? match.label : "";
 }
 
-const soloPrimeraCitaCanceladaOPerdida = citas => {
-  const response = citas.every(cita => {
-    // Si alguna cita tiene primera_cita === 0 → false
-    if (cita.primera_cita === 0) return false;
-
-    // Si tiene primera_cita === 1 pero su estado NO es cancelada o perdida → false
-    const estado = cita.estado.toLowerCase();
-    return estado.includes('cancelada') || estado.includes('perdida');
+const tienePrimeraCitaActiva = citas => {
+  return citas.some(cita => {
+    // Si es primera cita (1) y NO está cancelada/perdida → retorna true (bloquear botón)
+    if (cita.primera_cita === 1) {
+      const estado = cita.estado.toLowerCase();
+      return !estado.includes('cancelada') && !estado.includes('perdida');
+    }
+    return false;
   });
-  return !response
-}
+};
 
 const AddFirstAppoinments = () => {
   const { data: session } = useSession()
@@ -100,6 +99,7 @@ const AddFirstAppoinments = () => {
   const [datosPreCargados, setDatosPreCargados] = useState(null);
   const [cargaCompletada, setCargaCompletada] = useState(false);
   const [showModalInterview, setShowModalInterview] = useState(false);
+  const [hasFirstInterview, setHasFirstInterview] = useState(false);
 
   useEffect(() => {
     setProps({
@@ -112,13 +112,14 @@ const AddFirstAppoinments = () => {
   const fetchAppointmentsData = async () => {
     const response = await fetchAppointments()
     const alumnoCitas = response.filter(item => item.id_paciente === session?.user?.id)
-    return soloPrimeraCitaCanceladaOPerdida(alumnoCitas)
+    return tienePrimeraCitaActiva(alumnoCitas)
   }
-  
+
   useEffect(() => {
     const fetchData = async () => {
       const result = await fetchAppointmentsData()
       setShowModalInterview(result)
+      setHasFirstInterview(result)
     }
     fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1740,7 +1741,7 @@ const AddFirstAppoinments = () => {
                           <div className="col-12">
                             <div className="doctor-submit text-end mt-3">
                               <button
-                                disabled={Object.keys(errors).length > 0 || !showModalInterview}
+                                disabled={Object.keys(errors).length > 0 || hasFirstInterview}
                                 // disabled={!isValid}
                                 className="btn btn-primary submit-form me-2"
                                 onClick={handleOpen}
