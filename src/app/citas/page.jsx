@@ -116,7 +116,7 @@ const AppoinmentList = () => {
         setResults(data);
       }
     } catch (error) {
-      setError('')
+      setMessage('')
     } finally {
       setLoading(false)
     }
