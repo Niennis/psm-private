@@ -444,7 +444,7 @@ const AppoinmentList = () => {
   const columns = allColumns.filter((col) => {
     if (session.user?.rol === "profesional" && col.key !== "nombre_profesional") return true;
     if (session.user?.rol === "alumno" && col.key !== "nombre_alumno") return true;
-    if (session.user?.rol === "administrador") return true;
+    if ((session.user?.rol === "administrador" || session.user?.rol === "blend")) return true;
     return false;
   });
 
