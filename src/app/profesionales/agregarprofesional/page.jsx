@@ -454,9 +454,8 @@ const AddProfessional = () => {
 
                           </div>
                         </div>
-
                         {
-                          session?.user?.rol === "administrador" || session?.user?.rol === "blend" &&
+                          (session?.user?.rol === "administrador" || session?.user?.rol === "blend") &&
                           <>
                             {/*  ES ADMIN */}
                             <div className="col-12 col-md-6 col-xl-6">
