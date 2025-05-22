@@ -10,10 +10,10 @@ import { signOut } from "next-auth/react";
 import { useMediaQuery } from "@mui/material";
 import { logo } from "@/components/imagepath";
 import { Eye, EyeOff } from "feather-icons-react/build/IconComponents";
-import { logInAction } from "@/app/actions";
+// import { logInAction } from "@/app/actions";
 import SimpleBackdrop from "./Backdrop";
 import { useSession } from "next-auth/react";
-import ReCAPTCHA from "react-google-recaptcha";
+// import ReCAPTCHA from "react-google-recaptcha";
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(true);
@@ -26,7 +26,7 @@ const Login = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
-  const [captchaToken, setCaptchaToken] = useState(null)
+  // const [captchaToken, setCaptchaToken] = useState(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -58,19 +58,19 @@ const Login = () => {
     setSubmit('')
     setError('')
 
-    if (!captchaToken) {
-      setError("Por favor completa el reCAPTCHA.")
-      setIsLoading(false)
-      return
-    }
+    // if (!captchaToken) {
+    //   setError("Por favor completa el reCAPTCHA.")
+    //   setIsLoading(false)
+    //   return
+    // }
     try {
-      const response = await logInAction(captchaToken, data)
+      // const response = await logInAction(captchaToken, data)
 
-      if (!response?.success) {
-        setError("Captcha inválido")
-        setIsLoading(false)
-        return
-      }
+      // if (!response?.success) {
+      //   setError("Captcha inválido")
+      //   setIsLoading(false)
+      //   return
+      // }
 
       const res = await signIn('credentials', {
         redirect: false,
@@ -223,7 +223,7 @@ const Login = () => {
 
                                     {/* LOGIN ESTUDIANTES */}
                                     {
-                                      URL_RESERVAR.includes('agendaelectronica') && <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', padding: 'inherit'}}>
+                                      URL_RESERVAR.includes('agendaelectronica') && <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', padding: 'inherit' }}>
                                         <p>Ingresa con tu mail UDP para poder realizar una reserva.</p>
                                         <div>
                                           <button className="gsi-material-button btn btn-primary btn-block"
@@ -325,17 +325,18 @@ const Login = () => {
                                         </div>
 
                                         {/* <input type="hidden" name="recaptcha_token" value={token || ''} /> */}
-                                        <div className="form-group login-btn" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                                          <ReCAPTCHA
+                                        <div className="form-group login-btn" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                          {/* <ReCAPTCHA
                                             sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
                                             onChange={(token) => {
                                               setCaptchaToken(token)
                                               setError('') // Limpia errores anteriores si hay
                                             }}
-                                            style={{ margin: '5px'}}
-                                          />
+                                            style={{ margin: '5px' }}
+                                          /> */}
 
-                                          <button disabled={!captchaToken}
+                                          <button
+                                            // disabled={!captchaToken}
                                             className="btn btn-primary btn-block sailec-medium"
                                             onClick={handleOnSubmit}
                                           >
