@@ -586,7 +586,7 @@ const EditDoctor = ({ params }) => {
                                     components={{
                                       IndicatorSeparator: () => null
                                     }}
-                                    isDisabled={session?.user?.rol !== 'administrador'}
+                                    isDisabled={session?.user?.rol !== 'administrador' && session?.user?.rol !== 'blend'}
                                     styles={{
                                       control: (baseStyles, state) => ({
                                         ...baseStyles,
@@ -788,7 +788,7 @@ const EditDoctor = ({ params }) => {
                           </div>
                         </div>
                         {
-                          session?.user?.rol == "administrador" &&
+                          (session?.user?.rol == "administrador" || session?.user?.rol == "blend") &&
                           <div className="col-12 col-md-6 col-xl-6">
                             <div className="form-group select-gender">
                               <label className="gen-label">
@@ -797,7 +797,7 @@ const EditDoctor = ({ params }) => {
                               <div className="form-check-inline">
                                 <label className="form-check-label">
                                   <input
-                                    disabled={session?.user?.rol !== "administrador"}
+                                    disabled={session?.user?.rol !== "administrador" && session?.user?.rol !== "blend"}
                                     type="radio"
                                     value="activo"
                                     className="form-check-input"
@@ -810,7 +810,7 @@ const EditDoctor = ({ params }) => {
                               <div className="form-check-inline">
                                 <label className="form-check-label">
                                   <input
-                                    disabled={session?.user?.rol !== "administrador"}
+                                    disabled={session?.user?.rol !== "administrador" && session?.user?.rol !== "blend"}
                                     type="radio"
                                     value="inactivo"
                                     // defaultChecked={initial.status === 'inactivo'}

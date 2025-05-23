@@ -298,5 +298,5 @@ const GroupsList = () => {
   )
 }
 
-export default withAuth(GroupsList, ['administrador', 'profesional']);
+export default withAuth(GroupsList, ['administrador', 'profesional', 'blend']);
 

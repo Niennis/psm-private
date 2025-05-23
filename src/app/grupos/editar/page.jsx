@@ -551,4 +551,4 @@ const EditGroup = () => {
   )
 }
 
-export default withAuth(EditGroup, ['administrador', 'profesional']);
+export default withAuth(EditGroup, ['administrador', 'profesional', 'blend']);

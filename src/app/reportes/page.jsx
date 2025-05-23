@@ -935,4 +935,4 @@ const Admin_Dashboard = () => {
   );
 };
 
-export default withAuth(Admin_Dashboard, ['administrador']);
+export default withAuth(Admin_Dashboard, ['administrador', 'blend']);

@@ -199,4 +199,4 @@ const CreateGroup = () => {
 
 }
 
-export default withAuth(CreateGroup, ['administrador', 'profesional']);
+export default withAuth(CreateGroup, ['administrador', 'profesional', 'blend']);

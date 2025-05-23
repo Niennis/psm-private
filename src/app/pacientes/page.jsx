@@ -23,42 +23,42 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Button } from 'react-bootstrap';
-import { formatDateUTC } from '@/utils/managedata';
+import { formatDateUTC, filtrarFechasAnteriores } from '@/utils/managedata';
 import SimpleBackdrop from '@/components/Backdrop';
 
-const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0); // Normaliza la fecha (elimina horas, minutos, segundos y milisegundos)
+// const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
+//   const hoy = new Date();
+//   hoy.setHours(0, 0, 0, 0); // Normaliza la fecha (elimina horas, minutos, segundos y milisegundos)
 
-  return arrayDeObjetos.map(async (item) => {
-    const bodyUpdate = {
-      id: item.id_cita,
-      id_paciente: item.id_paciente,
-      id_profesional: item.id_profesional,
-      carrera: item.carrera || '',
-      email: item.email_estudiante || '',
-      appointment_date: item.fecha || '',
-      start_time: item.hora || '',
-      campus: item.campus || '',
-      nombre_estudiante: item.nombre_alumno,
-      selected_doctor: item.nombre_profesional || '',
-      quien_cancela: 'perdida',
-      status: item.estado,
-      tipo_cita: item.tipo_cita || '',
-    }
+//   return arrayDeObjetos.map(async (item) => {
+//     const bodyUpdate = {
+//       id: item.id_cita,
+//       id_paciente: item.id_paciente,
+//       id_profesional: item.id_profesional,
+//       carrera: item.carrera || '',
+//       email: item.email_estudiante || '',
+//       appointment_date: item.fecha || '',
+//       start_time: item.hora || '',
+//       campus: item.campus || '',
+//       nombre_estudiante: item.nombre_alumno,
+//       selected_doctor: item.nombre_profesional || '',
+//       quien_cancela: 'perdida',
+//       status: item.estado,
+//       tipo_cita: item.tipo_cita || '',
+//     }
 
-    const fechaItem = new Date(item[claveFecha]);
-    fechaItem.setHours(0, 0, 0, 0);
+//     const fechaItem = new Date(item[claveFecha]);
+//     fechaItem.setHours(0, 0, 0, 0);
 
-    if (fechaItem < hoy && item["estado"].includes('pendiente')) {
-      const res = await changeStatusAppointment(bodyUpdate)
+//     if (fechaItem < hoy && item["estado"].includes('pendiente')) {
+//       const res = await changeStatusAppointment(bodyUpdate)
 
-      return { ...item, estado: 'perdida' }
-    } else {
-      return item
-    }
-  });
-}
+//       return { ...item, estado: 'perdida' }
+//     } else {
+//       return item
+//     }
+//   });
+// }
 
 const PatientsList = () => {
   const ROL = ["profesional"]
@@ -120,7 +120,7 @@ const PatientsList = () => {
       setUsers(resp);
       setResults(resp);
       // setIsValidated(false)
-    } else if (session.user?.rol === 'administrador') {
+    } else if (session.user?.rol === 'administrador' || session.user?.rol === 'blend') {
       const resp = uniqueByEmail(citasConStatus)
 
       setUsers(resp);
@@ -155,7 +155,7 @@ const PatientsList = () => {
         const dataFiltered = data.filter(item => item.id_paciente == session.user?.id);
         setAppointments(dataFiltered);
         setPatientResults(dataFiltered);
-      } else if (session.user?.rol === 'administrador') {
+      } else if (session.user?.rol === 'administrador' || session.user?.rol === 'blend') {
         setAppointments(data);
         setPatientResults(data);
       }
@@ -450,7 +450,7 @@ const PatientsList = () => {
                   }
                 }}
               >
-                {(session.user?.rol === 'profesional' || session.user?.rol === 'administrador') ?
+                {(session.user?.rol === 'profesional' || session.user?.rol === 'administrador' || session.user?.rol === 'blend') ?
                   (<>
                     <Link
                       className="dropdown-item"
@@ -912,5 +912,5 @@ const PatientsList = () => {
 }
 
 // export default PatientsList;
-export default withAuth(PatientsList, ['administrador', 'profesional']);
+export default withAuth(PatientsList, ['administrador', 'profesional', 'blend']);
 
