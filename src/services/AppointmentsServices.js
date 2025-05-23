@@ -47,7 +47,7 @@ export const createInterview = async (appointment) => {
     alumno_id: appointment.patient_id,
     campus: appointment.campus === 'centro'
       ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
-      : citaSelected.campus === 'huechuraba'
+      : appointment.campus === 'huechuraba'
         ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
         : '',
     carrera: appointment.carrera,
