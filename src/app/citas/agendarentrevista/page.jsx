@@ -569,8 +569,10 @@ const AddFirstAppoinments = () => {
 
   const handleOpenBackdrop = () => setOpenBackdrop(true);
   const handleCloseBackdrop = () => setOpenBackdrop(false);
-  const handleCloseModalInterview = () => {
+
+  const handleCloseWarningModalInterview = () => {
     setShowModalInterview(false)
+    router.push('/citas')
   }
 
   return (
@@ -1847,7 +1849,7 @@ const AddFirstAppoinments = () => {
             <div className="col-sm-12 col-lg-6">
               <Alert
                 severity="error"
-                onClose={() => { setShowModalInterview(false) }}
+                onClose={handleCloseWarningModalInterview}
                 sx={{
                   zIndex: 'tooltip',
                   position: 'absolute',
