@@ -126,15 +126,14 @@ export const addProfessional = async (user) => {
     "campus": user.campus || '',
     "rut": "no informado",
     "fechaNacimiento": "1990-03-03",
-    "telefono": "no informado",
+    "telefono": user.mobile,
     "carrera": "no informada",
-    "anoIngresoCarrera": "2020-03-03",
+    "anoIngresoCarrera": "2020",
     "jornada": "no informado",
     "direccion": "no informado",
     "region": "no informado",
     "comuna": "no informado",
   }
-
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -237,6 +236,7 @@ export const changePassword = async (user) => {
   const body = {
     ...user,
   }
+  
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -259,6 +259,7 @@ export const changeEspecialidad = async (user) => {
   const body = {
     ...user,
   }
+  
   try {
     const data = await fetch(USERS_API, {
       method: "POST",
@@ -294,26 +295,3 @@ export const changeStatus = async (id, status) => {
     console.log('Error:', error)
   }
 }
-
-
-
-
-// {
-//   "apellido": "profesional",
-//   "campus": "ambas",
-//   "email": "profesional@profesional.com",
-//   "fecha_nacimiento": "Mon, 20 Feb 1995 00:00:00 GMT",
-//   "genero": "personalizado",
-//   "id": 6,
-//   "mustChangePassword": 0,
-//   "nombre": "profesional",
-//   "status": "activo",
-//   "telefono": "123456789",
-//   "tipo_usuario": "profesional",
-//   "name": "profesional",
-//   "lastName": "profesional",
-//   "mobile": "123456789",
-//   "dateOfBirth": "Mon, 20 Feb 1995 00:00:00 GMT",
-//   "gender": "personalizado",
-//   "speciality": "Psicopedagogía"
-// }

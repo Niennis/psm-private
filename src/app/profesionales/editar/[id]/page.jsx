@@ -94,7 +94,8 @@ const EditDoctor = ({ params }) => {
         speciality: especialidad[0]?.especialidad || 'No informada',
         status: user.status,
         password: user.contrasena,
-        confirmPassword: user.contrasena
+        confirmPassword: user.contrasena,
+        admin: user.tipo_usuario === 'administrador' || user.tipo_usuario === 'blend',
       };
       setInitial(obj)
 
@@ -141,8 +142,6 @@ const EditDoctor = ({ params }) => {
   }, [mobileValue, setValue]);
 
   // FUNCIÓN UPDATE
-
-  // FUNCIÓN UPDATE
   const createUserPayload = (data) => ({
     id: data.id,
     id_emergencia: 0,
@@ -167,7 +166,7 @@ const EditDoctor = ({ params }) => {
     rut: '12345678-9',
     status: data.status || initial.status,
     telefono: data.mobile,
-    tipo_usuario: initial.tipo_usuario,
+    tipo_usuario: (data.speciality == 'Administrador' ? 'administrador' : data.admin ? 'blend' : 'profesional' ) ||initial.tipo_usuario,
   });
 
   const createPasswordPayload = (data) => ({
@@ -220,7 +219,7 @@ const EditDoctor = ({ params }) => {
   };
 
   const updateAll = async (userPayload, passwordPayload, data, especialidades) => {
-    
+
     try {
       // Manejo de especialidad
       const respEspecialidad = await handleEspecialidad(data, especialidades);
@@ -229,7 +228,7 @@ const EditDoctor = ({ params }) => {
       const [respProfesional, respPass] = await Promise.all([
         updateProfesional(userPayload),
         changePassword(passwordPayload)
-      ]);      
+      ]);
 
       return {
         success: respProfesional.validacion && (respEspecialidad?.validacion || respEspecialidad.message) && respPass.validacion,
@@ -528,6 +527,12 @@ const EditDoctor = ({ params }) => {
                                 className="form-control"
                                 // onChange={handleTelefonoChange}
                                 type="tel"
+                                        onKeyDown={(e) => {
+                                          // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                          if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                            e.preventDefault();
+                                          }
+                                        }}
                                 {...register('mobile', {
                                   validate: (value) => {
                                     if (value.length === 0) {
@@ -788,40 +793,78 @@ const EditDoctor = ({ params }) => {
                           </div>
                         </div>
                         {
-                          (session?.user?.rol == "administrador" || session?.user?.rol == "blend") &&
-                          <div className="col-12 col-md-6 col-xl-6">
-                            <div className="form-group select-gender">
-                              <label className="gen-label">
-                                Estado <span className="login-danger">*</span>
-                              </label>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    disabled={session?.user?.rol !== "administrador" && session?.user?.rol !== "blend"}
-                                    type="radio"
-                                    value="activo"
-                                    className="form-check-input"
-                                    // defaultChecked={initial.status === 'activo'}
-                                    {...register('status')}
-                                  />
-                                  Activo
+                          (session?.user?.rol === "administrador" || session?.user?.rol === "blend") &&
+                          <>
+                            {/*  ES ADMIN */}
+                            <div className="col-12 col-md-6 col-xl-6">
+                              <div className="form-group select-gender">
+                                <label className="gen-label">
+                                  ¿Es administrador? <span className="login-danger">*</span>
                                 </label>
-                              </div>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    disabled={session?.user?.rol !== "administrador" && session?.user?.rol !== "blend"}
-                                    type="radio"
-                                    value="inactivo"
-                                    // defaultChecked={initial.status === 'inactivo'}
-                                    className="form-check-input"
-                                    {...register('status')}
-                                  />
-                                  Inactivo
-                                </label>
+                                <div className="form-check-inline">
+                                  <label className="form-check-label">
+                                    <input
+                                      type="checkbox"
+                                      value="activo"
+                                      name="admin"
+                                      className="form-check-input"
+                                      {...register('admin')}
+                                    />
+                                    Sí
+                                  </label>
+                                </div>
+                                {errors.status && <span className="login-danger">
+                                  <small>{errors.status.message}</small>
+                                </span>}
                               </div>
                             </div>
-                          </div>
+
+                            {/* ESTADO */}
+                            <div className="col-12 col-md-6 col-xl-6">
+                              <div className="form-group select-gender">
+                                <label className="gen-label">
+                                  Estado <span className="login-danger">*</span>
+                                </label>
+                                <div className="form-check-inline">
+                                  <label className="form-check-label">
+                                    <input
+                                      type="radio"
+                                      value="activo"
+                                      name="status"
+                                      className="form-check-input"
+                                      {...register('status', {
+                                        required: {
+                                          value: true,
+                                          message: 'Estado es requerido'
+                                        }
+                                      })}
+                                    />
+                                    Activo
+                                  </label>
+                                </div>
+                                <div className="form-check-inline">
+                                  <label className="form-check-label">
+                                    <input
+                                      type="radio"
+                                      value="inactivo"
+                                      name="status"
+                                      className="form-check-input"
+                                      {...register('status', {
+                                        required: {
+                                          value: true,
+                                          message: 'Estado es requerido'
+                                        }
+                                      })}
+                                    />
+                                    Inactivo
+                                  </label>
+                                </div>
+                                {errors.status && <span className="login-danger">
+                                  <small>{errors.status.message}</small>
+                                </span>}
+                              </div>
+                            </div>
+                          </>
                         }
                         <div className="col-12">
                           <div className="doctor-submit text-end">

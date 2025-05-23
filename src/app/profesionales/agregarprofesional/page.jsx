@@ -77,9 +77,6 @@ const AddProfessional = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSubmitSuccessful, reset])
 
-  const onChange = (date, dateString) => {
-    setIsClicked(true);
-  };
 
   const deleteSpaces = email => {
     return email.replace(/\s/g, '')
@@ -127,10 +124,6 @@ const AddProfessional = () => {
       setErrorMessage('El servicio no está disponible')
     }
   })
-
-  const onConfirm = async () => {
-    const response = await addProfessional(dataDoctor)
-  }
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -235,6 +228,131 @@ const AddProfessional = () => {
                           </div>
                         </div>
 
+                        {/*  TELÉFONO */}
+                        <div className="col-12 col-md-6 col-xl-6">
+                          <div className="form-group local-forms">
+                            <label>
+                              Teléfono
+                            </label>
+
+                            <div className="input-group">
+                              <div className="input-group-prepend">
+                                <span className="input-group-text">+56</span>
+                              </div>
+                              <input
+                                className="form-control"
+                                // onChange={handleTelefonoChange}
+                                type="tel"
+                                onKeyDown={(e) => {
+                                  // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                  if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                    e.preventDefault();
+                                  }
+                                }}
+                                {...register('mobile', {
+                                  validate: (value) => {
+                                    if (value.length === 0) {
+                                      return true; // Permitir valores vacíos
+                                    }
+                                    return value.length === 9 || "Cantidad de caracteres debe ser igual a 9, o dejar vacío."; // Validar longitud
+                                  },
+                                })}
+                                maxLength={9}
+                                minLength={0}
+                              />
+                            </div>
+                            {errors.mobile && <span><small>{errors.mobile.message}</small></span>}
+                          </div>
+                        </div>
+
+                        {/* Correo electrónico */}
+                        <div className="col-12 col-md-6 col-xl-6">
+                          <div className="form-group local-forms">
+                            <label>
+                              Email <span className="login-danger">*</span>
+                            </label>
+                            <input
+                              className="form-control"
+                              type="email"
+                              placeholder=""
+                              {...register('email', {
+                                required: {
+                                  value: true,
+                                  message: 'Correo electrónico es requerido'
+                                },
+                                pattern: {
+                                  value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
+                                  message: 'Correo no es válido'
+                                }
+                              })}
+                            />
+                            {
+                              errors.email && <span className="login-danger">
+                                <small>{errors.email.message}</small>
+                              </span>
+                            }
+                          </div>
+                        </div>
+
+                        {/* Especialidad */}
+                        <div className="col-12 col-md-6 col-xl-6">
+                          <div className="form-group local-forms">
+                            <label>
+                              Especialidad <span className="login-danger">*</span>
+                            </label>
+                            <Controller
+                              control={control}
+                              name="speciality"
+                              {...register('speciality', {
+                                required: {
+                                  value: true,
+                                  message: 'Especialidad es requerida',
+                                }
+                              })}
+                              ref={null}
+                              render={({ field: { onChange, onBlur, value } }) => (
+                                <>
+                                  <Select
+                                    instanceId="search-commodity"
+                                    defaultValue={''}
+                                    value={especialidades.find(option => option.value === value) || null}
+                                    onChange={(option) => onChange(option.value)}
+                                    options={especialidades}
+                                    id="search-commodity"
+                                    components={{
+                                      IndicatorSeparator: () => null
+                                    }}
+                                    styles={{
+                                      control: (baseStyles, state) => ({
+                                        ...baseStyles,
+                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
+                                        boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
+                                        '&:hover': {
+                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
+                                        },
+                                        borderRadius: '10px',
+                                        fontSize: "14px",
+                                        minHeight: "45px",
+                                      }),
+                                      dropdownIndicator: (base, state) => ({
+                                        ...base,
+                                        transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                                        transition: '250ms',
+                                        width: '35px',
+                                        height: '35px',
+                                      }),
+                                    }}
+                                  />
+                                </>
+                              )}
+                            />
+                            {errors.speciality && <span className="login-danger">
+                              <small>{errors.speciality.message}</small>
+                            </span>}
+
+                          </div>
+                        </div>
+
                         {/* Género */}
                         <div className="col-12 col-md-6 col-xl-6">
                           <div className="form-group local-forms">
@@ -293,35 +411,6 @@ const AddProfessional = () => {
                               <small>{errors.genero.message}</small>
                             </span>}
 
-                          </div>
-                        </div>
-
-                        {/* Correo electrónico */}
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>
-                              Correo electrónico <span className="login-danger">*</span>
-                            </label>
-                            <input
-                              className="form-control"
-                              type="email"
-                              placeholder=""
-                              {...register('email', {
-                                required: {
-                                  value: true,
-                                  message: 'Correo electrónico es requerido'
-                                },
-                                pattern: {
-                                  value: /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/,
-                                  message: 'Correo no es válido'
-                                }
-                              })}
-                            />
-                            {
-                              errors.email && <span className="login-danger">
-                                <small>{errors.email.message}</small>
-                              </span>
-                            }
                           </div>
                         </div>
 
@@ -396,64 +485,6 @@ const AddProfessional = () => {
                           </div>
                         </div>
 
-                        {/* Especialidad */}
-                        <div className="col-12 col-md-6 col-xl-6">
-                          <div className="form-group local-forms">
-                            <label>
-                              Especialidad <span className="login-danger">*</span>
-                            </label>
-                            <Controller
-                              control={control}
-                              name="speciality"
-                              {...register('speciality', {
-                                required: {
-                                  value: true,
-                                  message: 'Especialidad es requerida',
-                                }
-                              })}
-                              ref={null}
-                              render={({ field: { onChange, onBlur, value } }) => (
-                                <>
-                                  <Select
-                                    instanceId="search-commodity"
-                                    defaultValue={''}
-                                    value={especialidades.find(option => option.value === value) || null}
-                                    onChange={(option) => onChange(option.value)}
-                                    options={especialidades}
-                                    id="search-commodity"
-                                    components={{
-                                      IndicatorSeparator: () => null
-                                    }}
-                                    styles={{
-                                      control: (baseStyles, state) => ({
-                                        ...baseStyles,
-                                        borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1);',
-                                        boxShadow: state.isFocused ? '0 0 0 1px #2e37a4' : 'none',
-                                        '&:hover': {
-                                          borderColor: state.isFocused ? 'none' : '2px solid rgba(46, 55, 164, 0.1)',
-                                        },
-                                        borderRadius: '10px',
-                                        fontSize: "14px",
-                                        minHeight: "45px",
-                                      }),
-                                      dropdownIndicator: (base, state) => ({
-                                        ...base,
-                                        transform: state.selectProps.menuIsOpen ? 'rotate(-180deg)' : 'rotate(0)',
-                                        transition: '250ms',
-                                        width: '35px',
-                                        height: '35px',
-                                      }),
-                                    }}
-                                  />
-                                </>
-                              )}
-                            />
-                            {errors.speciality && <span className="login-danger">
-                              <small>{errors.speciality.message}</small>
-                            </span>}
-
-                          </div>
-                        </div>
                         {
                           (session?.user?.rol === "administrador" || session?.user?.rol === "blend") &&
                           <>
