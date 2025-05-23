@@ -29,7 +29,7 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 import { carreras } from "@/utils/selects";
-import { esFechaValida } from "@/utils/managedata";
+import { esFechaValida, formatDateToYYYYMMDD, normalizarHora } from "@/utils/managedata";
 
 const cacheHandler = new CacheHandler();
 
@@ -104,7 +104,7 @@ const AddInterviewRecord = ({ params }) => {
           : '',
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
-        hora_cita: date[0].hora,
+        hora_cita: normalizarHora(date[0].hora),
         motivo_consulta: records[0]?.motivo_consulta || '',
         nombre_social: response[0].nombre_social,
         nombre: responsePatient.nombre,
@@ -128,7 +128,6 @@ const AddInterviewRecord = ({ params }) => {
         celular_contacto_emergencia2: response[0].contacto2_numero,
         parentesco_contacto_emergencia2: response[0].contacto2_relacion,
       }
-
       const ultimoNumeroFicha = records.length > 0 ? records[records.length - 1].numero_ficha : 0;
       obj.numero_ficha = parseInt(ultimoNumeroFicha) + 1
 
@@ -220,8 +219,8 @@ const AddInterviewRecord = ({ params }) => {
       id_profesional: session?.user?.id,
       nombre_social: patient.nombre_social,
       patient_id: patient.id_alumno,
-      fecha: formatDate(data.fecha),
-      fecha_nacimiento: formatDate(data.fecha_nacimiento),
+      fecha: formatDateToYYYYMMDD(data.fecha),
+      fecha_nacimiento: formatDateToYYYYMMDD(data.fecha_nacimiento),
       tipos_apoyo_actual: data.tipos_apoyo_actual && data.tipos_apoyo_actual.length > 0 ? (data.tipos_apoyo_actual.map(item => item.label)).toString() : '',
       nombre_contacto_emergencia2: '',
       parentesco_contacto_emergencia2: '',
@@ -287,7 +286,7 @@ const AddInterviewRecord = ({ params }) => {
       lastName: data.apellido,
       name: data.nombre,
       selected_doctor: data.profesional_evaluador,
-      start_time: data.hora_cita,
+      start_time: normalizarHora(data.hora_cita),
       tipo_cita: data.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional',
     }
 
@@ -302,7 +301,7 @@ const AddInterviewRecord = ({ params }) => {
       "direccion": data.direccion || patient.direccion,
       "email": data.correo,
       "entrevistador": 0,
-      "fecha_nacimiento": convertDateFormat(data.fecha_nacimiento) || convertDateFormat(patient.fecha_nacimiento),
+      "fecha_nacimiento": formatDateToYYYYMMDD(data.fecha_nacimiento) || formatDateToYYYYMMDD(patient.fecha_nacimiento),
       "genero": data.genero || patient.genero,
       "id": parseInt(patient.id_alumno),
       "jornada": 'No aplica',
@@ -409,8 +408,8 @@ const AddInterviewRecord = ({ params }) => {
       id_receptor: derivacion_interna ? data.profesionales.id : '',
       id_profesional: session?.user?.id,
       id_alumno: patient.id_alumno,
-      fecha: formatDate(data.fecha),
-      fecha_nacimiento: formatDate(data.fecha_nacimiento),
+      fecha: formatDateToYYYYMMDD(data.fecha),
+      fecha_nacimiento: formatDateToYYYYMMDD(data.fecha_nacimiento),
       modalidad_atencion_evaluacion: data?.modalidad_atencion_evaluacion?.map(obj => obj.label).join(', ') || '',
       area_atencion_preferencia: data?.area_atencion_preferencia?.map(obj => obj.label).join(', ') || '',
       tipos_apoyo_actual: data?.tipos_apoyo_actual?.map(obj => obj.label).join(', ') || '',
@@ -428,7 +427,7 @@ const AddInterviewRecord = ({ params }) => {
       "direccion": data.direccion || patient.direccion,
       "email": data.correo,
       "entrevistador": 0,
-      "fecha_nacimiento": convertDateFormat(data.fecha_nacimiento) || convertDateFormat(patient.fecha_nacimiento),
+      "fecha_nacimiento": formatDateToYYYYMMDD(data.fecha_nacimiento) || formatDateToYYYYMMDD(patient.fecha_nacimiento),
       "genero": data.genero || patient.genero,
       "id": parseInt(patient.id_alumno),
       "jornada": 'No aplica',
@@ -456,7 +455,7 @@ const AddInterviewRecord = ({ params }) => {
       lastName: data.apellido,
       name: data.nombre,
       selected_doctor: data.profesional_evaluador,
-      start_time: data.hora_cita,
+      start_time: normalizarHora(data.hora_cita),
       tipo_cita: data.aplica_despeje == 1 ? 'Entrevista de despeje' : 'Atención con profesional',
       quien_cancela: ''
     }
@@ -3211,4 +3210,4 @@ const AddInterviewRecord = ({ params }) => {
 };
 
 // export default AddInterviewRecord;
-export default withAuth(AddInterviewRecord, ['administrador', 'profesional']);
+export default withAuth(AddInterviewRecord, ['administrador', 'profesional', 'blend']);

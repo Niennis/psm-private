@@ -38,22 +38,81 @@ export const validarRut = rut => {
   return dvEsperado === dv;
 }
 
-export const formatDateToYYYYMMDD = (dateString) => {
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+// export const formatDateToYYYYMMDD = (dateString) => {
+//   const date = new Date(dateString);
+//   const year = date.getFullYear();
+//   const month = String(date.getMonth() + 1).padStart(2, '0');
+//   const day = String(date.getDate()).padStart(2, '0');
 
-  return `${year}-${month}-${day}`;
-}
+//   return `${year}-${month}-${day}`;
+// }
+
+// export const formatDateToDDMMYYYY = (dateString) => {
+//   const date = new Date(dateString)
+//   const day = String(date.getDate()).padStart(2, '0')
+//   const month = String(date.getMonth() + 1).padStart(2, '0')
+//   const year = date.getFullYear()
+//   return `${day}-${month}-${year}`
+// }
+
+
+export const formatDateToYYYYMMDD = (dateString) => {
+  // Si ya está en formato YYYY-MM-DD, retorna igual
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+
+  let date;
+  
+  // Intenta parsear como formato RFC 2822/GMT (ej: "Fri, 07 Feb 2020 00:00:00 GMT")
+  if (/^[A-Za-z]{3},\s\d{2}\s[A-Za-z]{3}\s\d{4}/.test(dateString)) {
+    date = new Date(dateString);
+  } 
+  // Si no, asume formato DD-MM-YYYY
+  else {
+    const [day, month, year] = dateString.split('-').map(Number);
+    date = new Date(Date.UTC(year, month - 1, day));
+  }
+
+  // Validación por si el parseo falla
+  if (isNaN(date.getTime())) {
+    throw new Error(`Formato de fecha no reconocido: ${dateString}`);
+  }
+
+  // Extrae componentes en UTC
+  const yearUTC = date.getUTCFullYear();
+  const monthUTC = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dayUTC = String(date.getUTCDate()).padStart(2, '0');
+
+  return `${yearUTC}-${monthUTC}-${dayUTC}`;
+};
 
 export const formatDateToDDMMYYYY = (dateString) => {
-  const date = new Date(dateString)
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
-  return `${day}-${month}-${year}`
-}
+  // Si ya es YYYY-MM-DD (ISO), conviértela directamente
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return `${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}-${year}`;
+  }
+
+  // Si es DD-MM-YYYY, extrae día, mes y año (evitando problemas de zona horaria con UTC)
+  if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
+    const [day, month, year] = dateString.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    return `${String(date.getUTCDate()).padStart(2, '0')}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${date.getUTCFullYear()}`;
+  }
+
+  // Si es otro formato (como MM-DD-YYYY o fecha ISO con tiempo), usa el método seguro con UTC
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    throw new Error("Formato de fecha no válido");
+  }
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  return `${day}-${month}-${year}`;
+};
+
+
 
 export const formatDateUTC = dateString => {
   const date = new Date(dateString);
@@ -65,6 +124,29 @@ export const formatDateUTC = dateString => {
 
   return `${year}-${month}-${day}`;
 }
+
+
+export const normalizarHora = horaString => {
+  // Elimina espacios en blanco alrededor de la hora
+  const horaTrimmed = horaString.trim();
+  
+  // Divide la cadena en partes usando ":" como separador
+  const partes = horaTrimmed.split(':');
+  
+  // Extrae horas, minutos y segundos (si existen)
+  let horas = partes[0] || '00';
+  let minutos = partes[1] || '00';
+  let segundos = partes[2] || '00';
+  
+  // Asegura que horas, minutos y segundos tengan 2 dígitos
+  horas = horas.padStart(2, '0');
+  minutos = minutos.padStart(2, '0');
+  segundos = segundos.padStart(2, '0');
+  
+  // Combina las partes en el formato HH:MM:SS
+  return `${horas}:${minutos}:${segundos}`;
+}
+
 
 export const asegurarSegundos = horaStr => {
   const partes = horaStr.split(':');

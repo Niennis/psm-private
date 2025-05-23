@@ -121,7 +121,7 @@ export const addProfessional = async (user) => {
     "email": user.email,
     "contrasena": user.password,
     "especialidad": user.speciality,
-    "tipo_usuario": user.speciality == 'Administrador' ? 'administrador' : 'profesional',
+    "tipo_usuario": user.tipo_usuario ,
     "status": user.status,
     "campus": user.campus || '',
     "rut": "no informado",
@@ -216,6 +216,7 @@ export const updateProfesional = async (user) => {
   const body = {
     ...user
   }
+  
   try {
     const data = await fetch(USERS_API, {
       method: "POST",

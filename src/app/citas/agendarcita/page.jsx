@@ -257,7 +257,6 @@ const AddAppoinments = () => {
           campus: data.campus || 'No aplica'
         })
 
-
         if (appointment.estado === false) {
           setSuccess('fail')
           setError(appointment.detalle)

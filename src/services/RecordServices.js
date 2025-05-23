@@ -11,6 +11,7 @@ export const createInterviewRecord = async (input) => {
     "prevision_salud_fonasa": "",
     "prevision_salud_otro": "",
   }
+  
   const data = await fetch(RECORD_URL, {
     method: "POST",
     headers: {

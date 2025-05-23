@@ -1147,7 +1147,7 @@ const FichaAlumno = () => {
 
 
                           {
-                            (session?.user?.rol === 'administrador' || session?.user?.rol === 'profesional') && records && records.map((item, index) => (
+                            (session?.user?.rol === 'administrador' || session?.user?.rol === 'profesional' || session?.user?.rol === 'blend') && records && records.map((item, index) => (
                               <li key={item.id_alumno + index}>
                                 {/* Fila principal con los datos generales */}
                                 <div className="activity-user font-blue" style={{ top: '6px' }}>
@@ -1621,4 +1621,4 @@ const FichaAlumno = () => {
   );
 };
 
-export default withAuth(FichaAlumno, ['administrador', 'profesional', 'alumno']);
+export default withAuth(FichaAlumno, ['administrador', 'profesional', 'alumno', 'blend']);

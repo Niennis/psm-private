@@ -8,7 +8,7 @@ const Home = () => {
   const {data: session} = useSession()
   // Redirección directa en el servidor si hay sesión
   if (session) {
-    if(session?.user?.rol === 'administrador' || session?.user?.rol === 'profesional')
+    if(session?.user?.rol === 'administrador' || session?.user?.rol === 'profesional' || session?.user?.rol === 'blend')
     redirect('/pacientes')
   } else if( session?.user?.rol === 'alumno') {
     redirect('/citas')

@@ -564,7 +564,7 @@ const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendar
                 position: 'fixed',
                 top: '0',
                 width: '100%',
-                zIndex: 99999,
+                zIndex: 999999,
                 background: '#00000080'
               }}>
                 <div className="col-sm-12 col-lg-6">
@@ -592,7 +592,7 @@ const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendar
                   position: 'fixed',
                   top: '0',
                   width: '100%',
-                  zIndex: 99999,
+                  zIndex: 999999,
                   background: '#00000080'
                 }}>
                   <div className="col-sm-12 col-lg-6">
@@ -621,7 +621,7 @@ const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendar
                     position: 'fixed',
                     top: '0',
                     width: '100%',
-                    zIndex: 99999,
+                    zIndex: 999999,
                     background: '#00000080'
                   }}>
                     <div className="col-sm-12 col-lg-6">
@@ -653,4 +653,4 @@ const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendar
 
 // export default Calender;
 Calender.displayName = 'Calender';
-export default withAuth(Calender, ['alumno', 'profesional', 'administrador']);
+export default withAuth(Calender, ['alumno', 'profesional', 'administrador', 'blend']);
