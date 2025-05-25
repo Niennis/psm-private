@@ -1476,11 +1476,6 @@ const FichaAlumno = () => {
                                         {" "}
                                         <strong>Motivo consulta: {item.acuerdos || ''}</strong>
                                       </span>
-
-
-                                      <h3><span>Observaciones: {item.observaciones || ''}</span></h3>
-                                      {/* <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3> */}
-
                                     </div>
                                   </div>
                                 ) : (
