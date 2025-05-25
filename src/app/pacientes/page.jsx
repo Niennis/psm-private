@@ -456,7 +456,7 @@ const PatientsList = () => {
                       className="dropdown-item"
                       href={`/fichas/agregarficha/${record.id_cita}`}
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida');
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada');
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -471,8 +471,8 @@ const PatientsList = () => {
                         handleNavigate(record.fecha, record.hora)
                       }}
                       style={{
-                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? "not-allowed" : "pointer",
-                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') ? 0.5 : 1,
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.toLowerCase().includes('realizada') ? "not-allowed" : "pointer",
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.toLowerCase().includes('realizada') ? 0.5 : 1,
                       }}
                     >
                       <i className="far fa-edit me-2" />
@@ -482,11 +482,11 @@ const PatientsList = () => {
                       className="dropdown-item"
                       href={`/citas/${record.id_cita}`}
                       style={{
-                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
-                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.toLowerCase().includes('realizada') ? "not-allowed" : "pointer",
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.toLowerCase().includes('realizada') ? 0.5 : 1,
                       }}
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida');
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada');
                         if (isDisabled) {
                           e.preventDefault(); // Bloquea la navegación
                           e.stopPropagation(); // Evita que otros eventos se disparen
@@ -501,7 +501,7 @@ const PatientsList = () => {
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida');
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') ;
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -510,8 +510,8 @@ const PatientsList = () => {
                         openWarning(record.id_cita);
                       }}
                       style={{
-                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? "not-allowed" : "pointer",
-                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') ? 0.5 : 1,
+                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.toLowerCase().includes('realizada') ? "not-allowed" : "pointer",
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.toLowerCase().includes('realizada')  ? 0.5 : 1,
                       }}
                     >
                       <i className="fa fa-trash-alt m-r-5"></i>
@@ -525,7 +525,7 @@ const PatientsList = () => {
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida');
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') ;
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
