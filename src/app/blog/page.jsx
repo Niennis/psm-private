@@ -503,4 +503,4 @@ const BlogView = () => {
 }
 
 // export default BlogView;
-export default withAuth(BlogView, ['administrador', 'profesional']);
+export default withAuth(BlogView, ['administrador', 'profesional', 'blend']);

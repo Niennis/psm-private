@@ -671,4 +671,4 @@ const Editblog = ({ params }) => {
 }
 
 // export default Editblog
-export default withAuth(Editblog, ['administrador', 'profesional']);
+export default withAuth(Editblog, ['administrador', 'profesional', 'blend']);

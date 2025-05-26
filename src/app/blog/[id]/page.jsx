@@ -315,5 +315,5 @@ const Blogdetails = ({ params }) => {
 }
 
 // export default Blogdetails;
-export default withAuth(Blogdetails, ['administrador', 'profesional']);
+export default withAuth(Blogdetails, ['administrador', 'profesional', 'blend']);
 

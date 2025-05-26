@@ -532,4 +532,4 @@ const Addblog = () => {
   )
 }
 
-export default withAuth(Addblog, ['administrador', 'profesional']);
+export default withAuth(Addblog, ['administrador', 'profesional', 'blend']);
