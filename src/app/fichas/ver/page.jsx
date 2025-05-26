@@ -1166,7 +1166,7 @@ const FichaAlumno = () => {
 
                                       <span>
                                         {" "}
-                                        <strong>Motivo consulta: {item.acuerdos || ''}</strong>
+                                        <strong>Motivo consulta: {item.motivo_consulta || ''}</strong>
                                       </span>
 
 
@@ -1471,10 +1471,9 @@ const FichaAlumno = () => {
                                         {item.numero_ficha} {" - "}
                                         Profesional evaluador: {toTitleCase(item.profesional_evaluador)}
                                       </h3>
-
                                       <span>
                                         {" "}
-                                        <strong>Motivo consulta: {item.acuerdos || ''}</strong>
+                                        <strong>Motivo consulta: {item.motivo_consulta || ''}</strong>
                                       </span>
                                     </div>
                                   </div>

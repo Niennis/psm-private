@@ -105,7 +105,7 @@ const AddInterviewRecord = ({ params }) => {
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         hora_cita: normalizarHora(date[0].hora),
-        motivo_consulta: records[0]?.motivo_consulta || '',
+        motivo_consulta: (date.primera_cita == 1 ? date.motivo : records[0]?.motivo_consulta) || '',
         nombre_social: response[0].nombre_social,
         nombre: responsePatient.nombre,
         nombre_completo: !!(response[0]?.nombre_social && response[0]?.nombre_social.trim() !== "") ? response[0].nombre_social + ' ' + response[0].apellido : response[0].nombre + ' ' + response[0].apellido,
@@ -214,6 +214,7 @@ const AddInterviewRecord = ({ params }) => {
 
     const bodyInterview = {
       ...data,
+      motivo_consulta: data.motivo_consulta || patient.motivo_consulta || '',
       anoIngresoCarrera: data.ano_ingreso,
       id_receptor: derivacion_interna ? data.profesional_derivacion.id : '',
       id_profesional: session?.user?.id,
@@ -405,6 +406,7 @@ const AddInterviewRecord = ({ params }) => {
     // setValue('numero_ficha', 1)
     const bodyInterview = {
       ...data,
+      motivo_consulta: data.motivo_consulta || patient.motivo_consulta || '',
       id_receptor: derivacion_interna ? data.profesionales.id : '',
       id_profesional: session?.user?.id,
       id_alumno: patient.id_alumno,
