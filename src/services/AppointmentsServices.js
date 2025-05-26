@@ -58,13 +58,13 @@ export const createInterview = async (appointment) => {
     fechaInicio: appointment.fecha,
     hora: formatearHora(appointment.hora),
     modalidad: appointment.modalidad || 'modalidad',
-    motivo: appointment.motivo.label || 'motivo',
+    motivo: appointment.motivo || '',
     notas: 'notas',
     primera_cita: 1,
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
   }
-
+  
   try {
     const data = await fetch(APPOINTMENT_API, {
       method: "POST",
@@ -98,7 +98,7 @@ export const createAppointment = async (appointment) => {
     fechaInicio: appointment.fecha,
     hora: appointment.hora,
     modalidad: appointment.modalidad,
-    motivo: appointment.motivo.label || 'motivo',
+    motivo: appointment.motivo || '',
     notas: 'notas',
     primera_cita: 0,
     profesional_id: appointment.professional.id,

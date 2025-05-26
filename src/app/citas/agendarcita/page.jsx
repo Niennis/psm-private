@@ -24,6 +24,7 @@ import { fetchPatientsDespejeFalse } from "@/services/UsersServices";
 import { fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { showAllGroups } from "@/services/GroupServices";
 import { fetchFilteredProfesssionals } from "@/utils/getDoctorsWithDespeje";
+import { showRecords } from "@/services/RecordServices";
 
 import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
@@ -75,6 +76,8 @@ const AddAppoinments = () => {
   const [datosPreCargados, setDatosPreCargados] = useState(null);
 
   const [cargaCompletada, setCargaCompletada] = useState(false);
+  const [defaultMotivo, setDefaultMotivo] = useState(null);
+  const [isMotivoLoaded, setIsMotivoLoaded] = useState(false);
 
   useEffect(() => {
     setProps({
@@ -493,6 +496,55 @@ const AddAppoinments = () => {
     setIndiceHoras(prevIndice => Math.max(0, prevIndice - 5));
   };
 
+
+  // Observa los cambios en el campo del paciente
+  const selectedAlumno = watch('alumno');
+
+  useEffect(() => {
+    const fetchDefaultMotivo = async () => {
+      if (selectedAlumno?.id) {
+        setIsMotivoLoaded(false);
+        try {
+          const { entrevista: records } = await showRecords(selectedAlumno.id);
+          const motivoFromAPI = records[0]?.motivo_consulta;
+
+          if (motivoFromAPI) {
+            const foundMotivo = motivo_consulta.find(
+              opt => opt.label === motivoFromAPI
+            );
+
+            // Solo establece el valor si encontramos una coincidencia exacta
+            if (foundMotivo) {
+              setDefaultMotivo(foundMotivo);
+              setValue('motivo', foundMotivo);
+            } else {
+              // Si no coincide, reseteamos a null
+              setDefaultMotivo(null);
+              setValue('motivo', null);
+            }
+          } else {
+            // Si viene vacío de la API, reseteamos
+            setDefaultMotivo(null);
+            setValue('motivo', null);
+          }
+        } catch (error) {
+          console.error('Error fetching records:', error);
+          // En caso de error, reseteamos
+          setDefaultMotivo(null);
+          setValue('motivo', null);
+        } finally {
+          setIsMotivoLoaded(true);
+        }
+      } else {
+        // Si no hay alumno seleccionado, reseteamos
+        setDefaultMotivo(null);
+        setValue('motivo', null);
+      }
+    };
+
+    fetchDefaultMotivo();
+  }, [selectedAlumno, setValue]);
+  
   const handleSelectedalumno = async (e) => {
     setSelectedPatient(e)
     setValue('patientName', e?.social_name);
@@ -623,7 +675,7 @@ const AddAppoinments = () => {
                                     return (
                                       <Select
                                         instanceId="alumno"
-                                        defaultValue={selectedOption}
+                                        value={value}
                                         onChange={(e) => {
                                           onChange(e);
                                           handleSelectedalumno(e);
@@ -748,7 +800,7 @@ const AddAppoinments = () => {
                                     control={control}
                                     name="tipo_cita"
                                     rules={{ required: 'Tipo de atención es requerido' }}
-                                    
+
                                     ref={null}
                                     render={({ field: { onChange, onBlur, value, name, ref } }) => (
                                       <Select
@@ -863,9 +915,14 @@ const AddAppoinments = () => {
                                     <Select
                                       {...field}
                                       instanceId="motivo"
-                                      defaultValue={selectedOption}
+                                      value={field.value}
                                       // onChange={onChange}
                                       options={motivo_consulta}
+                                      placeholder={
+                                        isMotivoLoaded
+                                          ? "Seleccione un motivo..."
+                                          : "Cargando motivo..."
+                                      }
                                       menuPortalTarget={menuPortalTarget}
                                       styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                       id="motivo"
@@ -961,6 +1018,7 @@ const AddAppoinments = () => {
                               </div>
                             </div>
                           </div>
+
                           {modalidad === 'presencial' &&
                             <div className="row">
                               <div className="col-12 col-md-12 col-xl-12">
