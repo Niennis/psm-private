@@ -1161,7 +1161,7 @@ const FichaAlumno = () => {
                                     <div className="comman-activitys flex-grow-1">
                                       <h3>
                                         {item.numero_ficha} {" - "}
-                                        Profesional evaluador: {toTitleCase(item.profesional_evaluador)}
+                                        Profesional Tratante: {toTitleCase(item.profesional_evaluador)}
                                       </h3>
 
                                       <span>
@@ -1189,7 +1189,7 @@ const FichaAlumno = () => {
                                     <div className="comman-activitys flex-grow-1">
                                       <h3>
                                         {item.numero_ficha} {" - "}
-                                        Profesional evaluador: {toTitleCase(item.profesional_evaluador)}
+                                        Profesional Tratante: {toTitleCase(item.profesional_evaluador)}
                                       </h3>
 
                                       {" "}
@@ -1469,7 +1469,7 @@ const FichaAlumno = () => {
                                     <div className="comman-activitys flex-grow-1">
                                       <h3>
                                         {item.numero_ficha} {" - "}
-                                        Profesional evaluador: {toTitleCase(item.profesional_evaluador)}
+                                        Profesional Tratante: {toTitleCase(item.profesional_evaluador)}
                                       </h3>
                                       <span>
                                         {" "}
@@ -1485,7 +1485,7 @@ const FichaAlumno = () => {
                                     <div className="comman-activitys flex-grow-1">
                                       <h3>
                                         {item.numero_ficha} {" - "}
-                                        Profesional evaluador: {toTitleCase(item.profesional_evaluador)}
+                                        Profesional Tratante: {toTitleCase(item.profesional_evaluador)}
                                       </h3>
 
                                       {" "}
