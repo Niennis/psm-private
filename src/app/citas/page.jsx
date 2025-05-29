@@ -13,7 +13,7 @@ import { onShowSizeChange, itemRender } from '@/components/Pagination'
 
 import { useSidebar } from "@/context/SidebarContext";
 import withAuth from '@/components/withAuth';
-import { fetchAppointments, changeStatusAppointment, search } from '@/services/AppointmentsServices'
+import { fetchAppointments, changeStatusAppointment, search, fetchAppointmentById } from '@/services/AppointmentsServices'
 import { hasRecords } from '@/services/RecordServices';
 
 import {
@@ -53,39 +53,6 @@ const AppoinmentList = () => {
       activeClassName: "appoinment-list",
     });
   }, [setProps]);
-
-  // const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
-  //   const hoy = new Date();
-  //   hoy.setHours(0, 0, 0, 0); // Normaliza la fecha (elimina horas, minutos, segundos y milisegundos)
-
-  //   return arrayDeObjetos.map(async (item) => {
-  //     const bodyUpdate = {
-  //       id: item.id_cita,
-  //       id_paciente: item.id_paciente,
-  //       id_profesional: item.id_profesional,
-  //       carrera: item.carrera || '',
-  //       email: item.email_estudiante || '',
-  //       appointment_date: item.fecha || '',
-  //       start_time: item.hora || '',
-  //       campus: item.campus || '',
-  //       nombre_estudiante: item.nombre_alumno,
-  //       selected_doctor: item.nombre_profesional || '',
-  //       quien_cancela: 'perdida',
-  //       status: item.estado,
-  //       tipo_cita: item.tipo_cita || '',
-  //     }
-
-  //     const fechaItem = new Date(item[claveFecha]);
-  //     fechaItem.setHours(0, 0, 0, 0);
-
-  //     if (fechaItem < hoy && item["estado"].includes('pendiente')) {
-  //       const res = await changeStatusAppointment(bodyUpdate)
-  //       return { ...item, estado: 'perdida' }
-  //     } else {
-  //       return item
-  //     }
-  //   });
-  // }
 
   const loadAppointments = async () => {
     setLoading(true);
@@ -159,10 +126,22 @@ const AppoinmentList = () => {
   };
 
 
-  const openWarning = (id) => {
+  const openWarning = (record) => {
+    const citaDateTime = new Date(`${record.fecha}T${record.hora}`)
+    const ahora = new Date()
+
+    const diferenciaEnMs = citaDateTime - ahora
+    const horasRestantes = diferenciaEnMs / (1000 * 60 * 60)
+
+    if (horasRestantes < 24) {
+      setSuccess('info') // o 'error', según cómo quieras mostrarlo
+      setMessage('La cita ya no puede ser cancelada porque faltan menos de 24 horas.')
+      return
+    }
+
     setSuccess('warning')
     setMessage('¿Desea confirmar la eliminación del servicio seleccionado?')
-    setIdAppointment(id)
+    setIdAppointment(record.id_cita)
   }
 
 
@@ -346,6 +325,11 @@ const AppoinmentList = () => {
               {record.estado}
             </span>
           )}
+          {record.estado.includes("alta") && (
+            <span className="custom-badge status-blue">
+              {record.estado}
+            </span>
+          )}
         </div>
       )
     }, {
@@ -420,7 +404,8 @@ const AppoinmentList = () => {
                           e.stopPropagation();
                           return;
                         }
-                        openWarning(record.id_cita);
+                        { console.log('record', record) }
+                        openWarning(record);
                       }}
                       style={{
                         cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.includes('realizada') ? "not-allowed" : "pointer",

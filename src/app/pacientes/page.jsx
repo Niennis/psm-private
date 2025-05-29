@@ -7,8 +7,7 @@ import { useUserContext } from '@/context/UserContext';
 // import Headerudp from '../Headerudp';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
 import { fetchUser, fetchUsers, updateUser } from '../../services/UsersServices'
-import { changeStatusAppointment, search } from '../../services/AppointmentsServices'
-import { fetchAppointments } from '../../services/AppointmentsServices';
+import { changeStatusAppointment, search, fetchAppointmentById, fetchAppointments } from '../../services/AppointmentsServices'
 import { hasRecords } from '../../services/RecordServices'
 import {
   imagesend, refreshicon, searchnormal,
@@ -25,40 +24,6 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { Button } from 'react-bootstrap';
 import { formatDateUTC, filtrarFechasAnteriores } from '@/utils/managedata';
 import SimpleBackdrop from '@/components/Backdrop';
-
-// const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
-//   const hoy = new Date();
-//   hoy.setHours(0, 0, 0, 0); // Normaliza la fecha (elimina horas, minutos, segundos y milisegundos)
-
-//   return arrayDeObjetos.map(async (item) => {
-//     const bodyUpdate = {
-//       id: item.id_cita,
-//       id_paciente: item.id_paciente,
-//       id_profesional: item.id_profesional,
-//       carrera: item.carrera || '',
-//       email: item.email_estudiante || '',
-//       appointment_date: item.fecha || '',
-//       start_time: item.hora || '',
-//       campus: item.campus || '',
-//       nombre_estudiante: item.nombre_alumno,
-//       selected_doctor: item.nombre_profesional || '',
-//       quien_cancela: 'perdida',
-//       status: item.estado,
-//       tipo_cita: item.tipo_cita || '',
-//     }
-
-//     const fechaItem = new Date(item[claveFecha]);
-//     fechaItem.setHours(0, 0, 0, 0);
-
-//     if (fechaItem < hoy && item["estado"].includes('pendiente')) {
-//       const res = await changeStatusAppointment(bodyUpdate)
-
-//       return { ...item, estado: 'perdida' }
-//     } else {
-//       return item
-//     }
-//   });
-// }
 
 const PatientsList = () => {
   const ROL = ["profesional"]
@@ -417,6 +382,11 @@ const PatientsList = () => {
               {record.estado}
             </span>
           )}
+          {record.estado.includes("alta") && (
+            <span className="custom-badge status-blue">
+              {record.estado}
+            </span>
+          )}
         </div>
       )
     }, {
@@ -501,17 +471,17 @@ const PatientsList = () => {
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') ;
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada');
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
                           return;
                         }
-                        openWarning(record.id_cita);
+                        openWarning(record);
                       }}
                       style={{
                         cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.toLowerCase().includes('realizada') ? "not-allowed" : "pointer",
-                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.toLowerCase().includes('realizada')  ? 0.5 : 1,
+                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.toLowerCase().includes('realizada') ? 0.5 : 1,
                       }}
                     >
                       <i className="fa fa-trash-alt m-r-5"></i>
@@ -525,7 +495,7 @@ const PatientsList = () => {
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') ;
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada');
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -611,7 +581,7 @@ const PatientsList = () => {
 
       const validacionEstudiante = response?.resultado_mail_estudiante?.validacion;
       const validacionProfesional = response?.resultado_mail_profesional?.validacion;
-    
+
       const validacionExitosa = validacionEstudiante && validacionProfesional;
 
       if (!validacionExitosa) {
@@ -619,10 +589,10 @@ const PatientsList = () => {
         setMessage('No se pudo cancelar la cita');
         return;
       }
-    
+
       setSuccess('success');
       setMessage('Cita cancelada con éxito');
-    
+
       if (!responseHasRecords) {
         const updateUserResponse = await updateUser(bodyUpdateUser);
       }
@@ -635,10 +605,21 @@ const PatientsList = () => {
     }
   }
 
-  const openWarning = (id) => {
+  const openWarning = (record) => {
+    const citaDateTime = new Date(`${record.fecha}T${record.hora}`)
+    const ahora = new Date()
+
+    const diferenciaEnMs = citaDateTime - ahora
+    const horasRestantes = diferenciaEnMs / (1000 * 60 * 60)
+
+    if (horasRestantes < 24) {
+      setSuccess('info') // o 'error', según cómo quieras mostrarlo
+      setMessage('La cita ya no puede ser cancelada porque faltan menos de 24 horas.')
+      return
+    }
     setSuccess('warning')
     setMessage('¿Desea confirmar la eliminación del servicio seleccionado?')
-    setIdCita(id)
+    setIdCita(record.id_cita)
   }
 
 
@@ -660,7 +641,7 @@ const PatientsList = () => {
           height: 0,
         }}
       >
-      {loading && <SimpleBackdrop />}
+        {loading && <SimpleBackdrop />}
       </Form>
       {/* <Headerudp /> */}
       {/* <Sidebar id='menu-item2' id1='menu-items2' activeClassName='patient-list' /> */}
