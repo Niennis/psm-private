@@ -1905,3 +1905,30 @@ export const genero = [
   { value: "Mujer trans", label: "Mujer trans" },
   { value: "No binarie", label: "No binarie" }
 ]
+
+export const tipo_apoyo = [
+  { value: 2, label: "Emocional" },
+  { value: 3, label: "Familiar" },
+  { value: 4, label: "Amoroso" },
+  { value: 5, label: "Profesional" },
+  { value: 6, label: "Académico" },
+  { value: 7, label: "Económico" },
+  { value: 8, label: "Pares" },
+  { value: 9, label: "Otro" }
+];
+export const modalidad = [
+  { value: 2, label: "Atención psicológica breve" },
+  { value: 3, label: "Orientación/Consejería" },
+  { value: 4, label: "Atención psicopedagógica" },
+  { value: 5, label: "Orientación psicopedagógica" },
+  { value: 6, label: "Grupo Psicoterapéutico" },
+  { value: 7, label: "Grupo Psicopedagógico" },
+  { value: 8, label: "Grupo de acompañamiento" },
+  { value: 9, label: "Derivación externa" },
+  { value: 10, label: "Derivación Psiquiatra" }
+];
+export const area_atencion = [
+  { value: 2, label: "Psicológica" },
+  { value: 3, label: "Psicopedagógica" },
+  { value: 4, label: "Psiquiátrica" },
+];

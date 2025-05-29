@@ -5,7 +5,7 @@
 import { useState, useEffect, useId } from "react";
 import Select from "react-select";
 import Link from "next/link";
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, set } from 'react-hook-form';
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { Accordion, AccordionSummary, AccordionDetails, Alert } from "@mui/material";
@@ -28,7 +28,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
-import { carreras } from "@/utils/selects";
+import { carreras, tipo_apoyo, modalidad, area_atencion } from "@/utils/selects";
 import { esFechaValida, formatDateToYYYYMMDD, normalizarHora } from "@/utils/managedata";
 
 const cacheHandler = new CacheHandler();
@@ -52,6 +52,7 @@ const AddInterviewRecord = ({ params }) => {
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [isAlta, setIsAlta] = useState(false)
 
   const [open, setOpen] = useState(false);
   const { setProps } = useSidebar();
@@ -105,7 +106,7 @@ const AddInterviewRecord = ({ params }) => {
         fecha: dayjs(date[0].fecha).format('DD-MM-YYYY'),
         genero: responsePatient.genero,
         hora_cita: normalizarHora(date[0].hora),
-        motivo_consulta: (date.primera_cita == 1 ? date.motivo : records[0]?.motivo_consulta) || '',
+        motivo_consulta: (date[0]?.primera_cita == 1 ? date[0]?.motivo : records[0]?.motivo_consulta) || '',
         nombre_social: response[0].nombre_social,
         nombre: responsePatient.nombre,
         nombre_completo: !!(response[0]?.nombre_social && response[0]?.nombre_social.trim() !== "") ? response[0].nombre_social + ' ' + response[0].apellido : response[0].nombre + ' ' + response[0].apellido,
@@ -277,7 +278,7 @@ const AddInterviewRecord = ({ params }) => {
 
     const bodyEstado = {
       id: parseInt(params.id),
-      status: 'realizada',
+      status: isAlta ? 'alta' : 'realizada',
       id_paciente: patient.id_alumno,
       id_profesional: data.id_profesional,
       appointment_date: data.fecha,
@@ -338,54 +339,6 @@ const AddInterviewRecord = ({ params }) => {
       setIsLoading(false)
     }
   })
-
-  const gender = [
-    { value: 1, label: "Hombre" },
-    { value: 2, label: "Mujer" },
-    { value: 3, label: "Hombre trans" },
-    { value: 4, label: "Mujer trans" },
-    { value: 5, label: "No binarie" }
-  ];
-  const career = [
-    { value: 2, label: "Antropologia" },
-    { value: 3, label: "Arquitectura" },
-    { value: 4, label: "Contador" },
-    { value: 5, label: "Derecho" },
-    { value: 6, label: "Ingenieria" },
-  ];
-  const tipo_apoyo = [
-    { value: 2, label: "Emocional" },
-    { value: 3, label: "Familiar" },
-    { value: 4, label: "Amoroso" },
-    { value: 5, label: "Profesional" },
-    { value: 6, label: "Académico" },
-    { value: 7, label: "Económico" },
-    { value: 8, label: "Pares" },
-    { value: 9, label: "Otro" }
-  ];
-  const modalidad = [
-    { value: 2, label: "Atención psicológica breve" },
-    { value: 3, label: "Orientación/Consejería" },
-    { value: 4, label: "Atención psicopedagógica" },
-    { value: 5, label: "Orientación psicopedagógica" },
-    { value: 6, label: "Grupo Psicoterapéutico" },
-    { value: 7, label: "Grupo Psicopedagógico" },
-    { value: 8, label: "Grupo de acompañamiento" },
-    { value: 9, label: "Derivación externa" },
-    { value: 10, label: "Derivación Psiquiatra" }
-  ];
-  const estdo_atencion = [
-    { value: 2, label: "Reagendada" },
-    { value: 3, label: "Realizada" },
-    { value: 4, label: "Cancelada" },
-    { value: 4, label: "Cancelada por profesional" },
-    { value: 4, label: "Cancelada por alumno" }
-  ];
-  const area_atencion = [
-    { value: 2, label: "Psicológica" },
-    { value: 3, label: "Psicopedagógica" },
-    { value: 4, label: "Psiquiátrica" },
-  ];
 
   const formatDate = (dateString) => {
     const [day, month, year] = dateString.split("-");
@@ -534,10 +487,10 @@ const AddInterviewRecord = ({ params }) => {
   /*  --- DAR ALTA  ----- */
   const handleAlta = async (e) => {
     e.preventDefault()
-    // const { users: disponibilidades } = await fetchScheduleByAvailability(session?.user?.id)
+    const { users: disponibilidades } = await fetchScheduleByAvailability(session?.user?.id)
 
-    // const selectedHour = disponibilidades.find(item => (item.fechaInicio === convertDateFormat(patient.fecha))
-    //   && item.horaIni <= data.hora)
+    const selectedHour = disponibilidades.find(item => (item.fechaInicio === convertDateFormat(patient.fecha))
+      && item.horaIni <= data.hora)
     const body = {
       profesional_id: session?.user?.id,
       alumno_id: patient.id_alumno,
@@ -557,6 +510,7 @@ const AddInterviewRecord = ({ params }) => {
     e.preventDefault()
     setSuccess('citaConAlta')
     setMessage('¿Desea confirmar la alta del servicio?')
+    setIsAlta(true)
     const isValid = await trigger();
   }
 
