@@ -17,7 +17,7 @@ const errors = {
   EmailCreateAccount: "Ocurrió un problema. Revisa tu información o ingresa más tarde.",
   Callback: "Ocurrió un problema. Revisa tu información o ingresa más tarde. Recuerda usar tu mail UDP.",
   OAuthAccountNotLinked: "Para confirmar tu identidad, ingresa con la misma cuenta con que ingresasteoriginalmente.",
-  EmailSignin: "Revisa el email ingresado. Recuerda usar tu correo UDP.",
+  EmailSignin: "Revisa que hayas ingresado tu correo UDP correctamente y que seas alumno de pregrado.",
   CredentialsSignin: "El ingreso falló. Revisa que tus datos sean correctos.",
   Configuration: "Ocurrió un problema. Intenta más tarde",
   AccessDenied: "Revisa tus datos ingresados. Recuerda que si eres estudiante, debes ingresar con tu mail UDP.",

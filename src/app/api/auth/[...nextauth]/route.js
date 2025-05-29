@@ -99,6 +99,7 @@ const authOptions = {
           profile.email_verified && isAllowedDomain) {
           try {
             const user = await searchUser(profile.email);
+
             // return !!user;
             if (user.validacion === false) {
               // No se encontró en tu base de datos
@@ -107,10 +108,10 @@ const authOptions = {
             return true;
 
           } catch (error) {
-            return "/error?error=Configuration";
+            throw new Error(error.message || "Configuration");
           }
         } else {
-          return "/error/page?error=DominioNoPermitido";
+          return "/error?error=DominioNoPermitido";
         }
       }
 
@@ -130,7 +131,7 @@ const authOptions = {
         token.email = profile.email;
         token.nombre_social = profile?.nombre_social || profile?.nombre;
       }
-      
+
       if (user) {
         const profile = await searchUser(user.email);
         token.id = profile.id;
@@ -155,7 +156,7 @@ const authOptions = {
       return baseUrl;
     },
     async session({ session, token }) {
-      
+
       session.user = {
         id: token.id,
         name: token.name,
