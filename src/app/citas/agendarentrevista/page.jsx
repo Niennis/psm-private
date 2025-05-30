@@ -74,7 +74,7 @@ const tieneAlta = citas => {
   const citasOrdenadas = citas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
   const ultimaCita = citasOrdenadas[citasOrdenadas.length - 1];
 
-  if (ultimaCita.estado == "alta" && ultimaCita.fecha > INICIO_SEMESTRE && ultimaCita.fecha < FIN_SEMESTRE) {
+  if (ultimaCita?.estado == "alta" && ultimaCita?.fecha > INICIO_SEMESTRE && ultimaCita?.fecha < FIN_SEMESTRE) {
     return true;
   }
   return false;
