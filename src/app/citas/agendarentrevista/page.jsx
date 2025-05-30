@@ -66,6 +66,20 @@ const tienePrimeraCitaActiva = citas => {
   });
 };
 
+
+const tieneAlta = citas => {
+  let INICIO_SEMESTRE = process.env.NEXT_PUBLIC_INICIO_SEMESTRE || "2025-01-01"
+  let FIN_SEMESTRE = process.env.NEXT_PUBLIC_FIN_SEMESTRE || "2025-06-30"
+  
+  const citasOrdenadas = citas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+  const ultimaCita = citasOrdenadas[citasOrdenadas.length - 1];
+
+  if (ultimaCita.estado == "alta" && ultimaCita.fecha > INICIO_SEMESTRE && ultimaCita.fecha < FIN_SEMESTRE) {
+    return true;
+  }
+  return false;
+};
+
 const AddFirstAppoinments = () => {
   const { data: session } = useSession()
   const router = useRouter();
@@ -100,6 +114,8 @@ const AddFirstAppoinments = () => {
   const [cargaCompletada, setCargaCompletada] = useState(false);
   const [showModalInterview, setShowModalInterview] = useState(false);
   const [hasFirstInterview, setHasFirstInterview] = useState(false);
+  const [hasAlta, setHasAlta] = useState(false);
+
 
   useEffect(() => {
     setProps({
@@ -115,19 +131,42 @@ const AddFirstAppoinments = () => {
     return tienePrimeraCitaActiva(alumnoCitas)
   }
 
+  const fetchaCitasAlta = async () => {
+    const response = await fetchAppointments()
+    const alumnoCitas = response.filter(item => item.id_paciente === session?.user?.id)
+    return tieneAlta(alumnoCitas)
+  }
+
   useEffect(() => {
     const fetchData = async () => {
-      const result = await fetchAppointmentsData()
-      setShowModalInterview(result)
-      setHasFirstInterview(result)
+      try {
+        const alta = await fetchaCitasAlta();
+        setHasAlta(alta);
+
+        if (alta) {
+          setShowModalInterview(true);
+          setHasFirstInterview(true);
+          return;
+        }
+
+        const result = await fetchAppointmentsData();
+        setShowModalInterview(result);
+        setHasFirstInterview(result);
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+      }
+    };
+
+    if (session?.user?.id) {
+      fetchData();
     }
-    fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id])
+  }, [session?.user?.id]);
 
   const fetchInitialData = async (id) => {
     try {
       const { users: response } = await fetchUser(id);
+
       const patient = {
         id: response[0].id,
         name: response[0].nombre,
@@ -393,14 +432,6 @@ const AddFirstAppoinments = () => {
   }
 
   const motivo_consulta_seleccionado = watch('motivo')
-
-  const gender = [
-    { value: "Hombre", label: "Hombre" },
-    { value: "Mujer", label: "Mujer" },
-    { value: "Hombre trans", label: "Hombre trans" },
-    { value: "Mujer trans", label: "Mujer trans" },
-    { value: "No binarie", label: "No binarie" }
-  ]
 
   const handleFirstInterview = handleSubmit(async (data, e) => {
     setOpenBackdrop(true)
@@ -795,9 +826,9 @@ const AddFirstAppoinments = () => {
                                       <Select
                                         isDisabled={dataPatient?.genero ? true : false}
                                         // instanceId="genero"
-                                        value={gender.find(option => option.value === value) || null}
+                                        value={genero.find(option => option.value === value) || null}
                                         onChange={(option) => onChange(option.value)}
-                                        options={gender}
+                                        options={genero}
                                         menuPortalTarget={menuPortalTarget}
                                         styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                                         id="genero"
@@ -1860,16 +1891,31 @@ const AddFirstAppoinments = () => {
                 }}
                 spacing={2}
               >
-                <h4>Ya tienes una primera cita agendada</h4>
-                <ul>
-                  <li>
-                    <h4>Para pedir otra, primero debes cancelar la que ya tienes.</h4>
-                  </li>
-                  <li>
-                    <h4>Después de tu primera sesión, será el profesional quien coordine las siguientes citas contigo.</h4>
 
-                  </li>
-                </ul>
+                {
+                  (hasAlta && hasFirstInterview) && <>
+                    <h4>Tienes una alta este semestre</h4>
+                    <ul>
+                      <li>
+                        <h4>Solo puedes tener una alta por semestre.</h4>
+                      </li>
+                    </ul>
+                  </>
+                }
+                {
+                  (hasFirstInterview && !hasAlta) && <>
+                    <h4>Ya tienes una primera cita agendada</h4>
+                    <ul>
+                      <li>
+                        <h4>Para pedir otra, primero debes cancelar la que ya tienes.</h4>
+                      </li>
+                      <li>
+                        <h4>Después de tu primera sesión, será el profesional quien coordine las siguientes citas contigo.</h4>
+
+                      </li>
+                    </ul>
+                  </>
+                }
               </Alert>
             </div>
           </div>
