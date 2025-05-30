@@ -72,6 +72,7 @@ const PatientsList = () => {
 
     const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
     const citasActivas = response.filter(item => (!item["estado"].includes('cancelada') /* && !item["estado"].includes('realizada') */))
+    
     const citasConStatus = citasActivas.map(item => {
       const alumno = alumnos.find(alumno => alumno.id === item.id_paciente); // Buscar el alumno por ID
       return {
@@ -107,7 +108,7 @@ const PatientsList = () => {
 
     try {
       const response = await fetchAppointments();
-      const dataChangeStatus = response.filter(item => (!item["estado"].includes('realizada')) && item.id_paciente === record.id_paciente)
+      const dataChangeStatus = response.filter(item => /* (!item["estado"].includes('realizada')) && */ item.id_paciente === record.id_paciente)
 
       const promises = filtrarFechasAnteriores(dataChangeStatus, "fecha")
       const data = await Promise.all(promises)
