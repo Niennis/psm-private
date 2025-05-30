@@ -171,7 +171,7 @@ const AddFirstAppoinments = () => {
         id: response[0].id,
         name: response[0].nombre,
         lastName: response[0].apellido,
-        nombre_social: response[0].nombre_social || ' ',
+        nombre_social: response[0].nombre_social || '',
         email: session.user?.email,
         birthday: esFechaValida(response[0].fecha_nacimiento) ? dayjs(response[0].fecha_nacimiento).format('YYYY-MM-DD') : '',
         genero: normalizarGenero(response[0]?.genero),
