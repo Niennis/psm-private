@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./fonts.css";
 import "../assets/css/bootstrap.css"
 import Header from "@/components/Header";
 import Script from 'next/script'

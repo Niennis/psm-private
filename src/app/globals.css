@@ -12,6 +12,67 @@
 }
 
 
+/* karla-300 - latin_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Karla';
+  font-style: normal;
+  font-weight: 300;
+  src: url('../assets/fonts/karla-v31-latin_latin-ext-300.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD, U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* karla-300italic - latin_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Karla';
+  font-style: italic;
+  font-weight: 300;
+  src: url('../assets/fonts/karla-v31-latin_latin-ext-300italic.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD, U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* karla-regular - latin_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Karla';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../assets/fonts/karla-v31-latin_latin-ext-regular.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD, U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* karla-italic - latin_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Karla';
+  font-style: italic;
+  font-weight: 400;
+  src: url('../assets/fonts/karla-v31-latin_latin-ext-italic.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD, U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* karla-500 - latin_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Karla';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../assets/fonts/karla-v31-latin_latin-ext-500.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD, U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* karla-700 - latin_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Karla';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../assets/fonts/karla-v31-latin_latin-ext-700.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD, U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+
 /*-----------------
 	1. General
 -----------------------*/
@@ -22,7 +83,7 @@ html {
 }
 
 body {
-  font-family: "Poppins", sans-serif;
+  font-family: "Karla", sans-serif;
   font-size: 16px;
   color: #333448;
   background: linear-gradient(
@@ -13055,7 +13116,7 @@ tr.ant-table-row.ant-table-row-level-0.ant-table-row-selected,
 }
 
 .ant-table-wrapper .ant-table {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Karla', sans-serif;
 }
 
 .ant-table-wrapper .ant-table-pagination.ant-pagination {
@@ -13139,57 +13200,6 @@ input#react-select-genero-input {
   background-color: var(--main-light-red);
   border: 1px solid var(--main-light-red)
 }
-
-
-/* fonts; */
-@font-face {
-  font-family: sailec;
-  src: url(../assets/fonts/Sailec-Font/SailecLight/SailecLight.ttf);
-}
-
-.sailec {
-  font-family: sailec;
-}
-
-@font-face {
-  font-family: sailecbold;
-  src: url(../assets/fonts/Sailec-Font/SailecBold/SailecBold.ttf);
-}
-
-.sailec-bold {
-  font-family: sailecbold;
-}
-
-@font-face {
-  font-family: sailecmedium;
-  src: url(../assets/fonts/Sailec-Font/SailecMedium/SailecMedium.ttf);
-}
-
-.sailec-medium {
-  font-family: sailecmedium;
-}
-
-@font-face {
-  font-family: sailecitalic;
-  src: url(../assets/fonts/Sailec-Font/SailecRegularItalic/SailecRegularItalic.ttf);
-}
-
-.sailec-italic {
-  font-family: sailecitalic;
-}
-
-@font-face {
-  font-family: sailecthin;
-  src: url(../assets/fonts/Sailec-Font/SailecThin/SailecThin.ttf);
-}
-
-.sailec-thin {
-  font-family: sailecthin;
-}
-
-
-.sailec-titulo {}
-
 
 
 
@@ -13402,7 +13412,7 @@ d29e08
 }
 
 .blog-content h3 {
-  font-family: 'sailecmedium';
+  font-family: 'Karla';
 }
 
 .blog-content table {
@@ -13411,7 +13421,7 @@ d29e08
 }
 
 .blog-content th {
-  font-family: sailecmedium;
+  font-family: 'Karla';
 }
 
 .blog-content td {
@@ -13560,35 +13570,35 @@ td:has(div.text-end) {
 }
 
 .blog-title {
-  font-family: sailecbold;
+  font-family: Karla;
   font-weight: 700;
   font-size: 48px;
   line-height: 60px;
 }
 
 .blog-title-sm {
-  font-family: sailecbold;
+  font-family: Karla;
   font-weight: 700;
   font-size: 40px;
   line-height: 52px;
 }
 
 .blog-subtitle {
-  font-family: sailecbold;
+  font-family: Karla;
   font-weight: 700;
   font-size: 32px;
   line-height: 40px;
 }
 
 .blog-subtitle-sm {
-  font-family: sailecmedium;
+  font-family: Karlamedium;
   font-weight: 500;
   font-size: 24px;
   line-height: 32px;
 }
 
 .blog-text {
-  font-family: sailec;
+  font-family: Karla;
   font-weight: 400;
   font-size: 24px;
   line-height: 32px;
@@ -13602,7 +13612,7 @@ td:has(div.text-end) {
 }
 
 .blog-time {
-  font-family: sailecmedium;
+  font-family: Karlamedium;
   font-weight: 500;
   font-size: 20px;
   line-height: 28px;
@@ -13763,3 +13773,7 @@ td.ant-table-cell.ant-table-cell-fix-left {
   max-height: 300px;
   overflow-y: auto;
 }
+
+ .breadcrumb, h3{
+  font-family: Karla;
+ }
