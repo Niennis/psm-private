@@ -50,10 +50,10 @@ const Footer = () => {
           margin: '10px 20px'
         }}
       >
-        <h3 style={{ fontFamily: 'sailec', fontWeight: 700, fontSize: '20px', lineHeight: '27.5px' }}>
+        <h3 className="title-bold" style={{ fontWeight: 700, fontSize: '20px', lineHeight: '27.5px' }}>
           ¿Hablemos?
         </h3>
-        <p style={{ fontFamily: 'lato', fontWeight: 400, fontSize: '14px', lineHeight: '21px' }}>
+        <p className="body-small-regular" style={{ fontWeight: 400, fontSize: '14px', lineHeight: '21px' }}>
           Si necesitas ayuda, contáctanos y te ayudaremos.
         </p>
         <ReserveBtn text={'Reservar'} bgColor={'#FF5253'} color={'#fff'} />

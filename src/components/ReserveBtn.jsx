@@ -17,9 +17,9 @@ const ReserveBtn = ({ text, bgColor, color }) => {
 
   return (
     <>
-      <Link href={URL_RESERVAR} className="sailec-medium" >
+      <Link href={URL_RESERVAR} className="body-regular" >
       <button
-        className='btn btn-rounded btn-reservar'
+        className='btn btn-rounded btn-reservar body-regular'
         style={{
           width: matches ? '130px' : '100px',
           height: matches ? '56px' : '40px',

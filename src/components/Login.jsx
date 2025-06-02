@@ -132,7 +132,7 @@ const Login = () => {
   return (
     <>
       {isLoading && <SimpleBackdrop text={'el login'} />}
-      <div className="main-wrapper login-body sailec">
+      <div className="main-wrapper login-body">
         <div className="container-fluid px-0">
           <div className="row ">
             {/* Login logo */}
@@ -191,13 +191,14 @@ const Login = () => {
                                     {URL_RESERVAR.includes('agendaelectronica') && <li className="nav-item ">
                                       <a
 
-                                        className={`sailec-medium nav-link ${hash === 'estudiantes' ? 'active' : hash === '' ? 'active' : ''}`}
+                                        className={`ui-medium nav-link ${hash === 'estudiantes' ? 'active' : hash === '' ? 'active' : ''}`}
                                         onClick={() => handleTabClick('estudiantes')}
                                         href="#estudiantes"
                                         style={{
                                           background: hash === 'estudiantes' ? '#A6A6A6 ' : '',
                                           color: hash === 'estudiantes' ? '#FFF ' : '',
-                                          border: 'none'
+                                          border: 'none',
+                                          fontWeight: 'bold'
                                         }}
                                       >
                                         Estudiantes
@@ -205,13 +206,14 @@ const Login = () => {
                                     </li>}
                                     <li className="nav-item">
                                       <a
-                                        className={`sailec-medium nav-link ${hash === 'profesionales' ? 'active' : ''}`}
+                                        className={`ui-medium nav-link ${hash === 'profesionales' ? 'active' : ''}`}
                                         onClick={() => handleTabClick('profesionales')}
                                         href="#profesionales"
                                         style={{
                                           background: hash === 'profesionales' ? '#A6A6A6 ' : '',
                                           color: hash === 'profesionales' ? '#FFF ' : '',
                                           border: 'none',
+                                          fontWeight: 'bold'
                                         }}
                                       >
                                         Profesionales
@@ -337,7 +339,7 @@ const Login = () => {
 
                                           <button
                                             // disabled={!captchaToken}
-                                            className="btn btn-primary btn-block sailec-medium"
+                                            className="btn btn-primary btn-block ui-medium"
                                             onClick={handleOnSubmit}
                                           >
                                             Iniciar sesión

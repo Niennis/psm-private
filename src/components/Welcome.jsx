@@ -34,14 +34,14 @@ const Welcome = ({ children }) => {
               <div className="row">
                 <div className="col-md-6">
                   <div className="morning-user">
-                    <h2>
+                    <h2 className="header-2-regular ">
                       Buen día, <span>{session?.user?.nombre_social}</span>
                     </h2>
                     {
                       session?.user?.rol === 'alumno' ?
-                        <p>Ten un buen día en clases</p>
+                        <p className="ui-medium">Ten un buen día en clases</p>
                         :
-                        <p>Ten un buen día en el trabajo</p>
+                        <p className="ui-medium">Ten un buen día en el trabajo</p>
                     }
                   </div>
                 </div>

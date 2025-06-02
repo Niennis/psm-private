@@ -24,7 +24,7 @@ import {
   baricon1,
 } from "@/components/imagepath";
 
-const URL = "https://saludmental.udp.cl"
+const URL = "https://saludmental.udp.cl/"
 
 const pagesWithEvents = [
   // { title: 'INICIO', url: '/#inicio', label: 'inicio' },
@@ -178,7 +178,6 @@ const Header = () => {
               letterSpacing: '.3rem',
               color: 'inherit',
               textDecoration: 'none',
-              fontFamily: 'sailec'
             }}
           >
             <Image
@@ -235,21 +234,16 @@ const Header = () => {
                   {
                     pages.map((page) => (
                       <MenuItem key={page.title} onClick={page.title === "QUIÉNES SOMOS" ? handleOpenUserMenu : handleCloseNavMenu}>
-                        <Typography textAlign="center" className="sailec">
-                          <a href={page.url} style={{ color: 'black', fontFamily: 'sailec' }}>
+                        <Typography textAlign="center" className="ui-medium">
+                          <a href={page.url} style={{ color: 'black', fontFamily: 'Karla' }}>
                             {page.title}
                           </a>
                         </Typography>
                       </MenuItem>
                     ))
                   }
-                  {/* <MenuItem onClick={handleOpenUserMenu}>
-                <Typography textAlign="center" className="sailec" sx={{ color: '#000000', fontFamily: 'sailec' }}>
-                  CÓMO TRABAJAMOS <FaChevronDown />
-                </Typography>
-              </MenuItem> */}
 
-                  <Box sx={{ flexGrow: 0 }} className={`sailec `}>
+                  <Box sx={{ flexGrow: 0 }} className={`ui-medium `}>
                     <Menu
                       sx={{ mt: '45px' }}
                       id="menu-appbar"
@@ -269,8 +263,8 @@ const Header = () => {
                     >
                       {settings.map((setting) => (
                         <MenuItem key={setting.url} onClick={handleCloseUserMenu}>
-                          <Typography textAlign="center" className="sailec">
-                            <a href={setting.url} style={{ color: 'black', fontFamily: 'sailec', textDecoration: 'none' }}>
+                          <Typography textAlign="center" className="ui-medium">
+                            <a href={setting.url} style={{ color: 'black', Karla: 'ui-medium', textDecoration: 'none' }}>
                               {setting.title}
                             </a>
                           </Typography>
@@ -297,7 +291,7 @@ const Header = () => {
               letterSpacing: '.3rem',
               color: 'inherit',
               textDecoration: 'none',
-              fontFamily: 'sailec',
+              fontFamily: 'Karla',
             }}
           >
             <Image
@@ -329,8 +323,8 @@ const Header = () => {
                 >
                   <Tooltip title="Cómo trabajamos">
                     <Button
-                      className={`sailec ${activeSection === 'como_trabajamos' ? 'active-header' : ''}`}
-                      sx={{ p: 0, m: '0 15px 0 0', fontFamily: 'sailecmedium', color: 'black', marginTop: '16px', marginBottom: '16px', width: 'min-content' }}>
+                      className={`ui-small ${activeSection === 'como_trabajamos' ? 'active-header' : ''}`}
+                      sx={{ p: 0, m: '0 15px 0 0', fontFamily: 'Karla', color: 'black', marginTop: '16px', marginBottom: '16px', width: 'min-content' }}>
                       {page.title}
                     </Button>
                   </Tooltip>
@@ -355,10 +349,10 @@ const Header = () => {
                         onClick={handleCloseUserMenuDesktop}
                       // sx={{ py: 1 }}
                       >
-                        <Typography className="sailec">
+                        <Typography className="ui-small">
                           <a
                             href={setting.url}
-                            style={{ color: 'black', fontFamily: 'sailec', textDecoration: 'none' }}>
+                            style={{ color: 'black', fontFamily: 'Karla', textDecoration: 'none' }}>
                             {setting.title}
                           </a>
                         </Typography>
@@ -373,9 +367,9 @@ const Header = () => {
                   style={{ textDecoration: 'none' }}
                 >
                   <Button
-                    className="sailec"
+                    className="ui-small"
                     sx={{
-                      fontFamily: 'sailecmedium',
+                      fontFamily: 'Karla',
                       color: 'black',
                       my: 2,
                       mx: 1,
@@ -409,7 +403,7 @@ const Header = () => {
                         width={40}
                       />
                     </Link>
-                    <small style={{ display: 'block', textAlign: 'right', width: 'min-content' }}>
+                    <small style={{ display: 'block', textAlign: 'right', width: 'min-content', fontFamily: 'Karla' }}>
                       {`Bienvenido, 
                       ${(session.user?.nombre_social)}`}
                     </small>
@@ -417,7 +411,7 @@ const Header = () => {
                   :
                   <Link href={session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador' ? '/pacientes' : '/citas'} style={{ padding: 0, margin: 0, textAlign: 'right' }}>
                     <i className="fas fa-user-circle" style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} ></i>
-                    <small style={{ display: 'block', textAlign: 'right', width: 'min-content' }}>
+                    <small style={{ display: 'block', textAlign: 'right', width: 'min-content', fontFamily: 'Karla' }}>
                       {`Bienvenido, 
                       ${(session.user?.nombre_social)}`}
                     </small>

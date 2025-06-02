@@ -112,7 +112,7 @@ const Sidebar = () => {
   return (
     <ProtectedPage level={ROL}>
 
-      <div className="sidebar mt-5" id="sidebar" style={{ zIndex: 99 }}>
+      <div className="sidebar mt-5 ui-small" id="sidebar" style={{ zIndex: 99 }}>
         <Scrollbars
           autoHide={true}
           autoHideTimeout={1000}

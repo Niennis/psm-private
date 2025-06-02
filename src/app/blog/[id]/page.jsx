@@ -82,7 +82,7 @@ const card = (item) => {
   return (
     <Fragment>
       <CardContent sx={{ padding: 0, bgcolor: '#F1F1F1', height: '17rem' }}>
-        <Typography variant="h5" component="div" className='sailec-medium'
+        <Typography variant="h5" component="div" className='ui-medium'
           sx={{
             bgcolor: "#FABB00",
             height: '6rem',
@@ -154,7 +154,7 @@ const Blogdetails = ({ params }) => {
   return (
     <div>
       <>
-        <div className="main-wrapper main-blog sailec" style={{ backgroundColor: '#FFFFFF' }}>
+        <div className="main-wrapper main-blog" style={{ backgroundColor: '#FFFFFF' }}>
           {matches && <div style={{
             // marginTop: '100px',
             height: '620px',
@@ -269,7 +269,7 @@ const Blogdetails = ({ params }) => {
                       </div> */}
                       {/* TEXTO */}
 
-                      <div className="sailec col-lg-10 col-12 p-2" style={{ marginLeft: '0px', fontSize: '24px', fontWeight: 400, lineHeight: '32px', letterSpacing: '0em' }}>
+                      <div className="col-lg-10 col-12 p-2" style={{ marginLeft: '0px', fontSize: '24px', fontWeight: 400, lineHeight: '32px', letterSpacing: '0em' }}>
                         {/* <div className={matches ? "blog-content" : "blog-content-sm"} dangerouslySetInnerHTML={blog && { __html: blog?.blog_texto }}>
                         </div> */}
 
@@ -288,7 +288,7 @@ const Blogdetails = ({ params }) => {
 
                     <div className="row d-flex my-4" style={{ padding: '0', marginLeft: '0px', marginRight: '96px', borderTop: '1px solid grey', textAlign: 'center' }} >
                       <div className="col-12">
-                        <h3 className='sailec-medium' style={{ fontWeight: 700, fontSize: '32px', lineHeight: '40px' }}>Contenido descargable</h3>
+                        <h3 className='ui-medium' style={{ fontWeight: 700, fontSize: '32px', lineHeight: '40px' }}>Contenido descargable</h3>
                       </div>
                       {descargas && descargas?.map((item, index) => (
 

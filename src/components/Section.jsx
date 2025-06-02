@@ -47,7 +47,6 @@ const Section = ({ title, image, left, children, bgColor }) => {
                 >
                   {left &&
                     <Card
-                      className='col-12 col-lg-4 sailec'
                       sx={{
                         boxShadow: 0,
                         display: 'inline-block',
@@ -79,13 +78,11 @@ const Section = ({ title, image, left, children, bgColor }) => {
                     }}>
                     <Typography
                       variant="body2"
-                      className="sailec"
                       sx={{
                         color: '#000',
                         fontSize: '32px',
                         lineHeight: '40px',
                         fontWeight: 700,
-                        fontFamily: 'sailec'
                       }}>
                       {title}
                     </Typography>
@@ -95,7 +92,6 @@ const Section = ({ title, image, left, children, bgColor }) => {
                         color: '#000',
                         fontSize: '20px',
                         lineHeight: '28px',
-                        fontFamily: 'sailec'
                       }}> */}
                     {children}
                     {/* </Typography> */}
@@ -143,13 +139,11 @@ const Section = ({ title, image, left, children, bgColor }) => {
                     {/* <CardContent> */}
                     <Typography
                       variant="body2"
-                      className="sailec"
                       sx={{
                         color: '#000',
                         fontSize: '32px',
                         lineHeight: '40px',
                         fontWeight: 700,
-                        fontFamily: 'sailec'
                       }}>
                       {title}
                     </Typography>
