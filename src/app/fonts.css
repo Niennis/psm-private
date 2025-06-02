@@ -7,7 +7,7 @@
   font-family: 'Work Sans';
   font-style: normal;
   font-weight: 100;
-  src: url('../assets/fonts/worksans/work-sans-100.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-100.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-100italic - latin */
 @font-face {
@@ -15,7 +15,7 @@
   font-family: 'Work Sans';
   font-style: italic;
   font-weight: 100;
-  src: url('../assets/fonts/worksans/work-sans-100italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-100italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-200 - latin */
 @font-face {
@@ -23,7 +23,7 @@
   font-family: 'Work Sans';
   font-style: normal;
   font-weight: 200;
-  src: url('../assets/fonts/worksans/work-sans-200.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-200.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-200italic - latin */
 @font-face {
@@ -31,7 +31,7 @@
   font-family: 'Work Sans';
   font-style: italic;
   font-weight: 200;
-  src: url('../assets/fonts/worksans/work-sans-200italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-200italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-300 - latin */
 @font-face {
@@ -39,7 +39,7 @@
   font-family: 'Work Sans';
   font-style: normal;
   font-weight: 300;
-  src: url('../assets/fonts/worksans/work-sans-300.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-300.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-300italic - latin */
 @font-face {
@@ -47,7 +47,7 @@
   font-family: 'Work Sans';
   font-style: italic;
   font-weight: 300;
-  src: url('../assets/fonts/worksans/work-sans-300italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-300italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-regular - latin */
 @font-face {
@@ -55,7 +55,7 @@
   font-family: 'Work Sans';
   font-style: normal;
   font-weight: 400;
-  src: url('../assets/fonts/worksans/work-sans-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-italic - latin */
 @font-face {
@@ -63,7 +63,7 @@
   font-family: 'Work Sans';
   font-style: italic;
   font-weight: 400;
-  src: url('../assets/fonts/worksans/work-sans-italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-500 - latin */
 @font-face {
@@ -71,7 +71,7 @@
   font-family: 'Work Sans';
   font-style: normal;
   font-weight: 500;
-  src: url('../assets/fonts/worksans/work-sans-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-500italic - latin */
 @font-face {
@@ -79,7 +79,7 @@
   font-family: 'Work Sans';
   font-style: italic;
   font-weight: 500;
-  src: url('../assets/fonts/worksans/work-sans-500italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-500italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-600 - latin */
 @font-face {
@@ -87,7 +87,7 @@
   font-family: 'Work Sans';
   font-style: normal;
   font-weight: 600;
-  src: url('../assets/fonts/worksans/work-sans-600.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-600.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-600italic - latin */
 @font-face {
@@ -95,7 +95,7 @@
   font-family: 'Work Sans';
   font-style: italic;
   font-weight: 600;
-  src: url('../assets/fonts/worksans/work-sans-600italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-600italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-700 - latin */
 @font-face {
@@ -103,7 +103,7 @@
   font-family: 'Work Sans';
   font-style: normal;
   font-weight: 700;
-  src: url('../assets/fonts/worksans/work-sans-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-700italic - latin */
 @font-face {
@@ -111,7 +111,7 @@
   font-family: 'Work Sans';
   font-style: italic;
   font-weight: 700;
-  src: url('../assets/fonts/worksans/work-sans-700italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-700italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-800 - latin */
 @font-face {
@@ -119,7 +119,7 @@
   font-family: 'Work Sans';
   font-style: normal;
   font-weight: 800;
-  src: url('../assets/fonts/worksans/work-sans-800.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-800.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-800italic - latin */
 @font-face {
@@ -127,7 +127,7 @@
   font-family: 'Work Sans';
   font-style: italic;
   font-weight: 800;
-  src: url('../assets/fonts/worksans/work-sans-800italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-800italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-900 - latin */
 @font-face {
@@ -135,7 +135,7 @@
   font-family: 'Work Sans';
   font-style: normal;
   font-weight: 900;
-  src: url('../assets/fonts/worksans/work-sans-900.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-900.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 /* work-sans-900italic - latin */
 @font-face {
@@ -143,7 +143,7 @@
   font-family: 'Work Sans';
   font-style: italic;
   font-weight: 900;
-  src: url('../assets/fonts/worksans/work-sans-900italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../assets/fonts/WorkSans/work-sans-900italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
 @font-face {
