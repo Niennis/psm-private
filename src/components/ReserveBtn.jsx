@@ -31,7 +31,7 @@ const ReserveBtn = ({ text, bgColor, color }) => {
         }}
       // onClick={handleOpen}
       >
-        <Today style={{ margin: matches ? '-2px 4px 0 0': '-3px 0 0', fontSize: '15px' }} />
+        <Today style={{ margin: matches ? '-2px px 0 0': '-3px 0 0', fontSize: matches ? '15px' : '12px' }} />
         {text}
       </button>
       </Link>

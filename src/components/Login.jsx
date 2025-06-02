@@ -226,7 +226,7 @@ const Login = () => {
                                     {/* LOGIN ESTUDIANTES */}
                                     {
                                       URL_RESERVAR.includes('agendaelectronica') && <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', padding: 'inherit' }}>
-                                        <p>Ingresa con tu mail UDP para poder realizar una reserva.</p>
+                                        <p className="ui-medium">Ingresa con tu mail UDP para poder realizar una reserva.</p>
                                         <div>
                                           <button className="gsi-material-button btn btn-primary btn-block"
                                             onClick={() => handleSignIn()}
@@ -257,7 +257,7 @@ const Login = () => {
                                     {/* LOGIN PROFESIONALES */}
                                     <div className={`tab-pane ${hash === 'profesionales' ? 'show active' : ''}`} id="estudiantes">
                                       <form >
-                                        <div className="form-group">
+                                        <div className="form-group ui-medium">
                                           <label>
                                             Correo electrónico <span className="login-danger">*</span>
                                           </label>
@@ -278,7 +278,7 @@ const Login = () => {
                                           {errors.email && <span className="font-red"><small>{errors.email.message}</small></span>}
 
                                         </div>
-                                        <div className="form-group">
+                                        <div className="form-group ui-medium">
                                           <label>
                                             Contraseña <span className="login-danger">*</span>
                                           </label>
@@ -323,7 +323,7 @@ const Login = () => {
                                               <span className="checkmark" />
                                             </label> */}
                                           </div>
-                                          <Link href="/olvido-contrasena">¿Olvidaste la contraseña?</Link>
+                                          <Link className="ui-medium" href="/olvido-contrasena">¿Olvidaste la contraseña?</Link>
                                         </div>
 
                                         {/* <input type="hidden" name="recaptcha_token" value={token || ''} /> */}

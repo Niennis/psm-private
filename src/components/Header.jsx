@@ -1,35 +1,27 @@
 'use client'
 /* eslint-disable no-unused-vars */
-import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 import { useSection } from "@/context/SectionContext";
 import ReserveBtn from "./ReserveBtn";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
-import Image from "next/image";
-import { logo } from "./imagepath";
-import useMediaQuery from "@mui/system/useMediaQuery";
-import Tooltip from "@mui/material/Tooltip";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import Container from "@mui/material/Container";
-import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
+import { useMediaQuery } from "@mui/material";
+import { Tooltip, Avatar } from '@mui/material';
+
+import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, MenuItem } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import {
-  baricon,
-  baricon1,
-} from "@/components/imagepath";
+// import { FaUserCircle } from "react-icons/fa";
+// import { FaChevronDown } from "react-icons/fa";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useSession } from "next-auth/react";
+
 
 const URL = "https://saludmental.udp.cl/"
 
 const pagesWithEvents = [
   // { title: 'INICIO', url: '/#inicio', label: 'inicio' },
   { title: 'QUIÉNES SOMOS', url: URL + 'quienes-somos', label: 'quienes_somos' },
-  { title: 'CÓMO TRABAJAMOS', url: URL + 'como-trabajamos', label: 'como-trabajamos' },
+  // { title: 'CÓMO TRABAJAMOS', url: URL + 'como-trabajamos', label: 'como-trabajamos' },
   { title: 'TEST AUTODIAGNÓSTICO?', url: URL + '#test_autodiagnostico', label: 'test_autodiagnostico' },
   { title: 'EVENTOS', url: '/#', label: 'eventos' },
   { title: 'MATERIAL DESCARGABLE', url: URL + 'material-descargable', label: 'material_descargable' },
@@ -39,18 +31,30 @@ const pagesWithEvents = [
 const pagesWithoutEvents = [
   // { title: 'INICIO', url: '/#inicio', label: 'inicio' },
   { title: 'QUIÉNES SOMOS', url: URL + 'quienes-somos', label: 'quienes_somos' },
-  { title: 'CÓMO TRABAJAMOS', url: URL + 'como-trabajamos', label: 'como-trabajamos' },
+  // { title: 'CÓMO TRABAJAMOS', url: URL + 'como-trabajamos', label: 'como-trabajamos' },
   { title: 'TEST AUTODIAGNÓSTICO', url: URL + '#test_autodiagnostico', label: 'test_autodiagnostico' },
   { title: 'MATERIAL DESCARGABLE', url: URL + 'material-descargable', label: 'material_descargable' },
   { title: 'PREGUNTAS FRECUENTES', url: URL + '#preguntas-frecuentes', label: 'preguntas_frecuentes' },
 ];
 
-const settings = [
+const subMenu = [
   { title: 'Intervenciones', url: URL + 'como-trabajamos', label: '/como_trabajamos' },
   { title: 'Plan de Acción', url: URL + 'plan-de-accion-en-salud-mental', label: '/plan-de-accion-en-salud-mental' },
   { title: 'Prevención', url: URL + 'intervencion-en-promocion-y-prevencion', label: '/intervencion-en-promocion-y-prevencion' },
   { title: 'Convenios y profesionales', url: URL + 'como-trabajamos/convenios-y-profesionales', label: '/convenios-y-profesionales' },
 ];
+
+const theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 0, // 640
+      sm: 641, // 767
+      md: 768, // 1023
+      lg: 1024, // 1279
+      xl: 1280,
+    },
+  },
+});
 
 const Header = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
@@ -58,26 +62,17 @@ const Header = () => {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const { activeSection, setActiveSection } = useSection();
   const open = Boolean(anchorEl);
-  const { data: session } = useSession()
   const EVENTS = 0;
   const pages = EVENTS !== 0 ? pagesWithEvents : pagesWithoutEvents
-  const matches = useMediaQuery('(min-width:600px)');
   const [style, setStyle] = useState({ width: 'min-content' });
-  // const name = session?.user?.name;
-  const isSmallDevice = useMediaQuery(
-    "only screen and (max-width : 640px)"
-  );
-  const isMediumDevice = useMediaQuery(
-    "only screen and (min-width : 641px) and (max-width : 768px)"
-  );
-  const isLargeDevice = useMediaQuery(
-    "only screen and (min-width : 769px) and (max-width : 1024px)"
-  );
-  const isExtraLargeDevice = useMediaQuery(
-    "only screen and (min-width : 1025px)"
-  );
-  const menuTimeoutRef = useRef(null);
-  const menuRef = useRef(null);
+
+  const BOTON_RESERVAR = process.env.NEXT_PUBLIC_ACTIVATE_BUTTON === "true"
+
+  const matches = useMediaQuery("(max-width : 767px)");
+  const isMediumSize = useMediaQuery("(min-width : 768px) and (max-width : 1023px)");
+  const isLargeSize = useMediaQuery("(min-width: 1024px) ");
+  const { session } = useSession();
+  // const isXXLargeSize = useMediaQuery("(min-width:1281px)")
 
   useEffect(() => {
     const handleResize = () => {
@@ -103,28 +98,13 @@ const Header = () => {
       }
     };
   }, []);
-  const handlesidebar = () => {
-    document.body.classList.toggle("mini-sidebar");
-  };
 
-  const handlesidebarmobilemenu = () => {
-    document.body.classList.toggle("slide-nav");
-    document.getElementsByTagName("html")[0].classList.toggle('menu-opened');
-    document.getElementsByClassName("sidebar-overlay")[0].classList.toggle("opened");
-  };
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   }
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
-  };
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
   };
 
   const handleOpenUserMenu = (event) => {
@@ -140,110 +120,117 @@ const Header = () => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     setActiveSection(id);
   };
-
-  const handleOpenUserMenuDesktop = (event) => {
-    clearTimeout(menuTimeoutRef.current);
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseUserMenuDesktop = () => {
-    // Agrega un pequeño retraso para permitir el hover entre botón y menú
-    menuTimeoutRef.current = setTimeout(() => {
-      setAnchorElUser(null);
-    }, 200);
-  };
-
-  const handleMenuEnter = () => {
-    clearTimeout(menuTimeoutRef.current);
-  };
-
-  const handleMenuLeave = () => {
-    handleCloseUserMenuDesktop();
-  };
+  // Controla el padding del body al abrir/cerrar el menú
+  useEffect(() => {
+    if (anchorElNav) {
+      document.body.style.paddingRight = '0px';
+      const header = document.querySelector('header');
+      if (header) {
+        header.style.paddingRight = '0px';
+      }
+    } else {
+      document.body.style.paddingRight = '';
+      const header = document.querySelector('header');
+      if (header) {
+        header.style.paddingRight = '';
+      }
+    }
+  }, [anchorElNav]);
 
   return (
+    // <ThemeProvider theme={theme}>
     <AppBar position="fixed" style={{ background: 'white', color: 'black', margin: 0, height: matches ? '112px' : '98px', justifyContent: matches ? 'center' : 'flex-end' }}>
-      <Container maxWidth="false" style={{ background: 'white', color: 'black' }}>
-        <Toolbar disableGutters>
-          {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href={URL}
-            sx={{
-              mr: 2,
-              display: { xs: 'none', lg: 'flex' },
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            <Image
-              src={logo}
-              width={263}
-              height={70}
-              alt="Logo"
-            />{" "}
-          </Typography>
-
-          {session?.user ? <>
-            <Link id="toggle_btn" href="#" onClick={handlesidebar} >
-              <Image src={baricon} alt="" />
-            </Link>
-            <Link id="mobile_btn" className="mobile_btn float-start" href="#" onClick={handlesidebarmobilemenu}
-              style={{ position: 'revert' }}
-            >
-              <Image src={baricon1} alt="" />
-            </Link>
-          </>
-            :
+      <Container maxWidth="false" style={{ background: 'white', color: 'black', padding: matches && 0, margin: 0 }}>
+        <Toolbar disableGutters sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          {isLargeSize ? (
             <>
-              {/*  MENU MOBILE */}
-              <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-                <IconButton
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  onClick={handleOpenNavMenu}
-                  color="inherit"
+              {/* MENU DASHBOARD */}
+              <Box sx={{
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                // Tamaños responsivos con límites:
+                width: { sm: '150px', md: '180px', lg: '200px', xl: '263px' },
+                // Altura proporcional (ajusta según necesidad):
+                height: { xs: '40px', sm: '48px', md: '53px', lg: '70px' },
+                position: 'relative', // Necesario para Image con fill
+                overflow: 'hidden', // Previene desbordamientos
+              }}>
+                <Typography
+                  variant="h6"
+                  noWrap
+                  component="a"
+                  href={URL}
                 >
-                  <MenuIcon />
-                </IconButton>
-                <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorElNav}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                  }}
-                  open={Boolean(anchorElNav)}
-                  onClose={handleCloseNavMenu}
-                  sx={{
-                    display: { xs: 'block', lg: 'none' },
-                  }}
-                  disableEnforceFocus
-                >
-                  {
-                    pages.map((page) => (
-                      <MenuItem key={page.title} onClick={page.title === "QUIÉNES SOMOS" ? handleOpenUserMenu : handleCloseNavMenu}>
-                        <Typography textAlign="center" className="ui-medium">
-                          <a href={page.url} style={{ color: 'black', fontFamily: 'Karla' }}>
-                            {page.title}
-                          </a>
-                        </Typography>
-                      </MenuItem>
-                    ))
-                  }
+                  <Image
+                    alt="Logo"
+                    src={`/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}logo02.png`}
+                    height={70}
+                    width={263}
+                    priority
+                    style={{
+                      height: 'auto',
+                      width: '100%',
+                      maxWidth: '263px',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                <Box sx={{
+                  flexGrow: 1,
+                  display: { xs: 'none', md: 'flex' },
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  maxWidth: '800px',
+                  margin: '0 16px'
+                }}>
+                  {pages.map((page) => {
+                    return (
+                      <Link
+                        style={{
+                          color: 'black',
+                          textDecoration: 'none',
+                          flexShrink: 0
+                        }}
+                        href={page.url}
+                        key={page.title}
+                      >
+                        <Button
+                          className={`ui-small ${activeSection === page.label
+                            ? 'active-header'
+                            : ''
+                            }`}
 
-                  <Box sx={{ flexGrow: 0 }} className={`ui-medium `}>
+                          onClick={() => handleNavClick(page.label)}
+                          sx={{
+                            ...style, my: 2, mx: { lg: '4px', xl: 1 },
+                            color: 'black',
+                            display: 'block',
+                            width: 'min-content'
+
+                          }}
+                        >
+                          {page.title}
+                        </Button>
+                      </Link>
+                    )
+                  }
+                  )}
+                  <Tooltip title="Como trabajamos">
+                    <Button
+                      className={`ui-small ${activeSection === 'como_trabajamos'
+                        ? 'active-header'
+                        : ''
+                        }`}
+                      onMouseOver={handleOpenUserMenu} sx={{ ...style, p: 0, my: 2, mx: 1, width: 'min-content', color: 'black', marginTop: '16px', marginBottom: '16px' }}
+                    >
+                      CÓMO TRABAJAMOS
+                    </Button>
+                  </Tooltip>
+
+                  <Box sx={{ flexGrow: 0, }} className="ui-medium" >
                     <Menu
                       sx={{ mt: '45px' }}
                       id="menu-appbar"
@@ -259,12 +246,12 @@ const Header = () => {
                       }}
                       open={Boolean(anchorElUser)}
                       onClose={handleCloseUserMenu}
-                      disableEnforceFocus
                     >
-                      {settings.map((setting) => (
+                      {subMenu.map((setting) => (
                         <MenuItem key={setting.url} onClick={handleCloseUserMenu}>
-                          <Typography textAlign="center" className="ui-medium">
-                            <a href={setting.url} style={{ color: 'black', Karla: 'ui-medium', textDecoration: 'none' }}>
+                          <Typography textAlign="center" className="ui-medium"
+                            onMouseLeave={handleCloseUserMenu}>
+                            <a href={setting.url} style={{ color: 'black', textDecoration: 'none' }}>
                               {setting.title}
                             </a>
                           </Typography>
@@ -272,155 +259,211 @@ const Header = () => {
                       ))}
                     </Menu>
                   </Box>
-                </Menu>
+                </Box>
+                {/* BOTON RESERVAR DESKTOP */}
+                <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+                  <ReserveBtn text={'Reservar'} bgColor={'#FABB00'} color={'#000'} />
+                  <Link href={`${URL}#profesionales`} style={{ textDecoration: 'none' }} >
+                    {/* <FaUserCircle className={`btn-fa-user ${isSmallSize ? "btn-fa-user-mobile" : "btn-fa-user-desktop"}`} /> */}
+                  </Link>
+                </Box>
+                {/* USER MENU */}
+                {
+                  !session
+                    ? <>
+                      {/* <ReserveBtn text={'Reservar'} bgColor={'#FABB00'} color={'#000'} /> */}
+                      <Link href="/#profesionales" style={{ textDecoration: 'none' }}>
+                        <i className=" fas fa-user-circle" style={{ fontSize: '50px', color: "#b82925", background: '#fff', padding: '5px', marginLeft: '5px' }}></i>
+                      </Link>
+                    </>
+                    : session.user?.picture ?
+                      <button className="btn">
+                        <Link href={session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador' ? '/pacientes' : '/citas'} style={{ textDecoration: 'none' }}>
+                          <Image
+                            className="avatar-img rounded-circle"
+                            src={session?.user?.picture}
+                            alt="avatar"
+                            height={40}
+                            width={40}
+                          />
+                        </Link>
+                        <small style={{ display: 'block', textAlign: 'right', width: 'min-content', fontFamily: 'Work Sans' }}>
+                          {`Bienvenido, 
+                      ${(session.user?.nombre_social)}`}
+                        </small>
+                      </button>
+                      :
+                      <Link href={session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador' ? '/pacientes' : '/citas'} style={{ padding: 0, margin: 0, textAlign: 'right' }}>
+                        <i className="fas fa-user-circle" style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} ></i>
+                        <small style={{ display: 'block', textAlign: 'right', width: 'min-content', fontFamily: 'Work Sans' }}>
+                          {`Bienvenido, 
+                      ${(session.user?.nombre_social)}`}
+                        </small>
+                      </Link>
+                }
               </Box>
             </>
-          }
-
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href={URL}
-            sx={{
-              mr: { xs: 0, lg: 2 },
-              display: { xs: 'flex', lg: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-              fontFamily: 'Karla',
-            }}
-          >
-            <Image
-              src={logo}
-              width={200}
-              height={100}
-              alt="logo udp"
-              style={{ height: 'auto', justifyContent: 'center' }}
-            />{" "}
-          </Typography>
-
-          {/* MENU DASHBOARD */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              display: { xs: 'none', md: 'flex' },
-              justifyContent: 'flex-end',
-              alignItems: 'center'
-            }}
-          >
-            {pages.map((page) => (
-              page.title === "CÓMO TRABAJAMOS" ? (
-                <Box
-                  key={page.title}
-                  onMouseEnter={handleOpenUserMenuDesktop}
-                  onMouseLeave={handleCloseUserMenuDesktop}
-                  ref={menuRef}
-                  sx={{ display: 'inline-block' }}
-                >
-                  <Tooltip title="Cómo trabajamos">
-                    <Button
-                      className={`ui-small ${activeSection === 'como_trabajamos' ? 'active-header' : ''}`}
-                      sx={{ p: 0, m: '0 15px 0 0', fontFamily: 'Karla', color: 'black', marginTop: '16px', marginBottom: '16px', width: 'min-content' }}>
-                      {page.title}
-                    </Button>
-                  </Tooltip>
-
-                  <Menu
-                    sx={{ mt: '45px' }}
-                    anchorEl={anchorElUser}
-                    open={Boolean(anchorElUser)}
-                    onClose={handleCloseUserMenuDesktop}
-                    MenuListProps={{
-                      onMouseEnter: handleMenuEnter,
-                      onMouseLeave: handleMenuLeave,
-                      style: { pointerEvents: 'auto' }
-                    }}
-                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                    disableEnforceFocus
+          ) : (
+            <>
+              {/*  MENU MOBILE */}
+              <Box sx={{ display: 'flex', flexDirection: 'row', width: 'fit-content', alignItems: 'center' }}>
+                <Box sx={{
+                  flexGrow: 'unset', display: { xs: 'flex', sm: 'flex', md: 'flex', lg: 'none' },
+                }}>
+                  <IconButton
+                    size="small"
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={handleOpenNavMenu}
+                    color="inherit"
                   >
-                    {settings.map((setting) => (
-                      <MenuItem
-                        key={setting.url}
-                        onClick={handleCloseUserMenuDesktop}
-                      // sx={{ py: 1 }}
+                    <MenuIcon />
+                  </IconButton>
+                  <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorElNav}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'left',
+                    }}
+                    open={Boolean(anchorElNav)}
+                    onClose={handleCloseNavMenu}
+                    sx={{
+                      display: { xs: 'block', lg: 'none', margin: 0 },
+                    }}
+                  >
+                    {
+                      pages.map((page) => (
+                        <MenuItem key={page.title} onClick={handleCloseNavMenu}>
+                          <Typography textAlign="center" className="ui-medium">
+                            <a href={page.url} style={{ color: 'black', }}>
+                              {page.title}
+                            </a>
+                          </Typography>
+                        </MenuItem>
+                      ))
+                    }
+                    <MenuItem onClick={handleOpenUserMenu}>
+                      <Typography textAlign="center" className="ui-medium font-black" >
+                        CÓMO TRABAJAMOS{/*  <FaChevronDown /> */}
+                      </Typography>
+                    </MenuItem>
+
+                    <Box sx={{ flexGrow: 0 }} >
+                      <Menu
+                        sx={{ mt: '45px', }}
+                        id="menu-appbar"
+                        anchorEl={anchorElUser}
+                        anchorOrigin={{
+                          vertical: 'top',
+                          horizontal: 'right',
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                          vertical: 'top',
+                          horizontal: 'right',
+                        }}
+                        open={Boolean(anchorElUser)}
+                        onClose={handleCloseUserMenu}
                       >
-                        <Typography className="ui-small">
-                          <a
-                            href={setting.url}
-                            style={{ color: 'black', fontFamily: 'Karla', textDecoration: 'none' }}>
-                            {setting.title}
-                          </a>
-                        </Typography>
-                      </MenuItem>
-                    ))}
+                        {subMenu.map((setting) => (
+                          <MenuItem key={setting.url} onClick={handleCloseUserMenu}>
+                            <Typography textAlign="center" className="ui-medium">
+                              <a href={setting.url} style={{ color: 'black', textDecoration: 'none' }}>
+                                {setting.title}
+                              </a>
+                            </Typography>
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    </Box>
                   </Menu>
                 </Box>
-              ) : (
-                <Link
-                  href={page.url}
-                  key={page.title}
-                  style={{ textDecoration: 'none' }}
+                <Typography
+                  variant="h5"
+                  noWrap
+                  component="a"
+                  href={URL}
+                  sx={{
+                    // mr: { xs: 0, lg: 2 },
+                    display: { xs: 'flex', lg: 'none' },
+                    /* flexGrow: 1, temporal mientras botones están desactivados */
+                    color: 'inherit',
+                    overflow: 'unset',
+                    // Tamaños responsivos con límites:
+                    width: { xs: '100px', sm: '200px', md: '250px', lg: '200px', xl: '263px' },
+                    // Altura proporcional (ajusta según necesidad):
+                    height: { xs: '45px', sm: '40px', md: '60px', lg: '53px', xl: '70px' },
+                  }}
                 >
-                  <Button
-                    className="ui-small"
-                    sx={{
-                      fontFamily: 'Karla',
-                      color: 'black',
-                      my: 2,
-                      mx: 1,
-                      width: 'min-content'
-                    }}
-                  >
-                    {page.title}
-                  </Button>
+                  <Image
+                    src={`/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}logo02.png`}
+                    height={0}
+                    width={0}
+                    alt="logo udp"
+                    sizes="100%"
+                    style={{
+                      height: 'auto',
+                      width: 'auto',
+                    }} />{" "}
+                </Typography>
+              </Box>
+              {/* BOTON RESERVAR MOBILE */}
+              <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+                <ReserveBtn text={'Reservar'} bgColor={'#FABB00'} color={'#000'} />
+                <Link href={`${URL}#profesionales`} style={{ textDecoration: 'none' }} >
+                  {/* <FaUserCircle className={`btn-fa-user ${isSmallSize ? "btn-fa-user-mobile" : "btn-fa-user-desktop"}`} /> */}
                 </Link>
-              )
-            ))}
-          </Box>
-          {/* USER MENU */}
-          <Box sx={{ flexGrow: 0, maxWidth: '200px', wrap: 'balance', textAlign: 'right', display: 'flex', alignItems: 'center' }}>
-            {
-              !session
-                ? <>
-                  <ReserveBtn text={'Reservar'} bgColor={'#FABB00'} color={'#000'} />
-                  <Link href="/#profesionales" style={{ textDecoration: 'none' }}>
-                    <i className=" fas fa-user-circle" style={{ fontSize: matches ? '50px' : '38px', color: "#b82925", background: '#fff', padding: '5px', marginLeft: '5px' }}></i>
-                  </Link>
-                </>
-                : session.user?.picture ?
-                  <button className="btn">
-                    <Link href={session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador' ? '/pacientes' : '/citas'} style={{ textDecoration: 'none' }}>
-                      <Image
-                        className="avatar-img rounded-circle"
-                        src={session?.user?.picture}
-                        alt="avatar"
-                        height={40}
-                        width={40}
-                      />
-                    </Link>
-                    <small style={{ display: 'block', textAlign: 'right', width: 'min-content', fontFamily: 'Karla' }}>
-                      {`Bienvenido, 
+                {/* USER MENU */}
+                {
+                  !session
+                    ? <>
+                      {/* <ReserveBtn text={'Reservar'} bgColor={'#FABB00'} color={'#000'} /> */}
+                      <Link href="/#profesionales" style={{ textDecoration: 'none' }}>
+                        <i className=" fas fa-user-circle" style={{ fontSize: '40px' , color: "#b82925", background: '#fff', padding: '5px', }}></i>
+                      </Link>
+                    </>
+                    : session.user?.picture ?
+                      <button className="btn">
+                        <Link href={session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador' ? '/pacientes' : '/citas'} style={{ textDecoration: 'none' }}>
+                          <Image
+                            className="avatar-img rounded-circle"
+                            src={session?.user?.picture}
+                            alt="avatar"
+                            height={40}
+                            width={40}
+                          />
+                        </Link>
+                        <small style={{ display: 'block', textAlign: 'right', width: 'min-content', fontFamily: 'Work Sans' }}>
+                          {`Bienvenido, 
                       ${(session.user?.nombre_social)}`}
-                    </small>
-                  </button>
-                  :
-                  <Link href={session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador' ? '/pacientes' : '/citas'} style={{ padding: 0, margin: 0, textAlign: 'right' }}>
-                    <i className="fas fa-user-circle" style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} ></i>
-                    <small style={{ display: 'block', textAlign: 'right', width: 'min-content', fontFamily: 'Karla' }}>
-                      {`Bienvenido, 
+                        </small>
+                      </button>
+                      :
+                      <Link href={session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador' ? '/pacientes' : '/citas'} style={{ padding: 0, margin: 0, textAlign: 'right' }}>
+                        <i className="fas fa-user-circle" style={{ fontSize: '40px', marginLeft: '5px', display: 'block', justifySelf: 'flex-end' }} ></i>
+                        <small style={{ display: 'block', textAlign: 'right', width: 'min-content', fontFamily: 'Work Sans' }}>
+                          {`Bienvenido, 
                       ${(session.user?.nombre_social)}`}
-                    </small>
-                  </Link>
-            }
-          </Box>
+                        </small>
+                      </Link>
+                }
+              </Box>
+
+            </>
+          )}
+
+
         </Toolbar>
       </Container>
-    </AppBar>
+    </AppBar >
+    // </ThemeProvider>
   );
 };
 
