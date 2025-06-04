@@ -499,7 +499,7 @@ const Sidebar = () => {
                       <span className="menu-side">
                         <Image src={logout} alt="" />
                       </span>{" "}
-                      <span>Logout</span>
+                      <span>Cerrar sesión</span>
                     </Link>
                   </li>
 
