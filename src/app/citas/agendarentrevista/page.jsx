@@ -290,7 +290,7 @@ const AddFirstAppoinments = () => {
 
       const hoy = new Date();
       const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy);
-      const filterByAvailability = filterByDate.filter(item => item.disponible === 1)
+      const filterByAvailability = filterByDate.filter(item => item.disponible === 1 && item.tipoServicio.includes('despeje'))
 
       const orderedData = orderByDate(filterByAvailability);
       const bloque = obtenerDias(orderedData);

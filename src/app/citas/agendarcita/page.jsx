@@ -29,8 +29,9 @@ import { showRecords } from "@/services/RecordServices";
 import * as dayjs from 'dayjs'
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
 import 'dayjs/locale/es-mx'
-import { motivo_consulta } from "@/utils/selects";
+import { motivo_consulta, tipo_cita } from "@/utils/selects";
 import SelectorDeDias from "@/components/SelectorDias";
+import { formatDateToDDMMYYYY, formatDateToYYYYMMDD, normalizarHora } from "@/utils/managedata";
 
 // Función para obtener fechas únicas
 const obtenerFechasUnicas = array => {
@@ -78,6 +79,7 @@ const AddAppoinments = () => {
   const [cargaCompletada, setCargaCompletada] = useState(false);
   const [defaultMotivo, setDefaultMotivo] = useState(null);
   const [isMotivoLoaded, setIsMotivoLoaded] = useState(false);
+  const [appoinmentType, setAppoinmentType] = useState(''); // nuevo: tipo de cita
 
   useEffect(() => {
     setProps({
@@ -92,15 +94,6 @@ const AddAppoinments = () => {
   } = useForm({
     defaultValues: async () => await getCombinedData()
   });
-
-  const tipo_cita = [
-    { value: "Acompañamiento", label: "Acompañamiento psicológico" },
-    { value: "breve", label: "Psicoterapia breve" },
-    { value: "individual", label: "Psicopedagógica individual" },
-    { value: "psicoterapéutico", label: "Grupo psicoterapéutico" },
-    { value: "psicopedagógico", label: "Grupo psicopedagógico" },
-  ]
-
   // const [open, setOpen] = useState(false);
   const handleOpen = (e) => {
     e.preventDefault()
@@ -330,6 +323,7 @@ const AddAppoinments = () => {
     setDate('')
     setTime('')
     setLoadingDays(true)
+    setAppoinmentType(e.value)
     const professionals = await fetchFilteredProfesssionals(e.value)
     const selectedProfessionals = professionals.map((doc, i) => {
       return {
@@ -361,8 +355,14 @@ const AddAppoinments = () => {
       const { users: byProf } = await fetchScheduleByAvailability(e.id);
 
       const hoy = new Date();
-      const filterByDate = horasmedicas.filter(item => new Date(item.fechaInicio) >= hoy);
-      const filterByAvailability = filterByDate.filter(item => item.disponible === 1)
+      const filterByDate = horasmedicas.filter(item => {
+        const fecha = item.fechaInicio
+        const hora = normalizarHora(item.horaInicio);
+        const fechaCompleta = new Date(`${fecha}T${hora}`);
+        return new Date(fechaCompleta) >= hoy
+      });
+
+      const filterByAvailability = filterByDate.filter(item => item.disponible === 1 && item.tipoServicio.includes(appoinmentType))
 
       const orderedData = orderByDate(filterByAvailability);
       const bloque = obtenerDias(orderedData);
@@ -544,7 +544,7 @@ const AddAppoinments = () => {
 
     fetchDefaultMotivo();
   }, [selectedAlumno, setValue]);
-  
+
   const handleSelectedalumno = async (e) => {
     setSelectedPatient(e)
     setValue('patientName', e?.social_name);

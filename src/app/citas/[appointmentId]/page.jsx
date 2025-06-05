@@ -23,7 +23,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import withAuth from '@/components/withAuth';
 import { Alert, Box, LinearProgress } from "@mui/material";
-import { tipo_cita, motivo_consulta } from "@/utils/selects";
+import { motivo_consulta } from "@/utils/selects";
 
 import dayjs from "dayjs";
 import * as isLeapYear from 'dayjs/plugin/isLeapYear' // import plugin
