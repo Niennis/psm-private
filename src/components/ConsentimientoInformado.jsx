@@ -40,61 +40,81 @@ const ModalConsent = ({ open, handleClose, onClick, errors }) => {
             Consentimiento Informado
           </Typography>
           {/* <Typography id="modal-modal-description" sx={{ mt: 2 }}> */}
-          Para solicitar atención en el Departamento de Salud Mental Estudiantil, perteneciente a la Dirección de Asuntos Estudiantiles (DAE) de  la Universidad Diego Portales, debes leer y aceptar los siguientes términos generales y específicos de atención:
+          <h3>Proceso de ingreso y/o derivación (PID)</h3>
 
-          <b>Términos Generales</b>
+          <p>
+            En primera instancia se realizará una entrevsita de evaluación, la cual recabará información relevante sobre aspectos personales de la vida de el/la estudiante, motivo de consulta, principales dificultades y sintomatología. Dependiendo de los resultados de esta entrevista, criterios de exclusión y disponibilidad de horas, se indicará las posibilidades de atención dentro o fuera del DSME.
+          </p>
+          <p>
+            La entrevista de evaluación es parte de un proceso de ingreso o derivación, por lo que el sólo hecho de tener la entrevista <b>no asegura un cupo</b> en las instancias del DSME. Es relevante considerar que, <b>si la información entregada por el/la estudiante revierte algún riesgo vital grave para el/ la estudiante o algún/a tercero, será contactado, incluso sin su consentimiento</b>, algún familiar o adulto/a responsable de su red de apoyo, con el fin de informar la situación y que  pueda acompañar su ingreso a su sistema de salud o acoger la sugerencia de derivación del DSME, <b>lo cual se hará de manera obligatoria al ser sintomatología de carácter grave.</b>
+          </p>
+          <p>
+            Las alternativas de atención de salud mental <b>dentro del DSME</b> son: Psicoterapia individual breve (dependiendo del caso podría otorgarse un máximo 10 sesiones), acompañamiento psicológico (dependiendo del caso podría otorgarse un máximo 4 sesiones) tratamiento psiquiátrico (en casos puntuales), grupos psicoterapéuticos y atención psicopedagógica. Fuera del DSME exsiste una serie de centros en convenio para realizar una derivación a tratamiento psicológico y/o psiquiátrico.
+          </p>
+
+          <b>Derivación externa</b>
+          <p>
+            En caso de que durante la entrevista de evaluación se pesquise la necesidad de derivación externa,  dada su sintomatología o que se determine que el abordaje de su problemática requiere un tiempo más extenso tratamiento, el/la estudiante se compromete a acoger la sugerencia profesional. De no aceptar dicha sugerencia el/la estudiante se hace responsable de esta desición.
+          </p>
+          <p>
+            Recalcar que la atención del DSME está enfocada en procesos breves de baja a mediana complejidad, por lo que en casos de riesgo vital, la derivación es mandatoria, además de la activación de la red  de apoyo.
+          </p>
+
+          <h3>Derechos y Deberes</h3>
+          <p>
+            Para todas las instancias, tanto la entrevista de evaluación, ingreso a alguna de las modalidades dentro del DSME, como derivación a un centro con convenio, el/la estudiante debe conocer los siguientes derechos y deberes:
+          </p>
 
           <b>Derechos</b>
-          <ul>
-            <li>Ser tratado(a) en todo momento con respeto y dignidad, sin importar mi condición social, étnica, nacionalidad, opción religiosa, sexual o política.</li>
+          <ol>
+            <li>Ser tratado(a) en todo momento con respeto y dignidad, sin importar condición social, étnica, nacionalidad, opción religiosa, sexual o política.</li>
             <li>Recibir atención de salud mental apropiada y de calidad.</li>
-            <li>Ser informado(a) de mi diagnóstico, tratamiento y pronostico, si así lo requiero y solicito.</li>
-            <li>Aceptar o rechazar el tratamiento que se me proponga (firmaré consentimiento o disentimiento según sea el caso).</li>
-            <li>No ser objeto de investigaciones ni de tratamientos experimentales sin mi consentimiento.</li>
-            <li>Saber que toda la información tratada en las sesiones y/o contenida en mi ficha clínica, se mantendrá en reserva, y está sujeta al secreto profesional de confidencialidad. Si la información entregada revierte algún riesgo vital para el paciente o algún tercero, será contactado algún familiar o adulto responsable.</li>
-            <li>Ser atendido(a) puntualmente. Si el profesional se retrasa, deberá asignarme el tiempo que corresponde a mi atención.</li>
-            <li>Presentar reclamos, felicitaciones o sugerencias por escrito, en caso de solicitarlo.</li>
-          </ul>
+            <li>Saber que toda la información tratada en la sesión, se mantendrá en reserva, y está sujeta al secreto profesional de confidencialidad, quebrandose la misma en casos de riesgo vital grave y/o develación de daño a terceras personas. </li>
+            <li>Ser atendido(a) puntualmente. Si el profesional se retrasa, podrá asignarme el tiempo que corresponde a mi atención. </li>
+          </ol>
 
           <b>Deberes</b>
-
-          <ul>
-            <li>Entregar toda la información que se me solicite de manera clara, precisa y veraz.</li>
-            <li>Actualizar información de contacto en caso de producirse algún cambio, mientras me encuentre en tratamiento.</li>
-            <li>Asistir puntualmente a todas las sesiones (individuales y/o grupales) que se me cite.</li>
-            <li>De presentar un retraso mayor a 15 minutos, no podrá ser atendido. A no ser que se haya acordado con su tratante.</li>
-            <li>De no poder asistir a una sesión, avisar por correo electrónico, con al menos un día de anticipación o justificarla 24 horas después, a fin de asegurar las sesiones siguientes.</li>
-            <li>De no presentarse a la sesión de ingreso sin previo aviso, pasará nuevamente a la lista de espera.</li>
-            <li>De no presentarse en dos ocasiones consecutivas a su sesión sin aviso previo (paciente ya en atención), su cupo será utilizado por otro alumno, y no podrá recibir atención hasta el año próximo.</li>
-          </ul>
-
-          <b>Términos Específicos:</b>
-
-          Al realizarse atenciones presenciales:
-          <ul>
-            <li>Psicoterapia Breve: Sesiones tendrán una duración de 50 minutos aproximadamente, con regularidad de una vez a la semana (puede acordarse otro régimen previa evaluación/recomendación del tratante). La duración de los procesos terapéuticos serán de tipo breve y focal (un máximo de 6 sesiones).</li>
-          </ul>
-
-          Al realizarse intervenciones virtuales:
-
-          <ul>
-            <li>Dado el estado de catástrofe nacional declarado en Chile, a raíz de la pandemia de COVID19, las atenciones psicológicas presenciales fueron interrumpidas. Con el fin de mantener este tipo de servicio disponible para nuestros estudiantes, de forma exepcional y por el tiempo que se requieran los cuidados relacionados a la salud de nuestra comunidad, se realizarán intervenciones clínicas virtuales.</li>
-            <li>Las intervenciones clínicas virtuales se realizarán a través de las siguientes modalidades, donde el estudiante debe optar por UNA de ellas:</li>
-          </ul>
           <ol>
-            <li>Videollamada a las cuales se puede acceder por el sitio Whereby. El profesional enviará un link al correo institucional del alumno para ingresar.</li>
-            <li>Llamada telefónica, para lo cual el estudiante entregará un número de contacto.</li>
+            <li>
+              Brindar un trato respetuoso a todos los funcionarios del DMSE. No se aceptarán faltas relacionadas a condición social, étnia, nacionalidad, religión, política o sexual, tampoco serán permitidos garabatos, gritos, insultos, junto a insinuaciones de carácter sexual o conductas indebidas. Si esto sucede se cerrará el proceso de forma inmediata y no podrá solicitar atención en el DSME.
+            </li>
+            <li>
+              Entregar información fidedigna y datos necesarios para el contacto de un familiar y/o adulto responsable en caso de ser necesario.
+            </li>
+            <li>
+              Criterios de inasistencia:
+              <ol type="a">
+                <li>
+                  <strong>Entrevista de evaluación:</strong> se asignará una nueva hora si el estudiante justifica su inasistencia (certificados o documentos que avalen la ausencia). Podrá no presentarse a esta entrevista en sólo una oportunidad, luego de eso se cerrará el proceso y podrá solicitar ingreso al semestre siguiente.
+                </li>
+                <li>
+                  <strong>Psicoterapia individual breve:</strong>
+                  <ol type="i">
+                    <li>2 inasistencias injustificadas seguidas se considerará abandono en el registro y se dará de alta del proceso en el DSME.</li>
+                    <li>2 inasistencias injustificadas durante el proceso se considerará alta administrativa.</li>
+                    <li>2 inasistencias justificadas o dos inasistencias justificadas intermitentemente, podrán continuar su proceso y si falta una tercera vez, se considerará alta administrativa.</li>
+                  </ol>
+                </li>
+                <li>
+                  <strong>Acompañamiento:</strong> 1 inasistencia será permitida durante el proceso y si falta una segunda oportunidad, se cierra el proceso como alta administrativa.
+                </li>
+                <li>
+                  De presentar un retraso mayor a 15 minutos (individual y grupal/ presencial y online), no será atendido y se registrará como inasistencia.
+                </li>
+                <li>
+                  Justificación debe realizarse dentro de las 12 horas previas o posteriores a la ausencia, si no se marcará como una inasistencia.
+                </li>
+                <li>
+                  No se aceptará como justificación: quedarse dormido y olvido/confusión de la sesión.
+                </li>
+              </ol>
+            </li>
+            <li>
+              De ser derivado a un lugar con convenio (libre elección) o haber ingresado a su sistema de salud público o privado, el/la estudiante deberá coordinar su hora de atención e ingresar para dar inicio al tratamiento requerido. Si no asiste, no podrá solicitar ingreso nuevamente al DSME hasta el año siguiente.
+            </li>
           </ol>
-          <ul>
-            <li>Cualquiera de estas modalidades será confidencial, por lo que el profesional resguardará aquello, al igual que será mi responsabilidad contar con la privacidad necesaria para desarrollar la sesión virtual.</li>
-            <li>Algunas de las dificultades de utilizar estas modalidades virtuales radican en la complejidad para mantener confidencialidad, problemas en la calidad de la comunicación dados inconvenientes técnicos o de conectividad, además de la restricción del contacto directo y posibilidades de acción remota.</li>
-            <li>No podrán ser registradas las sesiones, la grabación unilateral de cualquier sesión y sin consentimiento es incurrir en un acto ilícito, que podría ser sancionado.</li>
-            <li>Si no deseo usar estas modalidades virtuales descritas, puedo esperar a recibir sesiones presenciales una vez que se normalicen las actividades de la Universidad.</li>
-          </ul>
 
-          Quedará expreso en este documento que declaro comprender y aceptar lo expuesto. Se me ha informado en qué consisten los servicios prestados por el Departamento de Salud Mental Estudiantil de forma presencial y la intervención clínica virtual producto de la pandemia COVID 19.
-
-          Además declaro haber presentado todos datos necesarios para mi contacto y los de un familiar y/o adulto responsable e información fidedigna en la ficha de atención psicológica que completé anteriormente.
+          <p>Quedará expreso en este documento que declaro comprender y aceptar lo expuesto.</p>
           {/* </Typography> */}
           {/* <Link to='/form'> */}
           <div className="row">

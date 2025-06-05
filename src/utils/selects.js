@@ -1883,6 +1883,15 @@ export const tipo_cita = [
   { value: "psicopedagógico", label: "Grupo psicopedagógico" },
 ]
 
+// PARA AGREGAR DISPONIBILIDAD
+export const tipo_cita_options = [
+  'Entrevista de despeje',
+  'Acompañamiento psicológico',
+  'Psicoterapia breve',
+  'Psicopedagógica individual',
+  'Grupo psicoterapéutico',
+  'Grupo psicopedagógico'
+];
 
 export const especialidades = [
   { value: "", label: "", name: "", id: 0 },
@@ -1933,10 +1942,11 @@ export const area_atencion = [
   { value: 4, label: "Psiquiátrica" },
 ];
 
-  export const duracion = [
-    { label: '30', value: 1 },
-    { label: '45', value: 2 },
-    { label: '60', value: 3 },
-    { label: '75', value: 4 },
-    { label: '90', value: 5 },
-  ]
+export const duracion = [
+  { label: '30', value: 1 },
+  { label: '45', value: 2 },
+  { label: '60', value: 3 },
+  { label: '75', value: 4 },
+  { label: '90', value: 5 },
+]
+
