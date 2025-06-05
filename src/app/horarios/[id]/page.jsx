@@ -22,7 +22,8 @@ import withAuth from '@/components/withAuth';
 import CustomizedTooltips from '@/components/Tooltip';
 import SimpleBackdrop from '@/components/Backdrop';
 import { useDisponibilidadContext } from '@/context/DisponibilidadContext';
-import { asegurarSegundos } from '@/utils/managedata';
+import { asegurarSegundos, duracion } from '@/utils/managedata';
+import { tipo_cita_options } from '@/utils/selects';
 
 const obtenerRangoHorarioOptimizado = bloques => {
   if (!bloques || bloques.length === 0) return null;
@@ -131,12 +132,6 @@ const ScheduleByProfessional = ({ params }) => {
     fetchProfesional()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  const duracion = [
-    { label: '30', value: 1 },
-    { label: '45', value: 2 },
-    { label: '60', value: 3 },
-    { label: '75', value: 4 },]
 
   /*  CARGA DATOS DE LOS APPS SERVICES */
   const { register, handleSubmit, watch, control, setValue, reset, getValues,
@@ -310,15 +305,6 @@ const ScheduleByProfessional = ({ params }) => {
     setValue("horaFin", data.horaFin);
     setValue("fecha_inicio", data.fechaInicio)
   }
-
-  const options = [
-    'Entrevista de despeje',
-    'Acompañamiento psicológico',
-    'Psicoterapia breve',
-    'Psicopedagógica individual',
-    'Grupo psicoterapéutico',
-    'Grupo psicopedagógico'
-  ];
 
   const validateHoraFin = (value) => {
     if (value < horaIni) {
@@ -657,7 +643,7 @@ const ScheduleByProfessional = ({ params }) => {
                         <div className="form-group select-gender">
                           <div className="row">
                             <div className="col-6 d-flex flex-column">
-                              {options.map((option) => (
+                              {tipo_cita_options.map((option) => (
                                 <label key={option} className="form-check-label">
                                   <input
                                     type="checkbox"
@@ -677,33 +663,6 @@ const ScheduleByProfessional = ({ params }) => {
 
                             </div>
                           </div>
-                          {/* <div className="form-check-inline"> 
-                              <div className="col-6 d-flex flex-column">
-                                <label className="form-check-label">
-                                  <input
-                                    type="checkbox"
-                                    value="Grupo psicoterapéutico"
-                                    name="tipo_cita"
-                                    className="form-check-input"
-                                    {...register('tipo_cita')}
-                                  />
-                                  Grupo psicoterapéutico
-                                </label>
-                              </div>
-                              <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="checkbox"
-                                    value="Grupo psicopedagógico"
-                                    name="tipo_cita"
-                                    className="form-check-input"
-                                    {...register('tipo_cita')}
-                                  />
-                                  Grupo psicopedagógico
-                                </label>
-                              </div>
-                            </div> */}
-
                           {errors.tipo_cita && <span><small>{errors.tipo_cita.message}</small></span>}
                         </div>
                       </div>

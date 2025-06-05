@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Button } from 'react-bootstrap';
-import { formatDateUTC, filtrarFechasAnteriores } from '@/utils/managedata';
+import { formatDateUTC, filtrarFechasAnteriores, normalizarHora } from '@/utils/managedata';
 import SimpleBackdrop from '@/components/Backdrop';
 
 const PatientsList = () => {
@@ -46,6 +46,7 @@ const PatientsList = () => {
   const [idCita, setIdCita] = useState('')
   const mobile = useMediaQuery('(max-width:780px)');
   const { setSelectedUserId } = useUserContext()
+  const HORAS_PARA_CANCELAR = process.env.NEXT_PUBLIC_HORAS_PARA_CANCELAR || 24;
 
   useEffect(() => {
     setProps({
@@ -72,7 +73,7 @@ const PatientsList = () => {
 
     const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
     const citasActivas = response.filter(item => (!item["estado"].includes('cancelada') /* && !item["estado"].includes('realizada') */))
-    
+
     const citasConStatus = citasActivas.map(item => {
       const alumno = alumnos.find(alumno => alumno.id === item.id_paciente); // Buscar el alumno por ID
       return {
@@ -363,7 +364,7 @@ const PatientsList = () => {
       responsive: ['lg'],
       render: (text, record) => (
         <div>
-          {record.estado === "pendiente" && (
+          {record.estado === "reservada" && (
             <span className="custom-badge status-green">
               {record.estado}
             </span>
@@ -607,13 +608,14 @@ const PatientsList = () => {
   }
 
   const openWarning = (record) => {
-    const citaDateTime = new Date(`${record.fecha}T${record.hora}`)
+    const hora = normalizarHora(record.hora);
+    const citaDateTime = new Date(`${record.fecha}T${hora}`)
     const ahora = new Date()
 
     const diferenciaEnMs = citaDateTime - ahora
     const horasRestantes = diferenciaEnMs / (1000 * 60 * 60)
 
-    if (horasRestantes < 24) {
+    if (horasRestantes < HORAS_PARA_CANCELAR) {
       setSuccess('info') // o 'error', según cómo quieras mostrarlo
       setMessage('La cita ya no puede ser cancelada porque faltan menos de 24 horas.')
       return
@@ -630,6 +632,11 @@ const PatientsList = () => {
 
   const handleSelectedId = (id) => {
     setSelectedUserId(id)
+  }
+  
+  const handleClose = () => {
+    setMessage('')
+    setSuccess('initial')
   }
 
   return (
@@ -797,20 +804,50 @@ const PatientsList = () => {
       <div className='p-0 m-0'>
         {
           success === 'success'
-            ?
-            <div style={{
-              height: '100%',
-              position: 'fixed',
-              top: '0',
-              width: '105%',
-              zIndex: 99999,
-              background: '#00000080',
-              margin: 0,
-            }}>
-              {/* <div className="col-sm-12 col-lg-6"> */}
+          &&
+          <div style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '105%',
+            zIndex: 99999,
+            background: '#00000080',
+            margin: 0,
+          }}>
+            {/* <div className="col-sm-12 col-lg-6"> */}
+            <Alert
+              severity="success"
+              onClose={handleClose}
+              sx={{
+                zIndex: 'tooltip',
+                position: 'absolute',
+                left: '30%',
+                width: '50%',
+                padding: '50px',
+                bottom: '50vh'
+              }}
+            // spacing={2}
+            >
+              {message}
+            </Alert>
+            {/* </div> */}
+          </div>
+        }
+        {success === 'fail'
+          &&
+          <div className="row" style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080',
+            margin: 0,
+          }}>
+            <div className="col-sm-12 col-lg-6">
               <Alert
-                severity="success"
-                onClose={() => { setSuccess('initial') }}
+                severity="error"
+                onClose={handleClose}
                 sx={{
                   zIndex: 'tooltip',
                   position: 'absolute',
@@ -823,69 +860,71 @@ const PatientsList = () => {
               >
                 {message}
               </Alert>
-              {/* </div> */}
             </div>
+          </div>
+        }
+        {
+          success === 'warning'
+          &&
+          <div className="row" style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080',
+            margin: 0,
+          }}>
+            <div className="col-sm-12 col-lg-6">
+              <Alert
+                severity="warning"
+                onClose={handleClose}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+              // spacing={2}
+              >
+                <h4>{message}</h4>
+                <Button variant="primary" onClick={() => { changeStatusToCancel(idCita) }}> Confirmar </Button>
+              </Alert>
+            </div>
+          </div>
 
-            : success === 'fail'
-              ?
-              <div className="row" style={{
-                height: '100%',
-                position: 'fixed',
-                top: '0',
-                width: '100%',
-                zIndex: 99999,
-                background: '#00000080',
-                margin: 0,
-              }}>
-                <div className="col-sm-12 col-lg-6">
-                  <Alert
-                    severity="error"
-                    onClose={() => { setSuccess('initial') }}
-                    sx={{
-                      zIndex: 'tooltip',
-                      position: 'absolute',
-                      left: '30%',
-                      width: '50%',
-                      padding: '50px',
-                      bottom: '50vh'
-                    }}
-                  // spacing={2}
-                  >
-                    {message}
-                  </Alert>
-                </div>
-              </div>
-              : success === 'warning'
-                ?
-                <div className="row" style={{
-                  height: '100%',
-                  position: 'fixed',
-                  top: '0',
-                  width: '100%',
-                  zIndex: 99999,
-                  background: '#00000080',
-                  margin: 0,
-                }}>
-                  <div className="col-sm-12 col-lg-6">
-                    <Alert
-                      severity="warning"
-                      onClose={() => { setSuccess('initial') }}
-                      sx={{
-                        zIndex: 'tooltip',
-                        position: 'absolute',
-                        left: '30%',
-                        width: '50%',
-                        padding: '50px',
-                        bottom: '50vh'
-                      }}
-                    // spacing={2}
-                    >
-                      <h4>{message}</h4>
-                      <Button variant="primary" onClick={() => { changeStatusToCancel(idCita) }}> Confirmar </Button>
-                    </Alert>
-                  </div>
-                </div>
-                : ""
+        }
+        {success === 'info'
+          &&
+          <div className="row" style={{
+            height: '100%',
+            position: 'fixed',
+            top: '0',
+            width: '100%',
+            zIndex: 99999,
+            background: '#00000080',
+            margin: 0,
+          }}>
+            <div className="col-sm-12 col-lg-6">
+              <Alert
+                severity="warning"
+                onClose={handleClose}
+                sx={{
+                  zIndex: 'tooltip',
+                  position: 'absolute',
+                  left: '30%',
+                  width: '50%',
+                  padding: '50px',
+                  bottom: '50vh'
+                }}
+              // spacing={2}
+              >
+                <h4>{message}</h4>
+              </Alert>
+            </div>
+          </div>
         }
       </div>
     </>

@@ -1932,3 +1932,11 @@ export const area_atencion = [
   { value: 3, label: "Psicopedagógica" },
   { value: 4, label: "Psiquiátrica" },
 ];
+
+  export const duracion = [
+    { label: '30', value: 1 },
+    { label: '45', value: 2 },
+    { label: '60', value: 3 },
+    { label: '75', value: 4 },
+    { label: '90', value: 5 },
+  ]

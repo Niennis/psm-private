@@ -191,7 +191,7 @@ export const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
         const fechaLimite = new Date(fechaItem);
         fechaLimite.setDate(fechaLimite.getDate() + DIAS_TOLERANCIA);
 
-        if (hoy > fechaLimite && item["estado"].includes('pendiente')) {
+        if (hoy > fechaLimite && item["estado"].includes('reservada')) {
             const res = await changeStatusAppointment(bodyUpdate);
             return { ...item, estado: 'perdida' };
         } else {

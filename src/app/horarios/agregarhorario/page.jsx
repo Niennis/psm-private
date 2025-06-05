@@ -14,6 +14,7 @@ import Select from "react-select";
 
 import { fetchSpecialityById, fetchProfessionalById, fetchProfessionals, fetchSpecialities, fetchProfessionalsAndAdmins, professionalsWithSpeciality } from '@/services/DoctorsServices';
 import { createSchedule, getDates, validateDates, generarHorasMedicas, eliminarDisponibilidadPorId, eliminarDisponibilidadCompleta } from '@/services/SchedulesServices';
+import { duracion, tipo_cita_options } from '@/utils/selects';
 import Calender from '../../calender/page';
 
 import { useSidebar } from "@/context/SidebarContext";
@@ -108,7 +109,7 @@ const AddSchedule = () => {
 
 
   const getProfessionals = async () => {
-      setIsLoading(true);
+    setIsLoading(true);
     try {
       const { users } = await fetchProfessionalsAndAdmins();
       const specialities = await fetchSpecialities()
@@ -125,7 +126,7 @@ const AddSchedule = () => {
           especialidad: doc.especialidad
         }
       })
-      
+
       if (docs.length > 0) {
         setProfesional(docs)
       }
@@ -195,7 +196,7 @@ const AddSchedule = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const { register, handleSubmit, watch, control, setValue, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, control, setValue, getValues, reset, formState: { errors } } = useForm();
 
   // Lógica para manejar los valores predeterminados asíncronos
   useEffect(() => {
@@ -230,6 +231,16 @@ const AddSchedule = () => {
   const horaIni = watch("horaIni");
   const horaFin = watch("horaFin");
   const profesionalSeleccionado = watch("nombre")
+
+
+  const handleCheckboxChange = (e) => {
+    const currentValues = getValues('tipo_cita') || [];
+    const updatedValues = e.target.checked
+      ? [...currentValues, e.target.value]
+      : currentValues.filter((item) => item !== e.target.value);
+
+    setValue('tipo_cita', updatedValues, { shouldValidate: true });
+  };
 
   // Validación personalizada para horaFin
   const validateHoraFin = (value) => {
@@ -306,11 +317,6 @@ const AddSchedule = () => {
       })
   })
 
-  const duracion = [
-    { label: '30', value: 1 },
-    { label: '45', value: 2 },
-    { label: '60', value: 3 },
-    { label: '75', value: 4 },]
 
   const handleDay = (e) => {
     const nuevoNumero = e.target.value;
@@ -674,90 +680,30 @@ const AddSchedule = () => {
                             <div className="row">
                               <div className="col-12 col-lg-6 d-flex flex-column">
 
-                                <label className="form-check-label">
-                                  <input
-                                    type="checkbox"
-                                    value="Entrevista de despeje"
-                                    name="tipo_cita"
-                                    className="form-check-input"
-                                    {...register('tipo_cita', {
-                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
-                                    })}
-                                  />
-                                  Entrevista de despeje
-                                </label>
-                                <label className="form-check-label">
-                                  <input
-                                    type="checkbox"
-                                    value="Acompañamiento psicológico"
-                                    name="tipo_cita"
-                                    className="form-check-input"
-                                    {...register('tipo_cita', {
-                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
-                                    })}
-                                  />
-                                  Acompañamiento psicológico
-                                </label>
-                                {/* </div>
-                                  <div className="form-check-inline"> */}
-                                <label className="form-check-label">
-                                  <input
-                                    type="checkbox"
-                                    value="Psicoterapia breve"
-                                    name="tipo_cita"
-                                    className="form-check-input"
-                                    {...register('tipo_cita', {
-                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
-                                    })}
-                                  />
-                                  Psicoterapia breve
-                                </label>
-                                {/* </div>
-                                  <div className="form-check-inline"> */}
-                                <label className="form-check-label">
-                                  <input
-                                    type="checkbox"
-                                    value="Psicopedagógica individual"
-                                    name="tipo_cita"
-                                    className="form-check-input"
-                                    {...register('tipo_cita', {
-                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
-                                    })}
-                                  />
-                                  Psicopedagógica individual
-                                </label>
 
-                                <label className="form-check-label">
-                                  <input
-                                    type="checkbox"
-                                    value="Grupo psicoterapéutico"
-                                    name="tipo_cita"
-                                    className="form-check-input"
-                                    {...register('tipo_cita', {
-                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
-                                    })}
-                                  />
-                                  Grupo psicoterapéutico
-                                </label>
-                                <label className="form-check-label">
-                                  <input
-                                    type="checkbox"
-                                    value="Grupo psicopedagógico"
-                                    name="tipo_cita"
-                                    className="form-check-input"
-                                    {...register('tipo_cita', {
-                                      validate: (value) => value?.length > 0 || "Debes seleccionar al menos una opción",
-                                    })}
-                                  />
-                                  Grupo psicopedagógico
-                                </label>
+                                {tipo_cita_options.map((option) => (
+                                  <label key={option} className="form-check-label">
+                                    <input
+                                      type="checkbox"
+                                      value={option}
+                                      name="tipo_cita"
+                                      className="form-check-input"
+                                      {...register('tipo_cita', {
+                                        onChange: handleCheckboxChange, // Actualiza dinámicamente
+                                        validate: (value) =>
+                                          value?.length > 0 || 'Debes seleccionar al menos una opción',
+                                      })}
+                                      checked={(getValues('tipo_cita') || []).includes(option)} // Chequea dinámicamente
+                                    />
+                                    {option}
+                                  </label>
+                                ))}
                               </div>
                             </div>
 
                             {errors.tipo_cita && <span><small>{errors.tipo_cita.message}</small></span>}
                           </div>
                         </div>
-
 
 
                         {/* MODALIDAD */}
