@@ -29,16 +29,16 @@ export default async function RootLayout({ children, props }) {
   const session = await getServerSession();
   return (
     // <AuthProvider session={session}>
-      <html lang="en">
-        <head>
-          <link rel="icon" href="/favicon.ico" sizes="any" />
-          <title>Salud Mental Estudiantil UDP</title>
+    <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <title>Salud Mental Estudiantil UDP</title>
 
-          <Script id="fontawesome" src="https://kit.fontawesome.com/7a6fedca6c.js" ></Script>
-          {/* <Script id="fontawesome" src="https://kit.fontawesome.com/a790242b27.js" ></Script> */}
-          <Script id="hotjar" strategy="afterInteractive" dangerouslySetInnerHTML={{
-            __html:
-              `(function(h,o,t,j,a,r){
+        <Script id="fontawesome" src="https://kit.fontawesome.com/7a6fedca6c.js" ></Script>
+        {/* <Script id="fontawesome" src="https://kit.fontawesome.com/a790242b27.js" ></Script> */}
+        <Script id="hotjar" strategy="afterInteractive" dangerouslySetInnerHTML={{
+          __html:
+            `(function(h,o,t,j,a,r){
                 h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
                 h._hjSettings={hjid:3921307,hjsv:6};
                 a=o.getElementsByTagName('head')[0];
@@ -46,37 +46,23 @@ export default async function RootLayout({ children, props }) {
                 r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
                 a.appendChild(r);
             })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=')`
-          }}></Script>
-          {/* <Script
+        }}></Script>
+        {/* <Script
             strategy="beforeInteractive"
             src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
           /> */}
-        </head>
-        <body>
-<AppProviders session={session}>
-
-          {/* <SectionProvider> */}
-            {/* <SidebarProvider> */}
-              {/* <UserWrapper> */}
-                {/* <DisponibilidadProvider> */}
-                  {/* <LoadingProvider> */}
-                  <Header />
-
-                  {/* {session && <Sidebar />} */}
-                  <Sidebar />
-                  <Welcome session={session}>
-                    {children}
-                  </Welcome>
-</AppProviders>
-
-                  {/* </LoadingProvider> */}
-                {/* </DisponibilidadProvider> */}
-              {/* </UserWrapper> */}
-            {/* </SidebarProvider> */}
-          {/* </SectionProvider> */}
-          {/* <Script src="./bot.js" data-args="Salud mental, #FFFFFF, #AA3C80FF, ./bot_salud_mental.png" id="bot"></Script> */}
-        </body>
-      </html>
+      </head>
+      <body>
+        <AppProviders session={session}>
+          <Header />
+          {/* {session && <Sidebar />} */}
+          <Sidebar />
+          <Welcome session={session}>
+            {children}
+          </Welcome>
+        </AppProviders>
+      </body>
+    </html>
     // </AuthProvider>
   );
 }

@@ -25,7 +25,7 @@ import PasswordAlert from '@/components/PasswordAlert';
 import { Button } from 'react-bootstrap'
 import { Alert } from '@mui/material';
 import { fetchUser } from '@/services/UsersServices';
-import { normalizarHora, filtrarFechasAnteriores } from '@/utils/managedata';
+import { normalizarHora, filtrarFechasAnteriores, formatDateUTC } from '@/utils/managedata';
 import { updateUser } from '@/services/UsersServices';
 import SimpleBackdrop from '@/components/Backdrop';
 

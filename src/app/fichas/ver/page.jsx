@@ -132,7 +132,7 @@ const FichaAlumno = () => {
         name: student[0].nombre,
         apellido: student[0].apellido,
         nombre_social: student[0]?.nombre_social || '',
-        email: session.user?.email,
+        email: student[0]?.email,
         fecha_nacimiento: student[0].fecha_nacimiento
           ? convertirAInputDate(student[0].fecha_nacimiento)
           : '',
