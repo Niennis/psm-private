@@ -1,5 +1,4 @@
 import dayjs from "dayjs"
-
 // datos para 30 días
 export const fetchScheduleByUser = async (id) => {
   const SCHEDULES_URL = process.env.NEXT_PUBLIC_SHOW_30_DAYS
@@ -149,7 +148,6 @@ export const generarHorasMedicas = async (id) => {
       disponible: disponibilidad
     };
   });
-
   return horasMedicas;
 };
 
