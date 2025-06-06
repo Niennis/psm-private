@@ -124,13 +124,6 @@ const authOptions = {
     },
 
     async jwt({ token, user }) {
-      if (token.email) {
-        const profile = await searchUser(token.email);
-        token.name = profile.nombre || token.name;
-        token.rol = profile.tipo_usuario;
-        token.email = profile.email;
-        token.nombre_social = profile?.nombre_social || profile?.nombre;
-      }
 
       if (user) {
         const profile = await searchUser(user.email);
@@ -138,8 +131,17 @@ const authOptions = {
         token.name = profile.nombre || user.name;
         token.rol = profile.tipo_usuario;
         token.email = profile.email;
-        token.nombre_social = profile?.nombre_social || profile?.nombre;
+        token.nombre_social = profile.tipo_usuario !== 'alumno' ? profile?.nombre : profile?.nombre_social || profile?.nombre;
       }
+      
+      if (token.email) {
+        const profile = await searchUser(token.email);
+        token.name = profile.nombre || token.name;
+        token.rol = profile.tipo_usuario;
+        token.email = profile.email;
+        token.nombre_social = profile.tipo_usuario !== 'alumno' ? profile?.nombre : profile?.nombre_social || profile?.nombre;
+      }
+
       return token;
     },
 
