@@ -375,7 +375,8 @@ const Calender = forwardRef(({ editBloque, vistaInicial, onVistaChange, calendar
                             {fechaSeleccionada?.toLocaleDateString("es-ES", {
                               year: "numeric",
                               month: "long",
-                              day: "numeric"
+                              day: "numeric",
+                              timeZone: 'UTC'
                             })}
                           </div>
 

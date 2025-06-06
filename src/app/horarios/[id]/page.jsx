@@ -22,8 +22,8 @@ import withAuth from '@/components/withAuth';
 import CustomizedTooltips from '@/components/Tooltip';
 import SimpleBackdrop from '@/components/Backdrop';
 import { useDisponibilidadContext } from '@/context/DisponibilidadContext';
-import { asegurarSegundos, duracion } from '@/utils/managedata';
-import { tipo_cita_options } from '@/utils/selects';
+import { asegurarSegundos } from '@/utils/managedata';
+import { tipo_cita_options, duracion } from '@/utils/selects';
 
 const obtenerRangoHorarioOptimizado = bloques => {
   if (!bloques || bloques.length === 0) return null;
@@ -526,7 +526,7 @@ const ScheduleByProfessional = ({ params }) => {
                       {isLoading ?
                         <SimpleBackdrop />
                         :
-                        <Calender
+                        calendario && <Calender
                           calendario={calendario}
                           editBloque={handleEdit}
                           profesional_id={params.id}

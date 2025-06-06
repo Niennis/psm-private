@@ -1271,7 +1271,7 @@ const AddSchedule = () => {
             {isLoading ?
               <SimpleBackdrop />
               :
-              <Calender
+              calendario && <Calender
                 profesional_id={session?.user?.id}
                 calendario={calendario}
                 editBloque={handleEdit}
