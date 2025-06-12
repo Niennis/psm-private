@@ -376,7 +376,7 @@ const AppoinmentList = () => {
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.includes('realizada');
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada')|| record.estado.toLowerCase().includes('alta') ;
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -385,8 +385,8 @@ const AppoinmentList = () => {
                         setIdAppointment(record.id_cita);
                       }}
                       style={{
-                        cursor: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.includes('realizada') ? "not-allowed" : "pointer",
-                        opacity: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.includes('realizada') ? 0.5 : 1,
+                        cursor: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? "not-allowed" : "pointer",
+                        opacity: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? 0.5 : 1,
                       }}
                     >
                       <i className="fa fa-trash-alt m-r-5"></i>
@@ -400,7 +400,7 @@ const AppoinmentList = () => {
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada');
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta');
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -409,8 +409,8 @@ const AppoinmentList = () => {
                         openWarning(record);
                       }}
                       style={{
-                        cursor: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.includes('realizada') ? "not-allowed" : "pointer",
-                        opacity: record.estado.includes('Cancelada') || record.estado.includes('cancelada') || record.estado.includes('perdida') || record.estado.includes('realizada') ? 0.5 : 1,
+                        cursor: record.estado.toLowerCase().includes('Cancelada') || record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? "not-allowed" : "pointer",
+                        opacity: record.estado.toLowerCase().includes('Cancelada') || record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? 0.5 : 1,
                       }}
                     >
                       <i className="fa fa-trash-alt m-r-5"></i>
