@@ -1881,6 +1881,7 @@ export const tipo_cita = [
   { value: "individual", label: "Psicopedagógica individual" },
   { value: "psicoterapéutico", label: "Grupo psicoterapéutico" },
   { value: "psicopedagógico", label: "Grupo psicopedagógico" },
+  { value: "psiquiatría", label: "Psiquiatría" },
 ]
 
 // PARA AGREGAR DISPONIBILIDAD
@@ -1889,6 +1890,7 @@ export const tipo_cita_options = [
   'Acompañamiento psicológico',
   'Psicoterapia breve',
   'Psicopedagógica individual',
+  'Psiquiatría',
   'Grupo psicoterapéutico',
   'Grupo psicopedagógico'
 ];

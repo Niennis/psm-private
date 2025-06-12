@@ -14,7 +14,7 @@ import { Modal, Button } from 'react-bootstrap'
 import { fetchUserByEmail, fetchUsers, fetchUser, updateUser, darAlta } from "@/services/UsersServices";
 import { fetchAppointments, changeStatusAppointment, editContact, createContact } from "@/services/AppointmentsServices"
 import { createInterviewRecord, showRecords } from "@/services/RecordServices";
-import { fetchProfessionals } from "@/services/DoctorsServices";
+import { fetchProfessionalsAndHybrid } from "@/utils/getDoctorsWithDespeje";
 
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
@@ -177,7 +177,7 @@ const AddInterviewRecord = ({ params }) => {
 
   const getProfessionals = async () => {
     try {
-      const response = await fetchProfessionals()
+      const response = await fetchProfessionalsAndHybrid()
 
       const docs = response.map((doc, i) => {
         return {

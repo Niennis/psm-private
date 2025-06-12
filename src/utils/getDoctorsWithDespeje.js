@@ -21,6 +21,26 @@ const fetchProfessionalsByServiceType = async (serviceType) => {
 };
 
 
+export const fetchProfessionalsAndHybrid = async () => {
+  // const profesionales = await fetchProfessionals();
+  const {users: profesionales} = await fetchProfessionalsAndAdmins();
+
+  const bloquesPromesas = profesionales.map(profesional =>
+    fetchScheduleByAvailability(profesional.id).then(response => ({
+      profesional,
+      bloques: response.users
+    }))
+  );
+
+  const profesionalesYBloques = await Promise.all(bloquesPromesas);
+
+  const profesionalesFiltrados = profesionalesYBloques.filter(({ profesional, bloques }) =>
+    bloques.some(bloque => bloque.tipoServicio && !bloque.tipoServicio.includes('despeje'))
+  ).map(({ profesional }) => profesional);
+  return profesionalesFiltrados;
+};
+
+
 export const fetchFilteredProfesssionals = async (type) => {
   return await fetchProfessionalsByServiceType(type);
 };
