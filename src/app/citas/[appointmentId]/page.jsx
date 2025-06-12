@@ -1072,7 +1072,7 @@ const EditAppoinments = ({ params }) => {
                                 className="form-check-input me-2"
                                 {...register('status')}
                               />
-                              ¿ Desea cancelar cita la cita?
+                              ¿ Desea cancelar la cita?
                             </label>
                           </div>
                         </div>
