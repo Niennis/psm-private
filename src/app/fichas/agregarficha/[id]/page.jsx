@@ -30,7 +30,7 @@ import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
 import { carreras, tipo_apoyo, modalidad, area_atencion } from "@/utils/selects";
 import { esFechaValida, formatDateToYYYYMMDD, normalizarHora } from "@/utils/managedata";
-
+import { fetchScheduleByAvailability } from "@/services/SchedulesServices";
 const cacheHandler = new CacheHandler();
 
 const AddInterviewRecord = ({ params }) => {
@@ -3081,10 +3081,7 @@ const AddInterviewRecord = ({ params }) => {
                     :
                     <>
                       <h4>{message}</h4>
-                      <Button variant="primary" onClick={(e) => {
-                        handleAlta(e);
-                        handleAppointment(e)
-                      }}> Confirmar </Button>
+                      <Button variant="primary" onClick={(e) => { handleAlta(e); handleAppointment(e) }}> Confirmar </Button>
                     </>
                   }
                 </Alert>
