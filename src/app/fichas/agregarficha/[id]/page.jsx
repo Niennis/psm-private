@@ -85,7 +85,6 @@ const AddInterviewRecord = ({ params }) => {
       const responsePatient = await fetchUserByEmail(date[0].email_estudiante)
       const { users: response } = await fetchUser(responsePatient.id)
       const { entrevista: records } = await showRecords(date[0].id_paciente)
-
       const obj = {
         id_alumno: date[0].id_paciente,
         id_profesional: date[0].id_profesional,
@@ -100,6 +99,7 @@ const AddInterviewRecord = ({ params }) => {
         direccion: response[0].direccion,
         edad: dayjs().diff(dayjs.utc(responsePatient.fecha_nacimiento), 'year'),
         email: date[0].email_estudiante,
+        estado: date[0].estado,
         fecha_nacimiento: response[0].fecha_nacimiento
           ? convertirAInputDate(response[0].fecha_nacimiento)
           : '',
@@ -278,7 +278,7 @@ const AddInterviewRecord = ({ params }) => {
 
     const bodyEstado = {
       id: parseInt(params.id),
-      status: isAlta ? 'alta' : 'realizada',
+      status: data.estado,
       id_paciente: patient.id_alumno,
       id_profesional: data.id_profesional,
       appointment_date: data.fecha,
@@ -3081,7 +3081,10 @@ const AddInterviewRecord = ({ params }) => {
                     :
                     <>
                       <h4>{message}</h4>
-                      <Button variant="primary" onClick={(e) => { handleAlta(e); handleAppointment(e) }}> Confirmar </Button>
+                      <Button variant="primary" onClick={(e) => {
+                        handleAlta(e);
+                        handleAppointment(e)
+                      }}> Confirmar </Button>
                     </>
                   }
                 </Alert>
