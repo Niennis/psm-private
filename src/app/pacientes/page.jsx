@@ -25,8 +25,186 @@ import { Button } from 'react-bootstrap';
 import { formatDateUTC, filtrarFechasAnteriores, normalizarHora } from '@/utils/managedata';
 import SimpleBackdrop from '@/components/Backdrop';
 
+/* 
+
+  const pacientesMap = {};
+
+  // Recorremos cada cita para agruparlas por paciente
+  citas.forEach(cita => {
+    const idPaciente = cita.id_paciente;
+
+    // Si el paciente no existe en el mapa, lo creamos
+    if (!pacientesMap[idPaciente]) {
+      pacientesMap[idPaciente] = {
+        id_paciente: idPaciente,
+        email_estudiante: cita.email_estudiante,
+        nombre_alumno: cita.nombre_alumno,
+        telefono_estudiante: cita.telefono_estudiante,
+        status: cita.status,
+        citas: []
+      };
+    }
+
+    // Añadimos la cita al array de citas del paciente
+    pacientesMap[idPaciente].citas.push({
+      id_cita: cita.id_cita,
+      fecha: cita.fecha,
+      hora: cita.hora,
+      estado: cita.estado,
+      campus: cita.campus,
+      especialidad_profesional: cita.especialidad_profesional,
+      motivo: cita.motivo,
+      primera_cita: cita.primera_cita,
+      uuid: cita.uuid,
+      id_profesional: cita.id_profesional
+    });
+  });
+
+  // Convertimos el mapa a un array de pacientes
+  return Object.values(pacientesMap);
+
+
+
+
+    const pacientesMap = {};
+  const fechaActual = new Date(); // Fecha y hora actual
+
+  citas.forEach(cita => {
+    const idPaciente = cita.id_paciente;
+    const fechaCita = new Date(`${cita.fecha}T${cita.hora}`); // Combina fecha y hora
+
+    // Si la cita es futura (o es hoy pero la hora aún no pasa)
+    if (fechaCita >= fechaActual && cita.estado !== "alta") {
+      // Si el paciente no existe en el mapa, lo creamos
+      if (!pacientesMap[idPaciente]) {
+        pacientesMap[idPaciente] = {
+          id_paciente: idPaciente,
+          email_estudiante: cita.email_estudiante,
+          nombre_alumno: cita.nombre_alumno,
+          telefono_estudiante: cita.telefono_estudiante,
+          status: cita.status,
+          citas: []
+        };
+      }
+
+      // Añadimos la cita al array de citas del paciente
+      pacientesMap[idPaciente].citas.push({
+        id_cita: cita.id_cita,
+        fecha: formatDateUTC(cita.fecha),
+        hora: cita.hora,
+        estado: cita.estado,
+        campus: cita.campus,
+        especialidad_profesional: cita.especialidad_profesional,
+        motivo: cita.motivo,
+        primera_cita: cita.primera_cita,
+        uuid: cita.uuid,
+        id_profesional: cita.id_profesional
+      });
+    }
+  });
+
+  // Ordenamos las citas de cada paciente (más próxima a más lejana)
+  Object.values(pacientesMap).forEach(paciente => {
+    paciente.citas.sort((a, b) => {
+      const fechaA = new Date(`${a.fecha}T${a.hora}`);
+      const fechaB = new Date(`${b.fecha}T${b.hora}`);
+      return fechaA - fechaB; // Orden ascendente (más cercana primero)
+    });
+  });
+
+  return Object.values(pacientesMap);
+*/
+
+const agruparCitasPorPaciente = citas => {
+  const pacientesMap = {};
+  const fechaActual = new Date(); // Fecha y hora actual
+
+  // Primero procesamos todas las citas para clasificarlas
+  citas.forEach(cita => {
+    const idPaciente = cita.id_paciente;
+    const fechaCita = new Date(`${cita.fecha}T${cita.hora}`);
+
+    // Creamos la entrada del paciente si no existe
+    if (!pacientesMap[idPaciente]) {
+      pacientesMap[idPaciente] = {
+        id_paciente: idPaciente,
+        email_estudiante: cita.email_estudiante,
+        nombre_alumno: cita.nombre_alumno,
+        telefono_estudiante: cita.telefono_estudiante,
+        status: cita.status,
+        citasFuturas: [],  // Para citas futuras
+        citasPasadas: []    // Para citas pasadas (no "alta")
+      };
+    }
+
+    // Clasificamos la cita según su fecha y estado
+    // if (cita.estado !== "alta") {
+      if (fechaCita >= fechaActual) {
+        // Cita futura
+        pacientesMap[idPaciente].citasFuturas.push({
+          id_cita: cita.id_cita,
+          fecha: formatDateUTC(cita.fecha),
+          hora: cita.hora,
+          estado: cita.estado,
+          campus: cita.campus,
+          especialidad_profesional: cita.especialidad_profesional,
+          motivo: cita.motivo,
+          primera_cita: cita.primera_cita,
+          uuid: cita.uuid,
+          id_profesional: cita.id_profesional
+        });
+      } else {
+        // Cita pasada
+        pacientesMap[idPaciente].citasPasadas.push({
+          id_cita: cita.id_cita,
+          fecha: formatDateUTC(cita.fecha),
+          hora: cita.hora,
+          estado: cita.estado,
+          campus: cita.campus,
+          especialidad_profesional: cita.especialidad_profesional,
+          motivo: cita.motivo,
+          primera_cita: cita.primera_cita,
+          uuid: cita.uuid,
+          id_profesional: cita.id_profesional
+        });
+      }
+    // }
+  });
+
+  // Procesamos el resultado final
+  const resultado = Object.values(pacientesMap).map(paciente => {
+    // Ordenamos citas futuras (más cercana primero)
+    paciente.citasFuturas.sort((a, b) => {
+      const fechaA = new Date(`${a.fecha}T${a.hora}`);
+      const fechaB = new Date(`${b.fecha}T${b.hora}`);
+      return fechaA - fechaB;
+    });
+
+    // Ordenamos citas pasadas (más reciente primero)
+    paciente.citasPasadas.sort((a, b) => {
+      const fechaA = new Date(`${a.fecha}T${a.hora}`);
+      const fechaB = new Date(`${b.fecha}T${b.hora}`);
+      return fechaB - fechaA; // Orden descendente
+    });
+
+    // Usamos citas futuras, o si no hay, la cita pasada más reciente
+    const citasFinales = paciente.citasFuturas.length > 0
+      ? paciente.citasFuturas
+      : paciente.citasPasadas.length > 0
+        ? [paciente.citasPasadas[0]]
+        : [];
+
+    return {
+      ...paciente,
+      citas: citasFinales
+    };
+  });
+
+  return resultado;
+
+}
+
 const PatientsList = () => {
-  const ROL = ["profesional"]
   const { data: session } = useSession()
   const router = useRouter();
   const { setProps } = useSidebar();
@@ -72,10 +250,14 @@ const PatientsList = () => {
     const response = await fetchAppointments();
 
     const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
-    const citasActivas = response.filter(item => (!item["estado"].includes('cancelada') /* && !item["estado"].includes('realizada') */))
+    const citasActivas = response
+    //  Ahora se muestran las canceladas, o se borran no más ???
+    
+    // .filter(item => (!item["estado"].includes('cancelada') /* && !item["estado"].includes('realizada') */))
 
     const citasConStatus = citasActivas.map(item => {
       const alumno = alumnos.find(alumno => alumno.id === item.id_paciente); // Buscar el alumno por ID
+
       return {
         ...item,                      // Copiar los datos de la cita
         status: alumno?.status || null // Agregar `status`, manejar casos donde no exista alumno
@@ -84,14 +266,18 @@ const PatientsList = () => {
     if (session.user?.rol === 'profesional') {
       const dataFiltered = citasConStatus.filter(item => item.id_profesional == parseInt(session.user?.id));
       const resp = uniqueByEmail(dataFiltered)
-      setUsers(resp);
-      setResults(resp);
+
+      const citas = agruparCitasPorPaciente(resp)
+      setUsers(citas);
+      setResults(citas);
       // setIsValidated(false)
     } else if (session.user?.rol === 'administrador' || session.user?.rol === 'blend') {
       const resp = uniqueByEmail(citasConStatus)
 
-      setUsers(resp);
-      setResults(resp);
+      const citas = agruparCitasPorPaciente(citasConStatus)
+
+      setUsers(citas);
+      setResults(citas);
     }
     setLoading(false)
   }
@@ -197,37 +383,74 @@ const PatientsList = () => {
         </>
       ),
     },
-    {
-      title: "Teléfono",
-      dataIndex: "mobile",
-      sorter: (a, b) => a.telefono_estudiante.length - b.telefono_estudiante.length,
-      render: (text, record) => (
-        <>
+    // {
+    //   title: "Teléfono",
+    //   dataIndex: "mobile",
+    //   sorter: (a, b) => a.telefono_estudiante.length - b.telefono_estudiante.length,
+    //   render: (text, record) => (
+    //     <>
 
-          <Link href="#">{record.telefono_estudiante}</Link>
+    //       <Link href="#">{record.telefono_estudiante}</Link>
 
-        </>
-      )
-    },
+    //     </>
+    //   )
+    // },
     {
       title: "Email",
       dataIndex: "email_estudiante",
       sorter: (a, b) => a.email_estudiante.localeCompare(b.email_estudiante, undefined, { sensitivity: 'base' })
     },
     {
-      title: "Estado",
-      dataIndex: "status",
-      sorter: (a, b) => a.status - b.status,
+      title: "Fecha",
+      dataIndex: "fecha",
+      sorter: (a, b) => a.citas[0].fecha - b.citas[0].fecha,
       render: (text, record) => (
         <div>
-          {record.status === "activo" && (
+
+          {record.citas[0].fecha}
+        </div>
+      )
+    },
+    {
+      title: "Hora",
+      dataIndex: "hora",
+      sorter: (a, b) => a.citas[0].hora - b.citas[0].hora,
+      render: (text, record) => (
+        <div>
+
+          {record.citas[0].hora}
+        </div>
+      )
+    },
+    {
+      title: "Estado",
+      dataIndex: "status",
+      sorter: (a, b) => a.citas[0].estado - b.citas[0].estado,
+      render: (text, record) => (
+        <div>
+          {record.citas[0].estado === "reservada" && (
             <span className="custom-badge status-green">
-              {record.status}
+              {record.citas[0].estado}
             </span>
           )}
-          {record.status === "inactivo" && (
+          {record.citas[0].estado === "realizada" && (
+            <span className="custom-badge status-blue">
+              {record.citas[0].estado}
+            </span>
+          )}
+          {record.citas[0].estado.includes("cancelada") && (
             <span className="custom-badge status-pink">
-              {record.status}
+              {record.citas[0].estado}
+            </span>
+          )}
+          {record.citas[0].estado.includes("perdida") && (
+            <span className="custom-badge status-pink">
+              {record.citas[0].estado}
+            </span>
+          )}
+          {record.citas[0].estado == "alta" && (
+            <span className="custom-badge status-blue">
+              {record.citas[0].estado}
             </span>
           )}
         </div>
@@ -384,7 +607,7 @@ const PatientsList = () => {
               {record.estado}
             </span>
           )}
-          {record.estado.includes("alta") && (
+          {record.estado == "alta" && (
             <span className="custom-badge status-blue">
               {record.estado}
             </span>
@@ -537,16 +760,16 @@ const PatientsList = () => {
       email: citaSelected.email_estudiante || '',
       appointment_date: citaSelected.fecha || '',
       start_time: citaSelected.hora || '',
-      campus: citaSelected.campus === 'centro'
+      campus: (citaSelected.campus).toLowerCase().includes('centro')
         ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
-        : citaSelected.campus === 'huechuraba'
+        : (citaSelected.campus).toLowerCase().includes('huechuraba')
           ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
-          : 'Videollamada',
+          : 'No aplica',
       nombre_estudiante: citaSelected.nombre_alumno,
       selected_doctor: citaSelected.nombre_profesional || '',
       quien_cancela: session?.user?.id,
       status: session?.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional',
-      tipo_cita: citaSelected.tipo_cita || '',
+      tipo_cita: (citaSelected.campus).toLowerCase().includes('sede') ? 'Presencial' : 'Videollamada',
     }
 
     const responseHasRecords = await hasRecords(citaSelected.id_paciente)
@@ -633,7 +856,7 @@ const PatientsList = () => {
   const handleSelectedId = (id) => {
     setSelectedUserId(id)
   }
-  
+
   const handleClose = () => {
     setMessage('')
     setSuccess('initial')
