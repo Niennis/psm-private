@@ -161,16 +161,16 @@ const AppoinmentList = () => {
       email: citaSelected.email_estudiante || '',
       appointment_date: citaSelected.fecha || '',
       start_time: citaSelected.hora || '',
-      campus: citaSelected.campus === 'centro'
+      campus: (citaSelected.campus).toLowerCase().includes('centro')
         ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
-        : citaSelected.campus === 'huechuraba'
+        : (citaSelected.campus).toLowerCase().includes('huechuraba')
           ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
-          : 'Videollamada',
+          : 'No aplica',
       nombre_estudiante: citaSelected.nombre_alumno,
       selected_doctor: citaSelected.nombre_profesional || '',
       quien_cancela: session?.user?.id,
       status: session?.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional',
-      tipo_cita: citaSelected.tipo_cita || '',
+      tipo_cita: (citaSelected.campus).toLowerCase().includes('sede') ? 'Presencial' : 'Videollamada',
     }
 
     const bodyUpdateUser = {
@@ -376,7 +376,7 @@ const AppoinmentList = () => {
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada')|| record.estado.toLowerCase().includes('alta') ;
+                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta');
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
