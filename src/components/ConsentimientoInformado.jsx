@@ -20,7 +20,7 @@ const style = {
   scrollBehavior: 'smooth'
 };
 
-const ModalConsent = ({ open, handleClose, onClick, errors }) => {
+const ModalConsent = ({ open, handleClose, onClick, errors, register }) => {
   // const [open, setOpen] = useState(false);
   // const handleOpen = () => setOpen(true);
   // const handleClose = () => setOpen(false);
@@ -114,7 +114,15 @@ const ModalConsent = ({ open, handleClose, onClick, errors }) => {
             </li>
           </ol>
 
-          <p>Quedará expreso en este documento que declaro comprender y aceptar lo expuesto.</p>
+          <p>
+            Quedará expreso en este documento que declaro comprender y aceptar lo expuesto.
+            {/* <input
+              type="checkbox"
+              {...register("aceptar", { required: true })}
+              style={{ marginLeft: '8px' }}
+            />
+          <span><small> *</small></span> */}
+          </p>
           {/* </Typography> */}
           {/* <Link to='/form'> */}
           <div className="row">

@@ -70,7 +70,7 @@ const tienePrimeraCitaActiva = citas => {
 const tieneAlta = citas => {
   let INICIO_SEMESTRE = process.env.NEXT_PUBLIC_INICIO_SEMESTRE || "2025-01-01"
   let FIN_SEMESTRE = process.env.NEXT_PUBLIC_FIN_SEMESTRE || "2025-06-30"
-  
+
   const citasOrdenadas = citas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
   const ultimaCita = citasOrdenadas[citasOrdenadas.length - 1];
 
@@ -1801,7 +1801,7 @@ const AddFirstAppoinments = () => {
               </div>
             </div>
           </div>
-          <ConsentimientoInformado open={open} handleClose={handleCloseModal} onClick={handleFirstInterview} errors={errors} />
+          <ConsentimientoInformado open={open} handleClose={handleCloseModal} onClick={handleFirstInterview} errors={errors} register={register} />
         </div>
 
         {openBackdrop && <SimpleBackdrop
