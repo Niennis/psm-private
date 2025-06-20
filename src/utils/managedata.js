@@ -1,3 +1,5 @@
+import { changeStatusAppointment } from "@/services/AppointmentsServices"
+
 const cleanRut = rut => {
   return typeof rut === 'string'
     ? rut.replace(/^0+|[^0-9kK]+/g, '').toUpperCase()

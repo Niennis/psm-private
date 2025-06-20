@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Button } from 'react-bootstrap';
-import { formatDateUTC, filtrarFechasAnteriores, normalizarHora } from '@/utils/managedata';
+import { formatDateUTC, formatDateToDDMMYYYY, filtrarFechasAnteriores, normalizarHora } from '@/utils/managedata';
 import SimpleBackdrop from '@/components/Backdrop';
 
 /* 
@@ -139,35 +139,35 @@ const agruparCitasPorPaciente = citas => {
 
     // Clasificamos la cita según su fecha y estado
     // if (cita.estado !== "alta") {
-      if (fechaCita >= fechaActual) {
-        // Cita futura
-        pacientesMap[idPaciente].citasFuturas.push({
-          id_cita: cita.id_cita,
-          fecha: formatDateUTC(cita.fecha),
-          hora: cita.hora,
-          estado: cita.estado,
-          campus: cita.campus,
-          especialidad_profesional: cita.especialidad_profesional,
-          motivo: cita.motivo,
-          primera_cita: cita.primera_cita,
-          uuid: cita.uuid,
-          id_profesional: cita.id_profesional
-        });
-      } else {
-        // Cita pasada
-        pacientesMap[idPaciente].citasPasadas.push({
-          id_cita: cita.id_cita,
-          fecha: formatDateUTC(cita.fecha),
-          hora: cita.hora,
-          estado: cita.estado,
-          campus: cita.campus,
-          especialidad_profesional: cita.especialidad_profesional,
-          motivo: cita.motivo,
-          primera_cita: cita.primera_cita,
-          uuid: cita.uuid,
-          id_profesional: cita.id_profesional
-        });
-      }
+    if (fechaCita >= fechaActual) {
+      // Cita futura
+      pacientesMap[idPaciente].citasFuturas.push({
+        id_cita: cita.id_cita,
+        fecha: formatDateToDDMMYYYY(cita.fecha),
+        hora: cita.hora,
+        estado: cita.estado,
+        campus: cita.campus,
+        especialidad_profesional: cita.especialidad_profesional,
+        motivo: cita.motivo,
+        primera_cita: cita.primera_cita,
+        uuid: cita.uuid,
+        id_profesional: cita.id_profesional
+      });
+    } else {
+      // Cita pasada
+      pacientesMap[idPaciente].citasPasadas.push({
+        id_cita: cita.id_cita,
+        fecha: formatDateToDDMMYYYY(cita.fecha),
+        hora: cita.hora,
+        estado: cita.estado,
+        campus: cita.campus,
+        especialidad_profesional: cita.especialidad_profesional,
+        motivo: cita.motivo,
+        primera_cita: cita.primera_cita,
+        uuid: cita.uuid,
+        id_profesional: cita.id_profesional
+      });
+    }
     // }
   });
 
@@ -252,7 +252,7 @@ const PatientsList = () => {
     const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
     const citasActivas = response
     //  Ahora se muestran las canceladas, o se borran no más ???
-    
+
     // .filter(item => (!item["estado"].includes('cancelada') /* && !item["estado"].includes('realizada') */))
 
     const citasConStatus = citasActivas.map(item => {
@@ -263,6 +263,7 @@ const PatientsList = () => {
         status: alumno?.status || null // Agregar `status`, manejar casos donde no exista alumno
       };
     });
+
     if (session.user?.rol === 'profesional') {
       const dataFiltered = citasConStatus.filter(item => item.id_profesional == parseInt(session.user?.id));
       const resp = uniqueByEmail(dataFiltered)
@@ -313,7 +314,7 @@ const PatientsList = () => {
         setPatientResults(data);
       }
     } catch (error) {
-      setError('')
+      console.log(error)
     } finally {
       setLoading(false)
     }
