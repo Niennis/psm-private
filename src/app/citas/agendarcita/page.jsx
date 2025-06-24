@@ -19,7 +19,7 @@ import { Button } from 'react-bootstrap'
 import SimpleBackdrop from "@/components/Backdrop";
 
 import { createAppointment, createAppointmentForGroup } from "@/services/AppointmentsServices"
-import { fetchSpecialityById } from "@/services/DoctorsServices";
+import { fetchSpecialityById, professionalsByUser } from "@/services/DoctorsServices";
 import { fetchPatientsDespejeFalse } from "@/services/UsersServices";
 import { fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { showAllGroups } from "@/services/GroupServices";
@@ -325,16 +325,35 @@ const AddAppoinments = () => {
     setLoadingDays(true)
     setAppoinmentType(e.value)
     const professionals = await fetchFilteredProfesssionals(e.value)
-    const selectedProfessionals = professionals.map((doc, i) => {
-      return {
-        value: i + 2,
-        label: doc.nombre + ' ' + doc.apellido,
-        id: doc.id,
-        email: doc.email,
-        name: doc.nombre
-      }
-    })
-    setDoctor(selectedProfessionals)
+
+    const { profesionales: professionalsByStudent } = await professionalsByUser(selectedPatient?.id)
+
+    if (professionalsByStudent.length === 0) {
+      const selectedProfessionals = professionals.map((doc, i) => {
+        return {
+          value: i + 2,
+          label: doc.nombre + ' ' + doc.apellido,
+          id: doc.id,
+          email: doc.email,
+          name: doc.nombre
+        }
+      })
+      setDoctor(selectedProfessionals)
+    } else {
+      const filteredProfessionals = professionals.filter(profesional =>
+        professionalsByStudent.some(entry => entry.id_profesional === profesional.id)
+      );
+      const selectedProfessionals = filteredProfessionals.map((doc, i) => {
+        return {
+          value: i + 2,
+          label: doc.nombre + ' ' + doc.apellido,
+          id: doc.id,
+          email: doc.email,
+          name: doc.nombre
+        }
+      })
+      setDoctor(selectedProfessionals)
+    }
   }
 
   // Obtiene días según profesional seleccionado
