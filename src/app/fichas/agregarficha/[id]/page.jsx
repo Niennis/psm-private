@@ -278,7 +278,7 @@ const AddInterviewRecord = ({ params }) => {
 
     const bodyEstado = {
       id: parseInt(params.id),
-      status: data.estado,
+      status: isAlta ? 'alta' : 'realizada',
       id_paciente: patient.id_alumno,
       id_profesional: data.id_profesional,
       appointment_date: data.fecha,
