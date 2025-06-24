@@ -12,6 +12,8 @@ import { hasRecords } from '../../services/RecordServices'
 import {
   imagesend, refreshicon, searchnormal,
 } from '../../components/imagepath';
+import { usersByProfessional, isAssignedToProfessional } from '@/services/DoctorsServices';
+
 import Link from "next/link";
 import Image from 'next/image';
 import Alert from '@mui/material/Alert';
@@ -283,9 +285,19 @@ const PatientsList = () => {
     setLoading(false)
   }
 
+  const handleUsersByProfessional = async (id) => {
+    const response = await usersByProfessional(id);
+  }
+
+  const handleIsAssigned = async (id, id_profesional) => {
+    const response = await isAssignedToProfessional(id, id_profesional);
+  }
+
   useEffect(() => {
     setLoading(true)
     fetchData()
+    handleUsersByProfessional(session.user?.id)
+    handleIsAssigned(16258, session.user?.id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -358,8 +370,13 @@ const PatientsList = () => {
   const columns = [
     {
       title: "Nombre",
-      dataIndex: "nombre",
-      sorter: (a, b) => a['nombre_alumno'].localeCompare(b['nombre_alumno']),
+      dataIndex: "nombre_alumno",
+      sorter: (a, b) => {
+        // Limpia espacios y normaliza a minúsculas antes de comparar
+        const nombreA = a.nombre_alumno.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const nombreB = b.nombre_alumno.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        return nombreA.localeCompare(nombreB, 'es', { sensitivity: 'base' });
+      },
       fixed: 'left',
       onCell: () => ({
         style: {
@@ -384,27 +401,34 @@ const PatientsList = () => {
         </>
       ),
     },
-    // {
-    //   title: "Teléfono",
-    //   dataIndex: "mobile",
-    //   sorter: (a, b) => a.telefono_estudiante.length - b.telefono_estudiante.length,
-    //   render: (text, record) => (
-    //     <>
-
-    //       <Link href="#">{record.telefono_estudiante}</Link>
-
-    //     </>
-    //   )
-    // },
     {
       title: "Email",
       dataIndex: "email_estudiante",
-      sorter: (a, b) => a.email_estudiante.localeCompare(b.email_estudiante, undefined, { sensitivity: 'base' })
+      sorter: (a, b) => {
+        // Extrae la primera letra (ignorando símbolos, números y espacios)
+        const getFirstLetter = (email) => {
+          const firstChar = email.trim().toLowerCase().replace(/[^a-záéíóúñ]/, '')[0];
+          return firstChar || ''; // Si no hay letras, devuelve string vacío
+        };
+
+        return getFirstLetter(a.email_estudiante).localeCompare(
+          getFirstLetter(b.email_estudiante), 'es');
+      }
     },
     {
       title: "Fecha",
       dataIndex: "fecha",
-      sorter: (a, b) => a.citas[0].fecha - b.citas[0].fecha,
+      sorter: (a, b) => {
+        // Convertir fechas dd-mm-yyyy a Date objects para comparación
+        const parseDate = (dateStr) => {
+          const [day, month, year] = dateStr.split('-');
+          return new Date(`${year}-${month}-${day}`);
+        };
+
+        const dateA = parseDate(a.citas[0].fecha);
+        const dateB = parseDate(b.citas[0].fecha);
+        return dateA - dateB;
+      },
       render: (text, record) => (
         <div>
 
@@ -415,7 +439,15 @@ const PatientsList = () => {
     {
       title: "Hora",
       dataIndex: "hora",
-      sorter: (a, b) => a.citas[0].hora - b.citas[0].hora,
+      sorter: (a, b) => {
+        // Convertir horas h:mm:ss a segundos para comparación
+        const timeToSeconds = (timeStr) => {
+          const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+          return hours * 3600 + minutes * 60 + seconds;
+        };
+
+        return timeToSeconds(a.citas[0].hora) - timeToSeconds(b.citas[0].hora);
+      },
       render: (text, record) => (
         <div>
 
@@ -665,6 +697,7 @@ const PatientsList = () => {
                           e.stopPropagation();
                         }
                         handleNavigate(record.fecha, record.hora)
+                        handleSelectedId(record.id_paciente)
                       }}
                       style={{
                         cursor: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? "not-allowed" : "pointer",
@@ -767,8 +800,7 @@ const PatientsList = () => {
           ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
           : 'No aplica',
       nombre_estudiante: citaSelected.nombre_alumno,
-      selected_doctor: citaSelected.nombre_profesional || '',
-      quien_cancela: session?.user?.id,
+      quien_cancela: citaSelected.nombre_profesional || '',
       status: session?.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional',
       tipo_cita: (citaSelected.campus).toLowerCase().includes('sede') ? 'Presencial' : 'Videollamada',
     }

@@ -8,11 +8,11 @@ import Image from 'next/image';
 import { Table } from 'antd';
 
 import { onShowSizeChange, itemRender } from '@/components/Pagination'
-import {  professionalsWithSpeciality, fetchSpecialities, fetchProfessionalsAndAdmins } from '@/services/DoctorsServices';
+import { professionalsWithSpeciality, fetchSpecialities, fetchProfessionalsAndAdmins } from '@/services/DoctorsServices';
 import { search } from '@/services/AppointmentsServices'
 import { useSidebar } from "@/context/SidebarContext";
 
-import {  plusicon, refreshicon, searchnormal } from '@/components/imagepath';
+import { plusicon, refreshicon, searchnormal } from '@/components/imagepath';
 import FeatherIcon from 'feather-icons-react/build/FeatherIcon';
 import withAuth from '@/components/withAuth';
 import SimpleBackdrop from '@/components/Backdrop';
@@ -41,7 +41,7 @@ const DoctorList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const {users} = await fetchProfessionalsAndAdmins();
+        const { users } = await fetchProfessionalsAndAdmins();
         const specialities = await fetchSpecialities()
         const professionals = await professionalsWithSpeciality(specialities, users);
         setDoctors(professionals)
@@ -110,7 +110,21 @@ const DoctorList = () => {
     {
       title: "Teléfono",
       dataIndex: "telefono",
-      sorter: (a, b) => a.telefono.length - b.telefono.length,
+      sorter: (a, b) => {
+        // Función para normalizar y clasificar valores
+        const getSortValue = (tel) => {
+          if (!tel || tel.trim() === '') return 2; // Campos vacíos al final
+
+          const cleanTel = tel.toString().trim();
+          const isNumeric = /^\d+$/.test(cleanTel); // Verifica si son solo dígitos
+
+          return isNumeric
+            ? 0 + parseInt(cleanTel, 10) // Números (ordenados por valor)
+            : 1 + cleanTel.toLowerCase().charCodeAt(0); // Texto (ordenado por primera letra)
+        };
+
+        return getSortValue(a.telefono) - getSortValue(b.telefono);
+      },
       render: (text, record) => (
         <>
           <Link href="#">{record.telefono}</Link>
@@ -206,7 +220,7 @@ const DoctorList = () => {
   return (
     < >
       {/* <Sidebar id='menu-item1' id1='menu-items1' activeClassName='doctor-list' /> */}
-      <div className="sidebar-overlay" data-reff=""  style={{ zIndex: 98 }}/>
+      <div className="sidebar-overlay" data-reff="" style={{ zIndex: 98 }} />
       <div className="page-wrapper">
         <div className="content">
           {/* Page Header */}
