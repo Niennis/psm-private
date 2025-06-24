@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable-next-line react-hooks/exhaustive-deps */
 /* eslint-disable react/jsx-no-duplicate-props */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import Select from "react-select";
 
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
@@ -26,6 +26,7 @@ import { useUserContext } from "@/context/UserContext";
 import { formatAndValidateRUT } from "@/utils/rutFormat";
 import { updateUser } from "@/services/UsersServices";
 import { createContact, editContact } from "@/services/AppointmentsServices";
+import { isAssignedToProfessional } from "@/services/DoctorsServices";
 import { regiones, comunas, motivo_consulta, carreras } from "@/utils/selects";
 import { Button } from 'react-bootstrap'
 import SimpleBackdrop from "@/components/Backdrop";
@@ -58,6 +59,21 @@ const FichaAlumno = () => {
   useEffect(() => {
     setMenuPortalTarget(document.body);
   }, [])
+
+
+  useEffect(() => {
+    const checkAssignment = async () => {
+      if (!selectedUserId || !session?.user?.id) return;
+
+      const isAssigned = await isAssignedToProfessional(selectedUserId, session.user.id);
+
+      if ((session.user.rol != 'alumno' && !isAssigned) || (session.user.rol == 'alumno' && selectedUserId != session.user.id)) {
+        setSuccess('failAccess')
+      }
+    };
+
+    checkAssignment();
+  }, [selectedUserId, session?.user?.id]);
 
   const { register, handleSubmit, watch, control, setValue, trigger, clearErrors,
     formState: { errors }
@@ -108,7 +124,23 @@ const FichaAlumno = () => {
           motivo_consulta: motivo_consulta,
         }
       })
-      setRecords(recordsProcesados)
+      const withDerivados = recordsProcesados.map(async (record) => {
+        if(record.derivado){
+          const { users } = await fetchUser(record.derivado)
+          
+          return {
+            ...record,
+            nombre_derivado: `${users[0]?.nombre} ${users[0]?.apellido}` || '',
+          }
+        } else {
+          return{
+            ...record,
+            nombre_derivado: ''
+          }
+        }
+      })
+      const promises = await Promise.all(withDerivados);
+      setRecords(promises)
     } catch (error) {
       console.log(error)
     }
@@ -336,21 +368,17 @@ const FichaAlumno = () => {
 
   const handleClose = () => {
     setSuccess('initial')
-    router.push('/citas')
+    if (session?.user?.rol !== 'alumno') {
+      router.push('/pacientes')
+    } else {
+      router.push('/citas')
+    }
   }
 
   const handleCloseModal = () => {
     setSuccess('initial')
   }
 
-
-
-  //  --------------- CÓDIGO PARA VALIDAR COMUNA
-
-
-
-
-  //  --------------- FIN CÓDIGO PARA VALIDAR COMUNA
 
   return (
     <>
@@ -1161,7 +1189,7 @@ const FichaAlumno = () => {
                                     <div className="comman-activitys flex-grow-1">
                                       <h3>
                                         {item.numero_ficha} {" - "}
-                                        Profesional Tratante: {toTitleCase(item.profesional_evaluador)}
+                                        Profesional Tratante: {toTitleCase(item?.profesional_evaluador)}
                                       </h3>
 
                                       <span>
@@ -1172,6 +1200,11 @@ const FichaAlumno = () => {
 
                                       <h3><span>Observaciones: {item.observaciones || ''}</span></h3>
                                       {/* <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3> */}
+
+                                      {
+                                        item?.derivado &&
+                                        <h3><span>Derivado a: {item.nombre_derivado || ''}</span></h3>
+                                      }
 
                                       <button
                                         className="btn btn-primary"
@@ -1197,6 +1230,11 @@ const FichaAlumno = () => {
 
                                       {" "}
                                       <h3><span><strong>Acuerdos:</strong> {item.acuerdos || ''}</span></h3>
+
+                                      {
+                                        item?.derivado &&
+                                        <h3><span>Derivado a: {item.nombre_derivado || ''}</span></h3>
+                                      }
 
                                       <button
                                         className="btn btn-primary"
@@ -1506,14 +1544,10 @@ const FichaAlumno = () => {
             </div>
           </div >
 
-
-
-
         </div >
       </div >
 
-      {success === 'success'
-        ?
+      {success === 'success' &&
         <div style={{
           height: '100%',
           position: 'fixed',
@@ -1541,75 +1575,101 @@ const FichaAlumno = () => {
           {/* </div> */}
         </div>
 
-        : success === 'fail'
-          ?
-          <div className="row" style={{
-            height: '100%',
-            position: 'fixed',
-            top: '0',
-            width: '100%',
-            zIndex: 99999,
-            background: '#00000080'
-          }}>
-            <div className="col-sm-12 col-lg-6">
-              <Alert
-                severity="error"
-                onClose={handleCloseModal}
-                sx={{
-                  zIndex: 'tooltip',
-                  position: 'absolute',
-                  left: '30%',
-                  width: '50%',
-                  padding: '50px',
-                  bottom: '50vh'
-                }}
-                spacing={2}
-              >
-                Ha ocurrido un problema. {message}
-              </Alert>
-            </div>
+      }
+      {success === 'fail' &&
+        <div className="row" style={{
+          height: '100%',
+          position: 'fixed',
+          top: '0',
+          width: '100%',
+          zIndex: 99999,
+          background: '#00000080'
+        }}>
+          <div className="col-sm-12 col-lg-6">
+            <Alert
+              severity="error"
+              onClose={handleCloseModal}
+              sx={{
+                zIndex: 'tooltip',
+                position: 'absolute',
+                left: '30%',
+                width: '50%',
+                padding: '50px',
+                bottom: '50vh'
+              }}
+              spacing={2}
+            >
+              Ha ocurrido un problema. {message}
+            </Alert>
           </div>
-          : success === 'warning'
-            ?
-            <div className="row" style={{
-              height: '100%',
-              position: 'fixed',
-              top: '0',
-              width: '100%',
-              zIndex: 99999,
-              background: '#00000080'
-            }}>
-              <div className="col-sm-12 col-lg-6">
-                <Alert
-                  severity="warning"
-                  onClose={handleCloseModal}
-                  sx={{
-                    zIndex: 'tooltip',
-                    position: 'absolute',
-                    left: '30%',
-                    width: '50%',
-                    padding: '50px',
-                    bottom: '50vh'
-                  }}
-                // spacing={2}
-                >
-                  <h4>{message}</h4>
-                  {
-                    Object.keys(errors).length > 0
-                      ?
-                      <> <h5>
-                        <span><small>** Quedan campos sin rellenar</small></span>
-                      </h5>
-                      </>
-                      :
-                      <Button variant="primary" onClick={(e) => { handleUpdate(e) }}> Confirmar </Button>
-                  }
+        </div>
+      }
 
-
-                </Alert>
-              </div>
-            </div>
-            : ""
+      {success === 'failAccess' &&
+        <div className="row" style={{
+          height: '100%',
+          position: 'fixed',
+          top: '0',
+          width: '100%',
+          zIndex: 99999,
+          background: '#00000080'
+        }}>
+          <div className="col-sm-12 col-lg-6">
+            <Alert
+              severity="error"
+              onClose={handleClose}
+              sx={{
+                zIndex: 'tooltip',
+                position: 'absolute',
+                left: '30%',
+                width: '50%',
+                padding: '50px',
+                bottom: '50vh'
+              }}
+              spacing={2}
+            >
+              No tienes acceso a esta ficha.
+            </Alert>
+          </div>
+        </div>
+      }
+      {success === 'warning' &&
+        <div className="row" style={{
+          height: '100%',
+          position: 'fixed',
+          top: '0',
+          width: '100%',
+          zIndex: 99999,
+          background: '#00000080'
+        }}>
+          <div className="col-sm-12 col-lg-6">
+            <Alert
+              severity="warning"
+              onClose={handleCloseModal}
+              sx={{
+                zIndex: 'tooltip',
+                position: 'absolute',
+                left: '30%',
+                width: '50%',
+                padding: '50px',
+                bottom: '50vh'
+              }}
+            // spacing={2}
+            >
+              <h4>{message}</h4>
+              {
+                Object.keys(errors).length > 0
+                  ?
+                  <> <h5>
+                    <span><small>** Quedan campos sin rellenar</small></span>
+                  </h5>
+                  </>
+                  :
+                  <Button variant="primary" onClick={(e) => { handleUpdate(e) }}> Confirmar </Button>
+              }
+            </Alert>
+          </div>
+        </div>
       }
     </>
   );

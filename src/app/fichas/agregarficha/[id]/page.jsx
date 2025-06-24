@@ -15,6 +15,7 @@ import { fetchUserByEmail, fetchUsers, fetchUser, updateUser, darAlta } from "@/
 import { fetchAppointments, changeStatusAppointment, editContact, createContact } from "@/services/AppointmentsServices"
 import { createInterviewRecord, showRecords } from "@/services/RecordServices";
 import { fetchProfessionalsAndHybrid } from "@/utils/getDoctorsWithDespeje";
+import { isAssignedToProfessional } from "@/services/DoctorsServices";
 
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
@@ -31,7 +32,7 @@ import CacheHandler from "@/utils/cache-handler";
 import { carreras, tipo_apoyo, modalidad, area_atencion } from "@/utils/selects";
 import { esFechaValida, formatDateToYYYYMMDD, normalizarHora } from "@/utils/managedata";
 import { fetchScheduleByAvailability } from "@/services/SchedulesServices";
-const cacheHandler = new CacheHandler();
+import { useUserContext } from "@/context/UserContext";
 
 const AddInterviewRecord = ({ params }) => {
   const { data: session } = useSession()
@@ -48,6 +49,7 @@ const AddInterviewRecord = ({ params }) => {
   const [data, setData] = useState(null);
   const [profesionales, setProfesionales] = useState([])
   const [menuPortalTarget, setMenuPortalTarget] = useState(null);
+  const { selectedUserId } = useUserContext()
 
   const [success, setSuccess] = useState('initial')
   const [error, setError] = useState('')
@@ -71,6 +73,20 @@ const AddInterviewRecord = ({ params }) => {
   useEffect(() => {
     setMenuPortalTarget(document.body);
   }, [])
+
+  useEffect(() => {
+    const checkAssignment = async () => {
+      if (!selectedUserId || !session?.user?.id) return;
+
+      const isAssigned = await isAssignedToProfessional(selectedUserId, session.user.id);
+
+      if ((session.user.rol != 'alumno' && !isAssigned)) {
+        setSuccess('failAccess')
+      }
+    };
+
+    checkAssignment();
+  }, [selectedUserId, session?.user?.id]);
 
   const convertirAInputDate = fechaTexto => {
     const fecha = dayjs.utc(fechaTexto).tz('America/Santiago', true);
@@ -3155,6 +3171,35 @@ const AddInterviewRecord = ({ params }) => {
                       <Button variant="primary" onClick={(e) => { handleInterview(e) }}> Confirmar </Button>
                     </>
                   }
+                </Alert>
+              </div>
+            </div>
+          }
+
+          {success === 'failAccess' &&
+            <div className="row" style={{
+              height: '100%',
+              position: 'fixed',
+              top: '0',
+              width: '100%',
+              zIndex: 99999,
+              background: '#00000080'
+            }}>
+              <div className="col-sm-12 col-lg-6">
+                <Alert
+                  severity="error"
+                  onClose={handleClose}
+                  sx={{
+                    zIndex: 'tooltip',
+                    position: 'absolute',
+                    left: '30%',
+                    width: '50%',
+                    padding: '50px',
+                    bottom: '50vh'
+                  }}
+                  spacing={2}
+                >
+                  No tienes acceso a esta ficha.
                 </Alert>
               </div>
             </div>

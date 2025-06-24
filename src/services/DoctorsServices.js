@@ -295,3 +295,76 @@ export const changeStatus = async (id, status) => {
     console.log('Error:', error)
   }
 }
+
+export const usersByProfessional = async (id) => {
+  const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/showvisibilidadxprofesional`
+  const body = {
+    "id_profesional": id
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    const response = await data.json()
+    
+    return response
+  } catch (error) {
+    console.log('Error:', error)
+  }
+}
+
+export const professionalsByUser = async (id) => {
+  const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/showvisibilidadxalumno`
+  const body = {
+    "id_alumno": id
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    const response = await data.json()
+    return response
+  } catch (error) {
+    console.log('Error:', error)
+  }
+}
+
+
+export const isAssignedToProfessional = async (userId, id_profesional) => {
+  const URL = `${process.env.NEXT_PUBLIC_SHOWPATIENTS}/showvisibilidadxprofesional`   
+
+  const body = {
+    "id_profesional": id_profesional
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*',
+      },
+      body: JSON.stringify(body)
+    })
+    const {alumnos: response} = await data.json()
+
+    const isAssigned = response.some(user => user.id_alumno == userId);
+    
+    return isAssigned;
+
+  } catch (error) {
+    console.log('Error:', error)
+  }
+}
