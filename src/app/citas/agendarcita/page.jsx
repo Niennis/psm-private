@@ -80,6 +80,7 @@ const AddAppoinments = () => {
   const [defaultMotivo, setDefaultMotivo] = useState(null);
   const [isMotivoLoaded, setIsMotivoLoaded] = useState(false);
   const [appoinmentType, setAppoinmentType] = useState(''); // nuevo: tipo de cita
+  const [loadingDoctors, setLoadingDoctors] = useState(false);
 
   useEffect(() => {
     setProps({
@@ -233,6 +234,8 @@ const AddAppoinments = () => {
   }
   // SUBMIT FUNCTION
   const onSubmit = handleSubmit(async (data, e) => {
+    // console.log('DATA', data);
+    
     const formValid = await trigger(['selectedDay', 'selectedHour', 'motivo']);
     if (!formValid) {
       console.log('Validación de formulario falló', errors);
@@ -317,42 +320,50 @@ const AddAppoinments = () => {
   }
 
   const handleSelectedType = async (e) => {
+    setLoadingDoctors(true); // <- Activar carga
     setDoctor([])
+    // console.log('doc', doctor);
+    setValue('professional', null);
     setDays([])
     setHours([])
     setDate('')
     setTime('')
     setLoadingDays(true)
     setAppoinmentType(e.value)
-    const professionals = await fetchFilteredProfesssionals(e.value)
+    try {
+      const professionals = await fetchFilteredProfesssionals(e.value)
 
-    const { profesionales: professionalsByStudent } = await professionalsByUser(selectedPatient?.id)
+      const { profesionales: professionalsByStudent } = await professionalsByUser(selectedPatient?.id)
+// console.log('professionalsByStudent', professionalsByStudent.length);
 
-    if (professionalsByStudent.length === 0) {
-      const selectedProfessionals = professionals.map((doc, i) => {
-        return {
-          value: i + 2,
-          label: doc.nombre + ' ' + doc.apellido,
-          id: doc.id,
-          email: doc.email,
-          name: doc.nombre
-        }
-      })
-      setDoctor(selectedProfessionals)
-    } else {
-      const filteredProfessionals = professionals.filter(profesional =>
-        professionalsByStudent.some(entry => entry.id_profesional === profesional.id)
-      );
-      const selectedProfessionals = filteredProfessionals.map((doc, i) => {
-        return {
-          value: i + 2,
-          label: doc.nombre + ' ' + doc.apellido,
-          id: doc.id,
-          email: doc.email,
-          name: doc.nombre
-        }
-      })
-      setDoctor(selectedProfessionals)
+      if (professionalsByStudent.length === 0) {
+        const selectedProfessionals = professionals.map((doc, i) => {
+          return {
+            value: i + 2,
+            label: doc.nombre + ' ' + doc.apellido,
+            id: doc.id,
+            email: doc.email,
+            name: doc.nombre
+          }
+        })
+        setDoctor(selectedProfessionals)
+      } else {
+        const filteredProfessionals = professionals.filter(profesional =>
+          professionalsByStudent.some(entry => entry.id_profesional === profesional.id)
+        );
+        const selectedProfessionals = filteredProfessionals.map((doc, i) => {
+          return {
+            value: i + 2,
+            label: doc.nombre + ' ' + doc.apellido,
+            id: doc.id,
+            email: doc.email,
+            name: doc.nombre
+          }
+        })
+        setDoctor(selectedProfessionals)
+      }
+    } finally {
+      setLoadingDoctors(false); // <- Desactivar carga
     }
   }
 
@@ -566,7 +577,7 @@ const AddAppoinments = () => {
 
   const handleSelectedalumno = async (e) => {
     setSelectedPatient(e)
-    setValue('patientName', e?.social_name);
+    setValue('patientName', e?.name);
     setValue('patientLastname', e?.lastName);
   }
 
@@ -755,7 +766,7 @@ const AddAppoinments = () => {
                               <input
                                 className="form-control"
                                 type="text"
-                                value={selectedPatient?.social_name || ''}
+                                value={selectedPatient?.name || ''}
                                 disabled
                                 {...register('patientName', {
                                   // required: {
@@ -872,13 +883,14 @@ const AddAppoinments = () => {
                               <div className="form-group local-forms col-md-6 col-xl-6">
                                 <label>Profesional</label>
                                 <Controller
+                                  key={`professional-${appoinmentType}`}
                                   control={control}
                                   name="professional"
                                   rules={{ required: 'Profesional es requerido' }}
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value, name, ref } }) => {
                                     return (<Select
-                                      placeholder={doctor.length === 0 ? 'Cargando...' : 'Seleccione...'}
+                                      placeholder={loadingDoctors  ? 'Cargando...' : 'Seleccione...'}
                                       instanceId="professional"
                                       defaultValue={selectedOption}
                                       onChange={(e) => {
