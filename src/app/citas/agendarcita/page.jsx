@@ -234,8 +234,6 @@ const AddAppoinments = () => {
   }
   // SUBMIT FUNCTION
   const onSubmit = handleSubmit(async (data, e) => {
-    // console.log('DATA', data);
-    
     const formValid = await trigger(['selectedDay', 'selectedHour', 'motivo']);
     if (!formValid) {
       console.log('Validación de formulario falló', errors);
@@ -247,15 +245,15 @@ const AddAppoinments = () => {
     if (data.alumno.type === 'grupo') {
       try {
         // la función que crea la cita
-        const appointment = await createAppointmentForGroup({
+        const bodyAppointment = {
           ...data,
           "patient_id": selectedPatient.id,
           hora: data.selectedHour,
           fecha: data.selectedDay,
           motivo: data.motivo === 'Otro' ? data.otro : data.motivo,
           campus: data.campus || 'No aplica'
-        })
-
+        }
+        const appointment = await createAppointmentForGroup(bodyAppointment)
         if (appointment.estado === false) {
           setSuccess('fail')
           setError(appointment.detalle)
@@ -277,15 +275,15 @@ const AddAppoinments = () => {
 
       try {
         // la función que crea la cita
-        const appointment = await createAppointment({
+        const bodyAppointment= {
           ...data,
           "patient_id": selectedPatient.id,
           hora: data.selectedHour,
           fecha: data.selectedDay,
           motivo: data.motivo === 'Otro' ? data.otro : data.motivo,
           campus: data.campus || 'No aplica'
-        })
-
+        }
+        const appointment = await createAppointment(bodyAppointment)
         if (appointment.estado === false) {
           setSuccess('fail')
           setError(appointment.detalle)
@@ -322,7 +320,6 @@ const AddAppoinments = () => {
   const handleSelectedType = async (e) => {
     setLoadingDoctors(true); // <- Activar carga
     setDoctor([])
-    // console.log('doc', doctor);
     setValue('professional', null);
     setDays([])
     setHours([])
@@ -334,7 +331,6 @@ const AddAppoinments = () => {
       const professionals = await fetchFilteredProfesssionals(e.value)
 
       const { profesionales: professionalsByStudent } = await professionalsByUser(selectedPatient?.id)
-// console.log('professionalsByStudent', professionalsByStudent.length);
 
       if (professionalsByStudent.length === 0) {
         const selectedProfessionals = professionals.map((doc, i) => {

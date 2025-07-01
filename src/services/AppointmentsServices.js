@@ -104,7 +104,6 @@ export const createAppointment = async (appointment) => {
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
   }
-
   try {
     const data = await fetch(APPOINTMENT_API, {
       method: "POST",
@@ -114,9 +113,8 @@ export const createAppointment = async (appointment) => {
       },
       body: JSON.stringify(body)
     })
-    const response = await data.json()
-
-    return response
+    // const response = await data.json()
+    return data
   } catch (error) {
     console.log('Error:', error)
   }
