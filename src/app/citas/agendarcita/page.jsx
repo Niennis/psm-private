@@ -332,7 +332,7 @@ const AddAppoinments = () => {
 
       const { profesionales: professionalsByStudent } = await professionalsByUser(selectedPatient?.id)
 
-      if (professionalsByStudent.length === 0) {
+      if (professionalsByStudent.length === 1) {
         const selectedProfessionals = professionals.map((doc, i) => {
           return {
             value: i + 2,
