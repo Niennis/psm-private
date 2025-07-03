@@ -65,6 +65,7 @@ const FichaAlumno = () => {
     const checkAssignment = async () => {
       if (!selectedUserId || !session?.user?.id) return;
 
+      // if (session.user.rol === "admin"  || session.user.rol === "blend") return; 
       const isAssigned = await isAssignedToProfessional(selectedUserId, session.user.id);
 
       if ((session.user.rol != 'alumno' && !isAssigned) || (session.user.rol == 'alumno' && selectedUserId != session.user.id)) {
@@ -73,7 +74,7 @@ const FichaAlumno = () => {
     };
 
     checkAssignment();
-  }, [selectedUserId, session?.user?.id]);
+  }, [selectedUserId, session?.user?.id, session?.user?.rol]);
 
   const { register, handleSubmit, watch, control, setValue, trigger, clearErrors,
     formState: { errors }
