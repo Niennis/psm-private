@@ -171,6 +171,7 @@ const AddFirstAppoinments = () => {
         id: response[0].id,
         name: response[0].nombre,
         lastName: response[0].apellido,
+        anoIngresoCarrera: response[0].anoIngresoCarrera || '',
         nombre_social: response[0].nombre_social || '',
         email: session.user?.email,
         birthday: esFechaValida(response[0].fecha_nacimiento) ? dayjs(response[0].fecha_nacimiento).format('YYYY-MM-DD') : '',
@@ -479,7 +480,7 @@ const AddFirstAppoinments = () => {
     const bodyUpdate = {
       "apellido": data.lastName || dataPatient.apellido,
       "aplica_despeje": 1,
-      "anoIngresoCarrera": 'No aplica',
+      "anoIngresoCarrera": dataPatient.anoIngresoCarrera || '',
       "campus": data.campus || 'No aplica',
       "comuna": data.comuna.label || dataPatient.comuna,
       "carrera": data.carrera.label || dataPatient.carrera,
