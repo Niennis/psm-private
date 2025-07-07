@@ -19,7 +19,7 @@ import { Button } from 'react-bootstrap'
 import SimpleBackdrop from "@/components/Backdrop";
 
 import { createAppointment, createAppointmentForGroup } from "@/services/AppointmentsServices"
-import { fetchSpecialityById, professionalsByUser } from "@/services/DoctorsServices";
+import { fetchSpecialityById, professionalsByUser, usersByProfessional } from "@/services/DoctorsServices";
 import { fetchPatientsDespejeFalse } from "@/services/UsersServices";
 import { fetchScheduleByDate, fetchScheduleByAvailability, generarHorasMedicas } from "@/services/SchedulesServices";
 import { showAllGroups } from "@/services/GroupServices";
@@ -116,7 +116,8 @@ const AddAppoinments = () => {
   /* FETCH PACIENTES CON DESPEJE */
   const getPatients = async () => {
     try {
-      const { users: alumnosFiltered } = await fetchPatientsDespejeFalse()
+      const { users: alumnosFiltered } = await fetchPatientsDespejeFalse() // estudiantes con despeje
+
       const alumnosProcessed = alumnosFiltered.map((alumno, i) => {
         return {
           value: `1-${i}`,
@@ -128,8 +129,33 @@ const AddAppoinments = () => {
           type: 'alumno'
         }
       })
-      setPatients(alumnosProcessed)
-      return alumnosProcessed;
+
+      if (session?.user?.rol === 'administrador' || session?.user?.rol === 'blend') {
+        setPatients(alumnosProcessed)
+        return alumnosProcessed;
+
+      } else {
+        const { alumnos } = await usersByProfessional(session?.user?.id)
+        const filter = alumnosProcessed.filter(alumno => alumnos.some(item => alumno.id == item.id_alumno))
+       
+      const results = await Promise.all(
+        alumnosProcessed.map(async (alumno) => {
+        const { profesionales } = await professionalsByUser(alumno.id);
+        return {
+            alumno,
+            keep: profesionales.length <= 1
+          };
+        })
+      );
+
+      const withoutAppointment = results
+        .filter(result => result.keep)
+        .map(result => result.alumno);
+
+        setPatients([...filter, ...withoutAppointment])
+        
+        return [...filter, ...withoutAppointment];
+      }
     } catch (error) {
       console.error("Error al traer data inicial:", error);
       return {};
