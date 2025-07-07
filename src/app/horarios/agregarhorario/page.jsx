@@ -252,6 +252,7 @@ const AddSchedule = () => {
 
   const onSubmit = handleSubmit(async data => {
     setLoading(true)
+    setIsLoading(true)
     setSuccess('initial')
     const semana = ["lunes", "martes", "miércoles", "jueves", "viernes"]
     const fechas = []
@@ -314,6 +315,7 @@ const AddSchedule = () => {
       })
       .finally(() => {
         setLoading(false)
+        setIsLoading(false)
       })
   })
 
@@ -557,8 +559,15 @@ const AddSchedule = () => {
                             <input
                               className="form-control"
                               type="text"
-                              {...register('title')}
+                              {...register('title', {
+                                required: {
+                                  value: true,
+                                  message: 'Nombre de servicio es requerido',
+                                },
+                              })}
                             />
+                            {errors.title && <span><small>{errors.title.message}</small></span>}
+
                             {/* </Tooltip> */}
                           </div>
                         </div>
@@ -852,7 +861,7 @@ const AddSchedule = () => {
                             </label>
                             <Controller
                               control={control}
-                              defaultValue='00:00:00'
+                              defaultValue=''
                               rules={{
                                 required: {
                                   value: true,
@@ -891,7 +900,7 @@ const AddSchedule = () => {
                             <div className="">
                               <Controller
                                 control={control}
-                                defaultValue='00:00:00'
+                                defaultValue=''
                                 rules={{
                                   validate: validateHoraFin,
                                   required: {
@@ -1035,70 +1044,30 @@ const AddSchedule = () => {
                                         </label>
                                       </div>
                                     </div>
+                              
                                     <div className="form-group select-gender">
-
-                                      <div className="form-check-inline">
-                                        <label className="form-check-label">
-                                          <input
-                                            type="checkbox"
-                                            value="lunes"
-                                            name="semanal"
-                                            className="form-check-input"
-                                            {...register('semanal.dia')}
-                                          />
-                                          Lunes
-                                        </label>
-                                      </div>
-                                      <div className="form-check-inline">
-                                        <label className="form-check-label">
-                                          <input
-                                            type="checkbox"
-                                            value="martes"
-                                            name="semanal"
-                                            className="form-check-input"
-                                            {...register('semanal.dia')}
-                                          />
-                                          Martes
-                                        </label>
-                                      </div>
-                                      <div className="form-check-inline">
-                                        <label className="form-check-label">
-                                          <input
-                                            type="checkbox"
-                                            value="miércoles"
-                                            name="semanal"
-                                            className="form-check-input"
-                                            {...register('semanal.dia')}
-                                          />
-                                          Miércoles
-                                        </label>
-                                      </div>
-                                      <div className="form-check-inline">
-                                        <label className="form-check-label">
-                                          <input
-                                            type="checkbox"
-                                            value="jueves"
-                                            name="semanal"
-                                            className="form-check-input"
-                                            {...register('semanal.dia')}
-                                          />
-                                          Jueves
-                                        </label>
-                                      </div>
-                                      <div className="form-check-inline">
-                                        <label className="form-check-label">
-                                          <input
-                                            type="checkbox"
-                                            value="viernes"
-                                            name="semanal"
-                                            className="form-check-input"
-                                            {...register('semanal.dia')}
-                                          />
-                                          Viernes
-                                        </label>
-                                      </div>
+                                      {['lunes', 'martes', 'miércoles', 'jueves', 'viernes'].map((dia) => (
+                                        <div className="form-check-inline" key={dia}>
+                                          <label className="form-check-label">
+                                            <input
+                                              type="checkbox"
+                                              value={dia}
+                                              className="form-check-input"
+                                              {...register('semanal.dia', {
+                                                validate: value =>
+                                                  value && value.length > 0 || 'Selecciona al menos un día'
+                                              })}
+                                            />
+                                            {dia.charAt(0).toUpperCase() + dia.slice(1)}
+                                          </label>
+                                        </div>
+                                      ))}
+                                      {errors?.semanal?.dia && (
+                                        <div className="text-danger">
+                                          <small>{errors.semanal.dia.message}</small>
+                                        </div>
+                                      )}
                                     </div>
-
                                   </div>
                                   : frecuencia === 'mensual'
                                     ? <div className="col-12 col-lg-6" style={{ border: '1px solid lightgrey', borderRadius: '8px', padding: '20px' }}>
@@ -1236,10 +1205,12 @@ const AddSchedule = () => {
                             </div>
                           </div>
                         </div>
+                        {Object.keys(errors).length !== 0 && <p className='font-red' style={{ textAlign: 'right' }}>**Faltan campos por completar</p>}
                         <div className="col-12">
                           <div className="doctor-submit text-end">
                             {/* <Link href="/addschedule" > */}
                             <button
+                              disabled={isLoading}
                               type="button"
                               className="btn btn-primary submit-form me-2"
                               onClick={onSubmit}
