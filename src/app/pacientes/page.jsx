@@ -267,18 +267,40 @@ const PatientsList = () => {
     });
 
     if (session.user?.rol === 'profesional') {
-      const dataFiltered = citasConStatus.filter(item => item.id_profesional == parseInt(session.user?.id));
+      const dataFiltered = citasConStatus.filter(item => parseInt(item.id_profesional) == parseInt(session.user?.id));
       const resp = uniqueByEmail(dataFiltered)
-
+      const { alumnos: alumnosPorProfesional } = await usersByProfessional(session?.user?.id)
+      const asignados = alumnos.filter(item => alumnosPorProfesional.some(alumno => alumno.id_alumno === item.id))
       const citas = agruparCitasPorPaciente(resp)
-      setUsers(citas);
-      setResults(citas);
+
+      // IDs ya presentes en array B (con citas)
+      const idsConCitas = citas.map(item => item.id_paciente);
+
+      // Alumnos que están en A pero no en B
+      const alumnosFaltantes = asignados
+        .filter(alumno => !idsConCitas.includes(alumno.id))
+        .map(alumno => ({
+          id_paciente: alumno.id,
+          email_estudiante: alumno.email || '',
+          nombre_alumno: `${(alumno.nombre_social || '').trim()} ${(alumno.apellido || '').trim()}`.trim(),
+          telefono_estudiante: alumno.telefono || '',
+          status: alumno.status || '',
+          citasFuturas: [],
+          citasPasadas: [],
+          citas: []
+        }));
+
+      // Resultado final con la estructura de B
+      const resultadoFinal = [...citas, ...alumnosFaltantes];
+
+      setUsers(resultadoFinal);
+      setResults(resultadoFinal);
+
       // setIsValidated(false)
     } else if (session.user?.rol === 'administrador' || session.user?.rol === 'blend') {
       const resp = uniqueByEmail(citasConStatus)
 
       const citas = agruparCitasPorPaciente(citasConStatus)
-
       setUsers(citas);
       setResults(citas);
     }
@@ -431,8 +453,7 @@ const PatientsList = () => {
       },
       render: (text, record) => (
         <div>
-
-          {record.citas[0].fecha}
+          {record.citas.length > 0 ? record?.citas[0]?.fecha : '-'}
         </div>
       )
     },
@@ -450,8 +471,9 @@ const PatientsList = () => {
       },
       render: (text, record) => (
         <div>
+          {console.log('record', record)}
 
-          {record.citas[0].hora}
+          {record.citas.length > 0 ? record?.citas[0]?.hora : '-'}
         </div>
       )
     },
@@ -461,31 +483,38 @@ const PatientsList = () => {
       sorter: (a, b) => a.citas[0].estado - b.citas[0].estado,
       render: (text, record) => (
         <div>
-          {record.citas[0].estado === "reservada" && (
+          {record.citas.length > 0 && record.citas[0]?.estado === "reservada" && (
             <span className="custom-badge status-green">
               {record.citas[0].estado}
             </span>
           )}
-          {record.citas[0].estado === "realizada" && (
+          {record.citas.length > 0 && record.citas[0]?.estado === "realizada" && (
             <span className="custom-badge status-blue">
               {record.citas[0].estado}
             </span>
           )}
-          {record.citas[0].estado.includes("cancelada") && (
+          {record.citas.length > 0 && record.citas[0]?.estado.includes("cancelada") && (
             <span className="custom-badge status-pink">
               {record.citas[0].estado}
             </span>
           )}
-          {record.citas[0].estado.includes("perdida") && (
+          {record.citas.length > 0 && record.citas[0]?.estado.includes("perdida") && (
             <span className="custom-badge status-pink">
               {record.citas[0].estado}
             </span>
           )}
-          {record.citas[0].estado == "alta" && (
+          {record.citas.length > 0 && record.citas[0]?.estado == "alta" && (
             <span className="custom-badge status-blue">
               {record.citas[0].estado}
             </span>
           )}
+          {
+            record.citas.length === 0 && (
+              <span className="custom-badge status-pink">
+                Por agendar
+              </span>
+            )
+          }
         </div>
       )
     },
