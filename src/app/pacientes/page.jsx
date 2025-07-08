@@ -6,7 +6,7 @@ import { Form, Table } from 'antd';
 import { useUserContext } from '@/context/UserContext';
 // import Headerudp from '../Headerudp';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
-import { fetchUser, fetchUsers, updateUser } from '../../services/UsersServices'
+import { fetchPatientsDespejeFalse, fetchUser, fetchUsers, updateUser } from '../../services/UsersServices'
 import { changeStatusAppointment, search, fetchAppointmentById, fetchAppointments } from '../../services/AppointmentsServices'
 import { hasRecords } from '../../services/RecordServices'
 import {
@@ -266,43 +266,51 @@ const PatientsList = () => {
       };
     });
 
+    const dataFiltered = citasConStatus.filter(item => parseInt(item.id_profesional) == parseInt(session.user?.id));
+    const resp = uniqueByEmail(dataFiltered)
+    const { alumnos: alumnosPorProfesional } = await usersByProfessional(session?.user?.id)
+    const asignados = alumnos.filter(item => alumnosPorProfesional.some(alumno => alumno.id_alumno === item.id))
+    const citas = agruparCitasPorPaciente(resp)
+
+    // IDs ya presentes en array B (con citas)
+    const idsConCitas = citas.map(item => item.id_paciente);
+
+    // Alumnos que están en A pero no en B
+    const alumnosFaltantes = asignados
+      .filter(alumno => !idsConCitas.includes(alumno.id))
+      .map(alumno => ({
+        id_paciente: alumno.id,
+        email_estudiante: alumno.email || '',
+        nombre_alumno: `${(alumno.nombre_social || '').trim()} ${(alumno.apellido || '').trim()}`.trim(),
+        telefono_estudiante: alumno.telefono || '',
+        status: alumno.status || '',
+        citasFuturas: [],
+        citasPasadas: [],
+        citas: []
+      }));
+
+    // Resultado final con la estructura de B
+    const resultadoFinal = [...citas, ...alumnosFaltantes];
+
+
+
+
     if (session.user?.rol === 'profesional') {
-      const dataFiltered = citasConStatus.filter(item => parseInt(item.id_profesional) == parseInt(session.user?.id));
-      const resp = uniqueByEmail(dataFiltered)
-      const { alumnos: alumnosPorProfesional } = await usersByProfessional(session?.user?.id)
-      const asignados = alumnos.filter(item => alumnosPorProfesional.some(alumno => alumno.id_alumno === item.id))
-      const citas = agruparCitasPorPaciente(resp)
 
-      // IDs ya presentes en array B (con citas)
-      const idsConCitas = citas.map(item => item.id_paciente);
 
-      // Alumnos que están en A pero no en B
-      const alumnosFaltantes = asignados
-        .filter(alumno => !idsConCitas.includes(alumno.id))
-        .map(alumno => ({
-          id_paciente: alumno.id,
-          email_estudiante: alumno.email || '',
-          nombre_alumno: `${(alumno.nombre_social || '').trim()} ${(alumno.apellido || '').trim()}`.trim(),
-          telefono_estudiante: alumno.telefono || '',
-          status: alumno.status || '',
-          citasFuturas: [],
-          citasPasadas: [],
-          citas: []
-        }));
-
-      // Resultado final con la estructura de B
-      const resultadoFinal = [...citas, ...alumnosFaltantes];
 
       setUsers(resultadoFinal);
       setResults(resultadoFinal);
 
       // setIsValidated(false)
     } else if (session.user?.rol === 'administrador' || session.user?.rol === 'blend') {
-      const resp = uniqueByEmail(citasConStatus)
+      // const resp = uniqueByEmail(citasConStatus)
+      const { users: alumnosFiltered } = await fetchPatientsDespejeFalse() // estudiantes con despeje
+
 
       const citas = agruparCitasPorPaciente(citasConStatus)
-      setUsers(citas);
-      setResults(citas);
+      setUsers(resultadoFinal);
+      setResults(resultadoFinal);
     }
     setLoading(false)
   }
@@ -471,8 +479,6 @@ const PatientsList = () => {
       },
       render: (text, record) => (
         <div>
-          {console.log('record', record)}
-
           {record.citas.length > 0 ? record?.citas[0]?.hora : '-'}
         </div>
       )
