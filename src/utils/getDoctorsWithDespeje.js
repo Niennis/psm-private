@@ -3,7 +3,7 @@ import { fetchScheduleByAvailability } from '@/services/SchedulesServices';
 
 const fetchProfessionalsByServiceType = async (serviceType) => {
   // const profesionales = await fetchProfessionals();
-  const {users: profesionales} = await fetchProfessionalsAndAdmins();
+  const { users: profesionales } = await fetchProfessionalsAndAdmins();
 
   const bloquesPromesas = profesionales.map(profesional =>
     fetchScheduleByAvailability(profesional.id).then(response => ({
@@ -23,7 +23,7 @@ const fetchProfessionalsByServiceType = async (serviceType) => {
 
 export const fetchProfessionalsAndHybrid = async () => {
   // const profesionales = await fetchProfessionals();
-  const {users: profesionales} = await fetchProfessionalsAndAdmins();
+  const { users: profesionales } = await fetchProfessionalsAndAdmins();
 
   const bloquesPromesas = profesionales.map(profesional =>
     fetchScheduleByAvailability(profesional.id).then(response => ({
@@ -34,9 +34,21 @@ export const fetchProfessionalsAndHybrid = async () => {
 
   const profesionalesYBloques = await Promise.all(bloquesPromesas);
 
-  const profesionalesFiltrados = profesionalesYBloques.filter(({ profesional, bloques }) =>
-    bloques.some(bloque => bloque.tipoServicio && !bloque.tipoServicio.includes('despeje'))
-  ).map(({ profesional }) => profesional);
+  const profesionalesFiltrados = profesionalesYBloques.filter(({ bloques }) => {
+  return bloques.some(bloque => {
+    if (!bloque.tipoServicio) return false;
+
+    let servicios = [];
+
+    try {
+      servicios = JSON.parse(bloque.tipoServicio.replace(/'/g, '"'));
+    } catch (e) {
+      return false; // si falla el parseo, lo excluye
+    }
+
+    return servicios.some(serv => !serv.toLowerCase().includes('despeje'));
+  });
+}).map(({ profesional }) => profesional);
   return profesionalesFiltrados;
 };
 
