@@ -168,7 +168,7 @@ const AppoinmentList = () => {
           : 'No aplica',
       nombre_estudiante: citaSelected.nombre_alumno,
       selected_doctor: citaSelected.nombre_profesional || '',
-      quien_cancela: session?.user?.id,
+      quien_cancela: citaSelected.nombre_alumno || 'Alumno',
       status: session?.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional',
       tipo_cita: (citaSelected.campus).toLowerCase().includes('sede') ? 'Presencial' : 'Videollamada',
     }

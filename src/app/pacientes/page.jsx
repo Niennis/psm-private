@@ -737,7 +737,7 @@ const PatientsList = () => {
           ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
           : 'No aplica',
       nombre_estudiante: citaSelected.nombre_alumno,
-      quien_cancela: citaSelected.nombre_profesional || '',
+      quien_cancela: citaSelected.nombre_profesional || 'Profesional',
       status: session?.user?.rol === 'alumno' ? 'cancelada por alumno' : 'cancelada por profesional',
       tipo_cita: (citaSelected.campus).toLowerCase().includes('sede') ? 'Presencial' : 'Videollamada',
     }
@@ -954,7 +954,7 @@ const PatientsList = () => {
                           dataSource={results}
 
                           // rowSelection={rowSelection}
-                          rowKey={(record) => record.id_paciente}
+                          rowKey={(record, i) => i + record.id_paciente}
                         />
                       </div>
                     </div>

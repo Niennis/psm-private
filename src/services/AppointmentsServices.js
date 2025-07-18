@@ -49,7 +49,7 @@ export const createInterview = async (appointment) => {
       ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
       : appointment.campus === 'huechuraba'
         ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
-        : '',
+        : 'Videollamada',
     carrera: appointment.carrera,
     como: 'como se entero',
     derivado_desde: 'derivado',
@@ -91,7 +91,7 @@ export const createAppointment = async (appointment) => {
       ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
       : appointment.campus === 'huechuraba'
         ? "Sede Huechuraba - Avenida Santa Clara 797, Huechuraba, piso -2, edificio Cubo"
-        : '',
+        : 'Videollamada',
     como: 'como se entero',
     derivado_desde: 'derivado',
     diagnostico_previo: 'diagnosticos',
