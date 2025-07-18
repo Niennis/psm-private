@@ -43,7 +43,7 @@ const formatearHora = (hora) => {
 export const createInterview = async (appointment) => {
   const APPOINTMENT_API = process.env.NEXT_PUBLIC_CREATE_INTERVIEW
   const body = {
-    ...appointment,
+    // ...appointment,
     alumno_id: appointment.patient_id,
     campus: appointment.campus === 'centro'
       ? "Sede Centro - Manuel Rodríguez Sur 343 , 2° piso"
@@ -64,6 +64,7 @@ export const createInterview = async (appointment) => {
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
   }
+  console.log('appointment', body);
 
   try {
     const data = await fetch(APPOINTMENT_API, {
@@ -420,3 +421,29 @@ export const editContact = async (data) => {
     return [];
   }
 }
+
+
+
+export const fetchListadoCitasPorProfesional = async (id) => {
+  const URL = 'https://showcitas-a3dxgabfa2e0dbag.eastus-01.azurewebsites.net/showlistadocita_noalumno'
+
+  const body = {
+    "id_noalumno": id
+  }
+
+  try {
+    const data = await fetch(URL, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body)
+    });
+    const response = await data.json();
+    return response;
+
+  } catch (error) {
+    console.log('Error:', error)
+  }
+}
+    
