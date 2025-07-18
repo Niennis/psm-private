@@ -7,7 +7,7 @@ import { useUserContext } from '@/context/UserContext';
 // import Headerudp from '../Headerudp';
 import { onShowSizeChange, itemRender } from '../../components/Pagination'
 import { fetchPatientsDespejeFalse, fetchUser, fetchUsers, updateUser } from '../../services/UsersServices'
-import { changeStatusAppointment, search, fetchAppointmentById, fetchAppointments } from '../../services/AppointmentsServices'
+import { changeStatusAppointment, search, fetchAppointmentById, fetchAppointments, fetchListadoCitasPorProfesional } from '../../services/AppointmentsServices'
 import { hasRecords } from '../../services/RecordServices'
 import {
   imagesend, refreshicon, searchnormal,
@@ -27,96 +27,7 @@ import { Button } from 'react-bootstrap';
 import { formatDateUTC, formatDateToDDMMYYYY, filtrarFechasAnteriores, normalizarHora } from '@/utils/managedata';
 import SimpleBackdrop from '@/components/Backdrop';
 
-/* 
-
-  const pacientesMap = {};
-
-  // Recorremos cada cita para agruparlas por paciente
-  citas.forEach(cita => {
-    const idPaciente = cita.id_paciente;
-
-    // Si el paciente no existe en el mapa, lo creamos
-    if (!pacientesMap[idPaciente]) {
-      pacientesMap[idPaciente] = {
-        id_paciente: idPaciente,
-        email_estudiante: cita.email_estudiante,
-        nombre_alumno: cita.nombre_alumno,
-        telefono_estudiante: cita.telefono_estudiante,
-        status: cita.status,
-        citas: []
-      };
-    }
-
-    // Añadimos la cita al array de citas del paciente
-    pacientesMap[idPaciente].citas.push({
-      id_cita: cita.id_cita,
-      fecha: cita.fecha,
-      hora: cita.hora,
-      estado: cita.estado,
-      campus: cita.campus,
-      especialidad_profesional: cita.especialidad_profesional,
-      motivo: cita.motivo,
-      primera_cita: cita.primera_cita,
-      uuid: cita.uuid,
-      id_profesional: cita.id_profesional
-    });
-  });
-
-  // Convertimos el mapa a un array de pacientes
-  return Object.values(pacientesMap);
-
-
-
-
-    const pacientesMap = {};
-  const fechaActual = new Date(); // Fecha y hora actual
-
-  citas.forEach(cita => {
-    const idPaciente = cita.id_paciente;
-    const fechaCita = new Date(`${cita.fecha}T${cita.hora}`); // Combina fecha y hora
-
-    // Si la cita es futura (o es hoy pero la hora aún no pasa)
-    if (fechaCita >= fechaActual && cita.estado !== "alta") {
-      // Si el paciente no existe en el mapa, lo creamos
-      if (!pacientesMap[idPaciente]) {
-        pacientesMap[idPaciente] = {
-          id_paciente: idPaciente,
-          email_estudiante: cita.email_estudiante,
-          nombre_alumno: cita.nombre_alumno,
-          telefono_estudiante: cita.telefono_estudiante,
-          status: cita.status,
-          citas: []
-        };
-      }
-
-      // Añadimos la cita al array de citas del paciente
-      pacientesMap[idPaciente].citas.push({
-        id_cita: cita.id_cita,
-        fecha: formatDateUTC(cita.fecha),
-        hora: cita.hora,
-        estado: cita.estado,
-        campus: cita.campus,
-        especialidad_profesional: cita.especialidad_profesional,
-        motivo: cita.motivo,
-        primera_cita: cita.primera_cita,
-        uuid: cita.uuid,
-        id_profesional: cita.id_profesional
-      });
-    }
-  });
-
-  // Ordenamos las citas de cada paciente (más próxima a más lejana)
-  Object.values(pacientesMap).forEach(paciente => {
-    paciente.citas.sort((a, b) => {
-      const fechaA = new Date(`${a.fecha}T${a.hora}`);
-      const fechaB = new Date(`${b.fecha}T${b.hora}`);
-      return fechaA - fechaB; // Orden ascendente (más cercana primero)
-    });
-  });
-
-  return Object.values(pacientesMap);
-*/
-
+// organizar citas por paciente, separando citas futuras y pasadas, y ordenando adecuadamente
 const agruparCitasPorPaciente = citas => {
   const pacientesMap = {};
   const fechaActual = new Date(); // Fecha y hora actual
@@ -236,6 +147,7 @@ const PatientsList = () => {
     });
   }, [setProps]);
 
+  // limpia data en caso que vengan repetidos los emails
   const uniqueByEmail = (array) => {
     const seenEmails = new Set();
     return array.filter((item) => {
@@ -248,73 +160,29 @@ const PatientsList = () => {
   };
 
   const fetchData = async () => {
-    const { users } = await fetchUsers()
-    const response = await fetchAppointments();
 
-    const alumnos = [...users.filter(user => user.tipo_usuario === 'alumno')]
-    const citasActivas = response
-    //  Ahora se muestran las canceladas, o se borran no más ???
-
-    // .filter(item => (!item["estado"].includes('cancelada') /* && !item["estado"].includes('realizada') */))
-
-    const citasConStatus = citasActivas.map(item => {
-      const alumno = alumnos.find(alumno => alumno.id === item.id_paciente); // Buscar el alumno por ID
-
-      return {
-        ...item,                      // Copiar los datos de la cita
-        status: alumno?.status || null // Agregar `status`, manejar casos donde no exista alumno
-      };
-    });
-
-    const dataFiltered = citasConStatus.filter(item => parseInt(item.id_profesional) == parseInt(session.user?.id));
-    const resp = uniqueByEmail(dataFiltered)
-    const { alumnos: alumnosPorProfesional } = await usersByProfessional(session?.user?.id)
-    const asignados = alumnos.filter(item => alumnosPorProfesional.some(alumno => alumno.id_alumno === item.id))
-    const citas = agruparCitasPorPaciente(resp)
-
-    // IDs ya presentes en array B (con citas)
-    const idsConCitas = citas.map(item => item.id_paciente);
-
-    // Alumnos que están en A pero no en B
-    const alumnosFaltantes = asignados
-      .filter(alumno => !idsConCitas.includes(alumno.id))
-      .map(alumno => ({
-        id_paciente: alumno.id,
-        email_estudiante: alumno.email || '',
-        nombre_alumno: `${(alumno.nombre_social || '').trim()} ${(alumno.apellido || '').trim()}`.trim(),
-        telefono_estudiante: alumno.telefono || '',
-        status: alumno.status || '',
-        citasFuturas: [],
-        citasPasadas: [],
-        citas: []
-      }));
-
-    // Resultado final con la estructura de B
-    const resultadoFinal = [...citas, ...alumnosFaltantes];
-
-
-
+    const { citas } = await fetchListadoCitasPorProfesional(session.user?.id)
 
     if (session.user?.rol === 'profesional') {
-
-
-
-      setUsers(resultadoFinal);
-      setResults(resultadoFinal);
-
-      // setIsValidated(false)
+      setUsers(citas);
+      setResults(citas);
+      setLoading(false)
     } else if (session.user?.rol === 'administrador' || session.user?.rol === 'blend') {
-      // const resp = uniqueByEmail(citasConStatus)
-      const { users: alumnosFiltered } = await fetchPatientsDespejeFalse() // estudiantes con despeje
 
+      const promises = citas.map(async cita => {
+        const { users: user } = await fetchUser(cita.id_profesional);
+        return {
+          ...cita,
+          nombreProfesional: user[0]?.nombre + ' ' + user[0]?.apellido || 'No informado',
+        }
+      })
+      const citasWithProfesional = await Promise.all(promises);
 
-      const citas = agruparCitasPorPaciente(citasConStatus)
-      setUsers(resultadoFinal);
-      setResults(resultadoFinal);
+      setUsers(citasWithProfesional);
+      setResults(citasWithProfesional);
+      setLoading(false)
     }
-    setLoading(false)
   }
-
   const handleUsersByProfessional = async (id) => {
     const response = await usersByProfessional(id);
   }
@@ -397,14 +265,14 @@ const PatientsList = () => {
   };
 
 
-  const columns = [
+  const allColumns = [
     {
-      title: "Nombre",
-      dataIndex: "nombre_alumno",
+      title: "Nombre paciente",
+      dataIndex: "nombrealumno",
       sorter: (a, b) => {
         // Limpia espacios y normaliza a minúsculas antes de comparar
-        const nombreA = a.nombre_alumno.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        const nombreB = b.nombre_alumno.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const nombreA = a.nombrealumno.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const nombreB = b.nombrealumno.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         return nombreA.localeCompare(nombreB, 'es', { sensitivity: 'base' });
       },
       fixed: 'left',
@@ -424,8 +292,8 @@ const PatientsList = () => {
               />
             </Link> */}
             <a style={{ color: '#0d6efd' }}
-              onClick={() => loadAppointments(record)}>{record.nombre_alumno}</a>
-            {/* <Link href={`/fichas/${record.id_paciente}`}>{record.nombre_alumno}</Link> */}
+              onClick={() => loadAppointments(record)}>{record.nombrealumno}</a>
+            {/* <Link href={`/fichas/${record.id_paciente}`}>{record.nombrealumno}</Link> */}
           </h2>
 
         </>
@@ -433,7 +301,7 @@ const PatientsList = () => {
     },
     {
       title: "Email",
-      dataIndex: "email_estudiante",
+      dataIndex: "emailalumno",
       sorter: (a, b) => {
         // Extrae la primera letra (ignorando símbolos, números y espacios)
         const getFirstLetter = (email) => {
@@ -441,10 +309,11 @@ const PatientsList = () => {
           return firstChar || ''; // Si no hay letras, devuelve string vacío
         };
 
-        return getFirstLetter(a.email_estudiante).localeCompare(
-          getFirstLetter(b.email_estudiante), 'es');
+        return getFirstLetter(a.emailestudiante).localeCompare(
+          getFirstLetter(b.emailestudiante), 'es');
       }
     },
+
     {
       title: "Fecha",
       dataIndex: "fecha",
@@ -455,13 +324,13 @@ const PatientsList = () => {
           return new Date(`${year}-${month}-${day}`);
         };
 
-        const dateA = parseDate(a.citas[0].fecha);
-        const dateB = parseDate(b.citas[0].fecha);
+        const dateA = parseDate(a.fecha);
+        const dateB = parseDate(b.fecha);
         return dateA - dateB;
       },
       render: (text, record) => (
         <div>
-          {record.citas.length > 0 ? record?.citas[0]?.fecha : '-'}
+          {record?.fecha != "0000-00-00" ? formatDateToDDMMYYYY(record?.fecha) : '-'}
         </div>
       )
     },
@@ -475,47 +344,47 @@ const PatientsList = () => {
           return hours * 3600 + minutes * 60 + seconds;
         };
 
-        return timeToSeconds(a.citas[0].hora) - timeToSeconds(b.citas[0].hora);
+        return timeToSeconds(a.hora) - timeToSeconds(b.hora);
       },
       render: (text, record) => (
         <div>
-          {record.citas.length > 0 ? record?.citas[0]?.hora : '-'}
+          {record?.hora != "00:00:00" ? record?.hora : '-'}
         </div>
       )
     },
     {
       title: "Estado",
       dataIndex: "status",
-      sorter: (a, b) => a.citas[0].estado - b.citas[0].estado,
+      sorter: (a, b) => a.estado - b.estado,
       render: (text, record) => (
         <div>
-          {record.citas.length > 0 && record.citas[0]?.estado === "reservada" && (
+          {record && record.estado === "reservada" && (
             <span className="custom-badge status-green">
-              {record.citas[0].estado}
+              {record.estado}
             </span>
           )}
-          {record.citas.length > 0 && record.citas[0]?.estado === "realizada" && (
+          {record && record.estado === "realizada" && (
             <span className="custom-badge status-blue">
-              {record.citas[0].estado}
+              {record.estado}
             </span>
           )}
-          {record.citas.length > 0 && record.citas[0]?.estado.includes("cancelada") && (
+          {record && record.estado.includes("cancelada") && (
             <span className="custom-badge status-pink">
-              {record.citas[0].estado}
+              {record.estado}
             </span>
           )}
-          {record.citas.length > 0 && record.citas[0]?.estado.includes("perdida") && (
+          {record && record.estado.includes("perdida") && (
             <span className="custom-badge status-pink">
-              {record.citas[0].estado}
+              {record.estado}
             </span>
           )}
-          {record.citas.length > 0 && record.citas[0]?.estado == "alta" && (
+          {record && record.estado == "alta" && (
             <span className="custom-badge status-blue">
-              {record.citas[0].estado}
+              {record.estado}
             </span>
           )}
           {
-            record.citas.length === 0 && (
+            record && record.estado == "por agendar" && (
               <span className="custom-badge status-pink">
                 Por agendar
               </span>
@@ -593,6 +462,39 @@ const PatientsList = () => {
       ),
     },
   ]
+
+  const columnProfesional = {
+    title: "Nombre profesional",
+    dataIndex: "nombreProfesional",
+    sorter: (a, b) => {
+      // Limpia espacios y normaliza a minúsculas antes de comparar
+      const nombreA = a.nombreProfesional.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const nombreB = b.nombreProfesional.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      return nombreA.localeCompare(nombreB, 'es', { sensitivity: 'base' });
+    },
+    fixed: 'left',
+    onCell: () => ({
+      style: {
+        background: 'red', // Color de fondo para esta columna
+      },
+    }),
+    render: (text, record) => (
+      <>
+        <h2 className="profile-image">
+          {record.nombreProfesional}
+        </h2>
+
+      </>
+    ),
+  }
+
+  // Filtrar columnas según rol
+  const columns = [...allColumns];
+
+  if (session?.user?.rol === 'administrador' || session?.user?.rol === 'blend') {
+    columns.splice(2, 0, columnProfesional);
+  }
+
 
   const patientColumns = [
     // {
