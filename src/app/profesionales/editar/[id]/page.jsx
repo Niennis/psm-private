@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import Select from "react-select";
 import { useForm, Controller } from 'react-hook-form'
-import { addEspecialidad, fetchProfessionalById, fetchSpecialityById, changeEspecialidad, updateProfesional, changePassword } from "@/services/DoctorsServices";
+import { addEspecialidad, fetchProfessionalById, fetchSpecialityById, changeEspecialidad, updateProfesional, changePassword, fetchProfessionalsAndAdmins } from "@/services/DoctorsServices";
 
 import withAuth from '@/components/withAuth';
 import CacheHandler from "@/utils/cache-handler";
@@ -78,8 +78,11 @@ const EditDoctor = ({ params }) => {
         const usersData = await fetchProfessionalById(params.id);
         user = usersData.users[0];
       } else {
-        const { users } = await fetchProfessionalById(params.id)
-        const findUser = await fetchUserByEmail(users[0]?.email)
+        const { users: response } = await fetchProfessionalsAndAdmins()
+
+        const userEmail = response.find(user => user.id === parseInt(params.id));
+
+        const findUser = await fetchUserByEmail(userEmail?.email)
         user = findUser
       }
 
@@ -166,7 +169,7 @@ const EditDoctor = ({ params }) => {
     rut: '12345678-9',
     status: data.status || initial.status,
     telefono: data.mobile,
-    tipo_usuario: (data.speciality == 'Administrador' ? 'administrador' : data.admin ? 'blend' : 'profesional' ) ||initial.tipo_usuario,
+    tipo_usuario: (data.speciality == 'Administrador' ? 'administrador' : data.admin ? 'blend' : 'profesional') || initial.tipo_usuario,
   });
 
   const createPasswordPayload = (data) => ({
@@ -527,12 +530,12 @@ const EditDoctor = ({ params }) => {
                                 className="form-control"
                                 // onChange={handleTelefonoChange}
                                 type="tel"
-                                        onKeyDown={(e) => {
-                                          // Solo permite números, '+', '-', '(', ')' y teclas de control
-                                          if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
-                                            e.preventDefault();
-                                          }
-                                        }}
+                                onKeyDown={(e) => {
+                                  // Solo permite números, '+', '-', '(', ')' y teclas de control
+                                  if (!/[0-9+\-()]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                                    e.preventDefault();
+                                  }
+                                }}
                                 {...register('mobile', {
                                   validate: (value) => {
                                     if (value.length === 0) {
