@@ -1734,7 +1734,9 @@ const AddFirstAppoinments = () => {
                                                           type="button"
                                                           className={`btn me-2 ${time === hour.horaInicio ? "btn-primary" : "btn-cancel"}`}
                                                           onClick={() => handleHours(hour.horaInicio)}>
-                                                          {hour.horaInicioBloque}
+                                                          {hour.horaInicioBloque.length >= 8
+                                                            ? hour.horaInicioBloque.slice(0, 5)
+                                                            : hour.horaInicioBloque.slice(0, 4)}
                                                         </button>
                                                       </div>
                                                     ))}
