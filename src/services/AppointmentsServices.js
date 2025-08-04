@@ -64,7 +64,6 @@ export const createInterview = async (appointment) => {
     profesional_id: appointment.professional.id,
     tratamiento: 'tratamientos',
   }
-  console.log('appointment', body);
 
   try {
     const data = await fetch(APPOINTMENT_API, {

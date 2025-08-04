@@ -137,23 +137,23 @@ const AddAppoinments = () => {
       } else {
         const { alumnos } = await usersByProfessional(session?.user?.id)
         const filter = alumnosProcessed.filter(alumno => alumnos.some(item => alumno.id == item.id_alumno))
-       
-      const results = await Promise.all(
-        alumnosProcessed.map(async (alumno) => {
-        const { profesionales } = await professionalsByUser(alumno.id);
-        return {
-            alumno,
-            keep: profesionales.length <= 1
-          };
-        })
-      );
 
-      const withoutAppointment = results
-        .filter(result => result.keep)
-        .map(result => result.alumno);
+        const results = await Promise.all(
+          alumnosProcessed.map(async (alumno) => {
+            const { profesionales } = await professionalsByUser(alumno.id);
+            return {
+              alumno,
+              keep: profesionales.length <= 1
+            };
+          })
+        );
+
+        const withoutAppointment = results
+          .filter(result => result.keep)
+          .map(result => result.alumno);
 
         setPatients([...filter, ...withoutAppointment])
-        
+
         return [...filter, ...withoutAppointment];
       }
     } catch (error) {
@@ -301,7 +301,7 @@ const AddAppoinments = () => {
 
       try {
         // la función que crea la cita
-        const bodyAppointment= {
+        const bodyAppointment = {
           ...data,
           "patient_id": selectedPatient.id,
           hora: data.selectedHour,
@@ -343,6 +343,7 @@ const AddAppoinments = () => {
     });
   }
 
+  // MUESTRA PROFESIONALES SEGÚN TIPO DE CITA SELECCIONADO
   const handleSelectedType = async (e) => {
     setLoadingDoctors(true); // <- Activar carga
     setDoctor([])
@@ -355,27 +356,39 @@ const AddAppoinments = () => {
     setAppoinmentType(e.value)
     try {
       const professionals = await fetchFilteredProfesssionals(e.value)
-      const filteredProfessionals = professionals.filter(profesional => profesional.status === 'activo');
+      const filteredProfessionalsActive = professionals.filter(profesional => profesional.status === 'activo');
 
+      if (selectedPatient?.type === 'alumno') {
+        const { profesionales: professionalsByStudent } = await professionalsByUser(selectedPatient?.id)
 
-      const { profesionales: professionalsByStudent } = await professionalsByUser(selectedPatient?.id)
-
-      if (professionalsByStudent.length === 1) {
-        const selectedProfessionals = filteredProfessionals.map((doc, i) => {
-          return {
-            value: i + 2,
-            label: doc.nombre + ' ' + doc.apellido,
-            id: doc.id,
-            email: doc.email,
-            name: doc.nombre
-          }
-        })
-        setDoctor(selectedProfessionals)
-      } else {
-        const filteredProfessionals = filteredProfessionals.filter(profesional =>
-          professionalsByStudent.some(entry => entry.id_profesional === profesional.id)
-        );
-        const selectedProfessionals = filteredProfessionals.map((doc, i) => {
+        if (professionalsByStudent.length === 1) {
+          const selectedProfessionals = filteredProfessionalsActive.map((doc, i) => {
+            return {
+              value: i + 2,
+              label: doc.nombre + ' ' + doc.apellido,
+              id: doc.id,
+              email: doc.email,
+              name: doc.nombre
+            }
+          })
+          setDoctor(selectedProfessionals)
+        } else {
+          const filteredProfessionals = filteredProfessionalsActive.filter(profesional =>
+            professionalsByStudent.some(entry => entry.id_profesional === profesional.id)
+          );
+          const selectedProfessionals = filteredProfessionals.map((doc, i) => {
+            return {
+              value: i + 2,
+              label: doc.nombre + ' ' + doc.apellido,
+              id: doc.id,
+              email: doc.email,
+              name: doc.nombre
+            }
+          })
+          setDoctor(selectedProfessionals)
+        }
+      } else if (selectedPatient?.type === 'grupo') {
+        const selectedProfessionals = professionals.map((doc, i) => {
           return {
             value: i + 2,
             label: doc.nombre + ' ' + doc.apellido,
@@ -489,7 +502,6 @@ const AddAppoinments = () => {
           const horaB = convertirAHoras(b.horaInicio);
           return horaA - horaB; // Orden ascendente
         });
-
       setHours(horasDisponibles);
     } catch (error) {
       console.error('Error al cargar horarios:', error);
@@ -914,7 +926,7 @@ const AddAppoinments = () => {
                                   ref={null}
                                   render={({ field: { onChange, onBlur, value, name, ref } }) => {
                                     return (<Select
-                                      placeholder={loadingDoctors  ? 'Cargando...' : 'Seleccione...'}
+                                      placeholder={loadingDoctors ? 'Cargando...' : 'Seleccione...'}
                                       instanceId="professional"
                                       defaultValue={selectedOption}
                                       onChange={(e) => {
@@ -1213,8 +1225,11 @@ const AddAppoinments = () => {
                                                         <button
                                                           type="button"
                                                           className={`btn me-2 ${time === hour.horaInicio ? "btn-primary" : "btn-cancel"}`}
-                                                          onClick={() => handleHours(hour.horaInicio)}>
-                                                          {hour.horaInicioBloque}
+                                                          onClick={() => handleHours(hour.horaInicio)}
+                                                        >
+                                                          {hour.horaInicioBloque.length >= 8 
+                                                            ? hour.horaInicioBloque.slice(0, 5)
+                                                            : hour.horaInicioBloque.slice(0, 4)}
                                                         </button>
                                                       </div>
                                                     ))}
