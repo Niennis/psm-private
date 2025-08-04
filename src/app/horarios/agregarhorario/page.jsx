@@ -803,7 +803,9 @@ const AddSchedule = () => {
                                     value="huechuraba"
                                     name="campus"
                                     className="form-check-input"
-                                    {...register('campus')}
+                                    {...register('campus', {
+                                      required: modalidad !== 'videollamada' ? 'Debes seleccionar un campus' : false,
+                                    })}
                                   />
                                   Sede Huechuraba
                                 </label>
@@ -815,23 +817,14 @@ const AddSchedule = () => {
                                     value="centro"
                                     name="campus"
                                     className="form-check-input"
-                                    {...register('campus')}
+                                    {...register('campus', {
+                                      required: modalidad !== 'videollamada' ? 'Debes seleccionar un campus' : false,
+                                    })}
                                   />
                                   Sede Centro
                                 </label>
                               </div>
-                              {/* <div className="form-check-inline">
-                                <label className="form-check-label">
-                                  <input
-                                    type="radio"
-                                    value="ambas"
-                                    name="campus"
-                                    className="form-check-input"
-                                    {...register('campus')}
-                                  />
-                                  Ambas
-                                </label>
-                              </div> */}
+                              {modalidad !== 'videollamada' && errors.campus && <span><small>{errors.campus.message}</small></span>}
                             </div>
                           </div>
                         }
@@ -1044,7 +1037,7 @@ const AddSchedule = () => {
                                         </label>
                                       </div>
                                     </div>
-                              
+
                                     <div className="form-group select-gender">
                                       {['lunes', 'martes', 'miércoles', 'jueves', 'viernes'].map((dia) => (
                                         <div className="form-check-inline" key={dia}>
@@ -1197,7 +1190,12 @@ const AddSchedule = () => {
                                     required: {
                                       value: true,
                                       message: 'Fecha de finalización es requerida'
-                                    }
+                                    },
+                                    validate: (value) => {
+                                      const inicio = getValues('fecha_inicio');
+                                      if (!inicio) return true; // evitar validación si no hay fecha de inicio aún
+                                      return new Date(value) > new Date(inicio) || 'La fecha de finalización debe ser posterior a la de inicio';
+                                    },
                                   })}
                                 />
                                 {errors.fechaFin && <span><small>{errors.fechaFin.message}</small></span>}
