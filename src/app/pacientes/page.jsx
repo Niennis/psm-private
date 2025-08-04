@@ -137,6 +137,7 @@ const PatientsList = () => {
   const [idCita, setIdCita] = useState('')
   const mobile = useMediaQuery('(max-width:780px)');
   const { setSelectedUserId } = useUserContext()
+  const [primeraReservada, setPrieraCitaReservada] = useState(null);
   const HORAS_PARA_CANCELAR = process.env.NEXT_PUBLIC_HORAS_PARA_CANCELAR || 24;
 
   useEffect(() => {
@@ -211,17 +212,27 @@ const PatientsList = () => {
       const promises = filtrarFechasAnteriores(dataChangeStatus, "fecha")
       const data = await Promise.all(promises)
 
+      const citasOrdenadas = data.sort((a, b) => {
+        const fechaA = new Date(`${a.fecha}T${a.hora}`);
+        const fechaB = new Date(`${b.fecha}T${b.hora}`);
+        return fechaA - fechaB;
+      });
+
+      const primeraReservada = citasOrdenadas
+        .filter(cita => cita.estado.toLowerCase() === 'reservada')
+      setPrieraCitaReservada(primeraReservada[0]?.id_cita)
+
       if (session.user?.rol === 'profesional') {
-        const dataFiltered = data.filter(item => item.id_profesional == session.user?.id);
+        const dataFiltered = citasOrdenadas.filter(item => item.id_profesional == session.user?.id);
         setAppointments(dataFiltered);
         setPatientResults(dataFiltered);
       } else if (session.user?.rol === 'alumno') {
-        const dataFiltered = data.filter(item => item.id_paciente == session.user?.id);
+        const dataFiltered = citasOrdenadas.filter(item => item.id_paciente == session.user?.id);
         setAppointments(dataFiltered);
         setPatientResults(dataFiltered);
       } else if (session.user?.rol === 'administrador' || session.user?.rol === 'blend') {
-        setAppointments(data);
-        setPatientResults(data);
+        setAppointments(citasOrdenadas);
+        setPatientResults(citasOrdenadas);
       }
     } catch (error) {
       console.log(error)
@@ -621,7 +632,14 @@ const PatientsList = () => {
                       className="dropdown-item"
                       href={`/fichas/agregarficha/${record.id_cita}`}
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta')
+                        const estadoLower = record.estado.toLowerCase();
+                        const isDisabled = (
+                          estadoLower.includes('cancelada') ||
+                          estadoLower.includes('perdida') ||
+                          estadoLower.includes('realizada') ||
+                          estadoLower.includes('alta') ||
+                          !(estadoLower === 'reservada' && record.id_cita === primeraReservada)
+                        );
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -637,8 +655,16 @@ const PatientsList = () => {
                         handleSelectedId(record.id_paciente)
                       }}
                       style={{
-                        cursor: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? "not-allowed" : "pointer",
-                        opacity: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? 0.5 : 1,
+                        cursor: (
+                          record.estado.toLowerCase() === 'reservada' &&
+                          record.id_cita === primeraReservada
+                        )
+                          ? 'pointer'
+                          : 'not-allowed',
+                        opacity: (
+                          record.estado.toLowerCase() === 'reservada' &&
+                          record.id_cita === primeraReservada
+                        ) ? 1 : 0.5,
                       }}
                     >
                       <i className="far fa-edit me-2" />
