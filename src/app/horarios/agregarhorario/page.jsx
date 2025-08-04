@@ -115,8 +115,8 @@ const AddSchedule = () => {
       const specialities = await fetchSpecialities()
       const professionals = await professionalsWithSpeciality(specialities, users);
       const filteredProfessionals = professionals.filter(item => item.tipo_usuario === 'profesional' || item.tipo_usuario === 'blend')
-
-      const docs = filteredProfessionals.map((doc, i) => {
+      const filteredProfessionalsActive = filteredProfessionals.filter(item => item.status === 'activo')
+      const docs = filteredProfessionalsActive.map((doc, i) => {
         return {
           value: i + 2,
           label: doc.nombre + ' ' + doc.apellido,

@@ -417,7 +417,10 @@ const AddFirstAppoinments = () => {
 
   const fetchData = async () => {
     const users = await fetchFilteredProfesssionals('despeje')
-    const docs = users.map((doc, i) => {
+
+    const filteredUsers = users.filter(user => user.status === 'activo');
+
+    const docs = filteredUsers.map((doc, i) => {
       return {
         value: i + 2,
         label: doc.nombre + ' ' + doc.apellido,

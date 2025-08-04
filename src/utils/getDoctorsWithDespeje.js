@@ -52,6 +52,12 @@ export const fetchProfessionalsAndHybrid = async () => {
   return profesionalesFiltrados;
 };
 
+export const fetchProfessionalsAndHybridActive = async () => {
+  const response = await fetchProfessionalsAndHybrid()
+  const filter = response.filter(profesional => profesional.status == 'activo')
+  return filter;
+}
+
 
 export const fetchFilteredProfesssionals = async (type) => {
   return await fetchProfessionalsByServiceType(type);

@@ -30,7 +30,7 @@ import {
   createContact,
 } from "@/services/AppointmentsServices";
 import { createInterviewRecord, showRecords } from "@/services/RecordServices";
-import { fetchProfessionalsAndHybrid } from "@/utils/getDoctorsWithDespeje";
+import { fetchProfessionalsAndHybridActive } from "@/utils/getDoctorsWithDespeje";
 import { isAssignedToProfessional } from "@/services/DoctorsServices";
 
 import dayjs from "dayjs";
@@ -242,7 +242,7 @@ const AddInterviewRecord = ({ params }) => {
 
   const getProfessionals = async () => {
     try {
-      const response = await fetchProfessionalsAndHybrid();
+      const response = await fetchProfessionalsAndHybridActive();
 
       const docs = response.map((doc, i) => {
         return {
@@ -657,7 +657,6 @@ const AddInterviewRecord = ({ params }) => {
   const handleClose = () => {
     setSuccess("initial");
     const derivacion_interna = watch("derivacion_interna");
-    console.log(derivacion_interna);
 
     if (success === "failAccess" || !derivacion_interna) {
       router.push("/pacientes");

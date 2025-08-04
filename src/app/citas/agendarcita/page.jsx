@@ -355,11 +355,13 @@ const AddAppoinments = () => {
     setAppoinmentType(e.value)
     try {
       const professionals = await fetchFilteredProfesssionals(e.value)
+      const filteredProfessionals = professionals.filter(profesional => profesional.status === 'activo');
+
 
       const { profesionales: professionalsByStudent } = await professionalsByUser(selectedPatient?.id)
 
       if (professionalsByStudent.length === 1) {
-        const selectedProfessionals = professionals.map((doc, i) => {
+        const selectedProfessionals = filteredProfessionals.map((doc, i) => {
           return {
             value: i + 2,
             label: doc.nombre + ' ' + doc.apellido,
@@ -370,7 +372,7 @@ const AddAppoinments = () => {
         })
         setDoctor(selectedProfessionals)
       } else {
-        const filteredProfessionals = professionals.filter(profesional =>
+        const filteredProfessionals = filteredProfessionals.filter(profesional =>
           professionalsByStudent.some(entry => entry.id_profesional === profesional.id)
         );
         const selectedProfessionals = filteredProfessionals.map((doc, i) => {
