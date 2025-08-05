@@ -14,7 +14,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 // import { FaChevronDown } from "react-icons/fa";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useSession } from "next-auth/react";
-
+import { useSidebar } from "@/context/SidebarContext";
 
 const URL = "https://saludmental.udp.cl/"
 
@@ -72,6 +72,8 @@ const Header = () => {
   const isMediumSize = useMediaQuery("(min-width : 768px) and (max-width : 1023px)");
   const isLargeSize = useMediaQuery("(min-width: 1024px) ");
   const { session } = useSession();
+  const { sidebarOpen, setSidebarOpen } = useSidebar();
+  const [isMobile, setIsMobile] = useState(false);
   // const isXXLargeSize = useMediaQuery("(min-width:1281px)")
 
   useEffect(() => {
@@ -97,6 +99,14 @@ const Header = () => {
         window.removeEventListener('resize', handleResize);
       }
     };
+  }, []);
+
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 991);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const handleOpenNavMenu = (event) => {
@@ -142,6 +152,15 @@ const Header = () => {
     <AppBar position="fixed" style={{ background: 'white', color: 'black', margin: 0, height: matches ? '112px' : '98px', justifyContent: matches ? 'center' : 'flex-end' }}>
       <Container maxWidth="false" style={{ background: 'white', color: 'black', padding: matches && 0, margin: 0 }}>
         <Toolbar disableGutters sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          {/* {isMobile && (
+            <button
+              className="mobile_btn"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              style={{ display: 'block' }}
+            >
+              <i className="fas fa-bars"></i>
+            </button>
+          )} */}
           {isLargeSize ? (
             <>
               {/* MENU DASHBOARD */}
@@ -315,8 +334,9 @@ const Header = () => {
                     aria-label="account of current user"
                     aria-controls="menu-appbar"
                     aria-haspopup="true"
-                    onClick={handleOpenNavMenu}
+                    // onClick={handleOpenNavMenu}
                     color="inherit"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
                   >
                     <MenuIcon />
                   </IconButton>
@@ -426,7 +446,7 @@ const Header = () => {
                     ? <>
                       {/* <ReserveBtn text={'Reservar'} bgColor={'#FABB00'} color={'#000'} /> */}
                       <Link href="/#profesionales" style={{ textDecoration: 'none' }}>
-                        <i className=" fas fa-user-circle" style={{ fontSize: '40px' , color: "#b82925", background: '#fff', padding: '5px', }}></i>
+                        <i className=" fas fa-user-circle" style={{ fontSize: '40px', color: "#b82925", background: '#fff', padding: '5px', }}></i>
                       </Link>
                     </>
                     : session.user?.picture ?

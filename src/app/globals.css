@@ -12060,8 +12060,8 @@ textarea.form-control {
   }
 
   .sidebar {
-    margin-left: -225px;
-    width: 225px;
+    /* margin-left: -225px; */
+    /* width: 225px; */
   }
 
   .page-wrapper {
@@ -12071,7 +12071,7 @@ textarea.form-control {
   }
 
   .slide-nav .sidebar {
-    margin-left: 0;
+    /* margin-left: 0; */
   }
 
   a.mobile_btn {
@@ -13915,3 +13915,27 @@ td.ant-table-cell.ant-table-cell-fix-left {
  .breadcrumb, h3 {
   font-family: 'ABC Arizona Flare', sans-serif;
  }
+
+@media only screen and (max-width: 991px) {
+  .sidebar {
+    position: fixed;
+    top: 90px;
+    left: -250px; /* Oculta fuera de pantalla */
+    width: 250px;
+    height: calc(100vh - 90px);
+    z-index: 1039;
+    transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+    background: #fff;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+    /* NO pongas display aquí */
+  }
+  .sidebar.open {
+    left: 0;
+  }
+  .sidebar-overlay {
+    display: none;
+  }
+  .mobile_btn {
+    display: block;
+  }
+}

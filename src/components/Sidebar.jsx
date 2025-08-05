@@ -39,6 +39,8 @@ const Sidebar = () => {
   const { setSelectedUserId } = useUserContext()
   // const [sidebar, setSidebar] = useState("");
   // const [showInterviewMenu, setShowInterviewMenu] = useState(false);
+  const { sidebarOpen, setSidebarOpen } = useSidebar();
+  const [isMobile, setIsMobile] = useState(false);
 
   const handleClick = (e, item, item1, item3) => {
     const div = document.querySelector(`#${item}`);
@@ -62,6 +64,17 @@ const Sidebar = () => {
     }
 
   }, [props]); // Use `props` in dependency array to re-run the effect when they change
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 991); // usa tu breakpoint real
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Solo agrega la clase "open" en mobile si sidebarOpen es true
+  const sidebarClass = `sidebar mt-5 ui-small${isMobile && sidebarOpen ? " open" : ""}`;
+
 
   const patientLoggedIn = async () => {
     try {
@@ -111,8 +124,23 @@ const Sidebar = () => {
 
   return (
     <ProtectedPage level={ROL}>
-
-      <div className="sidebar mt-5 ui-small" id="sidebar" style={{ zIndex: 99 }}>
+ {isMobile && sidebarOpen && (
+      <div
+        className="sidebar-overlay"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0,0,0,0.3)",
+          zIndex: 98,
+          display: sidebarOpen ? "block" : "none"
+        }}
+      />
+    )}
+      <div className={sidebarClass} id="sidebar" style={{ zIndex: 99 }}>
         <Scrollbars
           autoHide={true}
           autoHideTimeout={1000}
@@ -518,6 +546,15 @@ const Sidebar = () => {
 
 
         </Scrollbars>
+        {isMobile && (
+          <button
+            className="btn btn-close-sidebar"
+            onClick={() => setSidebarOpen(false)}
+            style={{ display: 'block', margin: '10px auto' }}
+          >
+            Cerrar
+          </button>
+        )}
       </div>
 
     </ProtectedPage >
