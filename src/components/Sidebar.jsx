@@ -124,22 +124,22 @@ const Sidebar = () => {
 
   return (
     <ProtectedPage level={ROL}>
- {isMobile && sidebarOpen && (
-      <div
-        className="sidebar-overlay"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          background: "rgba(0,0,0,0.3)",
-          zIndex: 98,
-          display: sidebarOpen ? "block" : "none"
-        }}
-      />
-    )}
+      {isMobile && sidebarOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.3)",
+            zIndex: 98,
+            display: sidebarOpen ? "block" : "none"
+          }}
+        />
+      )}
       <div className={sidebarClass} id="sidebar" style={{ zIndex: 99 }}>
         <Scrollbars
           autoHide={true}
@@ -169,19 +169,29 @@ const Sidebar = () => {
                     session.user?.rol && session.user?.rol === "alumno" &&
                     <>
                       <li>
-                        <Link className={props?.activeClassName === 'appoinment-list' ? 'active' : ''} href="/citas">Lista de Citas</Link>
+                        <Link
+                          className={props?.activeClassName === 'appoinment-list' ? 'active' : ''}
+                          href="/citas"
+                          onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
+                          Lista de Citas
+                        </Link>
                       </li>
                       <li>
                         <Link
                           className={props?.activeClassName === 'ficha' ? 'active' : ''}
-                          onClick={() => setSelectedUserId(session?.user?.id)}
+                          onClick={() => { setSelectedUserId(session?.user?.id); setSidebarOpen(!sidebarOpen) }}
                           href={`/fichas/ver`}>
                           Ficha
                         </Link>
                       </li>
                       {/* {(alumno && showInterviewMenu) && */}
                       <li>
-                        <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
+                        <Link
+                          className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''}
+                          href="/citas/agendarentrevista"
+                          onClick={() => setSidebarOpen(!sidebarOpen)}>
+                          Agendar Entrevista</Link>
                       </li>
                       {/* } */}
                     </>
@@ -192,10 +202,12 @@ const Sidebar = () => {
                     session.user?.rol && session.user?.rol === "profesional" &&
                     <>
                       <li className="submenu">
-                        <Link href="#" id="menu-item1" onClick={(e) => {
-                          // setSidebar('Doctors')
-                          handleClick(e, "menu-item1", "menu-items1")
-                        }}>
+                        <Link
+                          href="#" id="menu-item1"
+                          onClick={(e) => {
+                            // setSidebar('Doctors')
+                            handleClick(e, "menu-item1", "menu-items1")
+                          }}>
                           <span className="menu-side">
                             <Image src={doctor} alt="" />
                           </span>{" "}
@@ -204,7 +216,13 @@ const Sidebar = () => {
                         <ul style={{ display: "none" }} className="menu-items1">
 
                           <li>
-                            <Link className={props?.activeClassName === 'edit-doctor' ? 'active' : ''} href={`/profesionales/editar/${session.user?.id}`}>Editar Perfil</Link>
+                            <Link
+                              className={props?.activeClassName === 'edit-doctor' ? 'active' : ''}
+                              href={`/profesionales/editar/${session.user?.id}`}
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Editar Perfil
+                            </Link>
                           </li>
 
                         </ul>
@@ -219,7 +237,13 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items2">
                           <li>
-                            <Link className={props?.activeClassName === 'patient-list' ? 'active' : ''} href="/pacientes">Lista de Pacientes</Link>
+                            <Link
+                              className={props?.activeClassName === 'patient-list' ? 'active' : ''}
+                              href="/pacientes"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Lista de Pacientes
+                            </Link>
                           </li>
 
                         </ul>
@@ -235,13 +259,31 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items3">
                           <li>
-                            <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos">Lista de Grupos</Link>
+                            <Link
+                              className={props?.activeClassName === 'group-list' ? 'active' : ''}
+                              href="/grupos"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Lista de Grupos
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'add-group' ? 'active' : ''} href="/grupos/crear">Crear Grupos</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-group' ? 'active' : ''}
+                              href="/grupos/crear"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Crear Grupos
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'edit-group' ? 'active' : ''} href="/grupos/editar">Editar Grupos</Link>
+                            <Link
+                              className={props?.activeClassName === 'edit-group' ? 'active' : ''}
+                              href="/grupos/editar"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Editar Grupos
+                            </Link>
                           </li>
                         </ul>
                       </li>
@@ -257,14 +299,24 @@ const Sidebar = () => {
                         <ul style={{ display: "none" }} className="menu-items4">
 
                           <li>
-                            <Link className={props?.activeClassName === 'add-appoinment' ? 'active' : ''} href="/citas/agendarcita">Agendar Cita</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-appoinment' ? 'active' : ''}
+                              href="/citas/agendarcita"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agendar Cita
+                            </Link>
                           </li>
 
                         </ul>
                       </li>
                       <li className="submenu">
 
-                        <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario`} >
+                        <Link
+                          className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`}
+                          href={`/horarios/agregarhorario`}
+                          onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
                           <span className="menu-side">
                             <Image src={doctorschedule} alt="" />
                           </span>{" "}
@@ -281,11 +333,23 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items11">
                           <li>
-                            <Link className={props?.activeClassName === 'blog-grid' ? 'active' : ''} href="/blog">Blogs</Link>
+                            <Link
+                              className={props?.activeClassName === 'blog-grid' ? 'active' : ''}
+                              href="/blog"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Blogs
+                            </Link>
                           </li>
 
                           <li>
-                            <Link className={props?.activeClassName === 'add-blog' ? 'active' : ''} href="/blog/agregarblog">Agregar Blog</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-blog' ? 'active' : ''}
+                              href="/blog/agregarblog"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agregar Blog
+                            </Link>
                           </li>
 
                         </ul>
@@ -310,15 +374,33 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: 'none' }} className="menu-items1">
                           <li>
-                            <Link className={props?.activeClassName === 'doctor-list' ? 'active' : ''} href="/profesionales">Lista de Profesionales</Link>
+                            <Link
+                              className={props?.activeClassName === 'doctor-list' ? 'active' : ''}
+                              href="/profesionales"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Lista de Profesionales
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'add-doctor' ? 'active' : ''} href="/profesionales/agregarprofesional">Agregar Profesional</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-doctor' ? 'active' : ''}
+                              href="/profesionales/agregarprofesional"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agregar Profesional
+                            </Link>
                           </li>
 
 
                           <li>
-                            <Link className={props?.activeClassName === 'edit-doctor' ? 'active' : ''} href={`/profesionales/editar/${session.user?.id}`}>Editar Perfil</Link>
+                            <Link
+                              className={props?.activeClassName === 'edit-doctor' ? 'active' : ''}
+                              href={`/profesionales/editar/${session.user?.id}`}
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Editar Perfil
+                            </Link>
                           </li>
                         </ul>
                       </li>
@@ -331,7 +413,13 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items2">
                           <li>
-                            <Link className={props?.activeClassName === 'patient-list' ? 'active' : ''} href="/pacientes">Lista de Pacientes</Link>
+                            <Link
+                              className={props?.activeClassName === 'patient-list' ? 'active' : ''}
+                              href="/pacientes"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Lista de Pacientes
+                            </Link>
                           </li>
                         </ul>
                       </li>
@@ -345,13 +433,31 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items3">
                           <li>
-                            <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos">Lista de Grupos</Link>
+                            <Link
+                              className={props?.activeClassName === 'group-list' ? 'active' : ''}
+                              href="/grupos"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Lista de Grupos
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'add-group' ? 'active' : ''} href="/grupos/crear">Crear Grupos</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-group' ? 'active' : ''}
+                              href="/grupos/crear"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Crear Grupos
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'edit-group' ? 'active' : ''} href="/grupos/editar">Editar Grupos</Link>
+                            <Link
+                              className={props?.activeClassName === 'edit-group' ? 'active' : ''}
+                              href="/grupos/editar"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Editar Grupos
+                            </Link>
                           </li>
                         </ul>
                       </li>
@@ -366,15 +472,31 @@ const Sidebar = () => {
                         <ul style={{ display: "none" }} className="menu-items4">
 
                           <li>
-                            <Link className={props?.activeClassName === 'add-appoinment' ? 'active' : ''} href="/citas/agendarcita">Agendar Cita</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-appoinment' ? 'active' : ''}
+                              href="/citas/agendarcita"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agendar Cita
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''}
+                              href="/citas/agendarentrevista"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agendar Entrevista
+                            </Link>
                           </li>
                         </ul>
                       </li>
                       <li className="submenu">
-                        <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario`} >
+                        <Link
+                          className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`}
+                          href={`/horarios/agregarhorario`}
+                          onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
                           <span className="menu-side">
                             <Image src={doctorschedule} alt="" />
                           </span>{" "}
@@ -382,7 +504,11 @@ const Sidebar = () => {
                         </Link>
                       </li>
                       <li className="submenu">
-                        <Link className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`} href={`/reportes`} >
+                        <Link
+                          className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`}
+                          href={`/reportes`}
+                          onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
                           <span className="menu-side">
                             <Image src={dashboard} alt="" />
                           </span>{" "}
@@ -398,10 +524,22 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items11">
                           <li>
-                            <Link className={props?.activeClassName === 'blog-grid' ? 'active' : ''} href="/blog">Blogs</Link>
+                            <Link
+                              className={props?.activeClassName === 'blog-grid' ? 'active' : ''}
+                              href="/blog"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Blogs
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'add-blog' ? 'active' : ''} href="/blog/agregarblog">Agregar Blog</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-blog' ? 'active' : ''}
+                              href="/blog/agregarblog"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agregar Blog
+                            </Link>
                           </li>
                         </ul>
                       </li>
@@ -425,15 +563,33 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: 'none' }} className="menu-items1">
                           <li>
-                            <Link className={props?.activeClassName === 'doctor-list' ? 'active' : ''} href="/profesionales">Lista de Profesionales</Link>
+                            <Link
+                              className={props?.activeClassName === 'doctor-list' ? 'active' : ''}
+                              href="/profesionales"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Lista de Profesionales
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'add-doctor' ? 'active' : ''} href="/profesionales/agregarprofesional">Agregar Profesional</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-doctor' ? 'active' : ''}
+                              href="/profesionales/agregarprofesional"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agregar Profesional
+                            </Link>
                           </li>
 
 
                           <li>
-                            <Link className={props?.activeClassName === 'edit-doctor' ? 'active' : ''} href={`/profesionales/editar/${session.user?.id}`}>Editar Perfil</Link>
+                            <Link
+                              className={props?.activeClassName === 'edit-doctor' ? 'active' : ''}
+                              href={`/profesionales/editar/${session.user?.id}`}
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Editar Perfil
+                            </Link>
                           </li>
                         </ul>
                       </li>
@@ -446,7 +602,13 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items2">
                           <li>
-                            <Link className={props?.activeClassName === 'patient-list' ? 'active' : ''} href="/pacientes">Lista de Pacientes</Link>
+                            <Link
+                              className={props?.activeClassName === 'patient-list' ? 'active' : ''}
+                              href="/pacientes"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Lista de Pacientes
+                            </Link>
                           </li>
                         </ul>
                       </li>
@@ -460,13 +622,31 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items3">
                           <li>
-                            <Link className={props?.activeClassName === 'group-list' ? 'active' : ''} href="/grupos">Lista de Grupos</Link>
+                            <Link
+                              className={props?.activeClassName === 'group-list' ? 'active' : ''}
+                              href="/grupos"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Lista de Grupos
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'add-group' ? 'active' : ''} href="/grupos/crear">Crear Grupos</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-group' ? 'active' : ''}
+                              href="/grupos/crear"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Crear Grupos
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'edit-group' ? 'active' : ''} href="/grupos/editar">Editar Grupos</Link>
+                            <Link
+                              className={props?.activeClassName === 'edit-group' ? 'active' : ''}
+                              href="/grupos/editar"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Editar Grupos
+                            </Link>
                           </li>
                         </ul>
                       </li>
@@ -481,15 +661,31 @@ const Sidebar = () => {
                         <ul style={{ display: "none" }} className="menu-items4">
 
                           <li>
-                            <Link className={props?.activeClassName === 'add-appoinment' ? 'active' : ''} href="/citas/agendarcita">Agendar Cita</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-appoinment' ? 'active' : ''}
+                              href="/citas/agendarcita"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agendar Cita
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''} href="/citas/agendarentrevista">Agendar Entrevista</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-first-appoinment' ? 'active' : ''}
+                              href="/citas/agendarentrevista"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agendar Entrevista
+                            </Link>
                           </li>
                         </ul>
                       </li>
                       <li className="submenu">
-                        <Link className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`} href={`/horarios/agregarhorario`} >
+                        <Link
+                          className={`submenu ${props?.activeClassName === 'add-shedule' ? 'active' : ''}`}
+                          href={`/horarios/agregarhorario`}
+                          onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
                           <span className="menu-side">
                             <Image src={doctorschedule} alt="" />
                           </span>{" "}
@@ -497,7 +693,11 @@ const Sidebar = () => {
                         </Link>
                       </li>
                       <li className="submenu">
-                        <Link className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`} href={`/reportes`} >
+                        <Link
+                          className={`submenu ${props?.activeClassName === 'admin-dashboard' ? 'active' : ''}`}
+                          href={`/reportes`}
+                          onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
                           <span className="menu-side">
                             <Image src={dashboard} alt="" />
                           </span>{" "}
@@ -513,17 +713,33 @@ const Sidebar = () => {
                         </Link>
                         <ul style={{ display: "none" }} className="menu-items11">
                           <li>
-                            <Link className={props?.activeClassName === 'blog-grid' ? 'active' : ''} href="/blog">Blogs</Link>
+                            <Link
+                              className={props?.activeClassName === 'blog-grid' ? 'active' : ''}
+                              href="/blog"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Blogs
+                            </Link>
                           </li>
                           <li>
-                            <Link className={props?.activeClassName === 'add-blog' ? 'active' : ''} href="/blog/agregarblog">Agregar Blog</Link>
+                            <Link
+                              className={props?.activeClassName === 'add-blog' ? 'active' : ''}
+                              href="/blog/agregarblog"
+                              onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                              Agregar Blog
+                            </Link>
                           </li>
                         </ul>
                       </li>
                     </>
                   }
                   <li>
-                    <Link href="/" onClick={handleSignOut}>
+                    <Link href="/" onClick={(e) => {
+                      handleSignOut(e);
+                      setSidebarOpen(!sidebarOpen);
+                    }}
+                    >
                       <span className="menu-side">
                         <Image src={logout} alt="" />
                       </span>{" "}
