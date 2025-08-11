@@ -12,7 +12,7 @@ import { hasRecords } from '../../services/RecordServices'
 import {
   imagesend, refreshicon, searchnormal,
 } from '../../components/imagepath';
-import { usersByProfessional, isAssignedToProfessional } from '@/services/DoctorsServices';
+import { usersByProfessional, isAssignedToProfessional, professionalsByUser } from '@/services/DoctorsServices';
 
 import Link from "next/link";
 import Image from 'next/image';
@@ -24,20 +24,23 @@ import { useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Button } from 'react-bootstrap';
-import { formatDateUTC, formatDateToDDMMYYYY, filtrarFechasAnteriores, normalizarHora } from '@/utils/managedata';
+import { formatDateUTC, filtrarFechasAnteriores, normalizarHora } from '@/utils/managedata';
 import SimpleBackdrop from '@/components/Backdrop';
 
 // organizar citas por paciente, separando citas futuras y pasadas, y ordenando adecuadamente
-const agruparCitasPorPaciente = citas => {
+const agruparCitasPorPaciente = (citas) => {
   const pacientesMap = {};
-  const fechaActual = new Date(); // Fecha y hora actual
+  const fechaActual = new Date();
 
-  // Primero procesamos todas las citas para clasificarlas
   citas.forEach(cita => {
     const idPaciente = cita.id_paciente;
-    const fechaCita = new Date(`${cita.fecha}T${cita.hora}`);
 
-    // Creamos la entrada del paciente si no existe
+    // Asegurar formato de hora HH:mm:ss
+    const horaNorm = normalizarHora(cita.hora);
+    const [h, m, s] = horaNorm.split(":").map(Number);
+    const [year, month, day] = cita.fecha.split("-").map(Number);
+    const fechaCita = new Date(year, month - 1, day, h, m, s);
+
     if (!pacientesMap[idPaciente]) {
       pacientesMap[idPaciente] = {
         id_paciente: idPaciente,
@@ -45,77 +48,76 @@ const agruparCitasPorPaciente = citas => {
         nombre_alumno: cita.nombre_alumno,
         telefono_estudiante: cita.telefono_estudiante,
         status: cita.status,
-        citasFuturas: [],  // Para citas futuras
-        citasPasadas: []    // Para citas pasadas (no "alta")
+        citasFuturas: [],
+        citasPasadas: []
       };
     }
 
-    // Clasificamos la cita según su fecha y estado
-    // if (cita.estado !== "alta") {
-    if (fechaCita >= fechaActual) {
-      // Cita futura
-      pacientesMap[idPaciente].citasFuturas.push({
-        id_cita: cita.id_cita,
-        fecha: formatDateToDDMMYYYY(cita.fecha),
-        hora: cita.hora,
-        estado: cita.estado,
-        campus: cita.campus,
-        especialidad_profesional: cita.especialidad_profesional,
-        motivo: cita.motivo,
-        primera_cita: cita.primera_cita,
-        uuid: cita.uuid,
-        id_profesional: cita.id_profesional
-      });
+    const citaObj = {
+      id_cita: cita.id_cita,
+      fecha: cita.fecha,
+      hora: cita.hora,
+      estado: cita.estado,
+      campus: cita.campus,
+      especialidad_profesional: cita.especialidad_profesional,
+      motivo: cita.motivo,
+      primera_cita: cita.primera_cita,
+      uuid: cita.uuid,
+      id_profesional: cita.id_profesional
+    };
+
+    // Clasificación
+    if (
+      fechaCita >= fechaActual &&
+      cita.estado.toLowerCase() !== "realizada"
+    ) {
+      pacientesMap[idPaciente].citasFuturas.push(citaObj);
     } else {
-      // Cita pasada
-      pacientesMap[idPaciente].citasPasadas.push({
-        id_cita: cita.id_cita,
-        fecha: formatDateToDDMMYYYY(cita.fecha),
-        hora: cita.hora,
-        estado: cita.estado,
-        campus: cita.campus,
-        especialidad_profesional: cita.especialidad_profesional,
-        motivo: cita.motivo,
-        primera_cita: cita.primera_cita,
-        uuid: cita.uuid,
-        id_profesional: cita.id_profesional
-      });
+      pacientesMap[idPaciente].citasPasadas.push(citaObj);
     }
-    // }
   });
 
-  // Procesamos el resultado final
   const resultado = Object.values(pacientesMap).map(paciente => {
-    // Ordenamos citas futuras (más cercana primero)
     paciente.citasFuturas.sort((a, b) => {
-      const fechaA = new Date(`${a.fecha}T${a.hora}`);
-      const fechaB = new Date(`${b.fecha}T${b.hora}`);
+      const fechaA = parseFechaHora(a.fecha, a.hora);
+      const fechaB = parseFechaHora(b.fecha, b.hora);
       return fechaA - fechaB;
     });
 
-    // Ordenamos citas pasadas (más reciente primero)
     paciente.citasPasadas.sort((a, b) => {
-      const fechaA = new Date(`${a.fecha}T${a.hora}`);
-      const fechaB = new Date(`${b.fecha}T${b.hora}`);
-      return fechaB - fechaA; // Orden descendente
+      const fechaA = parseFechaHora(a.fecha, a.hora);
+      const fechaB = parseFechaHora(b.fecha, b.hora);
+      return fechaB - fechaA;
     });
 
-    // Usamos citas futuras, o si no hay, la cita pasada más reciente
     const citasFinales = paciente.citasFuturas.length > 0
       ? paciente.citasFuturas
       : paciente.citasPasadas.length > 0
         ? [paciente.citasPasadas[0]]
         : [];
 
-    return {
-      ...paciente,
-      citas: citasFinales
-    };
+    return { ...paciente, citas: citasFinales };
   });
 
   return resultado;
+};
 
+function parseFechaHora(fechaYYYYMMDD, hora) {
+  const horaNorm = normalizarHora(hora);
+  let [h, m, s] = horaNorm.split(":").map(Number);
+  if (isNaN(h)) h = 0;
+  if (isNaN(m)) m = 0;
+  if (isNaN(s)) s = 0;
+
+  const [year, month, day] = fechaYYYYMMDD.split("-").map(Number);
+  return new Date(year, month - 1, day, h, m, s);
 }
+const formatDateToDDMMYYYY = (dateString) => {
+  if (!dateString || dateString === '-' || dateString === "0000-00-00") return '-';
+  const [year, month, day] = dateString.split('-');
+  if (!year || !month || !day) return '-';
+  return `${day}-${month}-${year}`;
+};
 
 const PatientsList = () => {
   const { data: session } = useSession()
@@ -161,29 +163,162 @@ const PatientsList = () => {
   };
 
   const fetchData = async () => {
+    const { citas } = await fetchListadoCitasPorProfesional(session.user?.id);
+    const response = await fetchAppointments();
 
-    const { citas } = await fetchListadoCitasPorProfesional(session.user?.id)
+    const finalCitas = await Promise.all(
+      agruparCitasPorPaciente(response).map(async paciente => {
+        // Si tiene citas futuras, muestra la más próxima
+        if (paciente.citasFuturas.length > 0) {
+          // Para profesional: solo mostrar citas donde id_profesional es el usuario conectado
+          if (session?.user?.rol === 'profesional') {
+            const { alumnos: estudiantes } = await usersByProfessional(session.user.id);
+            const asignado = estudiantes.find(e => e.id_alumno === paciente.id_paciente);
+            console.log('estudiantes', estudiantes);
 
-    if (session.user?.rol === 'profesional') {
-      setUsers(citas);
-      setResults(citas);
-      setLoading(false)
-    } else if (session.user?.rol === 'administrador' || session.user?.rol === 'blend') {
-
-      const promises = citas.map(async cita => {
-        const { users: user } = await fetchUser(cita.id_profesional);
-        return {
-          ...cita,
-          nombreProfesional: user[0]?.nombre + ' ' + user[0]?.apellido || 'No informado',
+            // Si está asignado
+            if (asignado) {
+              // Si tiene citas futuras contigo, muestra la más próxima
+              const citasConmigo = paciente.citasFuturas.filter(
+                cita => cita.id_profesional == session.user.id
+              );
+              if (citasConmigo.length > 0) {
+                const cita = citasConmigo[0];
+                return {
+                  emailalumno: paciente.email_estudiante,
+                  nombrealumno: paciente.nombre_alumno,
+                  nombreProfesional: "", // El profesional eres tú
+                  fecha: cita.fecha,
+                  hora: normalizarHora(cita.hora),
+                  estado: cita.estado,
+                  id_paciente: paciente.id_paciente,
+                  id_cita: cita.id_cita,
+                  id_profesional: session.user.id,
+                };
+              }
+              // Si NO tiene citas futuras contigo, muestra "por agendar"
+              return {
+                emailalumno: paciente.email_estudiante,
+                nombrealumno: paciente.nombre_alumno,
+                nombreProfesional: "", // El profesional eres tú
+                fecha: null,
+                hora: null,
+                estado: "por agendar",
+                id_paciente: paciente.id_paciente,
+                id_cita: "",
+                id_profesional: session.user.id,
+              };
+            }
+            // Si no está asignado, no lo muestres
+            return null;
+          } else {
+            // Blend/administrador: muestra la cita futura más próxima
+            const cita = paciente.citasFuturas[0];
+            let nombreProfesional = "";
+            if (cita.id_profesional) {
+              try {
+                const response = await fetchUser(cita.id_profesional);
+                if (response && response.users && response.users[0]) {
+                  const prof = response.users[0];
+                  nombreProfesional = `${prof.nombre} ${prof.apellido}`;
+                }
+              } catch {
+                nombreProfesional = "No informado";
+              }
+            }
+            return {
+              emailalumno: paciente.email_estudiante,
+              nombrealumno: paciente.nombre_alumno,
+              nombreProfesional,
+              fecha: cita.fecha,
+              hora: normalizarHora(cita.hora),
+              estado: cita.estado,
+              id_paciente: paciente.id_paciente,
+              id_cita: cita.id_cita,
+              id_profesional: cita.id_profesional,
+            };
+          }
         }
-      })
-      const citasWithProfesional = await Promise.all(promises);
 
-      setUsers(citasWithProfesional);
-      setResults(citasWithProfesional);
-      setLoading(false)
-    }
-  }
+        // Si NO tiene citas futuras
+        if (session?.user?.rol === 'profesional') {
+          // Solo mostrar si está asignado
+          const { alumnos: estudiantes } = await usersByProfessional(session.user.id);
+          const asignado = estudiantes.find(e => e.id === paciente.id_paciente);
+          if (asignado) {
+            return {
+              emailalumno: paciente.email_estudiante,
+              nombrealumno: paciente.nombre_alumno,
+              nombreProfesional: "", // El profesional eres tú
+              fecha: null,
+              hora: null,
+              estado: "por agendar",
+              id_paciente: paciente.id_paciente,
+              id_cita: "",
+              id_profesional: session.user.id,
+            };
+          }
+          // Si no está asignado, no lo muestres
+          return null;
+        }
+
+        // Blend/administrador: lógica de profesionales asociados
+        if (session?.user?.rol === 'administrador' || session?.user?.rol === 'blend') {
+          const { profesionales } = await professionalsByUser(paciente.id_paciente);
+          let nombreProfesional = "";
+          let id_profesional = "";
+          if (profesionales && profesionales.length > 1) {
+            const segundo = profesionales[1];
+            nombreProfesional = "";
+            id_profesional = segundo.id_profesional;
+          } else if (profesionales && profesionales.length === 1) {
+            nombreProfesional = "";
+            id_profesional = "";
+          }
+          return {
+            emailalumno: paciente.email_estudiante,
+            nombrealumno: paciente.nombre_alumno,
+            nombreProfesional,
+            fecha: null,
+            hora: null,
+            estado: "por agendar",
+            id_paciente: paciente.id_paciente,
+            id_cita: "",
+            id_profesional,
+          };
+        }
+
+        // Si no cumple nada, retorna info vacía
+        return {
+          emailalumno: paciente.email_estudiante,
+          nombrealumno: paciente.nombre_alumno,
+          nombreProfesional: "",
+          fecha: null,
+          hora: null,
+          estado: "por agendar",
+          id_paciente: paciente.id_paciente,
+          id_cita: "",
+          id_profesional: "",
+        };
+      })
+    );
+
+    // Elimina los null (no asignados para profesional)
+    const finalCitasClean = finalCitas.filter(Boolean);
+
+    // Ordena para que "por agendar" quede primero
+    finalCitasClean.sort((a, b) => {
+      if (a.estado === "por agendar" && b.estado !== "por agendar") return -1;
+      if (a.estado !== "por agendar" && b.estado === "por agendar") return 1;
+      return 0;
+    });
+    console.log('finalCitasClean', finalCitasClean);
+
+    setUsers(finalCitasClean);
+    setResults(finalCitasClean);
+    setLoading(false);
+  };
+
   const handleUsersByProfessional = async (id) => {
     const response = await usersByProfessional(id);
   }
@@ -195,8 +330,8 @@ const PatientsList = () => {
   useEffect(() => {
     setLoading(true)
     fetchData()
-    handleUsersByProfessional(session.user?.id)
-    handleIsAssigned(16258, session.user?.id)
+    // handleUsersByProfessional(session.user?.id)
+    // handleIsAssigned(16258, session.user?.id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -359,7 +494,7 @@ const PatientsList = () => {
       },
       render: (text, record) => (
         <div>
-          {record?.hora != "00:00:00" ? record?.hora : '-'}
+          {(record?.hora != "00:00:00" && record?.hora != null) ? record?.hora : '-'}
         </div>
       )
     },
