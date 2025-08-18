@@ -174,7 +174,6 @@ const PatientsList = () => {
           if (session?.user?.rol === 'profesional') {
             const { alumnos: estudiantes } = await usersByProfessional(session.user.id);
             const asignado = estudiantes.find(e => e.id_alumno === paciente.id_paciente);
-            console.log('estudiantes', estudiantes);
 
             // Si está asignado
             if (asignado) {
@@ -312,7 +311,6 @@ const PatientsList = () => {
       if (a.estado !== "por agendar" && b.estado === "por agendar") return 1;
       return 0;
     });
-    console.log('finalCitasClean', finalCitasClean);
 
     setUsers(finalCitasClean);
     setResults(finalCitasClean);

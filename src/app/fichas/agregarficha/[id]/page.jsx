@@ -279,6 +279,9 @@ const AddInterviewRecord = ({ params }) => {
     }
   }, [isChecked]);
 
+  const derivacion_interna = watch("derivacion_interna");
+  const derivacion_externa = watch("derivacion_externa");
+  
   /* CITA NORMAL servicio es el mismo que el de despeje, pero se omiten los campos que no se necesitan */
   const handleAppointment = handleSubmit(async (data) => {
     setIsLoading(true);
@@ -289,6 +292,7 @@ const AddInterviewRecord = ({ params }) => {
 
     const bodyInterview = {
       ...data,
+      observaciones: derivacion_externa ? `${data.observaciones} -Derivado externamente-` : data.observaciones ,
       motivo_consulta: data.motivo_consulta || patient.motivo_consulta || "",
       anoIngresoCarrera: data.ano_ingreso,
       id_receptor: derivacion_interna ? data.profesional_derivacion.id : "",
@@ -440,6 +444,7 @@ const AddInterviewRecord = ({ params }) => {
     // setValue('numero_ficha', 1)
     const bodyInterview = {
       ...data,
+      observaciones: derivacion_externa ? `${data.observaciones} -Derivado externamente-` : data.observaciones ,
       motivo_consulta: data.motivo_consulta || patient.motivo_consulta || "",
       id_receptor: derivacion_interna ? data.profesionales.id : "",
       id_profesional: session?.user?.id,
@@ -648,8 +653,6 @@ const AddInterviewRecord = ({ params }) => {
     const isValid = await trigger();
   };
 
-  const derivacion_interna = watch("derivacion_interna");
-  const derivacion_externa = watch("derivacion_externa");
 
   const openWarningInterview = async (e) => {
     e.preventDefault();

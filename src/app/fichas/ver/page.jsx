@@ -126,15 +126,15 @@ const FichaAlumno = () => {
         }
       })
       const withDerivados = recordsProcesados.map(async (record) => {
-        if(record.derivado){
+        if (record.derivado) {
           const { users } = await fetchUser(record.derivado)
-          
+
           return {
             ...record,
             nombre_derivado: `${users[0]?.nombre} ${users[0]?.apellido}` || '',
           }
         } else {
-          return{
+          return {
             ...record,
             nombre_derivado: ''
           }
@@ -1202,10 +1202,19 @@ const FichaAlumno = () => {
                                       <h3><span>Observaciones: {item.observaciones || ''}</span></h3>
                                       {/* <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3> */}
 
-                                      {
-                                        item?.derivado &&
-                                        <h3><span>Derivado a: {item.nombre_derivado || ''}</span></h3>
-                                      }
+                                      {(item?.derivado || item?.observaciones?.includes("-Derivado externamente-")) && (
+                                        <h3>
+                                          <span>
+                                            Derivado a:{" "}
+                                            {[
+                                              item?.derivado ? item.nombre_derivado : null,
+                                              item?.observaciones?.includes("-Derivado externamente-") ? "Derivado externamente" : null
+                                            ]
+                                              .filter(Boolean)
+                                              .join(" / ")}
+                                          </span>
+                                        </h3>
+                                      )}
 
                                       <button
                                         className="btn btn-primary"
@@ -1232,10 +1241,19 @@ const FichaAlumno = () => {
                                       {" "}
                                       <h3><span><strong>Acuerdos:</strong> {item.acuerdos || ''}</span></h3>
 
-                                      {
-                                        item?.derivado &&
-                                        <h3><span>Derivado a: {item.nombre_derivado || ''}</span></h3>
-                                      }
+                                      {(item?.derivado || item?.observaciones?.includes("-Derivado externamente-")) && (
+                                        <h3>
+                                          <span>
+                                            Derivado a:{" "}
+                                            {[
+                                              item?.derivado ? item.nombre_derivado : null,
+                                              item?.observaciones?.includes("-Derivado externamente-") ? "Derivado externamente" : null
+                                            ]
+                                              .filter(Boolean)
+                                              .join(" / ")}
+                                          </span>
+                                        </h3>
+                                      )}
 
                                       <button
                                         className="btn btn-primary"
