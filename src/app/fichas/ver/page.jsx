@@ -1199,7 +1199,7 @@ const FichaAlumno = () => {
                                       </span>
 
 
-                                      <h3><span>Observaciones: {item.observaciones || ''}</span></h3>
+                                      <h3><span>Observaciones: {item?.observaciones?.replace("-Derivado externamente-", "").trim() || ''}</span></h3>
                                       {/* <h3><span>Acuerdos: {item.acuerdos || ''}</span></h3> */}
 
                                       {(item?.derivado || item?.observaciones?.includes("-Derivado externamente-")) && (
@@ -1236,7 +1236,7 @@ const FichaAlumno = () => {
                                       </h3>
 
                                       {" "}
-                                      <h3><span><strong>Observaciones:</strong> {item.observaciones || ''}</span></h3>
+                                      <h3><span><strong>Observaciones:</strong> {item?.observaciones?.replace("-Derivado externamente-", "").trim() || ''}</span></h3>
 
                                       {" "}
                                       <h3><span><strong>Acuerdos:</strong> {item.acuerdos || ''}</span></h3>
