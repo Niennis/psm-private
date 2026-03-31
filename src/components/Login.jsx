@@ -191,7 +191,7 @@ const Login = () => {
                                   <h3 className="section-title">Login</h3>
 
                                   <ul className="nav nav-tabs underline">
-                                    {URL_RESERVAR.includes('agenda') && <li className="nav-item ">
+                                    {URL_RESERVAR && <li className="nav-item ">
                                       <a
 
                                         className={`ui-medium nav-link ${hash === 'estudiantes' ? 'active' : hash === '' ? 'active' : ''}`}
@@ -228,7 +228,7 @@ const Login = () => {
 
                                     {/* LOGIN ESTUDIANTES */}
                                     {
-                                      URL_RESERVAR.includes('agenda') && <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', padding: 'inherit' }}>
+                                      URL_RESERVAR && <div className={`tab-pane ${hash === 'estudiantes' ? 'show active d-flex flex-column justify-content-evenly ' : hash === '' ? 'show active d-flex flex-column justify-content-evenly ' : ''}`} id="profesionales" style={{ height: '100%', textAlign: 'center', padding: 'inherit' }}>
                                         <p className="ui-medium">Ingresa con tu mail UDP para poder realizar una reserva.</p>
                                         <div>
                                           <button className="gsi-material-button btn btn-primary btn-block"
