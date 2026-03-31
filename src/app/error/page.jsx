@@ -24,6 +24,7 @@ const errors = {
   Verification: "Vuelve a intentar más tarde.",
   default: "Ocurrió un problema. Revisa tu información o ingresa más tarde.",
   AccesoDenegado: "Tu correo no está registrado. Contacta al soporte o intenta con otra cuenta.",
+  UsuarioInactivo: "Tu usuario está inactivo. Contacta con soporte para más información.",
   DominioNoPermitido: "Recuerda usar tu correo UDP."
 }
 
@@ -41,6 +42,7 @@ const Error = () => {
   const errorMessage = errorKey && (errors[errorKey] || errors.default);
 
   const handleUnauthorizedEmail = async () => {
+console.log('errors', errors);
 
     // Eliminar cookies relacionadas con la sesión de Google
     document.cookie.split(";").forEach((c) => {

@@ -13,6 +13,7 @@ module.exports = {
     //   '@fullcalendar/react'
     // ],
     esmExternals: 'loose', // Reduce duplicación de dependencias
+    instrumentationHook: true,
   },
   images: {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],

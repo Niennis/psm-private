@@ -74,6 +74,7 @@ const authOptions = {
           if (user?.validacion === false) {
             throw new Error("cuenta-no-validada");
           }
+
           return user; // éxito
         } catch (error) {
           console.error('ERROR en authorize:', error);
@@ -118,7 +119,15 @@ const authOptions = {
       if (account.provider === "credentials") {
         const body = { email: credentials.email, contrasena: credentials.password };
         const user = await fetchUserMailAndPass(body);
-        return !!user;
+
+        if(!!user && user.status !== "activo"){
+          console.log('entró al error');
+          
+          return `${process.env.NEXTAUTH_URL}/error?error=UsuarioInactivo`;
+
+        }
+
+        return !!user && user?.status === "activo";
       }
       return false;
     },
@@ -133,7 +142,7 @@ const authOptions = {
         token.email = profile.email;
         token.nombre_social = profile.tipo_usuario !== 'alumno' ? profile?.nombre : profile?.nombre_social || profile?.nombre;
       }
-      
+
       if (token.email) {
         const profile = await searchUser(token.email);
         token.name = profile.nombre || token.name;
@@ -141,6 +150,7 @@ const authOptions = {
         token.email = profile.email;
         token.nombre_social = profile.tipo_usuario !== 'alumno' ? profile?.nombre : profile?.nombre_social || profile?.nombre;
       }
+      console.log('TOKEN', token);
 
       return token;
     },

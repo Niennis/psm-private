@@ -36,11 +36,12 @@ const Login = () => {
 
   useEffect(() => {
     if (session?.user?.rol === 'profesional' || session?.user?.rol === 'administrador') {
+      console.log('HASH', window.location.hash);
       router.push('/pacientes')
     } else if (session?.user?.rol === 'alumno') {
       router.push('/citas')
     }
-  })
+  }, [session, router])
 
   const { register, handleSubmit, watch,
     formState: { errors }
@@ -82,8 +83,10 @@ const Login = () => {
       if (res?.ok) {
         setIsLoggedIn(true)
       } else {
-        if (res.error === 'cuenta-no-validada') {
+        if (res?.error === 'cuenta-no-validada') {
           setError("El mail y la contraseña no coinciden")
+        } else if (res?.error) {
+          setError("Ocurrió un problema inesperado")
         }
       }
 

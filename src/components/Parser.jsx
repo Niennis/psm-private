@@ -35,19 +35,19 @@ const ParserImgToImage = ({ htmlContent, classType }) => {
     if (match_base.length > 1 || match_key.length > 1) {
       normalizarTexto(src)
     } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes('https://reposaludmental.blob.core.windows.net/test/') && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
-  
+
       return `/api/file-proxy?filePath=${src}`
     } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
       const removeKey = src.split('?')[0]
       return `/api/file-proxy?filePath=${removeKey}`
     } else if (src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
-  
+
       return `/api/file-proxy?filePath=${src}`
     } else if (src.includes(process.env.NEXT_PUBLIC_KEY_IMG) && !src.includes(process.env.NEXT_PUBLIC_BASE_IMG)) {
-  
+
       return `/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
     } else if (!src.includes(process.env.NEXT_PUBLIC_BASE_IMG) && !src.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
-  
+
       return `/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}${src}`
     }
   }
@@ -78,6 +78,7 @@ const ParserImgToImage = ({ htmlContent, classType }) => {
   };
 
   // Usar html-react-parser para convertir el HTML a JSX
+  if (!htmlContent) return null;
   const content = parse(htmlContent, options);
 
   return <div>{content}</div>;

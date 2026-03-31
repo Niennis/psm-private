@@ -64,6 +64,12 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "eslint": "^8.53.0",
-    "eslint-config-next": "14.1.4"
+    "eslint-config-next": "14.1.4",
+    "msw": "^2.12.10"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

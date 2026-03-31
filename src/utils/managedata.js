@@ -129,6 +129,7 @@ export const formatDateUTC = dateString => {
 
 
 export const normalizarHora = horaString => {
+  if (!horaString) return '00:00:00';
   // Elimina espacios en blanco alrededor de la hora
   const horaTrimmed = horaString.trim();
   
@@ -193,7 +194,7 @@ export const filtrarFechasAnteriores = (arrayDeObjetos, claveFecha) => {
         const fechaLimite = new Date(fechaItem);
         fechaLimite.setDate(fechaLimite.getDate() + DIAS_TOLERANCIA);
 
-        if (hoy > fechaLimite && item["estado"].includes('reservada')) {
+        if (hoy > fechaLimite && item["estado"]?.includes('reservada')) {
             const res = await changeStatusAppointment(bodyUpdate);
             return { ...item, estado: 'perdida' };
         } else {

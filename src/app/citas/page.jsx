@@ -216,7 +216,7 @@ const AppoinmentList = () => {
 
       setSuccess('success');
       setMessage('Cita cancelada con éxito');
-
+      loadAppointments()
       if (!responseHasRecords) {
         const updateUserResponse = await updateUser(bodyUpdateUser);
       }

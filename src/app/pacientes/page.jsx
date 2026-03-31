@@ -69,7 +69,7 @@ const agruparCitasPorPaciente = (citas) => {
     // Clasificación
     if (
       fechaCita >= fechaActual &&
-      cita.estado.toLowerCase() !== "realizada"
+      (cita.estado || '').toLowerCase() !== "realizada"
     ) {
       pacientesMap[idPaciente].citasFuturas.push(citaObj);
     } else {
@@ -352,7 +352,7 @@ const PatientsList = () => {
       });
 
       const primeraReservada = citasOrdenadas
-        .filter(cita => cita.estado.toLowerCase() === 'reservada')
+        .filter(cita => (cita.estado || '').toLowerCase() === 'reservada')
       setPrieraCitaReservada(primeraReservada[0]?.id_cita)
 
       if (session.user?.rol === 'profesional') {
@@ -447,14 +447,9 @@ const PatientsList = () => {
       title: "Email",
       dataIndex: "emailalumno",
       sorter: (a, b) => {
-        // Extrae la primera letra (ignorando símbolos, números y espacios)
-        const getFirstLetter = (email) => {
-          const firstChar = email.trim().toLowerCase().replace(/[^a-záéíóúñ]/, '')[0];
-          return firstChar || ''; // Si no hay letras, devuelve string vacío
-        };
-
-        return getFirstLetter(a.emailestudiante).localeCompare(
-          getFirstLetter(b.emailestudiante), 'es');
+        const emailA = (a.emailalumno || '').trim().toLowerCase();
+        const emailB = (b.emailalumno || '').trim().toLowerCase();
+        return emailA.localeCompare(emailB, 'es', { sensitivity: 'base' });
       }
     },
 
@@ -462,14 +457,25 @@ const PatientsList = () => {
       title: "Fecha",
       dataIndex: "fecha",
       sorter: (a, b) => {
-        // Convertir fechas dd-mm-yyyy a Date objects para comparación
         const parseDate = (dateStr) => {
-          const [day, month, year] = dateStr.split('-');
+          if (!dateStr || dateStr === "-") return null; // casos especiales
+          const [day, month, year] = dateStr.split("-");
           return new Date(`${year}-${month}-${day}`);
         };
 
         const dateA = parseDate(a.fecha);
         const dateB = parseDate(b.fecha);
+
+        // Si ambos son null/invalid → iguales
+        if (!dateA && !dateB) return 0;
+
+        // Si A es null → A va primero
+        if (!dateA) return -1;
+
+        // Si B es null → B va primero
+        if (!dateB) return 1;
+
+        // Si ambos son válidos, comparo normalmente
         return dateA - dateB;
       },
       render: (text, record) => (
@@ -482,13 +488,26 @@ const PatientsList = () => {
       title: "Hora",
       dataIndex: "hora",
       sorter: (a, b) => {
-        // Convertir horas h:mm:ss a segundos para comparación
         const timeToSeconds = (timeStr) => {
-          const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+          if (!timeStr || timeStr === "-") return null; // casos especiales
+          const [hours, minutes, seconds] = timeStr.split(":").map(Number);
           return hours * 3600 + minutes * 60 + seconds;
         };
 
-        return timeToSeconds(a.hora) - timeToSeconds(b.hora);
+        const timeA = timeToSeconds(a.hora);
+        const timeB = timeToSeconds(b.hora);
+
+        // Ambos vacíos → iguales
+        if (timeA === null && timeB === null) return 0;
+
+        // Si A es vacío → va primero
+        if (timeA === null) return -1;
+
+        // Si B es vacío → va primero
+        if (timeB === null) return 1;
+
+        // Comparación normal
+        return timeA - timeB;
       },
       render: (text, record) => (
         <div>
@@ -499,7 +518,11 @@ const PatientsList = () => {
     {
       title: "Estado",
       dataIndex: "status",
-      sorter: (a, b) => a.estado - b.estado,
+      sorter: (a, b) => {
+        const estadoA = (a.estado || '').toLowerCase();
+        const estadoB = (b.estado || '').toLowerCase();
+        return estadoA.localeCompare(estadoB);
+      },
       render: (text, record) => (
         <div>
           {record && record.estado === "reservada" && (
@@ -512,12 +535,12 @@ const PatientsList = () => {
               {record.estado}
             </span>
           )}
-          {record && record.estado.includes("cancelada") && (
+          {record && record.estado?.includes("cancelada") && (
             <span className="custom-badge status-pink">
               {record.estado}
             </span>
           )}
-          {record && record.estado.includes("perdida") && (
+          {record && record.estado?.includes("perdida") && (
             <span className="custom-badge status-pink">
               {record.estado}
             </span>
@@ -658,20 +681,20 @@ const PatientsList = () => {
     {
       title: "Profesional",
       dataIndex: "nombre_profesional",
-      sorter: (a, b) => a['nombre_profesional'].localeCompare(b['nombre_profesional']),
+      sorter: (a, b) => (a['nombre_profesional'] || '').localeCompare(b['nombre_profesional'] || ''),
       key: 'nombre_profesional',
     },
     {
       title: "Especialidad",
       dataIndex: "especialidad_profesional",
-      sorter: (a, b) => a.especialidad_profesional.localeCompare(b.especialidad_profesional),
+      sorter: (a, b) => (a.especialidad_profesional || '').localeCompare(b.especialidad_profesional || ''),
       key: 'especialidad_profesional',
       responsive: ['md'],
     },
     {
       title: "Correo electrónico",
       dataIndex: "email_estudiante",
-      sorter: (a, b) => a['email_estudiante'].localeCompare(b['email_estudiante']),
+      sorter: (a, b) => (a['email_estudiante'] || '').localeCompare(b['email_estudiante'] || ''),
       render: (text, record) => (
         <>
           <Link href="#">{record.email_estudiante}</Link>
@@ -682,7 +705,7 @@ const PatientsList = () => {
     }, {
       title: "Día",
       dataIndex: "fecha",
-      sorter: (a, b) => a['fecha'].localeCompare(b['fecha']),
+      sorter: (a, b) => (a['fecha'] || '').localeCompare(b['fecha'] || ''),
       key: 'fecha',
       render: (text, record) => {
         const [year, month, day] = text.split('-');
@@ -691,12 +714,12 @@ const PatientsList = () => {
     }, {
       title: "Hora",
       dataIndex: "hora",
-      sorter: (a, b) => a['hora'].localeCompare(b['hora']),
+      sorter: (a, b) => (a['hora'] || '').localeCompare(b['hora'] || ''),
       key: 'hora',
     }, {
       title: "Estado",
       dataIndex: "estado",
-      sorter: (a, b) => a.estado.localeCompare(b.estado),
+      sorter: (a, b) => (a.estado || '').localeCompare(b.estado || ''),
       key: 'estado',
       responsive: ['lg'],
       render: (text, record) => (
@@ -765,7 +788,7 @@ const PatientsList = () => {
                       className="dropdown-item"
                       href={`/fichas/agregarficha/${record.id_cita}`}
                       onClick={(e) => {
-                        const estadoLower = record.estado.toLowerCase();
+                        const estadoLower = (record.estado || '').toLowerCase();
                         const isDisabled = (
                           estadoLower.includes('cancelada') ||
                           estadoLower.includes('perdida') ||
@@ -789,13 +812,13 @@ const PatientsList = () => {
                       }}
                       style={{
                         cursor: (
-                          record.estado.toLowerCase() === 'reservada' &&
+                          (record.estado || '').toLowerCase() === 'reservada' &&
                           record.id_cita === primeraReservada
                         )
                           ? 'pointer'
                           : 'not-allowed',
                         opacity: (
-                          record.estado.toLowerCase() === 'reservada' &&
+                          (record.estado || '').toLowerCase() === 'reservada' &&
                           record.id_cita === primeraReservada
                         ) ? 1 : 0.5,
                       }}
@@ -807,11 +830,11 @@ const PatientsList = () => {
                       className="dropdown-item"
                       href={`/citas/${record.id_cita}`}
                       style={{
-                        cursor: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? "not-allowed" : "pointer",
-                        opacity: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? 0.5 : 1,
+                        cursor: (record.estado || '').toLowerCase().includes('cancelada') || (record.estado || '').toLowerCase().includes('perdida') || (record.estado || '').toLowerCase().includes('realizada') || (record.estado || '').toLowerCase().includes('alta') ? "not-allowed" : "pointer",
+                        opacity: (record.estado || '').toLowerCase().includes('cancelada') || (record.estado || '').toLowerCase().includes('perdida') || (record.estado || '').toLowerCase().includes('realizada') || (record.estado || '').toLowerCase().includes('alta') ? 0.5 : 1,
                       }}
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta')
+                        const isDisabled = (record.estado || '').toLowerCase().includes('cancelada') || (record.estado || '').toLowerCase().includes('perdida') || (record.estado || '').toLowerCase().includes('realizada') || (record.estado || '').toLowerCase().includes('alta')
                         if (isDisabled) {
                           e.preventDefault(); // Bloquea la navegación
                           e.stopPropagation(); // Evita que otros eventos se disparen
@@ -826,7 +849,7 @@ const PatientsList = () => {
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta')
+                        const isDisabled = (record.estado || '').toLowerCase().includes('cancelada') || (record.estado || '').toLowerCase().includes('perdida') || (record.estado || '').toLowerCase().includes('realizada') || (record.estado || '').toLowerCase().includes('alta')
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -835,8 +858,8 @@ const PatientsList = () => {
                         openWarning(record);
                       }}
                       style={{
-                        cursor: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? "not-allowed" : "pointer",
-                        opacity: record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta') ? 0.5 : 1,
+                        cursor: (record.estado || '').toLowerCase().includes('cancelada') || (record.estado || '').toLowerCase().includes('perdida') || (record.estado || '').toLowerCase().includes('realizada') || (record.estado || '').toLowerCase().includes('alta') ? "not-allowed" : "pointer",
+                        opacity: (record.estado || '').toLowerCase().includes('cancelada') || (record.estado || '').toLowerCase().includes('perdida') || (record.estado || '').toLowerCase().includes('realizada') || (record.estado || '').toLowerCase().includes('alta') ? 0.5 : 1,
                       }}
                     >
                       <i className="fa fa-trash-alt m-r-5"></i>
@@ -850,7 +873,7 @@ const PatientsList = () => {
                       data-bs-toggle="modal"
                       data-bs-target="#delete_appointment"
                       onClick={(e) => {
-                        const isDisabled = record.estado.toLowerCase().includes('cancelada') || record.estado.toLowerCase().includes('perdida') || record.estado.toLowerCase().includes('realizada') || record.estado.toLowerCase().includes('alta')
+                        const isDisabled = (record.estado || '').toLowerCase().includes('cancelada') || (record.estado || '').toLowerCase().includes('perdida') || (record.estado || '').toLowerCase().includes('realizada') || (record.estado || '').toLowerCase().includes('alta')
                         if (isDisabled) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -1113,7 +1136,7 @@ const PatientsList = () => {
                           dataSource={results}
 
                           // rowSelection={rowSelection}
-                          rowKey={(record, i) => i + record.id_paciente}
+                          rowKey={(record) => record.id_paciente}
                         />
                       </div>
                     </div>

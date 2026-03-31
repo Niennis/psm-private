@@ -183,7 +183,7 @@ const Header = () => {
                 >
                   <Image
                     alt="Logo"
-                    src={`/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}logo02.png`}
+                    src="/logo02.png"
                     height={70}
                     width={263}
                     priority
@@ -423,7 +423,7 @@ const Header = () => {
                   }}
                 >
                   <Image
-                    src={`/api/file-proxy?filePath=${process.env.NEXT_PUBLIC_BASE_IMG}logo02.png`}
+                    src="/logo02.png"
                     height={0}
                     width={0}
                     alt="logo udp"

@@ -225,6 +225,7 @@ const FichaAlumno = () => {
   }
 
   const toTitleCase = str => {
+    if (!str) return '';
     return str
       .toLowerCase() // Convertir todo a minúsculas primero
       .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalizar la primera letra de cada palabra

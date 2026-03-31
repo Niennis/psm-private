@@ -137,7 +137,7 @@ const FooterDae = () => {
                 }}>
                 <div className="col-10 col-md-4 col-lg-4 p-0 d-flex flex-column align-items-start">
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_BASE_IMG}logo02_white.png${process.env.NEXT_PUBLIC_KEY_IMG}`}
+                    src="/logo02_white.png"
                     sizes="100vw"
                     style={{
                       width: '100%',
@@ -297,7 +297,7 @@ const FooterDae = () => {
                 </div>
                 <div className="col-10 col-lg-4 p-0 d-flex justify-content-center">
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_BASE_IMG}logo02_white.png${process.env.NEXT_PUBLIC_KEY_IMG}`}
+                    src="/logo02_white.png"
                     sizes="100vw"
                     style={{
                       width: '100%',

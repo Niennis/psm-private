@@ -73,7 +73,7 @@ const prepareImg = (src) => {
 
 const card = (item) => {
 
-  if (item.descarga_url.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
+  if (item.descarga_url && item.descarga_url.includes(process.env.NEXT_PUBLIC_KEY_IMG)) {
     item.descarga_url = item.descarga_url.split('?')[0]
   }
 
@@ -138,11 +138,13 @@ const Blogdetails = ({ params }) => {
     const fetchData = async () => {
       const { blogs } = await fetchBlog(params.id);
       setBlog(blogs[0])
-      const newArray = blogs.map(item => ({
-        descarga_bajada: item.descarga_bajada,
-        descarga_titulo: item.descarga_titulo,
-        descarga_url: item.descarga_url
-      }));
+      const newArray = blogs
+        .filter(item => item.descarga_url)
+        .map(item => ({
+          descarga_bajada: item.descarga_bajada,
+          descarga_titulo: item.descarga_titulo,
+          descarga_url: item.descarga_url
+        }));
 
       setDescargas(newArray)
     }
@@ -168,7 +170,7 @@ const Blogdetails = ({ params }) => {
                   position: 'relative',
                   width: '100%',
                   aspectRatio: '16/9',
-                  overflow: 'hidden' 
+                  overflow: 'hidden'
                 }}>
                 <Image
                   src={prepareImg(blog?.blog_imagen)}
@@ -178,8 +180,8 @@ const Blogdetails = ({ params }) => {
                     objectFit: 'cover',
                     objectPosition: 'center',
                   }}
-                  quality={75} 
-                  priority={false} 
+                  quality={75}
+                  priority={false}
                 />
               </div>
             }
@@ -287,10 +289,12 @@ const Blogdetails = ({ params }) => {
                     </article>
 
                     <div className="row d-flex my-4" style={{ padding: '0', marginLeft: '0px', marginRight: '96px', borderTop: '1px solid grey', textAlign: 'center' }} >
-                      <div className="col-12">
-                        <h3 className='ui-medium' style={{ fontWeight: 700, fontSize: '32px', lineHeight: '40px' }}>Contenido descargable</h3>
-                      </div>
-                      {descargas && descargas?.map((item, index) => (
+                      {descargas && descargas.length > 0 &&
+                        <div className="col-12">
+                          <h3 className='ui-medium' style={{ fontWeight: 700, fontSize: '32px', lineHeight: '40px' }}>Contenido descargable</h3>
+                        </div>
+                      }
+                      {descargas && descargas.length > 0 && descargas?.map((item, index) => (
 
                         <div className="col-12 col-lg-4 col-md-8 mb-3 mt-3 mt-md-5" key={index} style={{ margin: 'auto' }}>
                           <Box sx={{ minWidth: 275, width: '100%', textAlign: 'left' }}>

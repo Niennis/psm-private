@@ -9,22 +9,26 @@ import dynamic from 'next/dynamic';
 
 const ScrollContainer = dynamic(() => import('@/components/Scrollbar'), { ssr: false });
 
+import { MSWComponent } from "@/components/MSWComponent";
+
 export default function AppProviders({ children, session }) {
 
   return (
-    <AuthProvider session={session} >
-      <SectionProvider>
-        <SidebarProvider  >
-          <UserWrapper>
-            <DisponibilidadProvider>
+    <MSWComponent>
+      <AuthProvider session={session} >
+        <SectionProvider>
+          <SidebarProvider  >
+            <UserWrapper>
+              <DisponibilidadProvider>
 
-              <ScrollContainer>
-                {children}
-              </ScrollContainer>
-            </DisponibilidadProvider>
-          </UserWrapper>
-        </SidebarProvider>
-      </SectionProvider>
-    </AuthProvider>
+                <ScrollContainer>
+                  {children}
+                </ScrollContainer>
+              </DisponibilidadProvider>
+            </UserWrapper>
+          </SidebarProvider>
+        </SectionProvider>
+      </AuthProvider>
+    </MSWComponent>
   )
 }
