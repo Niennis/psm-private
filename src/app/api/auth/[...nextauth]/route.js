@@ -135,20 +135,24 @@ const authOptions = {
     async jwt({ token, user }) {
 
       if (user) {
-        const profile = await searchUser(user.email);
+        // Si el user tiene tipo_usuario (login con credenciales), usarlo directamente
+        const profile = user.tipo_usuario ? user : await searchUser(user.email);
         token.id = profile.id;
         token.name = profile.nombre || user.name;
         token.rol = profile.tipo_usuario;
         token.email = profile.email;
         token.nombre_social = profile.tipo_usuario !== 'alumno' ? profile?.nombre : profile?.nombre_social || profile?.nombre;
-      }
-
-      if (token.email) {
-        const profile = await searchUser(token.email);
-        token.name = profile.nombre || token.name;
-        token.rol = profile.tipo_usuario;
-        token.email = profile.email;
-        token.nombre_social = profile.tipo_usuario !== 'alumno' ? profile?.nombre : profile?.nombre_social || profile?.nombre;
+      } else if (token.email) {
+        // Solo en refrescos de JWT (sin user), re-consultar el perfil
+        try {
+          const profile = await searchUser(token.email);
+          token.name = profile.nombre || token.name;
+          token.rol = profile.tipo_usuario;
+          token.email = profile.email;
+          token.nombre_social = profile.tipo_usuario !== 'alumno' ? profile?.nombre : profile?.nombre_social || profile?.nombre;
+        } catch (error) {
+          console.error('Error refrescando perfil en JWT:', error);
+        }
       }
       console.log('TOKEN', token);
 
