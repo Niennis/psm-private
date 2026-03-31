@@ -504,4 +504,9 @@ export const handlers = [
     const body = await request.json()
     return HttpResponse.json({ message: 'Blog editado (mock)' })
   }),
+
+  // Catch-all: cualquier endpoint de Azure no cubierto devuelve respuesta vacía
+  http.all(/azurewebsites\.net/, () => {
+    return HttpResponse.json([])
+  }),
 ]
