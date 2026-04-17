@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Zerus — Portal Privado de Salud Mental UDP
 
-## Getting Started
+Portal web privado de la Dirección de Salud Mental de la **Universidad Diego Portales**. Permite a estudiantes agendar horas de atención psicológica y a profesionales de la salud gestionar fichas clínicas y disponibilidad.
 
-First, run the development server:
+> Este es uno de los dos portales del proyecto Zerus. Ver también: [Portal Público](https://github.com/Niennis/psm-public)
+
+## 🚀 Demo
+
+[Ver sitio en producción](https://psm-private.vercel.app/)
+
+> ⚠️ El acceso requiere credenciales. Este es un sistema de uso interno de la UDP.
+
+## ✨ Funcionalidades
+
+- **Estudiantes:** agendar horas de atención psicológica, ver historial de citas
+- **Profesionales:** gestionar disponibilidad, fichas clínicas de pacientes
+- **Administradores:** gestión de profesionales y configuración del sistema
+- Autenticación segura con perfiles diferenciados por rol
+- Cumplimiento de normativas de privacidad de datos clínicos
+
+## 🛠️ Stack tecnológico
+
+| Categoría | Tecnología |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Lenguaje | JavaScript |
+| Autenticación | NextAuth.js v4 |
+| UI / Estilos | Material UI v5, Ant Design 5, Bootstrap 5 |
+| Calendario | FullCalendar 6 |
+| Editor de texto | CKEditor 5 |
+| Formularios | React Hook Form |
+| HTTP client | Axios |
+| Fechas | Day.js |
+| Mocking (dev) | MSW v2 |
+| Despliegue | Vercel / Azure App Services |
+
+## ⚙️ Cómo correr localmente
 
 ```bash
+# Clonar el repositorio
+git clone https://github.com/Niennis/psm-private.git
+cd psm-private
+
+# Instalar dependencias
+npm install
+
+# Correr en modo desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3000](http://localhost:3000) en el navegador.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+> **Nota:** Este proyecto requiere variables de entorno para conectarse a la base de datos y configurar NextAuth.js. Contactar al equipo para obtener acceso.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## 📁 Estructura del proyecto
 
-## Learn More
+```
+src/
+├── app/                    # Páginas y rutas (App Router)
+│   ├── api/                # Route handlers (auth, file-proxy, captcha)
+│   ├── blog/               # Gestión de blog
+│   ├── citas/              # Agendamiento y detalle de citas
+│   ├── fichas/             # Fichas clínicas
+│   ├── grupos/             # Gestión de grupos
+│   ├── horarios/           # Horarios de profesionales
+│   ├── pacientes/          # Vista de pacientes
+│   ├── profesionales/      # Gestión de profesionales
+│   └── reportes/           # Reportes
+├── assets/                 # CSS global, fuentes e imágenes
+├── components/             # Componentes reutilizables
+│   └── skeletons/          # Skeletons de carga
+├── context/                # React Context (estado global)
+├── mocks/                  # Handlers MSW para desarrollo
+├── providers/              # Providers de React
+├── services/               # Llamadas a la API externa
+└── utils/                  # Funciones utilitarias
+public/                     # Recursos estáticos
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🔗 Proyecto relacionado
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+El [portal público](https://github.com/Niennis/psm-public) entrega información y recursos educativos a la comunidad, y es el punto de entrada al sistema.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## 👩‍💻 Desarrollada por
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+[Estefanía Osses Vera](https://github.com/Niennis) — Freelance, 2023–2025
